@@ -56,6 +56,18 @@ export const INTRO_BOOT = `(function(){
       window.requestAnimationFrame(onFirstPaint);
     });
     window.addEventListener("pageshow", onFirstPaint);
+    // Keep pinning briefly so restoration that fires after DOMContentLoaded loses.
+    if (!intentionalHash) {
+      var guardUntil = Date.now() + 900;
+      var guard = window.setInterval(function () {
+        var nowHash = (location.hash || "").replace(/^#/, "");
+        if (Date.now() > guardUntil || nowHash) {
+          window.clearInterval(guard);
+          return;
+        }
+        if (window.scrollY > 0) pinTop();
+      }, 50);
+    }
 
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var seen = false;

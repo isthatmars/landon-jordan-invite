@@ -14,40 +14,27 @@ export function Nav({ brandName }: { brandName: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="absolute inset-x-0 top-0 z-50">
-      <div className="mx-auto flex max-w-[1100px] items-center gap-3 px-3 py-3 sm:px-5">
-        <a href="#home" className="flex shrink-0 items-center gap-1.5">
-          <Crown className="h-4 w-5 drop-shadow-[0_0_6px_#ffd45a]" />
-          <span className="neon-script text-[1.55rem] leading-none sm:text-[1.8rem]">
-            {brandName}
-          </span>
+    <header className="site-header">
+      <div className="site-header-inner">
+        <a href="#home" className="brand-lockup">
+          <Crown className="brand-crown" />
+          <span className="script-hot brand-script">{brandName}</span>
         </a>
 
-        <nav className="font-nav ml-auto hidden min-w-0 items-center gap-2.5 whitespace-nowrap text-[11px] min-[680px]:flex sm:gap-3.5 sm:text-[13px]">
-          {links.map((l, i) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className={`shrink-0 ${
-                i === 0
-                  ? "text-[#ff4fd8] underline decoration-2 underline-offset-[7px]"
-                  : "text-white hover:text-[#ff4fd8]"
-              }`}
-            >
+        <nav className="site-nav font-nav" aria-label="Primary">
+          {links.map((l) => (
+            <a key={l.href} href={l.href} className={l.href === "#home" ? "is-home" : undefined}>
               {l.label}
             </a>
           ))}
         </nav>
 
-        <a
-          href="#rsvp"
-          className="btn-pink-outline ml-auto shrink-0 px-3 py-1.5 text-[10px] font-bold tracking-[0.18em] min-[680px]:ml-1 sm:px-4 sm:text-[11px]"
-        >
+        <a href="#rsvp" className="btn-header-rsvp">
           RSVP
         </a>
         <button
           type="button"
-          className="text-[10px] font-bold tracking-[0.16em] text-white min-[680px]:hidden"
+          className="site-menu font-nav"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
         >
@@ -55,7 +42,7 @@ export function Nav({ brandName }: { brandName: string }) {
         </button>
       </div>
       {open && (
-        <nav className="flex flex-col gap-2 bg-[#07010fcc] px-4 py-3 text-xs tracking-[0.18em] min-[680px]:hidden">
+        <nav className="site-nav-mobile font-nav" aria-label="Mobile">
           {links.map((l) => (
             <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
               {l.label}

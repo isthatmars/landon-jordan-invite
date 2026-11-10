@@ -11,27 +11,35 @@ export function Crown({ className = "" }: { className?: string }) {
   );
 }
 
-export function GreenSwoosh({ className = "" }: { className?: string }) {
+export function GreenSwoosh({
+  className = "",
+  stroke = "#7CFF3A",
+}: {
+  className?: string;
+  stroke?: string;
+}) {
   return (
     <svg viewBox="0 0 220 18" className={className} fill="none" aria-hidden>
-      <path
-        d="M6 12C50 2 120 2 214 8"
-        stroke="#7CFF3A"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+      <path d="M6 12C50 2 120 2 214 8" stroke={stroke} strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
 
 export function PinkSwoosh({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 240 32" className={className} fill="none" aria-hidden>
+    <svg viewBox="0 0 320 48" className={className} fill="none" aria-hidden>
       <path
-        d="M8 18c48 12 110 10 220-10"
-        stroke="#ff4fd8"
-        strokeWidth="3"
+        d="M8 30c34 12 62 16 98 8 24-5 20-16 44-18 30-2 46 16 78 14 34-2 52-14 84-20"
+        stroke="#ff39c8"
+        strokeWidth="5.5"
         strokeLinecap="round"
+      />
+      <path
+        d="M16 28c28 8 52 10 82 4 18-4 16-12 36-13 26-1 40 12 68 10"
+        stroke="#fff6fc"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        opacity="0.9"
       />
     </svg>
   );
@@ -60,8 +68,8 @@ export function NeonArrow({ className = "" }: { className?: string }) {
 export function CalendarIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} fill="none" aria-hidden>
-      <rect x="5" y="7" width="22" height="20" rx="4" stroke="#ff4fd8" strokeWidth="1.8" />
-      <path d="M5 13h22M11 5v5M21 5v5" stroke="#ff4fd8" strokeWidth="1.8" strokeLinecap="round" />
+      <rect x="5" y="7" width="22" height="20" rx="4" stroke="#ff39c8" strokeWidth="2" />
+      <path d="M5 13h22M11 5v5M21 5v5" stroke="#ff39c8" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -71,10 +79,10 @@ export function PinIcon({ className = "" }: { className?: string }) {
     <svg viewBox="0 0 32 32" className={className} fill="none" aria-hidden>
       <path
         d="M16 28s8-8.2 8-14a8 8 0 1 0-16 0c0 5.8 8 14 8 14z"
-        stroke="#ff4fd8"
-        strokeWidth="1.8"
+        stroke="#ff39c8"
+        strokeWidth="2"
       />
-      <circle cx="16" cy="14" r="2.4" fill="#ff4fd8" />
+      <circle cx="16" cy="14" r="2.4" fill="#ff39c8" />
     </svg>
   );
 }
@@ -82,8 +90,8 @@ export function PinIcon({ className = "" }: { className?: string }) {
 export function ClockIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} fill="none" aria-hidden>
-      <circle cx="16" cy="16" r="10" stroke="#ff4fd8" strokeWidth="1.8" />
-      <path d="M16 10v7l4 2" stroke="#ff4fd8" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="16" cy="16" r="10" stroke="#ff39c8" strokeWidth="2" />
+      <path d="M16 10v7l4 2" stroke="#ff39c8" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }

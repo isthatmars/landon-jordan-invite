@@ -179,9 +179,10 @@ export async function sendGuestSmsBlast(opts: {
 }
 
 /**
- * Hybrid delivery plug point: after our API persists an RSVP, optionally forward
- * to Fillout / SimpleTexting / EZ Texting / TextMagic via Zapier/Make (or direct webhook).
- * Resend remains primary email on our side. No live third party required until URL is set.
+ * Hybrid SMS plug point (recommended): after our API persists an RSVP, optionally
+ * POST to WEBHOOK_FORWARD_URL (Zapier/Make Catch Hook) → SimpleTexting or TextMagic.
+ * Our /admin stays the only guest-list UI — do not use Fillout as the RSVP dashboard.
+ * Resend remains primary email. No live third party required until URL is set.
  */
 export async function forwardRsvpWebhook(opts: {
   event: "rsvp.completed" | "rsvp.draft";

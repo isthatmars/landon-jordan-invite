@@ -128,21 +128,29 @@ export function parseCompletedRsvp(body: unknown): ParseResult<CompletedRsvp> {
 
   if (!firstName) return { ok: false, error: "What's your first name?" };
   if (!lastName) return { ok: false, error: "What's your last name?" };
-  if (!email) return { ok: false, error: "Add an email address so we can confirm your RSVP." };
-  if (!looksLikeEmail(email)) return { ok: false, error: "That email doesn't look quite right." };
   if (!isAttendStatus(source.attend)) {
     return { ok: false, error: "Let us know if you are able to attend." };
   }
 
+  const attend = source.attend;
+  const coming = isComing(attend);
+  if (coming) {
+    if (!email) return { ok: false, error: "Add an email address so we can confirm your RSVP." };
+    if (!looksLikeEmail(email)) return { ok: false, error: "That email doesn't look quite right." };
+    // Empty phone is fine. A partial number (anything short of 7 digits) is not.
+    if (phone && phoneDigits(phone) < 7) {
+      return {
+        ok: false,
+        error: "Enter a full phone number, or leave it blank.",
+      };
+    }
+  } else if (email && !looksLikeEmail(email)) {
+    return { ok: false, error: "That email doesn't look quite right." };
+  }
+
   const companions = readCompanions(source.companions, true);
   if (!companions.ok) return companions;
-
-  if (isComing(source.attend) && phoneDigits(phone) < 7) {
-    return {
-      ok: false,
-      error: "Add a phone number so we can reach you if you're coming.",
-    };
-  }
+  const people = attend === "no" ? [] : companions.value;
   if (!dietary) {
     return {
       ok: false,
@@ -159,7 +167,6 @@ export function parseCompletedRsvp(body: unknown): ParseResult<CompletedRsvp> {
     return { ok: false, error: "Add a note so we know what else to plan for." };
   }
 
-  const attend = source.attend;
   return {
     ok: true,
     value: {
@@ -167,10 +174,10 @@ export function parseCompletedRsvp(body: unknown): ParseResult<CompletedRsvp> {
       lastName,
       fullName: fullNameOf(firstName, lastName),
       email,
-      phone,
+      phone: attend === "no" ? "" : phone,
       attend,
-      companions: companions.value,
-      guestCount: headcountFor(attend, companions.value),
+      companions: people,
+      guestCount: headcountFor(attend, people),
       dietary,
       dietaryNotes: dietary === "yes" ? dietaryNotes : dietaryNotes,
       anythingElse,

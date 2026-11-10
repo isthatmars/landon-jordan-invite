@@ -43,7 +43,7 @@ export function Hero({ content }: { content: SiteContent }) {
           <div className="hero-copy">
             <div className="hero-type-glow" aria-hidden />
             <Crown className="hero-crown" />
-            <Handwrite as="h1" className="hero-script" inkClassName="script-hot" delay={700} duration={780}>
+            <Handwrite as="h1" className="hero-script" inkClassName="script-hot" delay={780} duration={620}>
               {content.heroScript}
             </Handwrite>
             {chromeIsArt ? (
@@ -63,7 +63,7 @@ export function Hero({ content }: { content: SiteContent }) {
             )}
             <p className="hero-birthday">{content.heroSubtitle}</p>
             <GreenSwoosh className="hero-swoosh-lime" stroke="#C6FF00" />
-            <Handwrite as="p" className="hero-invite" inkClassName="script-hot" delay={2600} duration={520}>
+            <Handwrite as="p" className="hero-invite" inkClassName="script-hot" delay={1180} duration={420}>
               {content.heroInvite}
             </Handwrite>
             <PinkSwoosh className="hero-swoosh" />

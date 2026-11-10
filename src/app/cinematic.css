@@ -1,5 +1,5 @@
 /* Cinematic intro + neon states. Layered on the existing poster; no layout changes.
-   Intro clock: html[data-intro="play"] and --intro-shift (negative ms once hydrated).
+   Intro clock: html[data-intro="reveal"] and --intro-shift (negative ms once hydrated).
    Section cues: html[data-motion="armed"] and data-seen-* set once by IntersectionObserver. */
 
 @property --pen {
@@ -78,20 +78,17 @@
   }
 }
 
-html:not([data-intro="play"]) .hero-script[data-neon="breathing"] {
+html:not([data-intro="reveal"]) .hero-script[data-neon="breathing"] {
   animation: neon-breathe 9.6s ease-in-out infinite;
 }
-html:not([data-intro="play"]) .hero-invite[data-neon="breathing"] {
+html:not([data-intro="reveal"]) .hero-invite[data-neon="breathing"] {
   animation: neon-breathe 12.4s ease-in-out -3s infinite;
 }
 .hw.script-hot {
   filter: none;
 }
 
-/* ---------- Buttons ---------- */
-.btn-pink-outline {
-  background: #09060f;
-}
+/* ---------- Buttons stay beveled keys ---------- */
 .btn-pink-outline:hover,
 .btn-pink-outline:focus-visible,
 .btn-header-rsvp:hover,
@@ -113,23 +110,9 @@ html:not([data-intro="play"]) .hero-invite[data-neon="breathing"] {
 }
 
 #rsvp .btn-green-solid {
-  width: min(100%, 320px);
-  border: 2px solid #c6ff00;
-  background: #07080c;
-  color: #fff;
-  box-shadow:
-    0 0 0 1px rgba(198, 255, 0, 0.35),
-    0 0 12px rgba(198, 255, 0, 0.5),
-    inset 0 0 12px rgba(198, 255, 0, 0.12);
-}
-#rsvp .btn-green-solid:hover,
-#rsvp .btn-green-solid:focus-visible {
-  background: #14180c;
-  filter: none;
-  box-shadow:
-    0 0 0 1px #c6ff00,
-    0 0 16px #c6ff00,
-    inset 0 0 16px rgba(198, 255, 0, 0.2);
+  width: 100%;
+  min-height: 3.35rem;
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem);
 }
 
 .skip-intro {
@@ -150,7 +133,9 @@ html:not([data-intro="play"]) .hero-invite[data-neon="breathing"] {
   text-transform: uppercase;
   cursor: pointer;
 }
-html[data-intro="play"] .skip-intro {
+html[data-intro="invite"] .skip-intro,
+html[data-intro="opening"] .skip-intro,
+html[data-intro="reveal"] .skip-intro {
   display: inline-flex;
   align-items: center;
 }
@@ -197,7 +182,7 @@ html[data-intro="play"] .skip-intro {
     0 0 18px #ff39c8;
 }
 
-html[data-intro="play"] .hw {
+html[data-intro="reveal"] .hw {
   animation-name: hw-draw, hw-stable;
   animation-duration: var(--hw-dur), 0.34s;
   animation-delay:
@@ -206,7 +191,7 @@ html[data-intro="play"] .hw {
   animation-fill-mode: both, both;
   animation-timing-function: linear, linear;
 }
-html[data-intro="play"] .hw-tip {
+html[data-intro="reveal"] .hw-tip {
   animation: hw-tip var(--hw-dur) linear calc(var(--hw-delay) + var(--intro-shift, 0ms)) both;
 }
 
@@ -290,87 +275,87 @@ html[data-intro="play"] .hw-tip {
   mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 74%, transparent);
 }
 
-html[data-intro="play"] .hero-bg {
-  animation: sky-on 0.7s cubic-bezier(0.16, 0.72, 0.28, 1) calc(var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-bg {
+  animation: sky-on 0.55s cubic-bezier(0.16, 0.72, 0.28, 1) calc(var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .intro-veil {
-  animation: veil-out 0.7s linear calc(var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .intro-veil {
+  animation: veil-out 0.55s linear calc(var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .intro-lights {
-  animation: lights-on 1.05s ease-out calc(0.08s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .intro-lights {
+  animation: lights-on 0.7s ease-out calc(0.04s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-ambient {
-  animation: ambient-in 0.75s ease-out calc(0.12s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-ambient {
+  animation: ambient-in 0.5s ease-out calc(0.06s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-type-glow {
-  animation: ambient-in 0.9s ease-out calc(0.75s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-couple {
+  animation: couple-light 0.6s ease-out calc(0.05s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-crown {
-  animation: crown-on 0.42s ease-out calc(1.52s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-type-glow {
+  animation: ambient-in 0.45s ease-out calc(0.4s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .chrome-art-shine,
-html[data-intro="play"] .hero-chrome-fallback {
-  animation: chrome-in 0.78s cubic-bezier(0.16, 0.84, 0.22, 1) calc(1.8s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .chrome-art-shine,
+html[data-intro="reveal"] .hero-chrome-fallback {
+  animation: chrome-in 0.5s cubic-bezier(0.16, 0.84, 0.22, 1) calc(0.42s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .chrome-art-shine::after {
-  animation: intro-sheen 0.62s ease-out calc(2.12s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .chrome-art-shine::after {
+  animation: intro-sheen 0.48s ease-out calc(0.62s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-birthday {
-  animation: rise-in 0.4s ease-out calc(2.18s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-crown {
+  animation: crown-on 0.36s ease-out calc(0.72s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-swoosh-lime path {
+html[data-intro="reveal"] .hero-birthday {
+  animation: rise-in 0.35s ease-out calc(1.05s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="reveal"] .hero-swoosh-lime path {
   stroke-dasharray: 240;
-  animation: stroke-on 0.4s ease-out calc(2.28s + var(--intro-shift, 0ms)) both;
+  animation: stroke-on 0.35s ease-out calc(1.12s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-couple {
-  animation: couple-light 0.85s ease-out calc(1.8s + var(--intro-shift, 0ms)) both;
-}
-html[data-intro="play"] .hero-swoosh path {
+html[data-intro="reveal"] .hero-swoosh path {
   stroke-dasharray: 520;
-  animation: stroke-on 0.48s ease-out calc(2.72s + var(--intro-shift, 0ms)) both;
+  animation: stroke-on 0.4s ease-out calc(1.35s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-facts .hero-fact:nth-child(1) {
-  animation: rise-in 0.38s ease-out calc(2.78s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-facts .hero-fact:nth-child(1) {
+  animation: rise-in 0.34s ease-out calc(1.15s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-facts .hero-fact:nth-child(3) {
-  animation: rise-in 0.38s ease-out calc(2.96s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-facts .hero-fact:nth-child(3) {
+  animation: rise-in 0.34s ease-out calc(1.28s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-facts .hero-fact:nth-child(5) {
-  animation: rise-in 0.38s ease-out calc(3.14s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-facts .hero-fact:nth-child(5) {
+  animation: rise-in 0.34s ease-out calc(1.4s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .fact-rule {
-  animation: ambient-in 0.35s ease-out calc(2.9s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .fact-rule {
+  animation: ambient-in 0.3s ease-out calc(1.22s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .hero-frame .btn-rsvp-now {
-  animation: cta-ignite 0.42s linear calc(3.18s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-frame .btn-rsvp-now {
+  animation: cta-ignite 0.4s linear calc(1.7s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .site-header {
-  animation: header-bar 0.5s ease-out calc(3.4s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .site-header {
+  animation: header-bar 0.45s ease-out calc(1.78s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="play"] .brand-lockup,
-html[data-intro="play"] .site-nav a,
-html[data-intro="play"] .btn-header-rsvp,
-html[data-intro="play"] .site-menu {
-  animation: nav-in 0.42s ease-out both;
+html[data-intro="reveal"] .brand-lockup,
+html[data-intro="reveal"] .site-nav a,
+html[data-intro="reveal"] .btn-header-rsvp,
+html[data-intro="reveal"] .site-menu {
+  animation: nav-in 0.4s ease-out both;
 }
-html[data-intro="play"] .brand-lockup {
-  animation-delay: calc(3.4s + var(--intro-shift, 0ms));
+html[data-intro="reveal"] .brand-lockup {
+  animation-delay: calc(1.78s + var(--intro-shift, 0ms));
 }
-html[data-intro="play"] .site-nav a:nth-child(1) {
-  animation-delay: calc(3.48s + var(--intro-shift, 0ms));
+html[data-intro="reveal"] .site-nav a:nth-child(1) {
+  animation-delay: calc(1.86s + var(--intro-shift, 0ms));
 }
-html[data-intro="play"] .site-nav a:nth-child(2) {
-  animation-delay: calc(3.56s + var(--intro-shift, 0ms));
+html[data-intro="reveal"] .site-nav a:nth-child(2) {
+  animation-delay: calc(1.92s + var(--intro-shift, 0ms));
 }
-html[data-intro="play"] .site-nav a:nth-child(3) {
-  animation-delay: calc(3.64s + var(--intro-shift, 0ms));
+html[data-intro="reveal"] .site-nav a:nth-child(3) {
+  animation-delay: calc(1.98s + var(--intro-shift, 0ms));
 }
-html[data-intro="play"] .site-nav a:nth-child(4) {
-  animation-delay: calc(3.72s + var(--intro-shift, 0ms));
+html[data-intro="reveal"] .site-nav a:nth-child(4) {
+  animation-delay: calc(2.04s + var(--intro-shift, 0ms));
 }
-html[data-intro="play"] .btn-header-rsvp,
-html[data-intro="play"] .site-menu {
-  animation-delay: calc(3.82s + var(--intro-shift, 0ms));
+html[data-intro="reveal"] .btn-header-rsvp,
+html[data-intro="reveal"] .site-menu {
+  animation-delay: calc(2.08s + var(--intro-shift, 0ms));
 }
 
 @keyframes sky-on {
@@ -536,7 +521,7 @@ html[data-intro="play"] .site-menu {
 }
 
 /* ---------- Section handwriting ---------- */
-html[data-motion="armed"] #lineup .neon-script,
+html[data-motion="armed"] #lineup .lineup-kicker,
 html[data-motion="armed"] #rsvp .neon-script-lg {
   -webkit-mask-image: linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a));
   mask-image: linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a));
@@ -569,7 +554,7 @@ html[data-motion="armed"] #watch .watch-line {
 
 html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .neon-script-lg,
 html[data-motion="armed"]:not([data-seen-arcade]) #arcade .neon-script-lg,
-html[data-motion="armed"]:not([data-seen-lineup]) #lineup .neon-script,
+html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-kicker,
 html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-script-lg {
   --pen-a: 130%;
   --pen-b: 130%;
@@ -580,16 +565,16 @@ html[data-motion="armed"]:not([data-seen-watch]) #watch .watch-line {
 }
 
 html[data-seen-mixtape="1"] #mixtape .neon-script-lg {
-  animation: write-two 1.28s cubic-bezier(0.33, 0.04, 0.22, 1) both, neon-breathe 11s ease-in-out 1.35s infinite;
+  animation: write-two 1.28s cubic-bezier(0.33, 0.04, 0.22, 1) both;
 }
 html[data-seen-arcade="1"] #arcade .neon-script-lg {
-  animation: write-two 1.15s cubic-bezier(0.33, 0.04, 0.22, 1) both, neon-breathe 13s ease-in-out 1.2s infinite;
+  animation: write-two 1.15s cubic-bezier(0.33, 0.04, 0.22, 1) both;
 }
-html[data-seen-lineup="1"] #lineup .neon-script {
-  animation: write-one 0.9s cubic-bezier(0.33, 0.04, 0.22, 1) 0.45s both, neon-breathe 9.2s ease-in-out 1.4s infinite;
+html[data-seen-lineup="1"] #lineup .lineup-kicker {
+  animation: write-one 0.9s cubic-bezier(0.33, 0.04, 0.22, 1) 0.2s both;
 }
 html[data-seen-rsvp="1"] #rsvp .neon-script-lg {
-  animation: write-one 0.85s cubic-bezier(0.33, 0.04, 0.22, 1) 0.15s both, neon-breathe 10.4s ease-in-out 1.1s infinite;
+  animation: write-one 0.85s cubic-bezier(0.33, 0.04, 0.22, 1) 0.15s both;
 }
 html[data-seen-watch="1"] #watch .watch-line {
   animation: write-line 0.7s cubic-bezier(0.33, 0.04, 0.22, 1) both;
@@ -601,7 +586,7 @@ html[data-seen-watch="1"] #watch .watch-line-rest {
   animation-delay: 0.56s;
 }
 html[data-seen-watch="1"] #watch .neon-script-lg {
-  animation: neon-breathe 8.6s ease-in-out 1.6s infinite;
+  animation: none;
 }
 
 @keyframes write-one {
@@ -768,20 +753,22 @@ html[data-live-arcade="0"] #arcade .cab-glint {
 }
 
 /* Lineup */
-html[data-motion="armed"]:not([data-seen-lineup]) #lineup h2,
-html[data-motion="armed"]:not([data-seen-lineup]) #lineup .grid > div {
+html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-card,
+html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-dress,
+html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-private {
   opacity: 0;
   transform: translateY(12px);
 }
-html[data-seen-lineup="1"] #lineup h2 {
-  animation: rise-in 0.55s ease both;
-}
-html[data-seen-lineup="1"] #lineup .grid > div {
+html[data-seen-lineup="1"] #lineup .lineup-card,
+html[data-seen-lineup="1"] #lineup .lineup-dress,
+html[data-seen-lineup="1"] #lineup .lineup-private {
   animation: rise-in 0.5s ease both;
 }
-html[data-seen-lineup="1"] #lineup .grid > div:nth-child(1) { animation-delay: 0.12s; }
-html[data-seen-lineup="1"] #lineup .grid > div:nth-child(2) { animation-delay: 0.28s; }
-html[data-seen-lineup="1"] #lineup .grid > div:nth-child(3) { animation-delay: 0.44s; }
+html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(1) { animation-delay: 0.08s; }
+html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(2) { animation-delay: 0.2s; }
+html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(3) { animation-delay: 0.32s; }
+html[data-seen-lineup="1"] #lineup .lineup-dress { animation-delay: 0.42s; }
+html[data-seen-lineup="1"] #lineup .lineup-private { animation-delay: 0.52s; }
 html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-pill {
   filter: saturate(0.45) brightness(0.62);
 }
@@ -870,7 +857,7 @@ html[data-live-rsvp="0"] #rsvp .neon-script-lg {
   #watch .neon-script-lg,
   #watch .watch-line,
   #arcade .neon-script-lg,
-  #lineup .neon-script,
+  #lineup .lineup-kicker,
   #rsvp .neon-script-lg,
   #rsvp .neon-frame::before {
     -webkit-mask-image: none;

@@ -211,13 +211,21 @@ export async function POST(request: Request) {
     ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com",
   });
 
-  const guestMail = await sendGuestEmail({
-    to: record.email,
-    subject: coming
-      ? `RSVP confirmed — ${oneLine(content.brandName)} 80s Party`
-      : `RSVP received — ${oneLine(content.brandName)} 80s Party`,
-    html: guestHtml,
-  });
+  const guestMail = record.email.trim()
+    ? await sendGuestEmail({
+        to: record.email,
+        subject: coming
+          ? `RSVP confirmed — ${oneLine(content.brandName)} 80s Party`
+          : `RSVP received — ${oneLine(content.brandName)} 80s Party`,
+        html: guestHtml,
+      })
+    : {
+        ok: true,
+        channel: "email" as const,
+        provider: "resend",
+        stubbed: true,
+        detail: "No guest email — confirmation not sent.",
+      };
   const ownerMail = await sendOwnerEmail({
     subject: `New RSVP: ${oneLine(record.fullName)} (${record.status})`,
     html: neonEmailTemplate({
@@ -238,7 +246,7 @@ export async function POST(request: Request) {
     },
   });
 
-  if (guestMail.ok) {
+  if (record.email.trim() && guestMail.ok) {
     const sentAt = new Date().toISOString();
     record.confirmationSentAt = sentAt;
     try {

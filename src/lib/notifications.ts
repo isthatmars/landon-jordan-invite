@@ -144,6 +144,15 @@ export async function sendGuestEmail(opts: {
   subject: string;
   html: string;
 }): Promise<NotifyResult> {
+  if (!opts.to.trim()) {
+    return {
+      ok: true,
+      channel: "email",
+      provider: "resend",
+      stubbed: true,
+      detail: "No guest email — confirmation not sent.",
+    };
+  }
   return sendViaResend(opts);
 }
 

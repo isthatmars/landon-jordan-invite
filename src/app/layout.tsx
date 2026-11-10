@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Barlow_Condensed, Caveat, Fugaz_One, Inter, Oswald, Yellowtail } from "next/font/google";
 import { Cinematic } from "@/components/motion/Cinematic";
+import { InviteEnvelope } from "@/components/motion/InviteEnvelope";
 import { INTRO_BOOT } from "@/components/motion/introBoot";
 import { SiteEffects } from "@/components/SiteEffects";
 import "./globals.css";
 import "./motion.css";
 import "./cinematic.css";
+import "./envelope.css";
 
 const script = localFont({
   src: "../fonts/hastron.otf",
@@ -76,6 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <button type="button" className="skip-intro" id="skip-intro">
           Skip intro
         </button>
+        <InviteEnvelope />
         <Cinematic />
         <SiteEffects />
         {children}

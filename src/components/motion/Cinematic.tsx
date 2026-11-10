@@ -17,18 +17,6 @@ const SECTIONS = [
   ["rsvp", "seenRsvp", "liveRsvp"],
 ] as const;
 
-function finishIntro() {
-  const root = document.documentElement;
-  document.getElementById("lj-intro-hold")?.remove();
-  if (root.dataset.intro !== "play") return;
-  root.dataset.intro = "done";
-  try {
-    sessionStorage.setItem(INTRO_KEY, "1");
-  } catch {
-    /* private mode */
-  }
-}
-
 export function skipIntro() {
   const root = document.documentElement;
   document.getElementById("lj-intro-hold")?.remove();
@@ -43,7 +31,7 @@ export function skipIntro() {
 export function Cinematic() {
   useLayoutEffect(() => {
     const root = document.documentElement;
-    const hold = document.getElementById("lj-intro-hold");
+    document.getElementById("lj-intro-hold")?.remove();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let seen = false;
     try {
@@ -55,26 +43,12 @@ export function Cinematic() {
     if (!home || reduced || seen) {
       root.dataset.intro = "done";
       root.dataset.motion = reduced ? "off" : "armed";
-      hold?.remove();
       return;
     }
-
-    const start = window.__ljIntroStart ?? Date.now();
-    window.__ljIntroStart = start;
-    const elapsed = Date.now() - start;
-    if (elapsed >= 4100) {
-      finishIntro();
-      return;
-    }
-    // The boot script already started the CSS clock. Seeking here would replay it.
-    if (root.dataset.intro !== "play") {
-      root.style.setProperty("--intro-shift", `-${elapsed}ms`);
-      root.dataset.intro = "play";
+    if (!root.dataset.intro || root.dataset.intro === "play") {
+      root.dataset.intro = "invite";
     }
     root.dataset.motion = "armed";
-    hold?.remove();
-    const timer = window.setTimeout(finishIntro, 4100 - elapsed);
-    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {

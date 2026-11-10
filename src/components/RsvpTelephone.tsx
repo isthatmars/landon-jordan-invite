@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function playRing(ctx: AudioContext) {
   const start = ctx.currentTime + 0.02;
@@ -26,8 +26,27 @@ function playRing(ctx: AudioContext) {
 
 export function RsvpTelephone() {
   const audio = useRef<AudioContext | null>(null);
+  const greeted = useRef(false);
   const [pickedUp, setPickedUp] = useState(false);
   const [buzzing, setBuzzing] = useState(false);
+  const [greeting, setGreeting] = useState(false);
+
+  useEffect(() => {
+    const section = document.getElementById("rsvp");
+    if (!section) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || greeted.current) return;
+        greeted.current = true;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        setGreeting(true);
+        window.setTimeout(() => setGreeting(false), 900);
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(section);
+    return () => io.disconnect();
+  }, []);
 
   const pickup = () => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -47,17 +66,18 @@ export function RsvpTelephone() {
   };
 
   const scrollToQuestion = () => {
-    const field = document.getElementById("rsvp-first");
+    const field = document.getElementById("rsvp-form");
     if (!(field instanceof HTMLElement)) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     field.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-    field.focus({ preventScroll: true });
+    const focusable = field.querySelector<HTMLElement>("button, input, textarea");
+    focusable?.focus({ preventScroll: true });
   };
 
   return (
-    <div className="mx-auto mt-4 w-full max-w-[16.5rem]" data-testid="rsvp-phone">
+    <div className="mx-auto mt-3 w-full max-w-[12.5rem]" data-testid="rsvp-phone">
       <button type="button" className="phone-hit" onClick={pickup} aria-label="Pick up the telephone">
-        <span className={`phone-prop ${buzzing ? "is-buzzing" : ""}`}>
+        <span className={`phone-prop ${buzzing ? "is-buzzing" : ""} ${greeting ? "is-ring-once" : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="phone-photo" src="/images/prop-rsvp-phone.png" alt="" draggable={false} />
         </span>

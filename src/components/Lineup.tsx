@@ -5,64 +5,45 @@ import { LineIcon } from "./icons";
 
 export function Lineup({ content }: { content: SiteContent }) {
   return (
-    <section id="lineup" className="lineup-ambient relative overflow-hidden bg-[#07010f] px-2 py-6 sm:px-5 sm:py-16">
+    <section id="lineup" className="lineup-ambient relative overflow-hidden bg-[#07010f]">
       <div className="lineup-sweep" aria-hidden />
-      <div className="relative z-[1] mx-auto max-w-[1100px]">
-        <div className="mb-2 flex items-center justify-center gap-4">
-          <span className="h-px w-10 bg-white/50 sm:w-16" />
-          <h2 className="font-nav text-center text-sm sm:text-base">
-            {content.lineupTitle}
-          </h2>
-          <span className="h-px w-10 bg-white/50 sm:w-16" />
-        </div>
-        <p className="mb-10 text-center text-[10px] tracking-[0.22em] text-white/75 sm:text-xs">
-          {content.lineupTagline}
-        </p>
+      <div className="lineup-wrap">
+        <p className="lineup-kicker">{content.lineupTitle}</p>
+        <p className="lineup-tagline">{content.lineupTagline}</p>
 
-        <div className="grid gap-6 md:grid-cols-3 md:gap-6">
+        <div className="lineup-grid">
           {content.lineup.map((block) => (
-            <div key={block.id} className="flex items-start gap-3">
-              <LineIcon
-                name={block.icon}
-                className="lineup-neon mt-1 h-10 w-10 shrink-0 text-[#ff39c8] sm:h-12 sm:w-12"
-              />
-              <div>
-                <p className="font-condensed text-sm font-bold tracking-wide text-[#ffc44d]">{block.time}</p>
-                <h3 className="font-condensed mt-0.5 text-lg font-bold italic leading-tight tracking-wide text-white">
-                  {block.title}
-                </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-[#f8f4fa]/85">{block.description}</p>
-              </div>
-            </div>
+            <article key={block.id} className="lineup-card">
+              <LineIcon name={block.icon} className="lineup-neon lineup-card-icon" />
+              <p className="lineup-time">{block.time}</p>
+              <h3 className="lineup-card-title">{block.title}</h3>
+              <p className="lineup-card-copy">{block.description}</p>
+            </article>
           ))}
         </div>
 
-        <div className="lineup-pill mt-6 flex flex-row items-center gap-2 rounded-full border-2 border-[#ff4fd8] bg-black/40 px-2 py-2 sm:mt-10 sm:gap-4 sm:px-5 sm:py-3">
-          <div className="flex flex-1 items-center justify-start gap-1.5 sm:gap-2">
-            <LineIcon name="hanger" className="h-7 w-7 shrink-0 text-[#ff4fd8]" />
-            <p className="text-sm font-bold tracking-wide">
-              DRESS CODE:{" "}
-              <span className="neon-script text-xl font-normal sm:text-3xl">
-                {content.dressCode}
-              </span>
-            </p>
+        <div className="lineup-dress">
+          <div className="lineup-dress-main">
+            <LineIcon name="hanger" className="lineup-dress-icon" />
+            <div>
+              <p className="lineup-dress-label">Dress code</p>
+              <p className="neon-script lineup-dress-script">{content.dressCode}</p>
+            </div>
           </div>
-          <span className="hidden h-8 w-px bg-white/25 min-[640px]:block" aria-hidden />
-          <p className="flex flex-1 items-center justify-center gap-2 text-left text-[13px] text-white/90 min-[640px]:justify-start">
-            <LineIcon name="trophy" className="h-7 w-7 shrink-0 text-[#f6c945]" />
-            {content.dressCodePrize}
+          <p className="lineup-dress-prize">
+            <LineIcon name="trophy" className="lineup-dress-icon" />
+            <span>{content.dressCodePrize}</span>
           </p>
         </div>
 
-        <div className="mt-8 text-center">
-          <p className="flex items-center justify-center gap-2 text-[12px] font-bold tracking-[0.18em] text-[#f6c945] sm:text-sm">
-            <LineIcon name="lock" className="h-5 w-5" />
+        <div className="lineup-private">
+          <p className="lineup-private-title">
+            <LineIcon name="lock" className="lineup-lock" />
             {content.privateNote}
           </p>
-          <p className="mx-auto mt-3 max-w-2xl text-[13px] leading-relaxed text-white/80">
-            We&apos;re keeping this celebration exclusive. This event is strictly for invited
-            guests. Please register every adult and child by name, and do not bring anyone who
-            isn&apos;t on the list.
+          <p className="lineup-private-copy">
+            This celebration stays exclusive. Register every adult and child by name, and do not
+            bring anyone who isn&apos;t on the list.
           </p>
         </div>
       </div>

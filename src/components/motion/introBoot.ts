@@ -2,8 +2,8 @@
 export const INTRO_KEY = "lj-cinematic-intro";
 
 /**
- * Runs before the hero is parsed so the first paint is the opening frame,
- * not a flash of the finished poster. Removed as soon as the timeline is live.
+ * Runs before the page is painted. The envelope waits for a gesture.
+ * If that UI never mounts, the site is shown instead of a black screen.
  */
 export const INTRO_BOOT = `(function(){
   try {
@@ -18,33 +18,19 @@ export const INTRO_BOOT = `(function(){
       root.dataset.motion = reduce ? "off" : "armed";
       return;
     }
-    root.dataset.intro = "play";
+    root.dataset.intro = "invite";
     root.dataset.motion = "armed";
-    root.style.setProperty("--intro-shift", "0ms");
-    window.__ljIntroStart = Date.now();
     document.addEventListener("click", function (event) {
       var target = event.target;
       if (!target || !target.closest || !target.closest("#skip-intro")) return;
       root.dataset.intro = "done";
       try { sessionStorage.setItem(key, "1"); } catch (e) {}
     });
-    var seenNode = null;
-    var obs = new MutationObserver(function () {
-      var node = document.querySelector(".hero-script");
-      if (!node || node === seenNode) return;
-      var previous = seenNode;
-      seenNode = node;
-      if (!previous) return;
-      var elapsed = Date.now() - (window.__ljIntroStart || Date.now());
-      root.style.setProperty("--intro-shift", "-" + elapsed + "ms");
-    });
-    obs.observe(document.documentElement, { childList: true, subtree: true });
     window.setTimeout(function () {
-      if (document.documentElement.dataset.intro === "play") {
-        document.documentElement.dataset.intro = "done";
-        try { sessionStorage.setItem(key, "1"); } catch (e) {}
+      if (root.dataset.intro === "invite" && !document.getElementById("invite-envelope")) {
+        root.dataset.intro = "done";
       }
-    }, 7000);
+    }, 4500);
   } catch (err) {
     document.documentElement.dataset.intro = "done";
   }

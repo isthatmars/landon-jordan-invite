@@ -1,7 +1,6 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
-import type { CSSProperties, ElementType, ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ElementType, type ReactNode } from "react";
 
 /**
  * Directional stroke reveal for a webfont script line.
@@ -24,7 +23,14 @@ export function Handwrite({
   delay?: number;
   duration?: number;
 }) {
-  const reduce = useReducedMotion();
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setReduce(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
   const Tag = as ?? "span";
   const style = {
     "--hw-delay": `${delay}ms`,

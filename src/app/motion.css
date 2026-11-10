@@ -344,7 +344,7 @@
     transparent
   );
   transform: skewX(-16deg);
-  animation: lineup-sweep 14s ease-in-out infinite;
+  animation: none;
 }
 
 @keyframes lineup-sweep {
@@ -364,7 +364,8 @@
 }
 
 .lineup-neon {
-  animation: lineup-neon 5.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px #ff39c8);
+  animation: none;
 }
 
 @keyframes lineup-neon {
@@ -378,7 +379,7 @@
 }
 
 .lineup-pill {
-  animation: lineup-pill 7.2s ease-in-out infinite;
+  animation: none;
 }
 
 @keyframes lineup-pill {
@@ -523,8 +524,28 @@
   height: auto;
 }
 
-.is-buzzing {
-  animation: receiver-buzz 0.07s linear infinite;
+.is-buzzing,
+.is-ring-once {
+  animation: phone-ring-once 0.85s ease-in-out 1;
+}
+
+@keyframes phone-ring-once {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-7deg);
+  }
+  40% {
+    transform: rotate(6deg);
+  }
+  62% {
+    transform: rotate(-3deg);
+  }
+  80% {
+    transform: rotate(1.5deg);
+  }
 }
 
 @keyframes receiver-buzz {

@@ -21,8 +21,51 @@ const STACK: {
   { id: "t7", label: "Prince – Purple Rain", top: "82.0%", height: "18%", labelTop: "8%", labelHeight: "50%" },
 ];
 
+function TransportIcon({ name }: { name: "back" | "play" | "pause" | "forward" | "stop" }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    className: "mix-key-icon",
+    "aria-hidden": true as const,
+  };
+  if (name === "back") {
+    return (
+      <svg {...common}>
+        <path d="M11.2 6.2 4.8 12l6.4 5.8V6.2zm8 0L12.8 12l6.4 5.8V6.2z" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (name === "play") {
+    return (
+      <svg {...common}>
+        <path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (name === "pause") {
+    return (
+      <svg {...common}>
+        <rect x="6.5" y="5.5" width="3.8" height="13" rx="0.6" fill="currentColor" />
+        <rect x="13.7" y="5.5" width="3.8" height="13" rx="0.6" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (name === "forward") {
+    return (
+      <svg {...common}>
+        <path d="M12.8 6.2 19.2 12l-6.4 5.8V6.2zM4.8 6.2 11.2 12l-6.4 5.8V6.2z" fill="currentColor" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...common}>
+      <rect x="6.5" y="6.5" width="11" height="11" rx="1" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function Mixtape({ headline }: { headline: string }) {
-  const { tracks, now, selectTape, insertingId, playing, toggleDeck, stop } = usePlayback();
+  const { tracks, now, selectTape, insertingId, playing, engaged, toggleDeck, stop, stepTape } =
+    usePlayback();
   const [flyer, setFlyer] = useState<{
     label: string;
     left: number;
@@ -116,14 +159,49 @@ export function Mixtape({ headline }: { headline: string }) {
               </span>
               <span className="mix-lamp" />
             </div>
-            <button
-              type="button"
-              className="mix-hot mix-hot-play"
-              aria-label={playing ? "Pause the tape" : "Play the tape"}
-              aria-pressed={playing}
-              onClick={toggleDeck}
-            />
-            <button type="button" className="mix-hot mix-hot-stop" aria-label="Stop the tape" onClick={stop} />
+            <div className="mix-keys" role="group" aria-label="Boombox transport">
+              <button
+                type="button"
+                className="mix-key"
+                aria-label="Previous tape"
+                onClick={() => stepTape(-1)}
+              >
+                <TransportIcon name="back" />
+              </button>
+              <button
+                type="button"
+                className={`mix-key${playing ? " is-down" : ""}`}
+                aria-label="Play the tape"
+                aria-pressed={playing}
+                onClick={() => {
+                  if (!playing) toggleDeck();
+                }}
+              >
+                <TransportIcon name="play" />
+              </button>
+              <button
+                type="button"
+                className={`mix-key${!playing && engaged ? " is-down" : ""}`}
+                aria-label="Pause the tape"
+                aria-pressed={!playing && engaged}
+                onClick={() => {
+                  if (playing) toggleDeck();
+                }}
+              >
+                <TransportIcon name="pause" />
+              </button>
+              <button
+                type="button"
+                className="mix-key"
+                aria-label="Next tape"
+                onClick={() => stepTape(1)}
+              >
+                <TransportIcon name="forward" />
+              </button>
+              <button type="button" className="mix-key" aria-label="Stop the tape" onClick={stop}>
+                <TransportIcon name="stop" />
+              </button>
+            </div>
             <div className="mix-phones">
               <div className="mix-shadow mix-shadow-phones" aria-hidden />
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -176,14 +254,6 @@ export function Mixtape({ headline }: { headline: string }) {
               />
             ))}
           </div>
-        </div>
-        <div className="mix-transport">
-          <button type="button" className="btn-pink-outline" onClick={toggleDeck} aria-pressed={playing}>
-            {playing ? "PAUSE" : "PLAY"}
-          </button>
-          <button type="button" className="btn-pink-outline" onClick={stop}>
-            STOP
-          </button>
         </div>
       </div>
       {flyer ? (

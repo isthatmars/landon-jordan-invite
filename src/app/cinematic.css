@@ -1,0 +1,868 @@
+/* Cinematic intro + neon states. Layered on the existing poster; no layout changes.
+   Intro clock: html[data-intro="play"] and --intro-shift (negative ms once hydrated).
+   Section cues: html[data-motion="armed"] and data-seen-* set once by IntersectionObserver. */
+
+@property --pen {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 130%;
+}
+@property --pen-a {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 130%;
+}
+@property --pen-b {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 130%;
+}
+@property --pen-c {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 130%;
+}
+@property --trace {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+
+/* ---------- Neon states ---------- */
+[data-neon="off"] {
+  filter: saturate(0.15) brightness(0.62);
+}
+[data-neon="igniting"] {
+  animation: neon-ignite 0.42s linear both;
+}
+[data-neon="on"] {
+  filter: none;
+}
+[data-neon="interactive"] {
+  transition: filter 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+}
+[data-neon="interactive"]:hover,
+[data-neon="interactive"]:focus-visible {
+  filter: brightness(1.16);
+}
+[data-neon="interactive"]:active {
+  transform: translateY(2px);
+}
+
+@keyframes neon-ignite {
+  0%,
+  18% {
+    filter: saturate(0.2) brightness(0.55);
+  }
+  34% {
+    filter: brightness(1.7);
+  }
+  48% {
+    filter: brightness(0.62);
+  }
+  66% {
+    filter: brightness(1.28);
+  }
+  100% {
+    filter: none;
+  }
+}
+
+@keyframes neon-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.93;
+  }
+}
+
+html:not([data-intro="play"]) .hero-script[data-neon="breathing"] {
+  animation: neon-breathe 9.6s ease-in-out infinite;
+}
+html:not([data-intro="play"]) .hero-invite[data-neon="breathing"] {
+  animation: neon-breathe 12.4s ease-in-out -3s infinite;
+}
+.hw.script-hot {
+  filter: none;
+}
+
+/* ---------- Buttons ---------- */
+.btn-pink-outline {
+  background: #09060f;
+}
+.btn-pink-outline:hover,
+.btn-pink-outline:focus-visible,
+.btn-header-rsvp:hover,
+.btn-header-rsvp:focus-visible {
+  filter: brightness(1.08);
+}
+.btn-rsvp-now:focus-visible,
+.btn-header-rsvp:focus-visible,
+.btn-pink-outline:focus-visible,
+.btn-green-solid:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.btn-rsvp-now:active,
+.btn-header-rsvp:active,
+.btn-pink-outline:active,
+#rsvp .btn-green-solid:active {
+  transform: translateY(2px);
+}
+
+#rsvp .btn-green-solid {
+  width: min(100%, 320px);
+  border: 2px solid #c6ff00;
+  background: #07080c;
+  color: #fff;
+  box-shadow:
+    0 0 0 1px rgba(198, 255, 0, 0.35),
+    0 0 12px rgba(198, 255, 0, 0.5),
+    inset 0 0 12px rgba(198, 255, 0, 0.12);
+}
+#rsvp .btn-green-solid:hover,
+#rsvp .btn-green-solid:focus-visible {
+  background: #14180c;
+  filter: none;
+  box-shadow:
+    0 0 0 1px #c6ff00,
+    0 0 16px #c6ff00,
+    inset 0 0 16px rgba(198, 255, 0, 0.2);
+}
+
+.skip-intro {
+  display: none;
+  position: fixed;
+  z-index: 80;
+  left: 0.85rem;
+  bottom: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  background: rgba(8, 4, 16, 0.82);
+  color: #fff;
+  padding: 0.5rem 0.85rem;
+  font-family: var(--font-nav), sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+html[data-intro="play"] .skip-intro {
+  display: inline-flex;
+  align-items: center;
+}
+.skip-intro:focus-visible {
+  outline: 2px solid #c6ff00;
+  outline-offset: 3px;
+}
+.skip-intro:active {
+  transform: translateY(1px);
+}
+
+/* ---------- Handwritten script ---------- */
+.hw-slot {
+  position: relative;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+.hw {
+  --pen: 130%;
+  display: block;
+  -webkit-mask-image: linear-gradient(108deg, #000 calc(var(--pen) - 2.4%), transparent var(--pen));
+  mask-image: linear-gradient(108deg, #000 calc(var(--pen) - 2.4%), transparent var(--pen));
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+.hw-tip {
+  position: absolute;
+  z-index: 2;
+  top: 58%;
+  left: 0;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: #fff;
+  box-shadow:
+    0 0 6px #fff,
+    0 0 12px #ff39c8,
+    0 0 18px #ff39c8;
+}
+
+html[data-intro="play"] .hw {
+  animation-name: hw-draw, hw-stable;
+  animation-duration: var(--hw-dur), 0.34s;
+  animation-delay:
+    calc(var(--hw-delay) + var(--intro-shift, 0ms)),
+    calc(var(--hw-delay) + var(--hw-dur) - 40ms + var(--intro-shift, 0ms));
+  animation-fill-mode: both, both;
+  animation-timing-function: linear, linear;
+}
+html[data-intro="play"] .hw-tip {
+  animation: hw-tip var(--hw-dur) linear calc(var(--hw-delay) + var(--intro-shift, 0ms)) both;
+}
+
+@keyframes hw-draw {
+  from {
+    --pen: -14%;
+  }
+  to {
+    --pen: 120%;
+  }
+}
+@keyframes hw-stable {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 0.4;
+  }
+  38% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.62;
+  }
+  74% {
+    opacity: 1;
+  }
+}
+@keyframes hw-tip {
+  0% {
+    opacity: 1;
+    left: -2%;
+    transform: translate(-40%, -20%);
+  }
+  22% {
+    opacity: 1;
+    transform: translate(-40%, -90%);
+  }
+  48% {
+    opacity: 1;
+    transform: translate(-40%, 18%);
+  }
+  74% {
+    opacity: 1;
+    transform: translate(-40%, -70%);
+  }
+  100% {
+    opacity: 0;
+    left: 104%;
+    transform: translate(-40%, -10%);
+  }
+}
+
+/* ---------- Intro timeline ---------- */
+.intro-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: #05010f;
+  opacity: 0;
+}
+.intro-lights {
+  position: absolute;
+  z-index: 1;
+  left: 8%;
+  right: 10%;
+  top: 7%;
+  height: 34%;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(circle, rgba(255, 236, 196, 0.95) 0 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(255, 57, 200, 0.9) 0 1.1px, transparent 2px),
+    radial-gradient(circle, rgba(198, 255, 0, 0.75) 0 1px, transparent 1.8px);
+  background-size: 47px 28px, 73px 36px, 91px 40px;
+  background-position: 0 0, 16px 10px, 8px 20px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 74%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 74%, transparent);
+}
+
+html[data-intro="play"] .hero-bg {
+  animation: sky-on 0.7s cubic-bezier(0.16, 0.72, 0.28, 1) calc(var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .intro-veil {
+  animation: veil-out 0.7s linear calc(var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .intro-lights {
+  animation: lights-on 1.05s ease-out calc(0.08s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-ambient {
+  animation: ambient-in 0.75s ease-out calc(0.12s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-type-glow {
+  animation: ambient-in 0.9s ease-out calc(0.75s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-crown {
+  animation: crown-on 0.42s ease-out calc(1.52s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .chrome-art-shine,
+html[data-intro="play"] .hero-chrome-fallback {
+  animation: chrome-in 0.78s cubic-bezier(0.16, 0.84, 0.22, 1) calc(1.8s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .chrome-art-shine::after {
+  animation: intro-sheen 0.62s ease-out calc(2.12s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-birthday {
+  animation: rise-in 0.4s ease-out calc(2.18s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-swoosh-lime path {
+  stroke-dasharray: 240;
+  animation: stroke-on 0.4s ease-out calc(2.28s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-couple {
+  animation: couple-light 0.85s ease-out calc(1.8s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-swoosh path {
+  stroke-dasharray: 520;
+  animation: stroke-on 0.48s ease-out calc(2.72s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-facts .hero-fact:nth-child(1) {
+  animation: rise-in 0.38s ease-out calc(2.78s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-facts .hero-fact:nth-child(3) {
+  animation: rise-in 0.38s ease-out calc(2.96s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-facts .hero-fact:nth-child(5) {
+  animation: rise-in 0.38s ease-out calc(3.14s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .fact-rule {
+  animation: ambient-in 0.35s ease-out calc(2.9s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .hero-frame .btn-rsvp-now {
+  animation: cta-ignite 0.42s linear calc(3.18s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .site-header {
+  animation: header-bar 0.5s ease-out calc(3.4s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="play"] .brand-lockup,
+html[data-intro="play"] .site-nav a,
+html[data-intro="play"] .btn-header-rsvp,
+html[data-intro="play"] .site-menu {
+  animation: nav-in 0.42s ease-out both;
+}
+html[data-intro="play"] .brand-lockup {
+  animation-delay: calc(3.4s + var(--intro-shift, 0ms));
+}
+html[data-intro="play"] .site-nav a:nth-child(1) {
+  animation-delay: calc(3.48s + var(--intro-shift, 0ms));
+}
+html[data-intro="play"] .site-nav a:nth-child(2) {
+  animation-delay: calc(3.56s + var(--intro-shift, 0ms));
+}
+html[data-intro="play"] .site-nav a:nth-child(3) {
+  animation-delay: calc(3.64s + var(--intro-shift, 0ms));
+}
+html[data-intro="play"] .site-nav a:nth-child(4) {
+  animation-delay: calc(3.72s + var(--intro-shift, 0ms));
+}
+html[data-intro="play"] .btn-header-rsvp,
+html[data-intro="play"] .site-menu {
+  animation-delay: calc(3.82s + var(--intro-shift, 0ms));
+}
+
+@keyframes sky-on {
+  from {
+    filter: brightness(0.08) saturate(0.28);
+  }
+  to {
+    filter: none;
+  }
+}
+@keyframes veil-out {
+  0% {
+    opacity: 0.97;
+  }
+  30% {
+    opacity: 0.42;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes lights-on {
+  0% {
+    opacity: 0;
+  }
+  28% {
+    opacity: 0.2;
+  }
+  46% {
+    opacity: 0.9;
+  }
+  58% {
+    opacity: 0.28;
+  }
+  74% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes ambient-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes crown-on {
+  0% {
+    opacity: 0;
+    filter: brightness(0.25);
+  }
+  46% {
+    opacity: 1;
+    filter: brightness(1.65) drop-shadow(0 0 10px #ffd45a);
+  }
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px #fff4c8) drop-shadow(0 0 14px #ffd45a);
+  }
+}
+@keyframes chrome-in {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.9);
+    filter: brightness(0.35);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes intro-sheen {
+  0% {
+    opacity: 0;
+    background-position: 130% 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    background-position: -30% 0;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes stroke-on {
+  from {
+    stroke-dashoffset: 520;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes spot-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes couple-light {
+  0%,
+  12% {
+    filter: brightness(0.28) saturate(0.8);
+  }
+  100% {
+    filter: none;
+  }
+}
+@keyframes cta-ignite {
+  0%,
+  16% {
+    filter: saturate(0.25) brightness(0.55);
+  }
+  34% {
+    filter: brightness(1.75);
+  }
+  48% {
+    filter: brightness(0.66);
+  }
+  64% {
+    filter: brightness(1.3);
+  }
+  100% {
+    filter: none;
+  }
+}
+@keyframes nav-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes header-bar {
+  from {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+  to {
+    background-color: rgba(7, 2, 18, 0.62);
+    border-color: rgba(255, 57, 200, 0.28);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  }
+}
+
+/* ---------- Section handwriting ---------- */
+html[data-motion="armed"] #lineup .neon-script,
+html[data-motion="armed"] #rsvp .neon-script-lg {
+  -webkit-mask-image: linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a));
+  mask-image: linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a));
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+html[data-motion="armed"] #mixtape .neon-script-lg,
+html[data-motion="armed"] #arcade .neon-script-lg {
+  -webkit-mask-image:
+    linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a)),
+    linear-gradient(108deg, #000 calc(var(--pen-b) - 3%), transparent var(--pen-b));
+  mask-image:
+    linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a)),
+    linear-gradient(108deg, #000 calc(var(--pen-b) - 3%), transparent var(--pen-b));
+  -webkit-mask-size: 100% 54%, 100% 54%;
+  mask-size: 100% 54%, 100% 54%;
+  -webkit-mask-position: left top, left bottom;
+  mask-position: left top, left bottom;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+html[data-motion="armed"] #watch .neon-script-lg {
+  -webkit-mask-image:
+    linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a)),
+    linear-gradient(108deg, #000 calc(var(--pen-b) - 3%), transparent var(--pen-b)),
+    linear-gradient(108deg, #000 calc(var(--pen-c) - 3%), transparent var(--pen-c));
+  mask-image:
+    linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a)),
+    linear-gradient(108deg, #000 calc(var(--pen-b) - 3%), transparent var(--pen-b)),
+    linear-gradient(108deg, #000 calc(var(--pen-c) - 3%), transparent var(--pen-c));
+  -webkit-mask-size: 100% 36%, 100% 36%, 100% 36%;
+  mask-size: 100% 36%, 100% 36%, 100% 36%;
+  -webkit-mask-position: left top, left center, left bottom;
+  mask-position: left top, left center, left bottom;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .neon-script-lg,
+html[data-motion="armed"]:not([data-seen-arcade]) #arcade .neon-script-lg,
+html[data-motion="armed"]:not([data-seen-lineup]) #lineup .neon-script,
+html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-script-lg {
+  --pen-a: -18%;
+  --pen-b: -18%;
+}
+html[data-motion="armed"]:not([data-seen-watch]) #watch .neon-script-lg {
+  --pen-a: -18%;
+  --pen-b: -18%;
+  --pen-c: -18%;
+}
+
+html[data-seen-mixtape="1"] #mixtape .neon-script-lg {
+  animation: write-two 1.28s cubic-bezier(0.33, 0.04, 0.22, 1) both, neon-breathe 11s ease-in-out 1.35s infinite;
+}
+html[data-seen-arcade="1"] #arcade .neon-script-lg {
+  animation: write-two 1.15s cubic-bezier(0.33, 0.04, 0.22, 1) both, neon-breathe 13s ease-in-out 1.2s infinite;
+}
+html[data-seen-lineup="1"] #lineup .neon-script {
+  animation: write-one 0.9s cubic-bezier(0.33, 0.04, 0.22, 1) 0.45s both, neon-breathe 9.2s ease-in-out 1.4s infinite;
+}
+html[data-seen-rsvp="1"] #rsvp .neon-script-lg {
+  animation: write-one 0.85s cubic-bezier(0.33, 0.04, 0.22, 1) 0.15s both, neon-breathe 10.4s ease-in-out 1.1s infinite;
+}
+html[data-seen-watch="1"] #watch .neon-script-lg {
+  animation: write-three 1.55s cubic-bezier(0.33, 0.04, 0.22, 1) both, neon-breathe 8.6s ease-in-out 1.6s infinite;
+}
+
+@keyframes write-one {
+  0% {
+    --pen-a: -18%;
+    --pen-b: 130%;
+  }
+  78% {
+    --pen-a: 122%;
+    filter: brightness(1);
+  }
+  88% {
+    filter: brightness(1.55);
+  }
+  94% {
+    filter: brightness(0.7);
+  }
+  100% {
+    --pen-a: 122%;
+    --pen-b: 130%;
+    filter: brightness(1);
+  }
+}
+@keyframes write-two {
+  0% {
+    --pen-a: -18%;
+    --pen-b: -18%;
+  }
+  46% {
+    --pen-a: 122%;
+    --pen-b: -18%;
+  }
+  82% {
+    --pen-a: 122%;
+    --pen-b: 122%;
+    filter: brightness(1);
+  }
+  90% {
+    filter: brightness(1.5);
+  }
+  96% {
+    filter: brightness(0.72);
+  }
+  100% {
+    --pen-a: 122%;
+    --pen-b: 122%;
+    filter: brightness(1);
+  }
+}
+@keyframes write-three {
+  0% {
+    --pen-a: -18%;
+    --pen-b: -18%;
+    --pen-c: -18%;
+  }
+  32% {
+    --pen-a: 122%;
+    --pen-b: -18%;
+    --pen-c: -18%;
+  }
+  64% {
+    --pen-a: 122%;
+    --pen-b: 122%;
+    --pen-c: -18%;
+  }
+  86% {
+    --pen-a: 122%;
+    --pen-b: 122%;
+    --pen-c: 122%;
+    filter: brightness(1.45);
+  }
+  93% {
+    filter: brightness(0.72);
+  }
+  100% {
+    --pen-a: 122%;
+    --pen-b: 122%;
+    --pen-c: 122%;
+    filter: brightness(1);
+  }
+}
+
+/* Mixtape: sign writes, stereo light comes up, labels stagger. Deck stays clickable. */
+html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .mix-neon-throw,
+html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .mix-table-pool {
+  opacity: 0.08;
+}
+html[data-seen-mixtape="1"] #mixtape .mix-neon-throw,
+html[data-seen-mixtape="1"] #mixtape .mix-table-pool {
+  animation: ambient-in 0.8s ease-out both;
+}
+html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .mix-arrow path {
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+}
+html[data-seen-mixtape="1"] #mixtape .mix-arrow path {
+  stroke-dasharray: 140;
+  animation: arrow-on 0.55s ease-out 0.9s both;
+}
+html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .mix-tape-ink {
+  opacity: 0;
+}
+html[data-seen-mixtape="1"] #mixtape .mix-tape-ink {
+  animation: rise-in 0.4s ease both;
+}
+html[data-seen-mixtape="1"] #mixtape .mix-tape:nth-of-type(1) .mix-tape-ink { animation-delay: 0.08s; }
+html[data-seen-mixtape="1"] #mixtape .mix-tape:nth-of-type(2) .mix-tape-ink { animation-delay: 0.16s; }
+html[data-seen-mixtape="1"] #mixtape .mix-tape:nth-of-type(3) .mix-tape-ink { animation-delay: 0.24s; }
+html[data-seen-mixtape="1"] #mixtape .mix-tape:nth-of-type(4) .mix-tape-ink { animation-delay: 0.32s; }
+html[data-seen-mixtape="1"] #mixtape .mix-tape:nth-of-type(5) .mix-tape-ink { animation-delay: 0.4s; }
+html[data-seen-mixtape="1"] #mixtape .mix-tape:nth-of-type(6) .mix-tape-ink { animation-delay: 0.48s; }
+
+@keyframes arrow-on {
+  from { stroke-dashoffset: 140; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Television: CRT powers on, headline writes, browse button ignites. */
+html[data-motion="armed"]:not([data-seen-watch]) #watch [data-screen="crt"] {
+  filter: brightness(0.18);
+}
+#watch [data-screen="crt"] {
+  transition: filter 0.45s ease;
+}
+html[data-seen-watch="1"] #watch .crt-static:not(.is-on) {
+  animation: crt-snow 0.46s steps(3, end) 0.05s both;
+}
+html[data-motion="armed"]:not([data-seen-watch]) #watch .btn-pink-outline {
+  filter: saturate(0.3) brightness(0.55);
+}
+html[data-seen-watch="1"] #watch .btn-pink-outline {
+  animation: cta-ignite 0.4s linear 1.05s both;
+}
+
+/* Arcade: marquee, then the existing disco loop and glints, then Start Game. */
+html[data-motion="armed"]:not([data-seen-arcade]) #arcade .cab-glint {
+  animation-play-state: paused;
+  opacity: 0.12;
+}
+html[data-motion="armed"]:not([data-seen-arcade]) #arcade .btn-pink-outline {
+  filter: saturate(0.3) brightness(0.55);
+}
+html[data-seen-arcade="1"] #arcade .btn-pink-outline {
+  animation: cta-ignite 0.4s linear 0.85s both;
+}
+html[data-live-arcade="0"] #arcade .cab-glint {
+  animation-play-state: paused;
+}
+
+/* Lineup */
+html[data-motion="armed"]:not([data-seen-lineup]) #lineup h2,
+html[data-motion="armed"]:not([data-seen-lineup]) #lineup .grid > div {
+  opacity: 0;
+  transform: translateY(12px);
+}
+html[data-seen-lineup="1"] #lineup h2 {
+  animation: rise-in 0.55s ease both;
+}
+html[data-seen-lineup="1"] #lineup .grid > div {
+  animation: rise-in 0.5s ease both;
+}
+html[data-seen-lineup="1"] #lineup .grid > div:nth-child(1) { animation-delay: 0.12s; }
+html[data-seen-lineup="1"] #lineup .grid > div:nth-child(2) { animation-delay: 0.28s; }
+html[data-seen-lineup="1"] #lineup .grid > div:nth-child(3) { animation-delay: 0.44s; }
+html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-pill {
+  filter: saturate(0.45) brightness(0.62);
+}
+#lineup .lineup-pill {
+  transition: filter 0.45s ease;
+}
+
+/* RSVP: frame traces, script illuminates, phone appears. Fields stay readable. */
+html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-frame {
+  border-color: rgba(255, 57, 200, 0.18);
+  box-shadow: none;
+}
+html[data-seen-rsvp="1"] #rsvp .neon-frame {
+  position: relative;
+  animation: frame-on 0.4s ease 1.15s both;
+}
+html[data-seen-rsvp="1"] #rsvp .neon-frame::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  padding: 3px;
+  pointer-events: none;
+  background: conic-gradient(from -90deg, #ff39c8 var(--trace), transparent 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: trace-on 1.15s linear both;
+}
+html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp [data-testid="rsvp-phone"] {
+  opacity: 0;
+  transform: translateY(10px);
+}
+html[data-seen-rsvp="1"] #rsvp [data-testid="rsvp-phone"] {
+  animation: rise-in 0.55s ease 0.35s both;
+}
+
+@keyframes frame-on {
+  from {
+    border-color: rgba(255, 57, 200, 0.2);
+    box-shadow: none;
+  }
+  to {
+    border-color: #ff39c8;
+    box-shadow: 0 0 24px #ff39c860, inset 0 0 24px #ff39c815;
+  }
+}
+@keyframes trace-on {
+  from { --trace: 0%; }
+  to { --trace: 100%; }
+}
+
+/* Pause cheap loops once a section has left the viewport. */
+html[data-live-home="0"] .hero-water,
+html[data-live-home="0"] .hero-shimmer,
+html[data-live-home="0"] .hero-palm img,
+html[data-intro="done"][data-live-home="0"] .hero-script[data-neon="breathing"],
+html[data-intro="done"][data-live-home="0"] .hero-invite[data-neon="breathing"],
+html[data-intro="done"][data-live-home="0"] .chrome-art-shine::after {
+  animation-play-state: paused;
+}
+html[data-live-watch="0"] .crt-screen-light,
+html[data-live-watch="0"] .crt-bezel-glow,
+html[data-live-watch="0"] .crt-scanlines::after {
+  animation-play-state: paused;
+}
+html[data-live-lineup="0"] .lineup-sweep::before,
+html[data-live-lineup="0"] .lineup-neon,
+html[data-live-lineup="0"] .lineup-pill {
+  animation-play-state: paused;
+}
+html[data-live-mixtape="0"] #mixtape .neon-script-lg,
+html[data-live-watch="0"] #watch .neon-script-lg,
+html[data-live-arcade="0"] #arcade .neon-script-lg,
+html[data-live-rsvp="0"] #rsvp .neon-script-lg {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-veil,
+  .intro-lights,
+  .hw-tip {
+    display: none;
+  }
+  .hw,
+  .hero-people::after,
+  #mixtape .neon-script-lg,
+  #watch .neon-script-lg,
+  #arcade .neon-script-lg,
+  #lineup .neon-script,
+  #rsvp .neon-script-lg,
+  #rsvp .neon-frame::before {
+    -webkit-mask-image: none;
+    mask-image: none;
+    animation: none !important;
+  }
+}

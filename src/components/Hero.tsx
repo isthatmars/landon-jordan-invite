@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import type { SiteContent } from "@/lib/types";
 import { HeroAtmosphere } from "./HeroAtmosphere";
+import { Handwrite } from "./motion/Handwrite";
+import { IntroVeil } from "./motion/IntroVeil";
 import { CalendarIcon, ClockIcon, Crown, GreenSwoosh, PinIcon, PinkSwoosh } from "./icons";
 
 export function Hero({ content }: { content: SiteContent }) {
@@ -17,6 +19,7 @@ export function Hero({ content }: { content: SiteContent }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/hero-bg-miami.jpg" alt="" className="hero-bg" />
       <HeroAtmosphere />
+      <IntroVeil />
       <div className="hero-shade" />
       <div className="hero-ambient" aria-hidden />
 
@@ -36,7 +39,9 @@ export function Hero({ content }: { content: SiteContent }) {
           <div className="hero-copy">
             <div className="hero-type-glow" aria-hidden />
             <Crown className="hero-crown" />
-            <h1 className="script-hot hero-script">{content.heroScript}</h1>
+            <Handwrite as="h1" className="hero-script" inkClassName="script-hot" delay={700} duration={780}>
+              {content.heroScript}
+            </Handwrite>
             {chromeIsArt ? (
               <span className="chrome-art-shine">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -54,7 +59,9 @@ export function Hero({ content }: { content: SiteContent }) {
             )}
             <p className="hero-birthday">{content.heroSubtitle}</p>
             <GreenSwoosh className="hero-swoosh-lime" stroke="#C6FF00" />
-            <p className="script-hot hero-invite">{content.heroInvite}</p>
+            <Handwrite as="p" className="hero-invite" inkClassName="script-hot" delay={2600} duration={520}>
+              {content.heroInvite}
+            </Handwrite>
             <PinkSwoosh className="hero-swoosh" />
           </div>
         </div>

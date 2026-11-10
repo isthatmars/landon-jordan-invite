@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Barlow_Condensed, Caveat, Fugaz_One, Inter, Oswald, Yellowtail } from "next/font/google";
+import { Cinematic } from "@/components/motion/Cinematic";
+import { INTRO_BOOT } from "@/components/motion/introBoot";
 import { SiteEffects } from "@/components/SiteEffects";
 import "./globals.css";
 import "./motion.css";
+import "./cinematic.css";
 
 const script = localFont({
   src: "../fonts/hastron.otf",
@@ -65,9 +68,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${script.variable} ${scriptFallback.variable} ${chrome.variable} ${condensed.variable} ${nav.variable} ${body.variable} ${label.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col night-sky">
+        <script id="lj-intro-boot" dangerouslySetInnerHTML={{ __html: INTRO_BOOT }} />
+        <button type="button" className="skip-intro" id="skip-intro">
+          Skip intro
+        </button>
+        <Cinematic />
         <SiteEffects />
         {children}
       </body>

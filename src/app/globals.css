@@ -2673,7 +2673,8 @@ form[data-step="3"] .rsvp-step-3 {
   gap: 1rem;
   width: 100%;
   margin-block: auto;
-  padding-bottom: clamp(3rem, 7vh, 5.25rem);
+  /* Keep interaction clearance on the step, not inside the centered cluster. */
+  padding-bottom: 0;
 }
 
 .rsvp-attend {
@@ -2815,6 +2816,8 @@ form[data-step="1"] .rsvp-step-1 {
   justify-content: center;
   width: 100%;
   margin-block: auto;
+  padding-bottom: clamp(3rem, 7vh, 5.25rem);
+  box-sizing: border-box;
 }
 
 @media (min-width: 768px) {

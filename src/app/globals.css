@@ -2539,9 +2539,10 @@ form[data-step="3"] .rsvp-step-3 {
 
 .lineup-card-copy {
   margin: 0.2rem 0 0;
-  color: #f8f4fa;
+  color: var(--neon-green);
   font-size: clamp(1.05rem, 0.95rem + 0.3vw, 1.2rem);
   line-height: 1.45;
+  text-shadow: 0 0 10px rgba(198, 255, 0, 0.28);
 }
 
 .lineup-dress {

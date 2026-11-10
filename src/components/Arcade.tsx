@@ -42,20 +42,16 @@ export function Arcade({ headline }: { headline: string }) {
   );
 
   return (
-    <section id="arcade" className="scene-section relative overflow-hidden">
+    <section id="arcade" className="scene-section relative overflow-x-clip overflow-y-visible">
       <ArcadeBackdrop />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-4 py-4 md:px-6 md:py-3">
-        <div className="flex w-full flex-col items-center justify-center gap-1 md:flex-row md:items-center md:gap-6">
-          <div className="arcade-copy relative z-20 order-1 w-full text-center md:order-1 md:w-[30%] md:pb-4 md:text-left">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end overflow-visible px-4 py-4 md:px-6 md:py-3">
+        <div className="flex w-full flex-col items-center justify-center gap-1 overflow-visible md:flex-row md:items-center md:gap-6">
+          <div className="arcade-copy relative z-20 order-1 w-full overflow-visible text-center md:order-1 md:w-[30%] md:pb-4 md:text-left">
             <h2 className="neon-script-lg arcade-title">{script}</h2>
             <GreenSwoosh className="mx-auto mt-1 h-3 w-24 md:mx-0 min-[640px]:w-36" />
             <NeonArrow className="arcade-arrow mx-auto mt-1 h-8 w-16 md:mx-0 min-[640px]:ml-6 min-[640px]:h-10 min-[640px]:w-16" />
-          </div>
-
-          <div className="arcade-cab relative order-2 w-[88%] max-w-[540px] md:order-2 md:w-[50%]">
-            <div className="arcade-machine">
             {!running && (
               <button
                 type="button"
@@ -71,28 +67,32 @@ export function Arcade({ headline }: { headline: string }) {
                 CLOSE GAME
               </button>
             )}
-            <div className="floor-contact" />
-            <div className="cab-lights" aria-hidden>
-              <span className="cab-glint cab-glint-a" />
-              <span className="cab-glint cab-glint-b" />
-              <span className="cab-glint cab-glint-c" />
-              <span className="cab-glint cab-glint-d" />
-            </div>
-            <div
-              data-testid="arcade-screen"
-              data-screen="arcade"
-              className="absolute z-20 overflow-hidden bg-black"
-              style={arcadeScreen}
-            >
-              {!overlay && <PacManGame running={running} embed />}
-            </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/prop-arcade-bartop.png"
-              alt="Front-facing Pac-Man arcade cabinet"
-              className="pointer-events-none relative z-10 block h-auto w-full"
-              draggable={false}
-            />
+          </div>
+
+          <div className="arcade-cab relative order-2 w-[88%] max-w-[540px] md:order-2 md:w-[50%]">
+            <div className="arcade-machine">
+              <div className="floor-contact" />
+              <div className="cab-lights" aria-hidden>
+                <span className="cab-glint cab-glint-a" />
+                <span className="cab-glint cab-glint-b" />
+                <span className="cab-glint cab-glint-c" />
+                <span className="cab-glint cab-glint-d" />
+              </div>
+              <div
+                data-testid="arcade-screen"
+                data-screen="arcade"
+                className="absolute z-[1] overflow-hidden bg-black"
+                style={arcadeScreen}
+              >
+                {!overlay && <PacManGame running={running} embed />}
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/prop-arcade-bartop.png"
+                alt="Front-facing Pac-Man arcade cabinet"
+                className="pointer-events-none relative z-10 block h-auto w-full"
+                draggable={false}
+              />
             </div>
           </div>
 

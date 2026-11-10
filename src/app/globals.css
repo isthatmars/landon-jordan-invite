@@ -1864,22 +1864,27 @@ body {
   padding-bottom: clamp(2.25rem, 6vw, 4rem);
 }
 
+#arcade {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
 .arcade-copy {
   margin-bottom: 0.2rem;
+  overflow: visible;
 }
 
 .arcade-title {
-  line-height: 0.9;
+  overflow: visible;
+  line-height: 1.18;
+  padding-top: 0.32em;
+  padding-bottom: 0.1em;
+  padding-inline: 0.14em;
 }
 
-.arcade-machine .arcade-start {
-  position: absolute;
-  z-index: 30;
-  top: 22%;
-  left: 0;
-  right: 0;
-  width: max-content;
-  margin: 0 auto;
+.arcade-copy .arcade-start {
+  display: inline-flex;
+  margin-top: 0.85rem;
 }
 
 .arcade-machine {

@@ -926,3 +926,337 @@ body {
     font-size: 0.98rem;
   }
 }
+
+/* Mixtape — one photographed table, two crops */
+.mix-scene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #120612;
+}
+
+.mix-plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 40% 84%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.mix-neon-throw {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  left: 28%;
+  top: -4%;
+  width: 58%;
+  height: 48%;
+  background: radial-gradient(
+    ellipse at 48% 28%,
+    rgba(255, 57, 200, 0.55),
+    rgba(255, 57, 200, 0.16) 38%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  filter: blur(2px);
+}
+
+.mix-table-pool {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  right: 8%;
+  bottom: 2%;
+  width: 42%;
+  height: 22%;
+  background: radial-gradient(ellipse at center, rgba(255, 57, 200, 0.28), transparent 68%);
+  mix-blend-mode: screen;
+  filter: blur(6px);
+}
+
+.mix-stage {
+  position: relative;
+  z-index: 2;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 1.15rem 0.55rem 4.6rem;
+}
+
+.mix-script {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.2rem;
+  width: 100%;
+  margin: 0.35rem 0 0.15rem;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 18px rgba(255, 57, 200, 0.35));
+}
+
+.mix-script h2 {
+  margin: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+  text-align: left;
+  font-size: clamp(2.35rem, 11vw, 3.15rem);
+  line-height: 0.86;
+}
+
+.mix-arrow {
+  width: 4.1rem;
+  height: 2.45rem;
+  max-width: 4.1rem;
+  max-height: 2.45rem;
+  flex: 0 0 auto;
+  margin: 0 0.15rem 0.15rem 0.05rem;
+  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px #ff39c8) drop-shadow(0 0 16px #ff39c8);
+}
+
+.mix-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mix-boom,
+.mix-stack,
+.mix-phones {
+  position: relative;
+}
+
+.mix-boom {
+  width: 100%;
+  z-index: 2;
+}
+
+.mix-stack {
+  position: relative;
+  width: 94%;
+  margin-top: -0.15rem;
+  z-index: 3;
+}
+
+.mix-phones {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  bottom: -6%;
+  width: 36%;
+  pointer-events: none;
+}
+
+.mix-photo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.mix-reflect {
+  -webkit-box-reflect: below 0 linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.12) 46%, transparent 72%);
+}
+
+.mix-mirror {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  top: 99.2%;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.mix-reflect-short {
+  -webkit-box-reflect: below 0 linear-gradient(rgba(0, 0, 0, 0.38), transparent 58%);
+}
+
+.mix-shadow {
+  position: absolute;
+  z-index: 1;
+  left: 4%;
+  right: 5%;
+  top: 96%;
+  height: 16%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 68% 40%, rgba(120, 0, 60, 0.55), transparent 58%),
+    radial-gradient(ellipse at 40% 45%, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.4) 46%, transparent 76%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.mix-shadow-stack {
+  top: 96%;
+  bottom: auto;
+  left: 7%;
+  right: 7%;
+  height: 14%;
+  background:
+    radial-gradient(ellipse at 72% 40%, rgba(140, 0, 80, 0.6), transparent 58%),
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.45) 48%, transparent 76%);
+}
+
+.mix-shadow-phones {
+  top: 78%;
+  bottom: auto;
+  left: 10%;
+  right: 22%;
+  height: 30%;
+  filter: blur(2px);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9), transparent 70%);
+}
+
+.mix-grade {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg, transparent 60%, rgba(255, 57, 200, 0.22) 100%),
+    linear-gradient(to top, rgba(255, 150, 50, 0.12), transparent 22%);
+  mix-blend-mode: soft-light;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.mix-grade-stack {
+  background:
+    linear-gradient(100deg, transparent 55%, rgba(255, 57, 200, 0.5) 100%),
+    linear-gradient(to top, rgba(255, 170, 60, 0.22), transparent 24%);
+}
+
+.mix-grade-phones {
+  background: linear-gradient(120deg, rgba(255, 140, 40, 0.2), rgba(255, 57, 200, 0.38));
+}
+
+.mix-tape {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.mix-tape-ink {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #1a1020;
+  font-family: var(--font-label), cursive;
+  font-weight: 600;
+  font-size: clamp(13px, 3.7vw, 18px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.mix-tape.is-on .mix-tape-ink {
+  color: #1a0614;
+  text-shadow:
+    0 0 8px #fff,
+    0 0 12px #ff39c8;
+  filter: drop-shadow(0 0 6px rgba(255, 57, 200, 0.95));
+}
+
+.mix-tape.is-insert .mix-tape-ink {
+  animation: tape-label-flash 0.55s ease;
+}
+
+@keyframes tape-label-flash {
+  0% {
+    filter: brightness(2.2) drop-shadow(0 0 10px #ff39c8);
+  }
+  100% {
+    filter: none;
+  }
+}
+
+@media (min-width: 860px) {
+  .mix-plate {
+    object-position: 46% 76%;
+  }
+
+  .mix-stage {
+    padding: 0.2rem 1.1rem 6.4rem;
+  }
+
+  .mix-script {
+    position: absolute;
+    top: 0.15rem;
+    left: 43%;
+    width: auto;
+    margin: 0;
+    justify-content: flex-start;
+  }
+
+  .mix-script h2 {
+    font-size: clamp(2.85rem, 4.5vw, 3.6rem);
+  }
+
+  .mix-arrow {
+    width: 4.6rem;
+    height: 3rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .mix-row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+    padding-top: 5.1rem;
+  }
+
+  .mix-boom {
+    width: 58%;
+    flex: none;
+  }
+
+  .mix-stack {
+    width: 31.5%;
+    flex: none;
+    margin: 0 0 0.4% -0.35rem;
+  }
+
+  .mix-phones {
+    left: -1%;
+    bottom: -8%;
+    width: 38%;
+  }
+
+  .mix-neon-throw {
+    left: 36%;
+    top: 0;
+    width: 42%;
+    height: 42%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mix-tape.is-insert .mix-tape-ink {
+    animation: none;
+  }
+}
+
+

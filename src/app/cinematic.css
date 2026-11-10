@@ -93,6 +93,8 @@ html:not([data-intro="reveal"]) .hero-invite[data-neon="breathing"] {
 .btn-header-rsvp:focus-visible,
 .btn-pink-outline:focus-visible,
 .btn-green-solid:focus-visible,
+.hero-facts-rsvp:focus-visible,
+.back-to-top:focus-visible,
 .game-close:focus-visible,
 .skip-intro:focus-visible,
 .keycap:focus-visible {
@@ -329,20 +331,23 @@ html[data-intro="reveal"] .hero-swoosh path {
   stroke-dasharray: 520;
   animation: stroke-on 0.4s ease-out calc(1.35s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="reveal"] .hero-facts .hero-fact:nth-child(1) {
+html[data-intro="reveal"] .hero-facts-main .hero-fact:nth-child(1) {
   animation: rise-in 0.34s ease-out calc(1.15s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="reveal"] .hero-facts .hero-fact:nth-child(3) {
+html[data-intro="reveal"] .hero-facts-main .hero-fact:nth-child(3) {
   animation: rise-in 0.34s ease-out calc(1.28s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="reveal"] .hero-facts .hero-fact:nth-child(5) {
+html[data-intro="reveal"] .hero-facts-main .hero-fact:nth-child(5) {
   animation: rise-in 0.34s ease-out calc(1.4s + var(--intro-shift, 0ms)) both;
 }
 html[data-intro="reveal"] .fact-rule {
   animation: ambient-in 0.3s ease-out calc(1.22s + var(--intro-shift, 0ms)) both;
 }
-html[data-intro="reveal"] .hero-frame .btn-rsvp-now {
-  animation: cta-ignite 0.4s linear calc(1.7s + var(--intro-shift, 0ms)) both;
+html[data-intro="reveal"] .hero-facts-divider {
+  animation: ambient-in 0.3s ease-out calc(1.48s + var(--intro-shift, 0ms)) both;
+}
+html[data-intro="reveal"] .hero-facts-rsvp {
+  animation: cta-ignite 0.4s linear calc(1.58s + var(--intro-shift, 0ms)) both;
 }
 html[data-intro="reveal"] .site-header {
   animation: header-bar 0.45s ease-out calc(1.78s + var(--intro-shift, 0ms)) both;

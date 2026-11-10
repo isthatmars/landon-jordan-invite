@@ -482,6 +482,50 @@ html[data-intro='reveal'] .invite-overlay .invite-atmosphere {
   }
 }
 
+/* Desktop: grow the centered invite stack ~30% so it fills the field. */
+@media (min-width: 768px) {
+  .invite-overlay {
+    gap: clamp(1.4rem, 3.6vh, 2.3rem);
+  }
+
+  .invite-overlay .invite-kicker {
+    max-width: min(90vw, 52rem);
+    font-size: clamp(3.5rem, 9.6vw, 6.25rem);
+  }
+
+  .envelope {
+    width: min(72vw, 33.8rem);
+  }
+
+  .envelope-card-script {
+    font-size: clamp(2.2rem, 5.4vw, 3.05rem);
+  }
+
+  .envelope-card-title {
+    font-size: clamp(1.2rem, 3.1vw, 1.55rem);
+  }
+
+  .envelope-card-date {
+    font-size: clamp(1rem, 2.6vw, 1.25rem);
+  }
+
+  .envelope-seal {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .envelope-crown {
+    width: 2.4rem;
+  }
+
+  .invite-open {
+    margin-top: clamp(2.1rem, 5.5vh, 3.4rem);
+    min-height: 4.1rem;
+    padding: 1rem 1.75rem;
+    font-size: clamp(1.15rem, 2.85vw, 1.5rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .invite-atmosphere-bloom--violet,
   .invite-atmosphere-bloom--pink,

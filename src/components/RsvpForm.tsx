@@ -289,14 +289,14 @@ export function RsvpForm({ content }: { content: SiteContent }) {
           <form id="rsvp-form" data-step={step} onSubmit={onSubmit} noValidate className="rsvp-steps space-y-4">
             <div className="rsvp-step rsvp-step-1 space-y-4">
               <p className="rsvp-ask">Are you able to attend?</p>
-              <div id="rsvp-attend" data-testid="rsvp-attend" className="grid gap-3">
+              <div id="rsvp-attend" data-testid="rsvp-attend" className="rsvp-attend">
                 <ChoiceButton
                   tone="yes"
                   pressed={form.attend === "yes"}
                   testId="rsvp-choice-yes"
                   onClick={() => chooseAttend("yes")}
                 >
-                  Yes I&apos;ll be there
+                  Yes, I&apos;ll Be There!
                 </ChoiceButton>
                 <ChoiceButton
                   tone="no"
@@ -304,7 +304,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                   testId="rsvp-choice-no"
                   onClick={() => chooseAttend("no")}
                 >
-                  Sorry I can&apos;t
+                  Sorry, I can&apos;t make it this time.
                 </ChoiceButton>
               </div>
             </div>

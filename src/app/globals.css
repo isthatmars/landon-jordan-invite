@@ -662,7 +662,7 @@ body {
   width: min(1280px, 100%);
   min-height: 82px;
   margin: 0 auto;
-  padding: max(0.4rem, env(safe-area-inset-top)) max(0.95rem, env(safe-area-inset-right)) 0.35rem max(0.95rem, env(safe-area-inset-left));
+  padding: max(1.15rem, env(safe-area-inset-top)) max(0.95rem, env(safe-area-inset-right)) 0.7rem max(0.95rem, env(safe-area-inset-left));
 }
 
 .brand-lockup {
@@ -2373,7 +2373,7 @@ body {
   }
 
   .site-header-inner {
-    padding: 0.4rem 0.7rem;
+    padding: 0.9rem 0.7rem 0.55rem;
     gap: 0.4rem;
   }
 

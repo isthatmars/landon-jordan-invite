@@ -1206,18 +1206,20 @@ body {
 
   .hero-invite-lockup {
     position: absolute;
-    left: max(0.5rem, 1.25vw);
+    /* Left sky / palm pocket beside the standing guy; under .hero-people so he overlaps. */
+    left: max(-5.25rem, -6.5vw);
     top: auto;
-    bottom: 18%;
-    z-index: 4;
+    bottom: 40%;
+    z-index: 1;
     order: 0;
     width: max-content;
-    max-width: min(40vw, 22rem);
+    max-width: min(24vw, 15.5rem);
     margin: 0;
     align-items: flex-start;
     text-align: left;
-    transform: rotate(-16deg);
-    transform-origin: left bottom;
+    pointer-events: none;
+    transform: rotate(-9deg);
+    transform-origin: left center;
   }
 
   .hero-invite-glow {
@@ -1236,11 +1238,11 @@ body {
   }
 
   .hero-invite {
-    font-size: clamp(3.9rem, 5.2vw, 5.4rem);
+    font-size: clamp(3.1rem, 3.9vw, 4.15rem);
   }
 
   .hero-swoosh {
-    width: min(100%, 20rem);
+    width: min(100%, 14rem);
     align-self: flex-start;
   }
 
@@ -1341,14 +1343,14 @@ body {
   }
 
   .hero-invite {
-    font-size: 5.5rem;
+    font-size: 4.2rem;
   }
 
   .hero-invite-lockup {
-    left: max(0.85rem, 2vw);
+    left: max(-5.75rem, -7vw);
     top: auto;
-    bottom: 16%;
-    max-width: min(38vw, 24rem);
+    bottom: 42%;
+    max-width: min(22vw, 16rem);
   }
 
   .fact-label {

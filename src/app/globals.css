@@ -720,7 +720,7 @@ body {
 }
 
 .hero-crown {
-  width: clamp(2.7rem, 5vw, 3.8rem);
+  width: clamp(3.25rem, 6vw, 4.55rem);
   height: auto;
   margin-bottom: 0.05rem;
   filter: drop-shadow(0 0 6px #fff4c8) drop-shadow(0 0 14px #ffd45a);
@@ -729,7 +729,7 @@ body {
 .hero-script {
   margin: 0;
   max-width: 100%;
-  font-size: clamp(2rem, 9vw, 2.6rem);
+  font-size: clamp(2.85rem, 12vw, 3.7rem);
   line-height: 1.08;
   overflow: visible;
   padding-bottom: 0.08em;
@@ -737,20 +737,56 @@ body {
   filter: none;
 }
 
+.hero-invite-lockup {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  order: 1;
+  width: max-content;
+  max-width: min(100%, 22rem);
+  margin: 0.35rem auto 0.15rem;
+  transform: rotate(-5deg);
+  transform-origin: center center;
+}
+
+.hero-invite-glow {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: 0;
+  width: 130%;
+  height: 140%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 57, 200, 0.72) 0%,
+    rgba(255, 57, 200, 0.34) 38%,
+    rgba(255, 57, 200, 0.1) 62%,
+    transparent 78%
+  );
+  filter: blur(10px);
+}
+
 .hero-invite {
-  margin: 0.15rem 0 0;
+  position: relative;
+  z-index: 1;
+  margin: 0;
   max-width: 100%;
-  font-size: clamp(2.05rem, 9.2vw, 2.7rem);
+  font-size: clamp(2.5rem, 11vw, 3.35rem);
   line-height: 1.08;
   overflow: visible;
   padding-bottom: 0.08em;
   color: #fff;
   filter: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .chrome-80s-art {
   display: block;
-  width: min(88vw, 20rem);
+  width: min(95vw, 24rem);
   height: auto;
   margin: 0.05rem auto 0.1rem;
   filter:
@@ -761,13 +797,13 @@ body {
 
 .hero-chrome-fallback {
   margin: 0.1rem 0;
-  font-size: clamp(4.5rem, 18vw, 7.5rem);
+  font-size: clamp(5.4rem, 21.6vw, 9rem);
 }
 
 .hero-birthday {
   margin: 0.15rem 0 0;
   font-family: var(--font-nav), sans-serif;
-  font-size: clamp(1.25rem, 4.2vw, 1.65rem);
+  font-size: clamp(1.5rem, 5vw, 2rem);
   font-weight: 600;
   letter-spacing: 0.28em;
   line-height: 1.2;
@@ -778,15 +814,17 @@ body {
 }
 
 .hero-swoosh-lime {
-  width: min(72%, 15rem);
-  height: 0.85rem;
+  width: min(72%, 18rem);
+  height: 1rem;
   margin-top: 0.05rem;
   filter: drop-shadow(0 0 6px #c6ff00);
 }
 
 .hero-swoosh {
-  width: min(92%, 20rem);
-  height: 1.55rem;
+  position: relative;
+  z-index: 1;
+  width: min(92%, 24rem);
+  height: 1.85rem;
   margin-top: -0.1rem;
   filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px #ff39c8) drop-shadow(0 0 18px #ff39c8);
 }
@@ -897,7 +935,7 @@ body {
   }
 
   .hero-stage {
-    position: static;
+    position: relative;
     flex: 1;
     flex-direction: row;
     align-items: center;
@@ -929,24 +967,60 @@ body {
   }
 
   .hero-copy {
-    width: min(50%, 34rem);
+    width: min(54%, 40rem);
     flex: none;
   }
 
   .hero-script {
-    font-size: clamp(3.5rem, 4.4vw, 4.5rem);
+    font-size: clamp(4.85rem, 6vw, 6.2rem);
+  }
+
+  .hero-invite-lockup {
+    position: absolute;
+    left: max(0.5rem, 1.25vw);
+    top: auto;
+    bottom: 18%;
+    z-index: 4;
+    order: 0;
+    width: max-content;
+    max-width: min(40vw, 22rem);
+    margin: 0;
+    align-items: flex-start;
+    text-align: left;
+    transform: rotate(-16deg);
+    transform-origin: left bottom;
+  }
+
+  .hero-invite-glow {
+    left: 42%;
+    top: 48%;
+    width: 145%;
+    height: 160%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(255, 57, 200, 0.78) 0%,
+      rgba(255, 57, 200, 0.4) 36%,
+      rgba(255, 57, 200, 0.12) 60%,
+      transparent 76%
+    );
+    filter: blur(12px);
   }
 
   .hero-invite {
-    font-size: clamp(3.6rem, 4.7vw, 4.75rem);
+    font-size: clamp(3.9rem, 5.2vw, 5.4rem);
+  }
+
+  .hero-swoosh {
+    width: min(100%, 20rem);
+    align-self: flex-start;
   }
 
   .chrome-80s-art {
-    width: min(100%, 32rem);
+    width: min(100%, 38.5rem);
   }
 
   .hero-birthday {
-    font-size: 1.75rem;
+    font-size: 2.1rem;
     letter-spacing: 0.32em;
     text-indent: 0.32em;
   }
@@ -1034,11 +1108,18 @@ body {
   }
 
   .hero-script {
-    font-size: 4.55rem;
+    font-size: 6.25rem;
   }
 
   .hero-invite {
-    font-size: 4.8rem;
+    font-size: 5.5rem;
+  }
+
+  .hero-invite-lockup {
+    left: max(0.85rem, 2vw);
+    top: auto;
+    bottom: 16%;
+    max-width: min(38vw, 24rem);
   }
 
   .fact-label {

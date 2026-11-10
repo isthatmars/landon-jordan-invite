@@ -63,6 +63,10 @@ export function Hero({ content }: { content: SiteContent }) {
             )}
             <p className="hero-birthday">{content.heroSubtitle}</p>
             <GreenSwoosh className="hero-swoosh-lime" stroke="#C6FF00" />
+          </div>
+
+          <div className="hero-invite-lockup">
+            <span className="hero-invite-glow" aria-hidden />
             <Handwrite as="p" className="hero-invite" inkClassName="script-hot" delay={1180} duration={420}>
               {content.heroInvite}
             </Handwrite>

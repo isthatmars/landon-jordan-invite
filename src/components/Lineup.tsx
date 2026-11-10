@@ -5,8 +5,9 @@ import { LineIcon } from "./icons";
 
 export function Lineup({ content }: { content: SiteContent }) {
   return (
-    <section id="lineup" className="bg-[#07010f] px-2 py-6 sm:px-5 sm:py-16">
-      <div className="mx-auto max-w-[1100px]">
+    <section id="lineup" className="lineup-ambient relative overflow-hidden bg-[#07010f] px-2 py-6 sm:px-5 sm:py-16">
+      <div className="lineup-sweep" aria-hidden />
+      <div className="relative z-[1] mx-auto max-w-[1100px]">
         <div className="mb-2 flex items-center justify-center gap-4">
           <span className="h-px w-10 bg-white/50 sm:w-16" />
           <h2 className="font-nav text-center text-sm sm:text-base">
@@ -23,7 +24,7 @@ export function Lineup({ content }: { content: SiteContent }) {
             <div key={block.id} className="flex items-start gap-3">
               <LineIcon
                 name={block.icon}
-                className="mt-1 h-10 w-10 shrink-0 text-[#ff39c8] drop-shadow-[0_0_8px_#ff39c8] sm:h-12 sm:w-12"
+                className="lineup-neon mt-1 h-10 w-10 shrink-0 text-[#ff39c8] sm:h-12 sm:w-12"
               />
               <div>
                 <p className="font-condensed text-sm font-bold tracking-wide text-[#ffc44d]">{block.time}</p>
@@ -36,7 +37,7 @@ export function Lineup({ content }: { content: SiteContent }) {
           ))}
         </div>
 
-        <div className="mt-6 flex flex-row items-center gap-2 rounded-full border-2 border-[#ff4fd8] bg-black/40 px-2 py-2 shadow-[0_0_18px_#ff4fd855] sm:mt-10 sm:gap-4 sm:px-5 sm:py-3">
+        <div className="lineup-pill mt-6 flex flex-row items-center gap-2 rounded-full border-2 border-[#ff4fd8] bg-black/40 px-2 py-2 sm:mt-10 sm:gap-4 sm:px-5 sm:py-3">
           <div className="flex flex-1 items-center justify-start gap-1.5 sm:gap-2">
             <LineIcon name="hanger" className="h-7 w-7 shrink-0 text-[#ff4fd8]" />
             <p className="text-sm font-bold tracking-wide">

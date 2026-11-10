@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { arcadeScreen } from "@/lib/cutouts";
+import { ArcadeBackdrop } from "./ArcadeBackdrop";
 import { GamepadIcon, GreenSwoosh, NeonArrow } from "./icons";
 import { PacManGame } from "./PacManGame";
 
@@ -18,12 +19,7 @@ export function Arcade({ headline }: { headline: string }) {
 
   return (
     <section id="arcade" className="scene-section relative overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/scene-arcade-room.jpg"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover object-[center_72%]"
-      />
+      <ArcadeBackdrop />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-2 py-3 sm:px-4 sm:py-6">
@@ -44,6 +40,12 @@ export function Arcade({ headline }: { headline: string }) {
 
           <div className="relative w-[48%] max-w-[520px]">
             <div className="floor-contact" />
+            <div className="cab-lights" aria-hidden>
+              <span className="cab-glint cab-glint-a" />
+              <span className="cab-glint cab-glint-b" />
+              <span className="cab-glint cab-glint-c" />
+              <span className="cab-glint cab-glint-d" />
+            </div>
             <div
               data-testid="arcade-screen"
               data-screen="arcade"

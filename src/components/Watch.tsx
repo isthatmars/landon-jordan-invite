@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { crtScreen } from "@/lib/cutouts";
 import { GreenSwoosh } from "./icons";
 import { usePlayback } from "./Playback";
@@ -10,6 +10,18 @@ export function Watch({ headline }: { headline: string }) {
   const { videos, now, playing, toggleCurrent, tuneVideo, onEnded, onPlayingChange, registerPlayer } =
     usePlayback();
   const [browsing, setBrowsing] = useState(false);
+  const [staticOn, setStaticOn] = useState(false);
+  const skipStatic = useRef(true);
+
+  useEffect(() => {
+    if (skipStatic.current) {
+      skipStatic.current = false;
+      return;
+    }
+    setStaticOn(true);
+    const timer = window.setTimeout(() => setStaticOn(false), 460);
+    return () => window.clearTimeout(timer);
+  }, [now?.youtubeId]);
   const lines = headline.trim().split(/\s+/);
   const script =
     lines.length >= 3 ? (
@@ -37,10 +49,11 @@ export function Watch({ headline }: { headline: string }) {
       <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-2 py-3 sm:px-4 sm:py-6">
         <div className="flex w-full items-end justify-center gap-2 sm:gap-4">
         <div className="relative w-[58%] max-w-[680px]">
+          <div className="crt-screen-light" aria-hidden />
           <div
             data-testid="tv-screen"
             data-screen="crt"
-            className="absolute z-[1] overflow-hidden bg-black"
+            className="crt-bezel-glow absolute z-[1] overflow-hidden bg-black"
             style={crtScreen}
           >
             {now?.youtubeId ? (
@@ -67,6 +80,8 @@ export function Watch({ headline }: { headline: string }) {
                 </span>
               </button>
             )}
+            <div className="crt-scanlines" aria-hidden />
+            <div className={`crt-static${staticOn ? " is-on" : ""}`} aria-hidden />
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="floor-contact" />

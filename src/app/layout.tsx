@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { Barlow_Condensed, Caveat, Fugaz_One, Inter, Oswald, Yellowtail } from "next/font/google";
 import { SiteEffects } from "@/components/SiteEffects";
 import "./globals.css";
+import "./motion.css";
 
 const script = localFont({
   src: "../fonts/hastron.otf",

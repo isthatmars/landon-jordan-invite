@@ -4,6 +4,7 @@ import { FormEvent, useRef, useState, type ReactNode } from "react";
 import { MAX_COMPANIONS, parseCompletedRsvp } from "@/lib/rsvp";
 import type { AttendStatus, PartyPerson, SiteContent } from "@/lib/types";
 import { Crown } from "./icons";
+import { RsvpTelephone } from "./RsvpTelephone";
 
 type YesNo = "" | "yes" | "no";
 
@@ -151,12 +152,14 @@ export function RsvpForm({ content }: { content: SiteContent }) {
               <p className="font-nav mx-auto mt-3 max-w-[17rem] text-[11px] leading-relaxed text-[#f8f4fa]/85">
                 {content.rsvpSubhead}
               </p>
+              <RsvpTelephone />
             </div>
 
             <form onSubmit={onSubmit} noValidate className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="What's your first name? *">
                   <input
+                    id="rsvp-first"
                     required
                     autoComplete="given-name"
                     className="input-dark"

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { SiteContent } from "@/lib/types";
+import { HeroAtmosphere } from "./HeroAtmosphere";
 import { CalendarIcon, ClockIcon, Crown, GreenSwoosh, PinIcon, PinkSwoosh } from "./icons";
 
 export function Hero({ content }: { content: SiteContent }) {
@@ -15,6 +16,7 @@ export function Hero({ content }: { content: SiteContent }) {
     <section id="home" className="hero-scene">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/hero-bg-miami.jpg" alt="" className="hero-bg" />
+      <HeroAtmosphere />
       <div className="hero-shade" />
       <div className="hero-ambient" aria-hidden />
 
@@ -36,15 +38,17 @@ export function Hero({ content }: { content: SiteContent }) {
             <Crown className="hero-crown" />
             <h1 className="script-hot hero-script">{content.heroScript}</h1>
             {chromeIsArt ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src="/images/chrome-80s.png"
-                alt={content.heroChrome}
-                className="chrome-80s-art"
-                draggable={false}
-              />
+              <span className="chrome-art-shine">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/chrome-80s.png"
+                  alt={content.heroChrome}
+                  className="chrome-80s-art"
+                  draggable={false}
+                />
+              </span>
             ) : (
-              <p className="chrome-80s hero-chrome-fallback" data-text={content.heroChrome}>
+              <p className="chrome-80s chrome-shine hero-chrome-fallback" data-text={content.heroChrome}>
                 {content.heroChrome}
               </p>
             )}

@@ -153,9 +153,11 @@ export async function POST(request: Request) {
   });
 
   if (guestMail.ok) {
+    const sentAt = new Date().toISOString();
+    record.confirmationSentAt = sentAt;
     await updateStore((s) => {
       const r = s.rsvps.find((x) => x.id === id);
-      if (r) r.confirmationSentAt = new Date().toISOString();
+      if (r) r.confirmationSentAt = sentAt;
     });
   }
 

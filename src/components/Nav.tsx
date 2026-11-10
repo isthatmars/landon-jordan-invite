@@ -10,19 +10,39 @@ const links = [
   { href: "#lineup", label: "THE LINEUP" },
 ];
 
+const SECTION_IDS = ["home", "mixtape", "watch", "arcade", "lineup", "rsvp"] as const;
 const SCROLL_BG_THRESHOLD = 16;
 
 export function Nav({ brandName }: { brandName: string }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState("#home");
 
   useEffect(() => {
     const update = () => {
       setScrolled(window.scrollY > SCROLL_BG_THRESHOLD);
+
+      // Section owns the active state once its top crosses the upper third.
+      const marker = Math.min(280, window.innerHeight * 0.36);
+      let current = "#home";
+      for (const id of SECTION_IDS) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top;
+        if (top <= marker) current = `#${id}`;
+      }
+      // Arcade has no nav link — keep Watch active while in arcade.
+      if (current === "#arcade") current = "#watch";
+      setActive(current);
     };
+
     update();
     window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
+    window.addEventListener("hashchange", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("hashchange", update);
+    };
   }, []);
 
   return (
@@ -35,13 +55,21 @@ export function Nav({ brandName }: { brandName: string }) {
 
         <nav className="site-nav font-nav" aria-label="Primary">
           {links.map((l) => (
-            <a key={l.href} href={l.href}>
+            <a
+              key={l.href}
+              href={l.href}
+              className={active === l.href ? "is-active" : undefined}
+              aria-current={active === l.href ? "true" : undefined}
+            >
               {l.label}
             </a>
           ))}
         </nav>
 
-        <a href="#rsvp" className="btn-header-rsvp">
+        <a
+          href="#rsvp"
+          className={`btn-header-rsvp${active === "#rsvp" ? " is-active" : ""}`}
+        >
           RSVP
         </a>
         <button
@@ -56,7 +84,12 @@ export function Nav({ brandName }: { brandName: string }) {
       {open && (
         <nav className="site-nav-mobile font-nav" aria-label="Mobile">
           {links.map((l) => (
-            <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
+            <a
+              key={l.href}
+              href={l.href}
+              className={active === l.href ? "is-active" : undefined}
+              onClick={() => setOpen(false)}
+            >
               {l.label}
             </a>
           ))}

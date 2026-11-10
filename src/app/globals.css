@@ -973,8 +973,8 @@ body {
     width: min(40vw, 32rem, max(14rem, calc((70svh - 7.5rem) * 0.83)));
     max-height: 100%;
     flex: none;
-    /* Nudge soles/wheels onto the floor band (scales with the cutout). */
-    transform: translateY(2.6%);
+    /* Cutout soles/wheels sit above the box edge; scale the seat with height. */
+    transform: translateY(6.4%);
     transform-origin: bottom center;
   }
 
@@ -989,10 +989,10 @@ body {
   .floor-contact {
     left: 1%;
     right: 2%;
-    bottom: 0.35rem;
-    height: 1.35rem;
-    background: rgba(0, 0, 0, 0.9);
-    filter: blur(7px);
+    bottom: 0.1rem;
+    height: 1.55rem;
+    background: rgba(0, 0, 0, 0.94);
+    filter: blur(8px);
   }
 
   .hero-copy {
@@ -1060,8 +1060,7 @@ body {
     justify-content: stretch;
     gap: 0;
     width: 100%;
-    /* Raise the landscape strip: half of the old empty floor gap. */
-    margin-top: 0.15rem;
+    margin-top: 0;
     padding: 0.95rem 1.2rem;
   }
 

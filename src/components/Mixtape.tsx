@@ -4,21 +4,28 @@ import { Cassette } from "./Cassette";
 import { NeonArrow } from "./icons";
 import { usePlayback } from "./Playback";
 
-const STACK: { id: string; label: string; color: string }[] = [
-  { id: "t1", label: "Michael Jackson – Beat It", color: "#f43f5e" },
-  { id: "t2", label: "My Cadillac Got That Bass", color: "#86efac" },
-  { id: "t3", label: "RUN-D.M.C. – Sucker M.C's", color: "#60a5fa" },
-  { id: "t5", label: "Salt-N-Pepa – Push It", color: "#f9a8d4" },
-  { id: "t6", label: "Miami Sound Machine – Conga", color: "#fde047" },
-  { id: "t7", label: "Prince – Purple Rain", color: "#d8b4fe" },
+const STACK: {
+  id: string;
+  label: string;
+  top: string;
+  height: string;
+  labelTop: string;
+  labelHeight: string;
+}[] = [
+  { id: "t1", label: "Michael Jackson – Beat It", top: "0%", height: "20.2%", labelTop: "34%", labelHeight: "50%" },
+  { id: "t2", label: "My Cadillac Got That Bass", top: "20.2%", height: "15.2%", labelTop: "18%", labelHeight: "62%" },
+  { id: "t3", label: "RUN-D.M.C. – Sucker M.C's", top: "35.4%", height: "15.7%", labelTop: "16%", labelHeight: "64%" },
+  { id: "t5", label: "Salt-N-Pepa – Push It", top: "51.1%", height: "15.2%", labelTop: "16%", labelHeight: "62%" },
+  { id: "t6", label: "Miami Sound Machine – Conga", top: "66.3%", height: "15.7%", labelTop: "18%", labelHeight: "58%" },
+  { id: "t7", label: "Prince – Purple Rain", top: "82.0%", height: "18%", labelTop: "8%", labelHeight: "50%" },
 ];
 
 export function Mixtape({ headline }: { headline: string }) {
-  const { tracks, now, selectTape } = usePlayback();
+  const { tracks, now, selectTape, insertingId } = usePlayback();
   const byId = new Map(tracks.map((track) => [track.id, track]));
   const stack = STACK.flatMap((row) => {
     const track = byId.get(row.id);
-    return track ? [{ ...track, color: row.color, stackLabel: row.label }] : [];
+    return track ? [{ ...row, track }] : [];
   });
   const loadedId = now?.trackId ?? "";
   const [lead, ...rest] = headline.split(/ and /i);
@@ -33,54 +40,89 @@ export function Mixtape({ headline }: { headline: string }) {
   );
 
   return (
-    <section id="mixtape" data-track-id={loadedId} className="scene-section relative overflow-hidden">
+    <section id="mixtape" data-track-id={loadedId} className="mix-scene scene-section">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/scene-mixtape-table.jpg"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover object-[center_88%]"
-      />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
+      <img src="/images/scene-mixtape-plate.jpg" alt="" className="mix-plate" />
+      <div className="mix-neon-throw" aria-hidden />
+      <div className="mix-table-pool" aria-hidden />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-2 pb-2 pt-16 sm:px-4 sm:pb-3 sm:pt-20">
-        <div className="relative flex w-full items-end justify-center gap-1 sm:gap-3">
-          <div className="absolute bottom-[94%] left-[22%] z-20 mb-1 flex items-end gap-1 sm:left-[34%]">
-            <h2 className="neon-script-lg text-left text-[1.85rem] leading-[0.86] sm:text-[3.15rem]">
-              {script}
-            </h2>
-            <NeonArrow className="mb-1 ml-1 h-8 w-11 shrink-0 sm:h-11 sm:w-16" />
-          </div>
+      <div className="mix-stage">
+        <div className="mix-script">
+          <h2 className="neon-script-lg">{script}</h2>
+          <NeonArrow className="mix-arrow" />
+        </div>
 
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/prop-headphones-80s.png"
-            alt=""
-            className="mb-1 hidden w-[11%] max-w-[130px] drop-shadow-[0_10px_8px_rgba(0,0,0,0.65)] min-[720px]:block"
-            draggable={false}
-          />
-
-          <div className="relative w-[64%] max-w-[760px]" data-testid="boombox">
-            <div className="floor-contact" />
+        <div className="mix-row">
+          <div className="mix-boom" data-testid="boombox">
+            <div className="mix-shadow" aria-hidden />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/prop-boombox-front.png"
+              src="/images/prop-boombox-scene.png"
               alt="Chrome boombox with a cassette in the deck"
-              className="relative block h-auto w-full"
+              className="mix-photo"
               draggable={false}
             />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/prop-boombox-reflection.png"
+              alt=""
+              className="mix-mirror"
+              draggable={false}
+            />
+            <div
+              className="mix-grade"
+              aria-hidden
+              style={{ maskImage: "url(/images/prop-boombox-scene.png)", WebkitMaskImage: "url(/images/prop-boombox-scene.png)" }}
+            />
+            <div className="mix-phones">
+              <div className="mix-shadow mix-shadow-phones" aria-hidden />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/prop-headphones-80s.png"
+                alt=""
+                className="mix-photo mix-reflect-short"
+                draggable={false}
+              />
+              <div
+                className="mix-grade mix-grade-phones"
+                aria-hidden
+                style={{
+                  maskImage: "url(/images/prop-headphones-80s.png)",
+                  WebkitMaskImage: "url(/images/prop-headphones-80s.png)",
+                }}
+              />
+            </div>
           </div>
 
-          <div className="relative w-[34%] max-w-[320px] shrink-0">
-            <div className="floor-contact" />
-            {stack.map((track, index) => (
+          <div className="mix-stack">
+            <div className="mix-shadow mix-shadow-stack" aria-hidden />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/cassette-stack-cut.png"
+              alt=""
+              className="mix-photo mix-reflect"
+              draggable={false}
+            />
+            <div
+              className="mix-grade mix-grade-stack"
+              aria-hidden
+              style={{
+                maskImage: "url(/images/cassette-stack-cut.png)",
+                WebkitMaskImage: "url(/images/cassette-stack-cut.png)",
+              }}
+            />
+            {stack.map((row) => (
               <Cassette
-                key={track.id}
-                track={track}
-                index={index}
-                label={track.stackLabel}
-                selected={track.id === loadedId}
-                inserting={false}
-                onSelect={() => selectTape(track.id)}
+                key={row.id}
+                track={row.track}
+                label={row.label}
+                top={row.top}
+                height={row.height}
+                labelTop={row.labelTop}
+                labelHeight={row.labelHeight}
+                selected={row.id === loadedId}
+                inserting={insertingId === row.id}
+                onSelect={() => selectTape(row.id)}
               />
             ))}
           </div>

@@ -2,21 +2,27 @@
 
 import type { Track } from "@/lib/types";
 
-/** Straight pile. Each case sits low enough that the sticker above it stays visible. */
+/** Click target over one photographed case in the shared stack. */
 export function Cassette({
   track,
-  index,
   label,
   selected,
   inserting,
   onSelect,
+  top,
+  height,
+  labelTop,
+  labelHeight,
 }: {
   track: Track;
-  index: number;
-  label?: string;
+  label: string;
   selected: boolean;
   inserting: boolean;
   onSelect: () => void;
+  top: string;
+  height: string;
+  labelTop: string;
+  labelHeight: string;
 }) {
   return (
     <button
@@ -27,32 +33,11 @@ export function Cassette({
       data-track-id={track.id}
       data-youtube-id={track.youtubeId}
       data-selected={selected ? "true" : "false"}
-      className={`relative block w-full border-0 bg-transparent p-0 outline-none transition-transform duration-500 focus-visible:ring-2 focus-visible:ring-pink-400/70 ${
-        index === 0 ? "" : "-mt-[38%]"
-      } ${inserting ? "-translate-x-24 -rotate-12 scale-90 opacity-30" : ""} ${
-        selected ? "z-30" : ""
-      }`}
-      style={{ zIndex: inserting ? 40 : index + 1 }}
+      className={`mix-tape${selected ? " is-on" : ""}${inserting ? " is-insert" : ""}`}
+      style={{ top, height }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/cassette-face.png"
-        alt=""
-        draggable={false}
-        className="pointer-events-none block h-auto w-full select-none"
-        style={{
-          filter: selected
-            ? "drop-shadow(0 0 12px rgba(255,43,214,0.95))"
-            : "drop-shadow(0 8px 10px rgba(0,0,0,0.55))",
-        }}
-      />
-      <span
-        className="pointer-events-none absolute left-[11%] right-[11%] top-[21%] flex h-[18%] items-center overflow-hidden px-0.5"
-        style={{ background: track.color }}
-      >
-        <span className="block w-full truncate text-center font-[family-name:var(--font-label)] text-[12px] font-medium leading-none text-[#1a1020] sm:text-[15px]">
-          {label ?? `${track.artist} – ${track.title}`}
-        </span>
+      <span className="mix-tape-ink" style={{ top: labelTop, height: labelHeight }}>
+        {label}
       </span>
     </button>
   );

@@ -38,14 +38,20 @@ function settleLoadScroll() {
   if (hash) {
     // Wait until the envelope is gone so hash scroll isn't hidden underneath.
     if (introBusy) {
+      const prev = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = "auto";
       window.scrollTo(0, 0);
+      document.documentElement.style.scrollBehavior = prev;
       return;
     }
     const el = document.getElementById(hash);
     if (el) el.scrollIntoView();
     return;
   }
+  const prev = document.documentElement.style.scrollBehavior;
+  document.documentElement.style.scrollBehavior = "auto";
   window.scrollTo(0, 0);
+  document.documentElement.style.scrollBehavior = prev;
   const active = document.activeElement;
   if (active instanceof HTMLElement && active.closest("#rsvp")) active.blur();
 }
@@ -85,7 +91,10 @@ export function Cinematic() {
     }
     root.dataset.motion = "armed";
     // Intro still up — stay pinned to the top under the envelope.
+    const prev = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
     window.scrollTo(0, 0);
+    root.style.scrollBehavior = prev;
   }, []);
 
   useEffect(() => {
@@ -95,7 +104,12 @@ export function Cinematic() {
     let guard = true;
     const reassert = () => {
       if (!guard || intentionalHash()) return;
-      if (window.scrollY > 0) window.scrollTo(0, 0);
+      if (window.scrollY > 0) {
+        const prev = root.style.scrollBehavior;
+        root.style.scrollBehavior = "auto";
+        window.scrollTo(0, 0);
+        root.style.scrollBehavior = prev;
+      }
     };
     const timers = [40, 200].map((ms) => window.setTimeout(reassert, ms));
     const release = window.setTimeout(() => {

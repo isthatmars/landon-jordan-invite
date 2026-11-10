@@ -22,7 +22,11 @@ export const INTRO_BOOT = `(function(){
     }
 
     function pinTop() {
-      if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+      if (!(window.scrollX || window.scrollY)) return;
+      var prev = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      window.scrollTo(0, 0);
+      root.style.scrollBehavior = prev;
       var active = document.activeElement;
       if (active && active.closest && active.closest("#rsvp") && typeof active.blur === "function") {
         active.blur();

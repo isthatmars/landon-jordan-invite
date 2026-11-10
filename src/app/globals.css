@@ -451,16 +451,15 @@ body {
 
 .script-hot {
   font-family: var(--font-hastron), var(--font-script-fallback), cursive;
-  line-height: 0.88;
-  background-image: linear-gradient(180deg, #fff 0%, #ffe8f8 16%, #ff39c8 48%, #ff39c8 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter:
-    drop-shadow(0 0 1px #fff)
-    drop-shadow(0 0 6px rgba(255, 255, 255, 0.9))
-    drop-shadow(0 0 12px #ff39c8)
-    drop-shadow(0 0 24px rgba(255, 57, 200, 0.95));
+  line-height: 1.05;
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  background: none;
+  filter: none;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.92),
+    0 0 1px #fff,
+    0 0 8px rgba(255, 255, 255, 0.8);
 }
 
 .site-header {
@@ -508,12 +507,7 @@ body {
   line-height: 1.2;
   padding-bottom: 0.08em;
   white-space: nowrap;
-  filter:
-    drop-shadow(0 0 1px #fff)
-    drop-shadow(0 0 7px rgba(255, 255, 255, 0.95))
-    drop-shadow(0 0 14px #ff39c8)
-    drop-shadow(0 0 28px rgba(255, 57, 200, 0.95))
-    drop-shadow(0 0 42px rgba(255, 57, 200, 0.55));
+  filter: none;
 }
 
 .site-nav {
@@ -711,12 +705,8 @@ body {
   line-height: 1.08;
   overflow: visible;
   padding-bottom: 0.08em;
-  filter:
-    drop-shadow(0 2px 2px rgba(0, 0, 0, 0.9))
-    drop-shadow(0 0 6px rgba(0, 0, 0, 0.8))
-    drop-shadow(0 0 2px #fff)
-    drop-shadow(0 0 12px #ff39c8)
-    drop-shadow(0 0 28px rgba(255, 57, 200, 0.85));
+  color: #fff;
+  filter: none;
 }
 
 .hero-invite {
@@ -726,12 +716,8 @@ body {
   line-height: 1.08;
   overflow: visible;
   padding-bottom: 0.08em;
-  filter:
-    drop-shadow(0 2px 2px rgba(0, 0, 0, 0.9))
-    drop-shadow(0 0 6px rgba(0, 0, 0, 0.75))
-    drop-shadow(0 0 2px #fff)
-    drop-shadow(0 0 12px #ff39c8)
-    drop-shadow(0 0 26px rgba(255, 57, 200, 0.8));
+  color: #fff;
+  filter: none;
 }
 
 .chrome-80s-art {
@@ -753,14 +739,14 @@ body {
 .hero-birthday {
   margin: 0.15rem 0 0;
   font-family: var(--font-nav), sans-serif;
-  font-size: clamp(1rem, 3.4vw, 1.15rem);
-  font-weight: 500;
-  letter-spacing: 0.32em;
-  line-height: 1.1;
-  text-indent: 0.32em;
+  font-size: clamp(1.25rem, 4.2vw, 1.65rem);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  line-height: 1.2;
+  text-indent: 0.28em;
   text-transform: uppercase;
-  color: #c6ff00;
-  text-shadow: 0 0 8px rgba(198, 255, 0, 0.9), 0 0 18px rgba(198, 255, 0, 0.45);
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(255, 255, 255, 0.45);
 }
 
 .hero-swoosh-lime {
@@ -897,9 +883,9 @@ body {
   }
 
   .hero-birthday {
-    font-size: 1.28rem;
-    letter-spacing: 0.4em;
-    text-indent: 0.4em;
+    font-size: 1.75rem;
+    letter-spacing: 0.32em;
+    text-indent: 0.32em;
   }
 
   .hero-facts {

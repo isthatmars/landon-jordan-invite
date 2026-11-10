@@ -152,7 +152,7 @@ export function AdminApp() {
           <p className="text-neon-gold text-xl">♛</p>
           <h1 className="neon-script-lg text-4xl">Neon Control Room</h1>
           <p className="text-sm text-violet-300">
-            Email-first guest comms · SMS optional/pluggable · same 80s vibe
+            Resend email live when keys set · SMS deferred (stubs kept) · same 80s vibe
           </p>
         </div>
         <div className="flex gap-2">

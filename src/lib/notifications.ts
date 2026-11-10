@@ -1,10 +1,11 @@
 /**
- * Notification stubs — email-first.
+ * Notifications — email-first (ship Resend now; defer live SMS).
  *
- * Guest + owner confirmations: Resend (primary).
- * Owner-only SMS alerts: optional Twilio trial (no A2P required for trial→verified numbers).
- * Guest mass SMS: pluggable provider; default OFF. Prefer WhatsApp, phone export,
- * or light tools (LoopMessage / TextMagic-style) over Twilio A2P 10DLC for a personal party.
+ * Resend: guest confirmation + owner alert + admin composers/reminders.
+ *   - No RESEND_API_KEY → stub/log (local demo OK)
+ *   - Key present → live POST https://api.resend.com/emails
+ *
+ * SMS: composer + WEBHOOK_FORWARD → SimpleTexting stubs kept; live SMS deferred.
  */
 
 export type SmsProviderId =
@@ -13,7 +14,8 @@ export type SmsProviderId =
   | "whatsapp_stub"
   | "export_csv"
   | "loopmessage_stub"
-  | "textmagic_stub";
+  | "textmagic_stub"
+  | "simpletexting_webhook";
 
 export interface NotifyResult {
   ok: boolean;
@@ -21,6 +23,7 @@ export interface NotifyResult {
   provider: string;
   stubbed: boolean;
   detail: string;
+  id?: string;
 }
 
 export function getSmsProvider(): SmsProviderId {
@@ -32,141 +35,145 @@ export function getSmsProvider(): SmsProviderId {
     "export_csv",
     "loopmessage_stub",
     "textmagic_stub",
+    "simpletexting_webhook",
   ];
   return (allowed.includes(raw as SmsProviderId) ? raw : "none") as SmsProviderId;
 }
 
-/** Guest confirmation email via Resend (stub when key missing). */
-export async function sendGuestEmail(opts: {
+async function sendViaResend(opts: {
   to: string;
   subject: string;
   html: string;
 }): Promise<NotifyResult> {
   const key = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM_EMAIL || "party@example.com";
+  const from = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+
   if (!key) {
-    console.info("[notifications:email:stub]", { to: opts.to, subject: opts.subject, from });
+    console.info("[notifications:email:stub]", {
+      to: opts.to,
+      subject: opts.subject,
+      from,
+    });
     return {
       ok: true,
       channel: "email",
       provider: "resend",
       stubbed: true,
-      detail: "RESEND_API_KEY unset — logged only. Wire Resend later.",
+      detail:
+        "RESEND_API_KEY unset — logged only. Set RESEND_API_KEY + RESEND_FROM_EMAIL + OWNER_EMAIL to go live.",
     };
   }
-  // Real Resend call left as TODO — do not block demo on live keys.
-  console.info("[notifications:email:todo-live]", { to: opts.to, subject: opts.subject, from });
-  return {
-    ok: true,
-    channel: "email",
-    provider: "resend",
-    stubbed: true,
-    detail: "RESEND_API_KEY present but live send deferred — stubbed for safety in this build.",
-  };
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [opts.to],
+        subject: opts.subject,
+        html: opts.html,
+      }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      id?: string;
+      message?: string;
+      name?: string;
+    };
+    if (!res.ok) {
+      console.warn("[notifications:email:resend-error]", res.status, data);
+      return {
+        ok: false,
+        channel: "email",
+        provider: "resend",
+        stubbed: false,
+        detail: `Resend ${res.status}: ${data.message || data.name || "send failed"}`,
+      };
+    }
+    return {
+      ok: true,
+      channel: "email",
+      provider: "resend",
+      stubbed: false,
+      id: data.id,
+      detail: `Sent via Resend (${data.id || "ok"})`,
+    };
+  } catch (err) {
+    console.warn("[notifications:email:resend-exception]", err);
+    return {
+      ok: false,
+      channel: "email",
+      provider: "resend",
+      stubbed: false,
+      detail: "Resend request failed (network). RSVP still saved.",
+    };
+  }
 }
 
-/** Owner alert email (always preferred over SMS). */
+/** Guest confirmation / blast email — live when RESEND_API_KEY is set. */
+export async function sendGuestEmail(opts: {
+  to: string;
+  subject: string;
+  html: string;
+}): Promise<NotifyResult> {
+  return sendViaResend(opts);
+}
+
+/** Owner alert email (primary owner channel — ship with Resend). */
 export async function sendOwnerEmail(opts: {
   subject: string;
   html: string;
 }): Promise<NotifyResult> {
-  const owner = process.env.OWNER_EMAIL || "owner@example.com";
-  return sendGuestEmail({ to: owner, subject: opts.subject, html: opts.html });
+  const owner = process.env.OWNER_EMAIL;
+  if (!owner) {
+    console.info("[notifications:email:owner:stub]", opts.subject);
+    return {
+      ok: true,
+      channel: "email",
+      provider: "resend",
+      stubbed: true,
+      detail: "OWNER_EMAIL unset — owner alert skipped (set OWNER_EMAIL to receive RSVP pings).",
+    };
+  }
+  return sendViaResend({ to: owner, subject: opts.subject, html: opts.html });
 }
 
 /**
- * Optional owner-only SMS (Twilio trial → verified numbers is enough).
- * Never used for mass guest blasts in the default config.
+ * Owner-only SMS — deferred. Kept for future; default SMS_PROVIDER=none.
  */
 export async function sendOwnerSms(body: string): Promise<NotifyResult> {
   const provider = getSmsProvider();
-  if (provider === "none" || provider === "export_csv") {
+  if (provider === "none" || provider === "export_csv" || provider === "simpletexting_webhook") {
     return {
       ok: true,
       channel: "sms",
       provider,
       stubbed: true,
-      detail: "SMS provider is none/export — owner SMS skipped (email-first).",
+      detail: "Live SMS deferred — email (Resend) is the ship path. SMS composer/webhook stubs remain.",
     };
   }
-  if (provider !== "twilio_owner_only") {
-    console.info(`[notifications:sms:${provider}:owner-stub]`, body.slice(0, 120));
-    return {
-      ok: true,
-      channel: "sms",
-      provider,
-      stubbed: true,
-      detail: `${provider} owner ping stubbed. Swap implementation later.`,
-    };
-  }
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_FROM_NUMBER;
-  const to = process.env.OWNER_PHONE;
-  if (!sid || !token || !from || !to) {
-    console.info("[notifications:sms:twilio-owner:stub]", body.slice(0, 120));
-    return {
-      ok: true,
-      channel: "sms",
-      provider: "twilio_owner_only",
-      stubbed: true,
-      detail: "Twilio/owner env incomplete — owner SMS stubbed. Trial + verified numbers is enough; skip A2P.",
-    };
-  }
-  console.info("[notifications:sms:twilio-owner:todo-live]", { to, body: body.slice(0, 80) });
+  console.info(`[notifications:sms:${provider}:owner-stub]`, body.slice(0, 120));
   return {
     ok: true,
     channel: "sms",
-    provider: "twilio_owner_only",
+    provider,
     stubbed: true,
-    detail: "Twilio credentials present; live owner SMS deferred — stubbed for safety.",
+    detail: `${provider} owner SMS stubbed (live SMS deferred).`,
   };
 }
 
 /**
- * Guest SMS / mass text — pluggable, default off.
- * Prefer: WhatsApp, export for phone Messages, LoopMessage/TextMagic-style tools.
- * Do NOT require Twilio A2P 10DLC for a personal party.
+ * Guest SMS / mass text — deferred. Prefer SimpleTexting via WEBHOOK_FORWARD later.
  */
 export async function sendGuestSmsBlast(opts: {
   bodies: { to: string; body: string }[];
   provider?: SmsProviderId;
 }): Promise<NotifyResult> {
   const provider = opts.provider || getSmsProvider();
-  if (provider === "none") {
-    return {
-      ok: true,
-      channel: "sms",
-      provider: "none",
-      stubbed: true,
-      detail:
-        "Guest SMS disabled (email-first). Enable WhatsApp, export_csv, or a light provider — avoid A2P 10DLC.",
-    };
-  }
-  if (provider === "export_csv") {
-    console.info("[notifications:sms:export]", {
-      count: opts.bodies.length,
-      sample: opts.bodies.slice(0, 2),
-    });
-    return {
-      ok: true,
-      channel: "sms",
-      provider: "export_csv",
-      stubbed: true,
-      detail: `Prepared ${opts.bodies.length} rows for phone Messages / personal send export (stub log).`,
-    };
-  }
-  if (provider === "twilio_owner_only") {
-    return {
-      ok: false,
-      channel: "sms",
-      provider,
-      stubbed: true,
-      detail:
-        "twilio_owner_only cannot mass-text guests (A2P avoided on purpose). Use email, WhatsApp, or export_csv.",
-    };
-  }
-  console.info(`[notifications:sms:${provider}:guest-stub]`, {
+  console.info(`[notifications:sms:${provider}:guest-deferred]`, {
     count: opts.bodies.length,
   });
   return {
@@ -174,15 +181,14 @@ export async function sendGuestSmsBlast(opts: {
     channel: "sms",
     provider,
     stubbed: true,
-    detail: `${provider} guest blast stubbed (${opts.bodies.length}). Wire real provider later — no A2P required for party use.`,
+    detail:
+      "Live guest SMS deferred. Keep composer UI; later WEBHOOK_FORWARD_URL → Zapier/Make → SimpleTexting.",
   };
 }
 
 /**
- * Hybrid SMS plug point (recommended): after our API persists an RSVP, optionally
- * POST to WEBHOOK_FORWARD_URL (Zapier/Make Catch Hook) → SimpleTexting or TextMagic.
- * Our /admin stays the only guest-list UI — do not use Fillout as the RSVP dashboard.
- * Resend remains primary email. No live third party required until URL is set.
+ * Optional SMS/automation forward (deferred live use).
+ * Recommended later: Zapier/Make → SimpleTexting. Our /admin stays the only guest list.
  */
 export async function forwardRsvpWebhook(opts: {
   event: "rsvp.completed" | "rsvp.draft";
@@ -193,16 +199,16 @@ export async function forwardRsvpWebhook(opts: {
   if (!url) {
     return {
       ok: true,
-      channel: "email",
+      channel: "sms",
       provider: "webhook_forward",
       stubbed: true,
-      detail: "WEBHOOK_FORWARD_URL unset — hybrid forward skipped.",
+      detail: "WEBHOOK_FORWARD_URL unset — SimpleTexting forward skipped (SMS deferred).",
     };
   }
   if (opts.event === "rsvp.draft" && process.env.WEBHOOK_FORWARD_ON_DRAFT !== "true") {
     return {
       ok: true,
-      channel: "email",
+      channel: "sms",
       provider: "webhook_forward",
       stubbed: true,
       detail: "Draft forward disabled (WEBHOOK_FORWARD_ON_DRAFT!=true).",
@@ -226,16 +232,16 @@ export async function forwardRsvpWebhook(opts: {
     });
     return {
       ok: res.ok,
-      channel: "email",
+      channel: "sms",
       provider: "webhook_forward",
       stubbed: false,
-      detail: `Forwarded ${opts.event} → ${url} (${res.status})`,
+      detail: `Forwarded ${opts.event} → webhook (${res.status})`,
     };
   } catch (err) {
     console.warn("[notifications:webhook_forward:error]", err);
     return {
       ok: false,
-      channel: "email",
+      channel: "sms",
       provider: "webhook_forward",
       stubbed: false,
       detail: "Webhook forward failed (RSVP still saved locally).",

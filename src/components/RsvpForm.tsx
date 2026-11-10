@@ -62,7 +62,12 @@ export function RsvpForm({ content }: { content: SiteContent }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
       setStatus("done");
-      setMessage("You're on the list! Confirmation email stubbed (Resend-ready).");
+      const stubbed = data?.notifications?.guestMail?.stubbed;
+      setMessage(
+        stubbed
+          ? "You're on the list! Email stubbed until RESEND_API_KEY is set."
+          : "You're on the list! Confirmation email sent (or queued via Resend).",
+      );
     } catch (err) {
       setStatus("error");
       setMessage(err instanceof Error ? err.message : "Something went wrong");

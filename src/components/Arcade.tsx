@@ -100,7 +100,7 @@ export function Arcade({ headline }: { headline: string }) {
             className="relative z-[1] h-auto w-full drop-shadow-[0_40px_70px_#000c]"
           />
           {/* Game screen inset — sits on the cabinet glass */}
-          <div className="absolute left-[18%] right-[18%] top-[14%] bottom-[38%] z-[2] overflow-hidden rounded-sm bg-black/90 shadow-[inset_0_0_20px_#000]">
+          <div className="absolute left-[30%] right-[24%] top-[20%] bottom-[55%] z-[2] overflow-hidden rounded-sm bg-black/90 shadow-[inset_0_0_20px_#000]">
             {!running ? (
               <button
                 type="button"

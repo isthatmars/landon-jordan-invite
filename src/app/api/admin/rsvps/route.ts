@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 import { requireAdminFromRequest } from "@/lib/auth";
 import { uid } from "@/lib/id";
 import {
+  escapeHtml,
   neonEmailTemplate,
   sendGuestEmail,
 } from "@/lib/notifications";
+import {
+  headcountFor,
+  isAttendStatus,
+  parseDraftRsvp,
+  partyHeadcount,
+} from "@/lib/rsvp";
 import { getStore, updateStore } from "@/lib/store";
-import type { RsvpStatus } from "@/lib/types";
+import type { PartyPerson, RsvpStatus } from "@/lib/types";
 
 
 export async function GET(request: Request) {
@@ -22,7 +29,7 @@ export async function GET(request: Request) {
   } else if (filter === "attending") {
     rsvps = rsvps.filter((r) => r.status === "confirmed" || r.attend === "yes");
   }
-  return NextResponse.json({ rsvps });
+  return NextResponse.json({ rsvps, headcount: partyHeadcount(store.rsvps) });
 }
 
 export async function PATCH(request: Request) {
@@ -44,7 +51,7 @@ export async function PATCH(request: Request) {
       subject: `Reminder — ${content.brandName} 80s Party`,
       html: neonEmailTemplate({
         headline: "You're still invited!",
-        bodyHtml: `<p>Hey ${rsvp.fullName},</p><p>Just a friendly nudge for <strong>${content.eventDate}</strong> at <strong>${content.eventVenue}</strong> (${content.eventTime}).</p><p>${content.eventAddress}</p>`,
+        bodyHtml: `<p>Hey ${escapeHtml(rsvp.fullName)},</p><p>Just a friendly nudge for <strong>${escapeHtml(content.eventDate)}</strong> at <strong>${escapeHtml(content.eventVenue)}</strong> (${escapeHtml(content.eventTime)}).</p><p>${escapeHtml(content.eventAddress)}</p>`,
         ctaLabel: "Open Invite",
         ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
       }),
@@ -69,14 +76,45 @@ export async function PATCH(request: Request) {
         r.formCompletedAt = r.formCompletedAt || new Date().toISOString();
       }
     }
-    if (typeof body.fullName === "string") r.fullName = body.fullName;
-    if (typeof body.email === "string") r.email = body.email;
-    if (typeof body.phone === "string") r.phone = body.phone;
-    if (typeof body.guestCount === "number") r.guestCount = body.guestCount;
+    if (typeof body.firstName === "string") r.firstName = body.firstName.trim();
+    if (typeof body.lastName === "string") r.lastName = body.lastName.trim();
+    if (typeof body.fullName === "string") r.fullName = body.fullName.trim();
+    if (typeof body.firstName === "string" || typeof body.lastName === "string") {
+      const joined = `${r.firstName} ${r.lastName}`.trim();
+      if (joined) r.fullName = joined;
+    }
+    if (typeof body.email === "string") r.email = body.email.trim();
+    if (typeof body.phone === "string") r.phone = body.phone.trim();
+    if (isAttendStatus(body.attend)) r.attend = body.attend;
+    if (Array.isArray(body.companions)) {
+      const parsed = parseDraftRsvp({ companions: body.companions, attend: r.attend });
+      if (parsed.ok) r.companions = parsed.value.companions;
+    }
+    if (body.dietary === "yes" || body.dietary === "no" || body.dietary === "") {
+      r.dietary = body.dietary;
+    }
+    if (typeof body.dietaryNotes === "string") r.dietaryNotes = body.dietaryNotes.trim();
+    if (body.anythingElse === "yes" || body.anythingElse === "no" || body.anythingElse === "") {
+      r.anythingElse = body.anythingElse;
+    }
+    if (typeof body.specialRequests === "string") r.specialRequests = body.specialRequests.trim();
+    if (!Array.isArray(r.companions)) r.companions = [];
+    const named = r.companions.filter(
+      (person: PartyPerson) => person.firstName?.trim() && person.lastName?.trim(),
+    );
+    r.guestCount = headcountFor(r.attend, named);
+    if (typeof body.guestCount === "number" && r.attend !== "no" && r.status !== "declined") {
+      r.guestCount = Math.max(0, body.guestCount);
+    }
+    if (r.attend === "no" || r.status === "declined") {
+      r.attend = "no";
+      r.guestCount = 0;
+    }
     r.updatedAt = new Date().toISOString();
   });
 
-  return NextResponse.json({ ok: true, rsvps: (await getStore()).rsvps });
+  const next = await getStore();
+  return NextResponse.json({ ok: true, rsvps: next.rsvps, headcount: partyHeadcount(next.rsvps) });
 }
 
 export async function POST(request: Request) {
@@ -84,23 +122,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await request.json().catch(() => ({}));
+  const draft = parseDraftRsvp(body);
+  if (!draft.ok) return NextResponse.json({ error: draft.error }, { status: 400 });
   const now = new Date().toISOString();
   const id = uid("rsvp");
+  const parsed = draft.value;
+  const fallbackName = String(body.fullName || "New Guest").trim();
+  const [fallbackFirst, ...fallbackRest] = fallbackName.split(/\s+/);
+  const attend = isAttendStatus(body.attend) ? body.attend : parsed?.attend || "yes";
+  const companions = parsed?.companions.filter((person) => person.firstName && person.lastName) || [];
   await updateStore((s) => {
     s.rsvps.unshift({
       id,
-      firstName: body.firstName || "New",
-      lastName: body.lastName || "Guest",
-      fullName: body.fullName || "New Guest",
-      attend: body.attend || "yes",
-      guestCount: Number(body.guestCount) || 1,
-      companions: [],
-      phone: body.phone || "",
-      email: body.email || "",
-      dietary: "",
-      dietaryNotes: "",
-      anythingElse: "",
-      specialRequests: "",
+      firstName: parsed?.firstName || fallbackFirst || "New",
+      lastName: parsed?.lastName || fallbackRest.join(" ") || "Guest",
+      fullName: parsed?.fullName || fallbackName,
+      attend,
+      guestCount: headcountFor(attend, companions),
+      companions,
+      phone: parsed?.phone || "",
+      email: parsed?.email || "",
+      dietary: parsed?.dietary || "",
+      dietaryNotes: parsed?.dietaryNotes || "",
+      anythingElse: parsed?.anythingElse || "",
+      specialRequests: parsed?.specialRequests || "",
       status: body.status || "pending",
       createdAt: now,
       updatedAt: now,
@@ -109,5 +154,6 @@ export async function POST(request: Request) {
       abandoned: false,
     });
   });
-  return NextResponse.json({ ok: true, id, rsvps: (await getStore()).rsvps });
+  const store = await getStore();
+  return NextResponse.json({ ok: true, id, rsvps: store.rsvps, headcount: partyHeadcount(store.rsvps) });
 }

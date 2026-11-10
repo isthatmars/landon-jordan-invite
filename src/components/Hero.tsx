@@ -32,83 +32,83 @@ export function Hero({ content }: { content: SiteContent }) {
         />
       </motion.div>
       {/* Readability gradients — do NOT fade the couple layer */}
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[#05010ff5] via-[#05010f66] to-transparent md:via-[#05010f40]" />
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[#05010f] via-transparent to-[#05010f55]" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-[#05010fe6] via-transparent to-transparent md:hidden" />
+      <div className="pointer-events-none absolute inset-0 z-[1] hidden bg-gradient-to-l from-[#05010ff0] via-[#05010f55] to-transparent md:block" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[#05010f] via-transparent to-[#05010f33]" />
 
-      {/* Hard cutout couple — opaque PNG via <img>, no blend into city */}
-      <motion.div
-        className="pointer-events-none absolute bottom-0 right-[-4%] z-[4] flex h-[84%] w-[85%] max-w-[780px] items-end justify-center sm:right-[0%] md:left-[26%] md:right-auto md:w-[60%] lg:left-[30%] lg:w-[54%]"
-        style={{ y: coupleY }}
-      >
-        {/* Contact shadow so subjects sit ON the scene, not dissolve into pier */}
-        <div
-          aria-hidden
-          className="absolute bottom-[2%] left-1/2 z-0 h-[7%] w-[62%] -translate-x-1/2 rounded-[100%] bg-black/70 blur-2xl"
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/images/hero-couple-cutout.png?v=hard2`}
-          alt="Landon and Jordan in 80s windbreakers"
-          className="relative z-[1] max-h-full w-auto max-w-full object-contain object-bottom"
-          style={{
-            opacity: 1,
-            mixBlendMode: "normal",
-            isolation: "isolate",
-            filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.9))",
-          }}
-          draggable={false}
-        />
-      </motion.div>
-
-      {/* Typography layer */}
-      <motion.div
-        className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-center px-4 pb-28 pt-28 md:px-6"
-        style={{ y: textY, opacity: textOpacity }}
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-[min(100%,28rem)]"
-        >
-          <div className="mb-1 flex items-center gap-2">
-            <span className="text-2xl text-neon-gold drop-shadow-[0_0_10px_#ffd700]" aria-hidden>
-              ♛
-            </span>
-            <h1 className="neon-script-lg text-4xl leading-none sm:text-5xl md:text-6xl">
-              {content.heroScript}
-            </h1>
-          </div>
-
-          <motion.p
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.15, duration: 0.7 }}
-            className="chrome-80s my-1 text-[5.5rem] sm:text-[7.5rem] md:text-[9rem]"
-            aria-label="80s"
+      <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-4 pb-6 pt-24 md:px-6">
+        <div className="grid flex-1 items-end gap-2 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:items-center">
+          {/* Hard cutout couple — same faces, poster placement on the left */}
+          <motion.div
+            className="pointer-events-none relative order-2 flex items-end justify-center md:order-1 md:justify-start"
+            style={{ y: coupleY }}
           >
-            {content.heroChrome}
-          </motion.p>
+            <div
+              aria-hidden
+              className="absolute bottom-[2%] left-1/2 z-0 h-[8%] w-[70%] -translate-x-1/2 rounded-[100%] bg-black/70 blur-2xl md:left-[42%]"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/hero-couple-cutout.png?v=hard2"
+              alt="Landon and Jordan in 80s windbreakers"
+              className="relative z-[1] max-h-[42svh] w-auto max-w-full object-contain object-bottom md:max-h-[62svh]"
+              style={{
+                opacity: 1,
+                mixBlendMode: "normal",
+                isolation: "isolate",
+                filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.9))",
+              }}
+              draggable={false}
+            />
+          </motion.div>
 
-          <p className="mb-4 text-sm font-semibold tracking-[0.35em] text-white sm:text-base">
-            {content.heroSubtitle}
-          </p>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.35, duration: 0.6 }}
-            className="neon-script-lg flicker-in text-3xl underline decoration-neon-pink/80 underline-offset-8 sm:text-4xl"
+          <motion.div
+            className="order-1 md:order-2 md:text-right"
+            style={{ y: textY, opacity: textOpacity }}
           >
-            {content.heroInvite}
-          </motion.p>
-        </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span className="mb-1 block text-2xl text-neon-gold drop-shadow-[0_0_10px_#ffd700] md:text-3xl" aria-hidden>
+                ♛
+              </span>
+              <h1 className="neon-script-lg text-4xl leading-none sm:text-5xl md:text-6xl">
+                {content.heroScript}
+              </h1>
+
+              <motion.p
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.15, duration: 0.7 }}
+                className="chrome-80s my-1 text-[22vw] sm:text-8xl md:ml-auto md:text-[6.5rem] lg:text-[8rem]"
+                aria-label="80s"
+              >
+                {content.heroChrome}
+              </motion.p>
+
+              <p className="mb-4 text-sm font-semibold tracking-[0.35em] text-white sm:text-base">
+                {content.heroSubtitle}
+              </p>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.35, duration: 0.6 }}
+                className="neon-script-lg flicker-in text-3xl underline decoration-neon-pink/80 underline-offset-8 sm:text-4xl"
+              >
+                {content.heroInvite}
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.7 }}
-          className="glass-bar mt-10 flex flex-col gap-4 rounded-2xl px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+          className="glass-bar relative z-20 mt-4 flex flex-col gap-4 rounded-2xl px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
         >
           <div className="flex flex-col gap-3 text-sm font-semibold tracking-wide sm:flex-row sm:gap-8">
             <Detail label={content.eventDate} kind="date" />
@@ -123,7 +123,7 @@ export function Hero({ content }: { content: SiteContent }) {
             RSVP NOW &gt;
           </a>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }

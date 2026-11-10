@@ -3,6 +3,12 @@ import path from "path";
 import { createDefaultStore } from "./defaults";
 import type { AppStore } from "./types";
 
+/**
+ * RSVP persistence stays in this file store.
+ * Supabase is not wired in this pass. When NEXT_PUBLIC_SUPABASE_URL and
+ * SUPABASE_SERVICE_ROLE_KEY are absent, reads and writes remain .data/store.json.
+ */
+
 const DATA_DIR = path.join(process.cwd(), ".data");
 const STORE_PATH = path.join(DATA_DIR, "store.json");
 

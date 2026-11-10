@@ -26,7 +26,7 @@ Notifications are **email-first**. Live sends kick in when these are set:
 |---|---|
 | `RESEND_API_KEY` | Resend API key (required for live email) |
 | `RESEND_FROM_EMAIL` | From address (verified in Resend) |
-| `OWNER_EMAIL` | Owner alert / reminder inbox |
+| `OWNER_EMAIL` | Owner alert inboxes. A comma-separated list; each address gets the RSVP alert. |
 | `NEXT_PUBLIC_SITE_URL` | Absolute site URL used in email CTAs |
 
 Without `RESEND_API_KEY`, emails are logged locally only (fine for demos).

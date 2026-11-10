@@ -40,6 +40,31 @@ export function getSmsProvider(): SmsProviderId {
   return (allowed.includes(raw as SmsProviderId) ? raw : "none") as SmsProviderId;
 }
 
+/** Split OWNER_EMAIL on commas or semicolons. Blanks dropped, duplicates ignored. */
+export function parseOwnerEmails(raw: string | undefined | null): string[] {
+  if (!raw) return [];
+  const seen = new Set<string>();
+  const emails: string[] = [];
+  for (const part of raw.split(/[,;]/)) {
+    const email = part.trim();
+    if (!email) continue;
+    const key = email.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    emails.push(email);
+  }
+  return emails;
+}
+
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 async function sendViaResend(opts: {
   to: string;
   subject: string;
@@ -122,23 +147,49 @@ export async function sendGuestEmail(opts: {
   return sendViaResend(opts);
 }
 
-/** Owner alert email (primary owner channel — ship with Resend). */
+/**
+ * Owner alert email. OWNER_EMAIL may list several inboxes, separated by
+ * commas or semicolons. Each address gets its own send. Guest mail never
+ * goes through here.
+ */
 export async function sendOwnerEmail(opts: {
   subject: string;
   html: string;
 }): Promise<NotifyResult> {
-  const owner = process.env.OWNER_EMAIL;
-  if (!owner) {
+  const owners = parseOwnerEmails(process.env.OWNER_EMAIL);
+  if (owners.length === 0) {
     console.info("[notifications:email:owner:stub]", opts.subject);
     return {
       ok: true,
       channel: "email",
       provider: "resend",
       stubbed: true,
-      detail: "OWNER_EMAIL unset — owner alert skipped (set OWNER_EMAIL to receive RSVP pings).",
+      detail:
+        "OWNER_EMAIL unset — owner alert skipped (set OWNER_EMAIL to receive RSVP pings).",
     };
   }
-  return sendViaResend({ to: owner, subject: opts.subject, html: opts.html });
+
+  const results = await Promise.all(
+    owners.map((to) => sendViaResend({ to, subject: opts.subject, html: opts.html })),
+  );
+  const failed = results.filter((result) => !result.ok);
+  const stubbed = results.every((result) => result.stubbed);
+  const inboxLabel = owners.length === 1 ? "inbox" : "inboxes";
+  let detail = `Owner alert sent to ${owners.length} ${inboxLabel}.`;
+  if (stubbed) {
+    detail = `Owner alert logged for ${owners.length} ${inboxLabel}. RESEND_API_KEY unset.`;
+  } else if (failed.length > 0) {
+    detail = `Owner alert failed for ${failed.length} of ${owners.length} ${inboxLabel}.`;
+  }
+
+  return {
+    ok: failed.length === 0,
+    channel: "email",
+    provider: "resend",
+    stubbed,
+    id: results.map((result) => result.id).filter(Boolean).join(",") || undefined,
+    detail,
+  };
 }
 
 /**

@@ -21,7 +21,7 @@ export const defaultContent: SiteContent = {
       time: "6:00 PM – 7:30 PM",
       title: "LET'S ROLL!",
       description:
-        "Lace up and hit the floor. Roller skating, photo moments, and that first blast of classic 80s heat.",
+        "Lace up and hit the floor. Whether you're showing off a move or just riding the music, it's about a good time.",
       icon: "skate",
     },
     {
@@ -29,7 +29,7 @@ export const defaultContent: SiteContent = {
       time: "7:30 PM – 9:00 PM",
       title: "DINNER & GOOD VIBES",
       description:
-        "Sit down, catch up, and enjoy dinner with the crew. Good food, better conversation.",
+        "Take a break from the floor, grab a plate, and catch up over dinner.",
       icon: "dinner",
     },
     {
@@ -37,12 +37,12 @@ export const defaultContent: SiteContent = {
       time: "9:00 PM – MIDNIGHT",
       title: "THE DJ BATTLE & DANCE PARTY",
       description:
-        "Two DJs go head-to-head. Dance floor stays open until midnight — bring that Flyest 80s Look.",
+        "Two DJs go head-to-head with old-school hip-hop, R&B, South Florida bass, and 80s jams until midnight.",
       icon: "dj",
     },
   ],
   dressCode: "80s FRESH!",
-  dressCodePrize: "Prize for the Flyest 80s Look",
+  dressCodePrize: "We've got a special prize for the guest with the Flyest 80s Look!",
   privateNote: "PRIVATE PARTY | INVITED GUESTS ONLY",
   rsvpHeadline: "RSVP",
   rsvpSubhead:

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdminFromRequest } from "@/lib/auth";
 import { uid } from "@/lib/id";
 import {
+  escapeHtml,
   neonEmailTemplate,
   sendGuestEmail,
   sendOwnerEmail,
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
             : `<ul>${abandoned
                 .map(
                   (r) =>
-                    `<li>${r.fullName || "(no name)"} — ${r.email || "no email"} — last: ${r.lastFieldTouched || "?"}</li>`,
+                    `<li>${escapeHtml(r.fullName || "(no name)")} — ${escapeHtml(r.email || "no email")} — last: ${escapeHtml(r.lastFieldTouched || "?")}</li>`,
                 )
                 .join("")}</ul>`,
       }),
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
       subject: `Reminder: ${content.eventDate} at ${content.eventVenue}`,
       html: neonEmailTemplate({
         headline: "See you on the floor!",
-        bodyHtml: `<p>Hey ${g.fullName},</p><p>Quick reminder — <strong>${content.eventDate}</strong> · ${content.eventTime}</p><p>${content.eventVenue}<br/>${content.eventAddress}</p><p>Dress code: ${content.dressCode}</p>`,
+        bodyHtml: `<p>Hey ${escapeHtml(g.fullName)},</p><p>Quick reminder — <strong>${escapeHtml(content.eventDate)}</strong> · ${escapeHtml(content.eventTime)}</p><p>${escapeHtml(content.eventVenue)}<br/>${escapeHtml(content.eventAddress)}</p><p>Dress code: ${escapeHtml(content.dressCode)}</p>`,
         ctaLabel: "Open Invite",
         ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
       }),

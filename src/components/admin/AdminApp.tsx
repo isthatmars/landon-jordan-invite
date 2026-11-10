@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { partyHeadcount } from "@/lib/rsvp";
 import type {
   MessageLog,
   ReminderLog,
@@ -190,7 +191,15 @@ export function AdminApp() {
 
       {tab === "rsvps" && (
         <section className="admin-panel p-5 overflow-x-auto">
-          <h2 className="text-lg font-bold mb-4 tracking-wide">RSVPs & invites</h2>
+          <h2 className="text-lg font-bold mb-2 tracking-wide">RSVPs & invites</h2>
+          <p className="mb-4 text-sm text-violet-100">
+            Door-list headcount:{" "}
+            <strong className="text-neon-green">{partyHeadcount(rsvps)}</strong>
+            <span className="mt-1 block text-xs text-violet-300">
+              Sum of guest counts on completed RSVPs that are not declined. Sample rows are
+              excluded.
+            </span>
+          </p>
           <table className="w-full text-sm text-left min-w-[720px]">
             <thead className="text-violet-300 text-xs uppercase tracking-wider">
               <tr>
@@ -219,8 +228,25 @@ export function AdminApp() {
                   </td>
                   <td className="py-2 pr-2">
                     {r.fullName || "—"}
+                    {r.id.startsWith("sample-") && (
+                      <span className="ml-2 text-[10px] text-violet-400">SAMPLE</span>
+                    )}
                     {r.abandoned && (
                       <span className="ml-2 text-[10px] text-amber-300">ABANDONED</span>
+                    )}
+                    {r.companions?.length > 0 && (
+                      <p className="text-xs text-violet-300">
+                        {r.companions
+                          .map((person) => `${person.firstName} ${person.lastName}`.trim())
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    )}
+                    {r.dietary === "yes" && r.dietaryNotes && (
+                      <p className="text-xs text-amber-200">Dietary: {r.dietaryNotes}</p>
+                    )}
+                    {r.anythingElse === "yes" && r.specialRequests && (
+                      <p className="text-xs text-violet-200">Note: {r.specialRequests}</p>
                     )}
                   </td>
                   <td className="py-2 pr-2">

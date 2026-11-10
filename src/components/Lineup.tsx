@@ -9,7 +9,7 @@ export function Lineup({ content }: { content: SiteContent }) {
       <div className="mx-auto max-w-[1100px]">
         <div className="mb-2 flex items-center justify-center gap-4">
           <span className="h-px w-10 bg-white/50 sm:w-16" />
-          <h2 className="text-center text-[13px] font-semibold tracking-[0.28em] sm:text-base">
+          <h2 className="font-nav text-center text-sm sm:text-base">
             {content.lineupTitle}
           </h2>
           <span className="h-px w-10 bg-white/50 sm:w-16" />
@@ -18,19 +18,19 @@ export function Lineup({ content }: { content: SiteContent }) {
           {content.lineupTagline}
         </p>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-6">
+        <div className="grid gap-6 md:grid-cols-3 md:gap-6">
           {content.lineup.map((block) => (
-            <div key={block.id} className="flex items-start gap-1.5 sm:gap-3">
+            <div key={block.id} className="flex items-start gap-3">
               <LineIcon
                 name={block.icon}
-                className="mt-0.5 h-7 w-7 shrink-0 text-[#ff4fd8] drop-shadow-[0_0_8px_#ff4fd8] sm:h-12 sm:w-12"
+                className="mt-1 h-10 w-10 shrink-0 text-[#ff39c8] drop-shadow-[0_0_8px_#ff39c8] sm:h-12 sm:w-12"
               />
               <div>
-                <p className="text-[8px] font-bold tracking-wide text-[#ff4fd8] sm:text-[12px]">{block.time}</p>
-                <h3 className="mt-0.5 text-[9px] font-extrabold leading-tight tracking-wide text-[#f6c945] sm:text-[15px]">
+                <p className="font-condensed text-sm font-bold tracking-wide text-[#ffc44d]">{block.time}</p>
+                <h3 className="font-condensed mt-0.5 text-lg font-bold italic leading-tight tracking-wide text-white">
                   {block.title}
                 </h3>
-                <p className="mt-1 text-[8px] leading-snug text-white/80 sm:text-[12.5px] sm:leading-relaxed">{block.description}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-[#f8f4fa]/85">{block.description}</p>
               </div>
             </div>
           ))}
@@ -41,7 +41,7 @@ export function Lineup({ content }: { content: SiteContent }) {
             <LineIcon name="hanger" className="h-7 w-7 shrink-0 text-[#ff4fd8]" />
             <p className="text-sm font-bold tracking-wide">
               DRESS CODE:{" "}
-              <span className="font-[family-name:var(--font-script)] text-lg font-normal text-[#ff4fd8] sm:text-2xl">
+              <span className="neon-script text-xl font-normal sm:text-3xl">
                 {content.dressCode}
               </span>
             </p>

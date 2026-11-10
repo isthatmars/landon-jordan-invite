@@ -18,12 +18,12 @@ export function Nav({ brandName }: { brandName: string }) {
       <div className="mx-auto flex max-w-[1100px] items-center gap-3 px-3 py-3 sm:px-5">
         <a href="#home" className="flex shrink-0 items-center gap-1.5">
           <Crown className="h-4 w-5 drop-shadow-[0_0_6px_#ffd45a]" />
-          <span className="font-[family-name:var(--font-script)] text-[1.35rem] leading-none text-[#ffe6fb] drop-shadow-[0_0_8px_#ff4fd888] sm:text-[1.55rem]">
+          <span className="neon-script text-[1.55rem] leading-none sm:text-[1.8rem]">
             {brandName}
           </span>
         </a>
 
-        <nav className="ml-auto hidden min-w-0 items-center gap-2.5 whitespace-nowrap text-[9px] font-semibold tracking-[0.12em] min-[680px]:flex sm:gap-3.5 sm:text-[11px] sm:tracking-[0.16em]">
+        <nav className="font-nav ml-auto hidden min-w-0 items-center gap-2.5 whitespace-nowrap text-[11px] min-[680px]:flex sm:gap-3.5 sm:text-[13px]">
           {links.map((l, i) => (
             <a
               key={l.href}

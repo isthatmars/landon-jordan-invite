@@ -26,10 +26,10 @@ export function Arcade({ headline }: { headline: string }) {
       />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1000px] items-end px-2 py-3 sm:px-6 sm:py-12">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-2 py-3 sm:px-4 sm:py-6">
         <div className="flex w-full items-end justify-center gap-2 sm:gap-4">
-          <div className="relative z-20 w-[30%] pb-3 text-left sm:pb-8">
-            <h2 className="neon-script-lg text-[1.45rem] leading-[0.9] min-[640px]:text-[2.6rem]">{script}</h2>
+          <div className="relative z-20 w-[28%] pb-2 text-left sm:pb-6">
+            <h2 className="neon-script-lg text-[1.8rem] leading-[0.86] sm:text-[3.1rem]">{script}</h2>
             <GreenSwoosh className="mt-1 h-3 w-24 min-[640px]:w-36" />
             <NeonArrow className="mt-1 h-8 w-12 min-[640px]:ml-6 min-[640px]:h-10 min-[640px]:w-16" />
             <button
@@ -42,7 +42,7 @@ export function Arcade({ headline }: { headline: string }) {
             </button>
           </div>
 
-          <div className="relative w-[42%] max-w-[360px]">
+          <div className="relative w-[48%] max-w-[520px]">
             <div className="floor-contact" />
             <div
               data-testid="arcade-screen"

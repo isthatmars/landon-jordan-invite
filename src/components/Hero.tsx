@@ -36,7 +36,7 @@ export function Hero({ content }: { content: SiteContent }) {
 
           <div className="relative z-[2] pb-1 text-center sm:pb-6">
             <Crown className="mx-auto mb-0.5 h-5 w-8 drop-shadow-[0_0_10px_#ffd45a] sm:mb-1 sm:h-10 sm:w-14" />
-            <h1 className="neon-script-lg text-[1.15rem] leading-none sm:text-5xl">
+            <h1 className="neon-script-lg text-[1.7rem] leading-none sm:text-6xl">
               {content.heroScript}
             </h1>
             <p className="chrome-80s mx-auto mt-0.5 text-[clamp(2.7rem,13vw,9.2rem)]" aria-label="80s">
@@ -46,7 +46,7 @@ export function Hero({ content }: { content: SiteContent }) {
               {content.heroSubtitle}
             </p>
             <GreenSwoosh className="mx-auto h-2 w-24 sm:-mt-1 sm:h-3 sm:w-52" />
-            <p className="neon-script-lg text-[1.15rem] leading-none sm:mt-2 sm:text-5xl">{content.heroInvite}</p>
+            <p className="neon-script-lg text-[1.7rem] leading-none sm:mt-2 sm:text-6xl">{content.heroInvite}</p>
             <PinkSwoosh className="mx-auto h-4 w-28 sm:-mt-1 sm:h-6 sm:w-56" />
           </div>
         </div>

@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
-import { Fugaz_One, Great_Vibes, Outfit } from "next/font/google";
+import localFont from "next/font/local";
+import { Barlow_Condensed, Caveat, Fugaz_One, Inter, Oswald, Yellowtail } from "next/font/google";
 import { SiteEffects } from "@/components/SiteEffects";
 import "./globals.css";
 
-const script = Great_Vibes({
+const script = localFont({
+  src: "../fonts/hastron.otf",
+  variable: "--font-hastron",
+  display: "swap",
+  fallback: ["Yellowtail", "cursive"],
+});
+
+const scriptFallback = Yellowtail({
   weight: "400",
   subsets: ["latin"],
-  variable: "--font-script",
+  variable: "--font-script-fallback",
   display: "swap",
 });
 
@@ -17,9 +25,32 @@ const chrome = Fugaz_One({
   display: "swap",
 });
 
-const body = Outfit({
+const condensed = Barlow_Condensed({
+  weight: ["600", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-condensed",
+  display: "swap",
+});
+
+const nav = Oswald({
+  weight: "500",
+  subsets: ["latin"],
+  variable: "--font-nav",
+  display: "swap",
+});
+
+const body = Inter({
+  weight: ["400", "500"],
   subsets: ["latin"],
   variable: "--font-body",
+  display: "swap",
+});
+
+const label = Caveat({
+  weight: ["500", "600"],
+  subsets: ["latin"],
+  variable: "--font-label",
   display: "swap",
 });
 
@@ -33,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${script.variable} ${chrome.variable} ${body.variable} h-full antialiased`}
+      className={`${script.variable} ${scriptFallback.variable} ${chrome.variable} ${condensed.variable} ${nav.variable} ${body.variable} ${label.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col night-sky">
         <SiteEffects />

@@ -50,7 +50,7 @@ export function Cassette({
         className="pointer-events-none absolute left-[11%] right-[11%] top-[21%] flex h-[18%] items-center overflow-hidden px-0.5"
         style={{ background: track.color }}
       >
-        <span className="block w-full truncate text-center font-[family-name:var(--font-script)] text-[8px] leading-none text-[#1a1020] min-[640px]:text-[11px]">
+        <span className="block w-full truncate text-center font-[family-name:var(--font-label)] text-[12px] font-medium leading-none text-[#1a1020] sm:text-[15px]">
           {label ?? `${track.artist} – ${track.title}`}
         </span>
       </span>

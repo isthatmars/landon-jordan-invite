@@ -34,9 +34,9 @@ export function Watch({ headline }: { headline: string }) {
       />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1000px] items-end px-2 py-3 sm:px-6 sm:py-14">
-        <div className="flex w-full items-end justify-center gap-2 sm:gap-5">
-        <div className="relative w-[48%] max-w-[480px]">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-2 py-3 sm:px-4 sm:py-6">
+        <div className="flex w-full items-end justify-center gap-2 sm:gap-4">
+        <div className="relative w-[58%] max-w-[680px]">
           <div
             data-testid="tv-screen"
             data-screen="crt"
@@ -78,8 +78,8 @@ export function Watch({ headline }: { headline: string }) {
           />
         </div>
 
-        <div className="relative w-[30%] pb-2 text-left">
-          <h2 className="neon-script-lg text-[1.35rem] leading-[0.9] min-[640px]:text-[2.4rem]">{script}</h2>
+        <div className="relative w-[28%] pb-2 text-left">
+          <h2 className="neon-script-lg text-[1.7rem] leading-[0.86] sm:text-[3rem]">{script}</h2>
           <GreenSwoosh className="mt-1 h-3 w-28 min-[640px]:w-40" />
           <button
             type="button"

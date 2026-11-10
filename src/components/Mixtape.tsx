@@ -42,24 +42,24 @@ export function Mixtape({ headline }: { headline: string }) {
       />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1000px] items-end px-2 pb-3 pt-14 sm:px-6 sm:pb-12 sm:pt-24">
-        <div className="relative flex w-full items-end justify-center gap-2 sm:gap-4">
-          <div className="absolute bottom-full left-[28%] z-20 mb-2 flex items-end gap-1 sm:left-[40%]">
-            <h2 className="neon-script-lg text-left text-[1.4rem] leading-[0.9] min-[640px]:text-[2.2rem]">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-2 pb-2 pt-16 sm:px-4 sm:pb-3 sm:pt-20">
+        <div className="relative flex w-full items-end justify-center gap-1 sm:gap-3">
+          <div className="absolute bottom-[94%] left-[22%] z-20 mb-1 flex items-end gap-1 sm:left-[34%]">
+            <h2 className="neon-script-lg text-left text-[1.85rem] leading-[0.86] sm:text-[3.15rem]">
               {script}
             </h2>
-            <NeonArrow className="mb-0.5 h-7 w-9 shrink-0 drop-shadow-[0_0_8px_#ff4fd8] sm:h-9 sm:w-12" />
+            <NeonArrow className="mb-1 ml-1 h-8 w-11 shrink-0 sm:h-11 sm:w-16" />
           </div>
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/prop-headphones-80s.png"
             alt=""
-            className="mb-1 w-[16%] max-w-[120px] drop-shadow-[0_10px_8px_rgba(0,0,0,0.65)]"
+            className="mb-1 hidden w-[11%] max-w-[130px] drop-shadow-[0_10px_8px_rgba(0,0,0,0.65)] min-[720px]:block"
             draggable={false}
           />
 
-          <div className="relative w-[50%] max-w-[500px]" data-testid="boombox">
+          <div className="relative w-[64%] max-w-[760px]" data-testid="boombox">
             <div className="floor-contact" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -70,7 +70,7 @@ export function Mixtape({ headline }: { headline: string }) {
             />
           </div>
 
-          <div className="relative w-[28%] max-w-[210px] shrink-0">
+          <div className="relative w-[34%] max-w-[320px] shrink-0">
             <div className="floor-contact" />
             {stack.map((track, index) => (
               <Cassette

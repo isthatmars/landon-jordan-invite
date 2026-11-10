@@ -42,8 +42,15 @@ export function Mixtape({ headline }: { headline: string }) {
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#05010f] via-transparent to-[#05010f]" />
 
-      <div className="relative z-10 mx-auto grid max-w-[1100px] items-center gap-4 px-3 py-6 sm:px-5 min-[640px]:grid-cols-[1.15fr_0.85fr] min-[640px]:py-8">
-        <div className="relative mx-auto w-full max-w-[560px]" data-testid="boombox">
+      <div className="relative z-10 mx-auto grid max-w-[1100px] items-center gap-6 px-3 py-6 sm:px-5 min-[640px]:grid-cols-[1.25fr_0.62fr] min-[640px]:py-8">
+        <div>
+          <div className="mb-3 flex items-end justify-center gap-1 min-[640px]:justify-start">
+            <h2 className="neon-script-lg text-center text-[1.85rem] leading-[0.95] min-[640px]:text-left sm:text-[2.35rem]">
+              {script}
+            </h2>
+            <NeonArrow className="mb-1 h-8 w-11 shrink-0 drop-shadow-[0_0_8px_#ff4fd8]" />
+          </div>
+          <div className="relative mx-auto w-full max-w-[560px]" data-testid="boombox">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/prop-boombox-front.png"
@@ -58,15 +65,10 @@ export function Mixtape({ headline }: { headline: string }) {
             className="pointer-events-none absolute -left-1 bottom-[4%] w-[26%] drop-shadow-2xl min-[640px]:-left-4"
             draggable={false}
           />
+          </div>
         </div>
 
-        <div className="flex flex-col items-center min-[640px]:items-start">
-          <div className="mb-2 flex items-end gap-1">
-            <h2 className="neon-script-lg text-center text-[2rem] leading-[0.95] min-[640px]:text-left sm:text-[2.6rem]">
-              {script}
-            </h2>
-            <NeonArrow className="mb-1 h-9 w-12 shrink-0 drop-shadow-[0_0_8px_#ff4fd8]" />
-          </div>
+        <div className="flex justify-center min-[640px]:justify-end">
           <div className="flex flex-col items-center pb-2">
             {stack.map((track, index) => (
               <Cassette

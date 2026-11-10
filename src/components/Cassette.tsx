@@ -27,8 +27,8 @@ export function Cassette({
       data-track-id={track.id}
       data-youtube-id={track.youtubeId}
       data-selected={selected ? "true" : "false"}
-      className={`relative block w-[228px] max-w-full border-0 bg-transparent p-0 outline-none transition-transform duration-500 focus-visible:ring-2 focus-visible:ring-pink-400/70 ${
-        index === 0 ? "" : "-mt-[58px]"
+      className={`relative block w-[172px] max-w-full border-0 bg-transparent p-0 outline-none transition-transform duration-500 focus-visible:ring-2 focus-visible:ring-pink-400/70 ${
+        index === 0 ? "" : "-mt-[44px]"
       } ${inserting ? "-translate-x-24 -rotate-12 scale-90 opacity-30" : ""} ${
         selected ? "z-30" : ""
       }`}
@@ -47,10 +47,10 @@ export function Cassette({
         }}
       />
       <span
-        className="pointer-events-none absolute left-[12%] right-[12%] top-[22%] flex h-[16%] items-center overflow-hidden px-1"
+        className="pointer-events-none absolute left-[8%] right-[8%] top-[22%] flex h-[16%] items-center overflow-hidden px-0.5"
         style={{ background: track.color }}
       >
-        <span className="block w-full truncate text-center font-[family-name:var(--font-script)] text-[11px] leading-none text-[#1a1020]">
+        <span className="block w-full truncate text-center font-[family-name:var(--font-script)] text-[10px] leading-none text-[#1a1020]">
           {label ?? `${track.artist} – ${track.title}`}
         </span>
       </span>

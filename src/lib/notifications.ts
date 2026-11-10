@@ -178,6 +178,70 @@ export async function sendGuestSmsBlast(opts: {
   };
 }
 
+/**
+ * Hybrid delivery plug point: after our API persists an RSVP, optionally forward
+ * to Fillout / SimpleTexting / EZ Texting / TextMagic via Zapier/Make (or direct webhook).
+ * Resend remains primary email on our side. No live third party required until URL is set.
+ */
+export async function forwardRsvpWebhook(opts: {
+  event: "rsvp.completed" | "rsvp.draft";
+  rsvp: Record<string, unknown>;
+  site?: { eventDate?: string; eventVenue?: string; eventTime?: string };
+}): Promise<NotifyResult> {
+  const url = process.env.WEBHOOK_FORWARD_URL;
+  if (!url) {
+    return {
+      ok: true,
+      channel: "email",
+      provider: "webhook_forward",
+      stubbed: true,
+      detail: "WEBHOOK_FORWARD_URL unset — hybrid forward skipped.",
+    };
+  }
+  if (opts.event === "rsvp.draft" && process.env.WEBHOOK_FORWARD_ON_DRAFT !== "true") {
+    return {
+      ok: true,
+      channel: "email",
+      provider: "webhook_forward",
+      stubbed: true,
+      detail: "Draft forward disabled (WEBHOOK_FORWARD_ON_DRAFT!=true).",
+    };
+  }
+  const secret = process.env.WEBHOOK_FORWARD_SECRET;
+  const body = {
+    event: opts.event,
+    rsvp: opts.rsvp,
+    site: opts.site || null,
+    sentAt: new Date().toISOString(),
+  };
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(secret ? { "X-Webhook-Secret": secret } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+    return {
+      ok: res.ok,
+      channel: "email",
+      provider: "webhook_forward",
+      stubbed: false,
+      detail: `Forwarded ${opts.event} → ${url} (${res.status})`,
+    };
+  } catch (err) {
+    console.warn("[notifications:webhook_forward:error]", err);
+    return {
+      ok: false,
+      channel: "email",
+      provider: "webhook_forward",
+      stubbed: false,
+      detail: "Webhook forward failed (RSVP still saved locally).",
+    };
+  }
+}
+
 export function neonEmailTemplate(opts: {
   headline: string;
   bodyHtml: string;

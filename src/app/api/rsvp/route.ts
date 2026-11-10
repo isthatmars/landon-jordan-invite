@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { uid } from "@/lib/id";
 import {
+  forwardRsvpWebhook,
   neonEmailTemplate,
   sendGuestEmail,
   sendOwnerEmail,
@@ -65,6 +66,18 @@ export async function POST(request: Request) {
         });
       }
     });
+    const draft = store.rsvps.find((r) => r.id === draftId);
+    if (draft) {
+      void forwardRsvpWebhook({
+        event: "rsvp.draft",
+        rsvp: draft as unknown as Record<string, unknown>,
+        site: {
+          eventDate: store.content.eventDate,
+          eventVenue: store.content.eventVenue,
+          eventTime: store.content.eventTime,
+        },
+      });
+    }
     return NextResponse.json({ ok: true, id: draftId, abandoned: true, count: store.rsvps.length });
   }
 
@@ -129,6 +142,15 @@ export async function POST(request: Request) {
   const ownerSms = await sendOwnerSms(
     `RSVP: ${fullName} (${record.status}) · ${record.guestCount} guest(s) · ${email}`,
   );
+  const webhook = await forwardRsvpWebhook({
+    event: "rsvp.completed",
+    rsvp: record as unknown as Record<string, unknown>,
+    site: {
+      eventDate: content.eventDate,
+      eventVenue: content.eventVenue,
+      eventTime: content.eventTime,
+    },
+  });
 
   if (guestMail.ok) {
     await updateStore((s) => {
@@ -140,6 +162,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     rsvp: record,
-    notifications: { guestMail, ownerMail, ownerSms },
+    notifications: { guestMail, ownerMail, ownerSms, webhook },
   });
 }

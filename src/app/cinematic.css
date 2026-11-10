@@ -89,24 +89,15 @@ html:not([data-intro="reveal"]) .hero-invite[data-neon="breathing"] {
 }
 
 /* ---------- Buttons stay beveled keys ---------- */
-.btn-pink-outline:hover,
-.btn-pink-outline:focus-visible,
-.btn-header-rsvp:hover,
-.btn-header-rsvp:focus-visible {
-  filter: brightness(1.08);
-}
 .btn-rsvp-now:focus-visible,
 .btn-header-rsvp:focus-visible,
 .btn-pink-outline:focus-visible,
-.btn-green-solid:focus-visible {
+.btn-green-solid:focus-visible,
+.game-close:focus-visible,
+.skip-intro:focus-visible,
+.keycap:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 3px;
-}
-.btn-rsvp-now:active,
-.btn-header-rsvp:active,
-.btn-pink-outline:active,
-#rsvp .btn-green-solid:active {
-  transform: translateY(2px);
 }
 
 #rsvp .btn-green-solid {
@@ -132,6 +123,13 @@ html:not([data-intro="reveal"]) .hero-invite[data-neon="breathing"] {
   line-height: 1;
   text-transform: uppercase;
   cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease,
+    filter 0.18s ease;
 }
 html[data-intro="invite"] .skip-intro,
 html[data-intro="opening"] .skip-intro,
@@ -139,12 +137,29 @@ html[data-intro="reveal"] .skip-intro {
   display: inline-flex;
   align-items: center;
 }
+.skip-intro:hover,
 .skip-intro:focus-visible {
+  color: #fff;
+  border-color: #c6ff00;
+  background: rgba(12, 8, 20, 0.92);
   outline: 2px solid #c6ff00;
   outline-offset: 3px;
+  filter: brightness(1.08);
+  transform: scale(1.05);
+  box-shadow:
+    0 0 8px rgba(198, 255, 0, 0.45),
+    0 0 18px rgba(198, 255, 0, 0.28);
 }
 .skip-intro:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-intro:hover,
+  .skip-intro:focus-visible,
+  .skip-intro:active {
+    transform: none;
+  }
 }
 
 /* ---------- Handwritten script ---------- */

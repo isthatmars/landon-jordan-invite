@@ -22,9 +22,25 @@ export const INTRO_BOOT = `(function(){
     root.dataset.motion = "armed";
     document.addEventListener("click", function (event) {
       var target = event.target;
-      if (!target || !target.closest || !target.closest("#skip-intro")) return;
-      root.dataset.intro = "done";
-      try { sessionStorage.setItem(key, "1"); } catch (e) {}
+      if (!target || !target.closest) return;
+      if (target.closest("#skip-intro")) {
+        root.dataset.intro = "done";
+        try { sessionStorage.setItem(key, "1"); } catch (e) {}
+        return;
+      }
+      if (!target.closest("#open-invitation") || root.dataset.intro !== "invite") return;
+      root.dataset.intro = "opening";
+      window.setTimeout(function () {
+        root.style.setProperty("--intro-shift", "0ms");
+        root.dataset.intro = "reveal";
+        window.__ljIntroStart = Date.now();
+        try { sessionStorage.setItem(key, "1"); } catch (e) {}
+      }, 1700);
+      window.setTimeout(function () {
+        if (root.dataset.intro === "reveal" || root.dataset.intro === "opening") {
+          root.dataset.intro = "done";
+        }
+      }, 3900);
     });
     window.setTimeout(function () {
       if (root.dataset.intro === "invite" && !document.getElementById("invite-envelope")) {

@@ -96,7 +96,7 @@ export function InviteEnvelope() {
           </div>
         </div>
       </div>
-      <button type="button" className="invite-open" onClick={open}>
+      <button type="button" id="open-invitation" className="invite-open" onClick={open}>
         Open your invitation
       </button>
     </div>

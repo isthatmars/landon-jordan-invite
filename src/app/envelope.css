@@ -43,7 +43,7 @@ html[data-intro="opening"] .site-header {
   overflow: hidden;
 }
 
-.invite-overlay.is-zoom {
+html[data-intro='reveal'] .invite-overlay {
   animation: invite-fade 1.35s ease 0.35s forwards;
   pointer-events: none;
 }
@@ -90,7 +90,7 @@ html[data-intro="opening"] .site-header {
   filter: drop-shadow(0 28px 24px rgba(0, 0, 0, 0.55));
 }
 
-.envelope.is-zoom {
+html[data-intro='reveal'] .envelope {
   animation: card-approach 1.25s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 }
 
@@ -135,7 +135,8 @@ html[data-intro="opening"] .site-header {
   transform: translateY(18%);
 }
 
-.envelope.is-open .envelope-card {
+html[data-intro='opening'] .envelope-card,
+html[data-intro='reveal'] .envelope-card {
   animation: card-rise 1.05s cubic-bezier(0.16, 0.84, 0.28, 1) 0.45s forwards;
 }
 
@@ -201,7 +202,8 @@ html[data-intro="opening"] .site-header {
   transition: transform 0.85s cubic-bezier(0.45, 0.05, 0.2, 1);
 }
 
-.envelope.is-open .envelope-flap {
+html[data-intro='opening'] .envelope-flap,
+html[data-intro='reveal'] .envelope-flap {
   transform: rotateX(196deg);
   z-index: 0;
 }
@@ -227,15 +229,16 @@ html[data-intro="opening"] .site-header {
   transition: opacity 0.3s ease 0.15s, transform 0.3s ease;
 }
 
-.envelope.is-open .envelope-seal {
+html[data-intro='opening'] .envelope-seal,
+html[data-intro='reveal'] .envelope-seal {
   opacity: 0;
   transform: translate(-50%, -70%) scale(0.7);
 }
 
 .envelope-crown {
-  width: 1.7rem;
+  width: 1.85rem;
   height: auto;
-  filter: drop-shadow(0 1px 0 rgba(90, 40, 0, 0.35));
+  filter: brightness(0.35) contrast(1.6);
 }
 
 .invite-open {
@@ -266,9 +269,8 @@ html[data-intro="opening"] .site-header {
   pointer-events: none;
 }
 
-.invite-overlay.is-ready .invite-open {
-  animation: invite-button 0.45s ease forwards;
-  pointer-events: auto;
+html[data-intro="invite"] .invite-open {
+  animation: invite-button 0.45s ease 1.5s both;
 }
 
 .invite-open:active {
@@ -278,9 +280,9 @@ html[data-intro="opening"] .site-header {
     0 1px 0 #3d5200;
 }
 
-.invite-overlay.is-zoom .invite-open,
-.invite-overlay.is-zoom .invite-kicker,
-.invite-overlay.is-zoom .invite-glow {
+html[data-intro='reveal'] .invite-overlay .invite-open,
+html[data-intro='reveal'] .invite-overlay .invite-kicker,
+html[data-intro='reveal'] .invite-overlay .invite-glow {
   opacity: 0;
   transition: opacity 0.35s ease;
 }
@@ -297,9 +299,15 @@ html[data-intro="opening"] .site-header {
 }
 
 @keyframes invite-button {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+  }
   to {
     opacity: 1;
     transform: none;
+    pointer-events: auto;
   }
 }
 

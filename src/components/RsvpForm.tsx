@@ -152,19 +152,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
 
   const chooseAttend = (attend: "yes" | "no") => {
     setStepError("");
-    const current = formRef.current;
-    const next: FormState =
-      attend === "yes"
-        ? { ...current, attend, specialRequests: "" }
-        : {
-            ...current,
-            attend,
-            email: "",
-            phone: "",
-            dietaryNotes: "",
-            bringingChildren: "",
-            companions: [],
-          };
+    const next: FormState = { ...formRef.current, attend };
     formRef.current = next;
     setForm(next);
     setStep(2);
@@ -174,11 +162,9 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   const chooseChildren = (bringingChildren: YesNo) => {
     const current = formRef.current;
     const companions =
-      bringingChildren === "yes"
-        ? current.companions.length > 0
-          ? current.companions
-          : [{ firstName: "", lastName: "" }]
-        : [];
+      bringingChildren === "yes" && current.companions.length === 0
+        ? [{ firstName: "", lastName: "" }]
+        : current.companions;
     const next = { ...current, bringingChildren, companions };
     formRef.current = next;
     setForm(next);
@@ -302,7 +288,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
 
           <form id="rsvp-form" data-step={step} onSubmit={onSubmit} noValidate className="rsvp-steps space-y-4">
             <div className="rsvp-step rsvp-step-1 space-y-4">
-              <p className="rsvp-ask">Will you be attending?</p>
+              <p className="rsvp-ask">Are you able to attend?</p>
               <div id="rsvp-attend" data-testid="rsvp-attend" className="grid gap-3">
                 <ChoiceButton
                   tone="yes"
@@ -310,7 +296,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                   testId="rsvp-choice-yes"
                   onClick={() => chooseAttend("yes")}
                 >
-                  Yes, I&apos;ll be there!
+                  Yes I&apos;ll be there
                 </ChoiceButton>
                 <ChoiceButton
                   tone="no"
@@ -318,7 +304,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                   testId="rsvp-choice-no"
                   onClick={() => chooseAttend("no")}
                 >
-                  Sorry, I can&apos;t make it.
+                  Sorry I can&apos;t
                 </ChoiceButton>
               </div>
             </div>

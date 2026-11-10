@@ -42,6 +42,11 @@ html {
   scroll-behavior: smooth;
 }
 
+html.neon-cursor-on,
+html.neon-cursor-on * {
+  cursor: none !important;
+}
+
 body {
   margin: 0;
   min-height: 100%;
@@ -49,6 +54,13 @@ body {
   color: var(--text);
   font-family: var(--font-body), "Segoe UI", sans-serif;
   overflow-x: hidden;
+}
+
+@media (pointer: coarse) {
+  html.neon-cursor-on,
+  html.neon-cursor-on * {
+    cursor: auto !important;
+  }
 }
 
 ::selection {
@@ -90,13 +102,23 @@ body {
 }
 
 .section-pad {
-  padding: 7rem 1.25rem;
+  padding: 8rem 1.25rem;
 }
 
 @media (min-width: 768px) {
   .section-pad {
-    padding: 9rem 2rem;
+    padding: 11rem 2rem;
   }
+}
+
+/* Full-bleed photographic scenes — no card chrome */
+.scene-section {
+  isolation: isolate;
+}
+
+.scene-breath {
+  height: clamp(4rem, 10vh, 8rem);
+  background: linear-gradient(180deg, #05010f, #0a0014, #05010f);
 }
 
 .night-sky {

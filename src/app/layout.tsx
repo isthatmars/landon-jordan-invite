@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Great_Vibes, Orbitron, Outfit } from "next/font/google";
+import { SiteEffects } from "@/components/SiteEffects";
 import "./globals.css";
 
 const script = Great_Vibes({
@@ -34,7 +35,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${script.variable} ${display.variable} ${body.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col night-sky">{children}</body>
+      <body className="min-h-full flex flex-col night-sky">
+        <SiteEffects />
+        {children}
+      </body>
     </html>
   );
 }

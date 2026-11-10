@@ -1,10 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { VideoItem } from "@/lib/types";
-import { Reveal } from "./Reveal";
+import { useLightParallax } from "./Parallax";
 
 export function Watch({
   headline,
@@ -17,108 +17,138 @@ export function Watch({
   const [active, setActive] = useState(sorted[0] || null);
   const [browsing, setBrowsing] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const light = useLightParallax();
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  const bgY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["-6%", "8%"]);
+  const tvY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["8%", "-4%"]);
 
   return (
-    <section id="watch" className="section-pad relative">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
-        <Reveal>
-          <div className="relative mx-auto max-w-xl">
-            <div className="relative overflow-hidden rounded-xl border-[10px] border-[#5c3a22] bg-[#2a1a10] shadow-[0_20px_60px_#000]">
-              <div className="relative aspect-[4/3] bg-black crt-scanlines overflow-hidden">
-                {active?.videoUrl && playing ? (
-                  <video
-                    key={active.id}
-                    src={active.videoUrl}
-                    className="h-full w-full object-cover"
-                    controls
-                    autoPlay
-                    onEnded={() => setPlaying(false)}
-                  />
-                ) : (
-                  <>
-                    <Image
-                      src={active?.posterUrl || "/images/crt-tv.jpg"}
-                      alt={active ? `${active.title} placeholder` : "CRT TV"}
-                      fill
-                      className="object-cover opacity-90"
-                      sizes="(max-width:768px) 100vw, 50vw"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setPlaying(true)}
-                      className="absolute inset-0 flex items-center justify-center"
-                      aria-label="Play video"
-                    >
-                      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/85 text-2xl text-black shadow-[0_0_30px_#fff8]">
-                        ▶
-                      </span>
-                    </button>
-                  </>
-                )}
-                {!active?.videoUrl && playing && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/80 p-6 text-center">
-                    <p className="text-sm text-violet-200">
-                      Placeholder — add a real <code className="text-neon-teal">videoUrl</code> in
-                      Admin → Videos. Showing channel static vibes for now.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <Image
-                src="/images/remote.jpg"
-                alt="80s TV remote"
-                width={120}
-                height={120}
-                className="rounded-lg border border-white/10 shadow-lg opacity-90"
-              />
-            </div>
-          </div>
-        </Reveal>
+    <section
+      ref={sectionRef}
+      id="watch"
+      className="scene-section relative min-h-[100svh] w-full overflow-hidden"
+    >
+      <motion.div className="absolute inset-[-10%] z-0" style={{ y: bgY }}>
+        <Image
+          src="/images/scene-watch-table.jpg"
+          alt=""
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#05010f] via-transparent to-[#05010f]" />
+      </motion.div>
 
-        <Reveal delay={0.12}>
-          <h2 className="neon-script-lg text-4xl sm:text-5xl mb-6">{headline}</h2>
+      <div className="relative z-10 mx-auto grid min-h-[100svh] max-w-6xl items-center gap-10 px-4 py-24 md:grid-cols-[1.1fr_0.9fr] md:px-6">
+        <motion.div className="relative" style={{ y: tvY }}>
+          <div className="relative mx-auto w-full max-w-lg">
+            <Image
+              src="/images/prop-crt-tv.png"
+              alt="Vintage wood CRT television"
+              width={800}
+              height={640}
+              className="relative z-[2] h-auto w-full drop-shadow-[0_30px_60px_#000c]"
+            />
+            {/* Screen inset overlay */}
+            <div className="absolute left-[14%] right-[14%] top-[18%] bottom-[28%] z-[3] overflow-hidden rounded-sm crt-scanlines">
+              {active?.videoUrl && playing ? (
+                <video
+                  key={active.id}
+                  src={active.videoUrl}
+                  className="h-full w-full object-cover"
+                  controls
+                  autoPlay
+                  onEnded={() => setPlaying(false)}
+                />
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-700/50 via-purple-900/70 to-black" />
+                  <button
+                    type="button"
+                    onClick={() => setPlaying(true)}
+                    className="absolute inset-0 flex items-center justify-center"
+                    aria-label="Play video"
+                  >
+                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/85 text-xl text-black shadow-[0_0_30px_#fff8]">
+                      ▶
+                    </span>
+                  </button>
+                  {playing && !active?.videoUrl && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/75 p-4 text-center text-xs text-violet-200">
+                      Add a videoUrl in Admin → Videos
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            <Image
+              src="/images/prop-vinyl-stack.png"
+              alt=""
+              width={180}
+              height={180}
+              className="absolute -left-4 bottom-0 z-[1] w-[26%] drop-shadow-xl"
+            />
+            <Image
+              src="/images/prop-roller-skate.png"
+              alt=""
+              width={200}
+              height={200}
+              className="absolute -right-2 bottom-[-4%] z-[4] w-[30%] drop-shadow-2xl md:-right-8"
+            />
+            <Image
+              src="/images/remote.jpg"
+              alt="80s TV remote"
+              width={100}
+              height={100}
+              className="absolute -right-1 top-[55%] z-[5] w-[18%] rotate-12 rounded-md opacity-95 shadow-lg mix-blend-lighten md:right-[-6%]"
+            />
+          </div>
+        </motion.div>
+
+        <div>
+          <h2 className="neon-script-lg mb-6 text-4xl sm:text-5xl">{headline}</h2>
           <button
             type="button"
-            className="btn-pink-outline inline-flex items-center gap-2 text-sm tracking-widest font-bold"
+            className="btn-pink-outline inline-flex items-center gap-2 text-sm font-bold tracking-widest"
             onClick={() => setBrowsing((v) => !v)}
           >
             ▶ BROWSE VIDEOS
           </button>
-
-          {browsing && (
-            <motion.ul
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-6 space-y-2"
-            >
-              {sorted.map((v) => (
-                <li key={v.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActive(v);
-                      setPlaying(false);
-                    }}
-                    className={`w-full rounded-xl border px-4 py-3 text-left transition ${
-                      active?.id === v.id
-                        ? "border-neon-pink bg-pink-500/10"
-                        : "border-white/10 bg-black/30 hover:border-neon-teal/40"
-                    }`}
-                  >
-                    <span className="font-semibold">{v.title}</span>
-                    <span className="block text-xs text-violet-300">{v.artist}</span>
-                  </button>
-                </li>
-              ))}
-            </motion.ul>
-          )}
-          <p className="mt-6 text-sm text-violet-300/80 max-w-md">
-            Classic music-video browser on a wood CRT. Swap placeholders anytime from the neon
-            admin.
-          </p>
-        </Reveal>
+          <AnimatePresence>
+            {browsing && (
+              <motion.ul
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-6 space-y-2"
+              >
+                {sorted.map((v) => (
+                  <li key={v.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActive(v);
+                        setPlaying(false);
+                      }}
+                      className={`w-full border-b px-1 py-3 text-left transition ${
+                        active?.id === v.id
+                          ? "border-neon-pink text-neon-pink"
+                          : "border-white/15 text-white hover:border-neon-teal/50"
+                      }`}
+                    >
+                      <span className="font-semibold">{v.title}</span>
+                      <span className="block text-xs text-violet-300">{v.artist}</span>
+                    </button>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </section>
   );

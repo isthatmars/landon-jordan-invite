@@ -1,39 +1,75 @@
 "use client";
 
+import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { PacManGame } from "./PacManGame";
 import { PinballLite } from "./PinballLite";
-import { Reveal } from "./Reveal";
+import { useLightParallax } from "./Parallax";
 
 export function Arcade({ headline }: { headline: string }) {
   const [game, setGame] = useState<"pacman" | "pinball">("pacman");
   const [running, setRunning] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const light = useLightParallax();
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  const bgY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["-8%", "8%"]);
+  const cabY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["10%", "-6%"]);
 
   return (
-    <section id="arcade" className="section-pad relative">
-      <div className="pointer-events-none absolute inset-0 opacity-30 grid-glow" />
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
-        <Reveal>
-          <h2 className="neon-script-lg text-4xl sm:text-5xl mb-2">{headline}</h2>
-          <p className="text-violet-200 mb-6 text-sm">
-            Keyboard + touch. Switch cabinets anytime.
-          </p>
-          <div className="flex flex-wrap gap-3 mb-6">
+    <section
+      ref={sectionRef}
+      id="arcade"
+      className="scene-section relative min-h-[100svh] w-full overflow-hidden"
+    >
+      <motion.div className="absolute inset-[-10%] z-0" style={{ y: bgY }}>
+        <Image
+          src="/images/scene-arcade-room.jpg"
+          alt=""
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#05010f] via-transparent to-[#05010f]" />
+      </motion.div>
+
+      <div className="relative z-10 mx-auto grid min-h-[100svh] max-w-6xl items-center gap-8 px-4 py-24 md:grid-cols-[0.85fr_1.15fr] md:px-6">
+        <div>
+          <h2 className="neon-script-lg mb-2 text-4xl sm:text-5xl">{headline}</h2>
+          <svg
+            className="mb-6 text-neon-pink"
+            width="72"
+            height="28"
+            viewBox="0 0 72 28"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M2 14c18-10 40-12 58-4"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            <path d="M52 6l14 6-10 4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
+          <div className="mb-4 flex flex-wrap gap-3">
             <button
               type="button"
-              className="btn-pink-outline text-sm tracking-widest font-bold"
+              className="btn-pink-outline text-sm font-bold tracking-widest"
               onClick={() => {
                 setGame("pacman");
                 setRunning(true);
               }}
             >
-              🎮 START GAME
+              START GAME
             </button>
             <button
               type="button"
-              className={`text-xs tracking-widest px-4 py-2 rounded-full border ${
-                game === "pacman" ? "border-neon-teal text-neon-teal" : "border-white/20"
+              className={`rounded-full border px-4 py-2 text-xs tracking-widest ${
+                game === "pacman" ? "border-neon-teal text-neon-teal" : "border-white/25"
               }`}
               onClick={() => setGame("pacman")}
             >
@@ -41,8 +77,8 @@ export function Arcade({ headline }: { headline: string }) {
             </button>
             <button
               type="button"
-              className={`text-xs tracking-widest px-4 py-2 rounded-full border ${
-                game === "pinball" ? "border-neon-teal text-neon-teal" : "border-white/20"
+              className={`rounded-full border px-4 py-2 text-xs tracking-widest ${
+                game === "pinball" ? "border-neon-teal text-neon-teal" : "border-white/25"
               }`}
               onClick={() => {
                 setGame("pinball");
@@ -52,31 +88,46 @@ export function Arcade({ headline }: { headline: string }) {
               PINBALL
             </button>
           </div>
+          <p className="text-sm text-violet-200/90">Keyboard + touch · game lives in the cabinet</p>
+        </div>
 
-          <div className="rounded-2xl border border-white/10 bg-black/50 p-4 shadow-[0_0_30px_#3b82f640]">
+        <motion.div className="relative mx-auto w-full max-w-md" style={{ y: cabY }}>
+          <Image
+            src="/images/prop-arcade-cabinet.png"
+            alt="Pac-Man arcade cabinet"
+            width={640}
+            height={800}
+            className="relative z-[1] h-auto w-full drop-shadow-[0_40px_70px_#000c]"
+          />
+          {/* Game screen inset — sits on the cabinet glass */}
+          <div className="absolute left-[18%] right-[18%] top-[14%] bottom-[38%] z-[2] overflow-hidden rounded-sm bg-black/90 shadow-[inset_0_0_20px_#000]">
             {!running ? (
-              <p className="text-center text-sm text-violet-300 py-16">
-                Press START GAME to boot the cabinet.
-              </p>
-            ) : game === "pacman" ? (
-              <PacManGame running={running} />
+              <button
+                type="button"
+                className="flex h-full w-full flex-col items-center justify-center gap-2 text-neon-green"
+                onClick={() => setRunning(true)}
+              >
+                <span className="text-[10px] tracking-[0.3em]">INSERT COIN</span>
+                <span className="text-xs tracking-widest text-white/80">TAP TO START</span>
+              </button>
             ) : (
-              <PinballLite running={running} />
+              <div className="flex h-full items-center justify-center overflow-auto p-1 scale-[0.92] origin-center">
+                {game === "pacman" ? (
+                  <PacManGame running={running} />
+                ) : (
+                  <PinballLite running={running} />
+                )}
+              </div>
             )}
           </div>
-        </Reveal>
-
-        <Reveal delay={0.1} className="relative">
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-[0_0_40px_#ff2bd630]">
-            <Image
-              src="/images/arcade-cabinet.jpg"
-              alt="Pac-Man arcade cabinet"
-              width={900}
-              height={675}
-              className="h-auto w-full object-cover"
-            />
-          </div>
-        </Reveal>
+          <Image
+            src="/images/prop-roller-skate.png"
+            alt=""
+            width={200}
+            height={200}
+            className="absolute -right-6 bottom-[6%] z-[3] w-[34%] drop-shadow-2xl md:-right-10"
+          />
+        </motion.div>
       </div>
     </section>
   );

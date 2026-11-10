@@ -19,9 +19,13 @@ export default async function HomePage() {
     <main className="flex-1">
       <Nav brandName={content.brandName} />
       <Hero content={content} />
+      <div className="scene-breath" aria-hidden />
       <Mixtape headline={content.mixtapeHeadline} tracks={tracks} />
+      <div className="scene-breath" aria-hidden />
       <Watch headline={content.watchHeadline} videos={videos} />
+      <div className="scene-breath" aria-hidden />
       <Arcade headline={content.arcadeHeadline} />
+      <div className="scene-breath" aria-hidden />
       <Lineup content={content} />
       <RsvpForm content={content} />
       <Footer tagline={content.footerTagline} />

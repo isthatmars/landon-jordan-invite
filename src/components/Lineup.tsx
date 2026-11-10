@@ -30,10 +30,8 @@ export function Lineup({ content }: { content: SiteContent }) {
         <div className="lineup-dress">
           <div className="lineup-dress-main">
             <LineIcon name="hanger" className="lineup-dress-icon icon-shake" />
-            <div>
-              <p className="lineup-dress-label">Dress code</p>
-              <p className="neon-script lineup-dress-script">{dressCodeScript(content.dressCode)}</p>
-            </div>
+            <p className="lineup-dress-label">Dress code</p>
+            <p className="neon-script lineup-dress-script">{dressCodeScript(content.dressCode)}</p>
           </div>
           <p className="lineup-dress-prize">
             <LineIcon name="trophy" className="lineup-dress-icon icon-shake" />

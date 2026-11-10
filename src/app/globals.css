@@ -2192,17 +2192,21 @@ body {
   top: 0;
   z-index: 2;
   margin: 0;
-  padding: 0.7rem 0.95rem 0.45rem;
-  background: rgba(18, 28, 0, 0.72);
-  color: #f4ffe8;
+  padding: 0.85rem 0.95rem 0.55rem;
+  /* Sticky list header label — not a control/button. */
+  background: linear-gradient(180deg, rgba(198, 255, 0, 0.34), rgba(198, 255, 0, 0.18));
+  color: #ffffff;
   font-family: var(--font-nav), sans-serif;
-  font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.28rem);
+  font-size: clamp(1.18rem, 1.05rem + 0.55vw, 1.42rem);
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   line-height: 1.2;
   text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(198, 255, 0, 0.45);
-  border-bottom: 1px solid rgba(198, 255, 0, 0.45);
+  text-shadow: 0 0 10px rgba(198, 255, 0, 0.5);
+  border: 0;
+  border-bottom: 1px solid rgba(198, 255, 0, 0.35);
+  border-radius: 0;
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -2668,7 +2672,8 @@ form[data-step="3"] .rsvp-step-3 {
   justify-content: center;
   gap: 1rem;
   width: 100%;
-  padding-bottom: clamp(2.5rem, 6vh, 4.5rem);
+  margin-block: auto;
+  padding-bottom: clamp(3rem, 7vh, 5.25rem);
 }
 
 .rsvp-attend {
@@ -2798,6 +2803,8 @@ form[data-step="1"].rsvp-steps {
   flex-direction: column;
   justify-content: center;
   align-items: stretch;
+  align-self: stretch;
+  height: 100%;
   min-height: 100%;
 }
 
@@ -2806,9 +2813,8 @@ form[data-step="1"] .rsvp-step-1 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex: 1 1 auto;
   width: 100%;
-  min-height: min(22rem, 48svh);
+  margin-block: auto;
 }
 
 @media (min-width: 768px) {
@@ -2816,8 +2822,9 @@ form[data-step="1"] .rsvp-step-1 {
     min-height: min(36rem, 62svh);
   }
 
-  form[data-step="1"] .rsvp-step-1 {
-    min-height: 100%;
+  form[data-step="1"] .rsvp-step-1,
+  form[data-step="1"] .rsvp-attend-block {
+    margin-block: auto;
   }
 }
 

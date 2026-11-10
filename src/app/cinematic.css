@@ -509,14 +509,16 @@ html[data-intro="reveal"] .site-menu {
 }
 @keyframes header-bar {
   from {
+    opacity: 0;
     background-color: transparent;
     border-color: transparent;
     box-shadow: none;
   }
   to {
-    background-color: rgba(7, 2, 18, 0.62);
-    border-color: rgba(255, 57, 200, 0.28);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+    opacity: 1;
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
   }
 }
 

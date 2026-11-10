@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Crown } from "./icons";
 
 const links = [
@@ -10,11 +10,23 @@ const links = [
   { href: "#lineup", label: "THE LINEUP" },
 ];
 
+const SCROLL_BG_THRESHOLD = 16;
+
 export function Nav({ brandName }: { brandName: string }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const update = () => {
+      setScrolled(window.scrollY > SCROLL_BG_THRESHOLD);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
 
   return (
-    <header className="site-header">
+    <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
       <div className="site-header-inner">
         <a href="#home" className="brand-lockup">
           <Crown className="brand-crown" />

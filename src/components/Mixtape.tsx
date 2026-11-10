@@ -108,9 +108,22 @@ export function Mixtape({ headline }: { headline: string }) {
             <div className={`mix-deck${playing ? " is-live" : ""}`} aria-hidden>
               <span className="mix-reel mix-reel-l" />
               <span className="mix-reel mix-reel-r" />
+              <span className="mix-eq">
+                <i />
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="mix-lamp" />
             </div>
-            <span className={`mix-speaker mix-speaker-l${playing ? " is-live" : ""}`} aria-hidden />
-            <span className={`mix-speaker mix-speaker-r${playing ? " is-live" : ""}`} aria-hidden />
+            <button
+              type="button"
+              className="mix-hot mix-hot-play"
+              aria-label={playing ? "Pause the tape" : "Play the tape"}
+              aria-pressed={playing}
+              onClick={toggleDeck}
+            />
+            <button type="button" className="mix-hot mix-hot-stop" aria-label="Stop the tape" onClick={stop} />
             <div className="mix-phones">
               <div className="mix-shadow mix-shadow-phones" aria-hidden />
               {/* eslint-disable-next-line @next/next/no-img-element */}

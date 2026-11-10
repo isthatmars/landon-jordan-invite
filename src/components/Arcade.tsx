@@ -48,14 +48,17 @@ export function Arcade({ headline }: { headline: string }) {
 
       <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-4 py-6 md:px-4 md:py-6">
         <div className="flex w-full flex-col items-center justify-center gap-3 md:flex-row md:items-end md:gap-4">
-          <div className="relative z-20 order-1 w-full pb-1 text-center md:order-1 md:w-[28%] md:pb-6 md:text-left">
+          <div className="arcade-copy relative z-20 order-1 w-full text-center md:order-1 md:w-[28%] md:pb-6 md:text-left">
             <h2 className="neon-script-lg text-[34px] leading-[0.92] sm:text-[3.1rem]">{script}</h2>
             <GreenSwoosh className="mx-auto mt-1 h-3 w-24 md:mx-0 min-[640px]:w-36" />
-            <NeonArrow className="mx-auto mt-1 h-8 w-16 md:mx-0 min-[640px]:ml-6 min-[640px]:h-10 min-[640px]:w-16" />
+            <NeonArrow className="arcade-arrow mx-auto mt-1 h-8 w-16 md:mx-0 min-[640px]:ml-6 min-[640px]:h-10 min-[640px]:w-16" />
+          </div>
+
+          <div className="arcade-cab relative order-2 w-[86%] max-w-[520px] md:order-2 md:w-[48%]">
             {!running && (
               <button
                 type="button"
-                className="btn-pink-outline mt-3 inline-flex min-h-12 items-center gap-2 px-5 py-3 text-base font-bold tracking-[0.14em] md:min-h-0 md:px-4 md:py-1.5 md:text-xs"
+                className="btn-pink-outline arcade-start"
                 onClick={() => setRunning(true)}
               >
                 <GamepadIcon className="h-4 w-5" />
@@ -63,17 +66,11 @@ export function Arcade({ headline }: { headline: string }) {
               </button>
             )}
             {!overlay && running && (
-              <button
-                type="button"
-                className="btn-pink-outline mt-3 inline-flex min-h-12 items-center px-5 py-3 text-base font-bold tracking-[0.14em] md:min-h-0 md:px-4 md:py-1.5 md:text-xs"
-                onClick={() => setRunning(false)}
-              >
+              <button type="button" className="btn-pink-outline arcade-start" onClick={() => setRunning(false)}>
                 CLOSE GAME
               </button>
             )}
-          </div>
-
-          <div className="relative order-2 w-[78%] max-w-[520px] md:order-2 md:w-[48%]">
+            <div className="arcade-machine">
             <div className="floor-contact" />
             <div className="cab-lights" aria-hidden>
               <span className="cab-glint cab-glint-a" />
@@ -96,6 +93,7 @@ export function Arcade({ headline }: { headline: string }) {
               className="pointer-events-none relative z-10 block h-auto w-full"
               draggable={false}
             />
+            </div>
           </div>
 
           <div className="relative order-3 w-[34%] max-w-[140px] shrink-0 md:w-[22%] md:max-w-[210px]">

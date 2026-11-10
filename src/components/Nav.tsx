@@ -48,6 +48,9 @@ export function Nav({ brandName }: { brandName: string }) {
               {l.label}
             </a>
           ))}
+          <a href="#rsvp" onClick={() => setOpen(false)}>
+            RSVP
+          </a>
         </nav>
       )}
     </header>

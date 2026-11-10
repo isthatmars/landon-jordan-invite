@@ -25,10 +25,11 @@ export function Hero({ content }: { content: SiteContent }) {
         <div className="grid items-center gap-2 min-[640px]:grid-cols-[1.02fr_0.98fr]">
           <div className="relative flex items-end justify-center min-[640px]:justify-start">
             {/* eslint-disable-next-line @next/next/no-img-element */}
+            <div className="floor-contact bottom-1" />
             <img
               src="/images/hero-couple-cutout.png"
               alt="Landon and Jordan in 80s windbreakers"
-              className="relative z-[1] h-auto w-full max-w-[560px] object-contain object-bottom drop-shadow-[0_18px_24px_rgba(0,0,0,0.65)] max-[639px]:max-h-[46vh] min-[640px]:max-h-[520px]"
+              className="relative z-[1] h-auto w-full max-w-[560px] object-contain object-bottom max-[639px]:max-h-[46vh] min-[640px]:max-h-[520px]"
               draggable={false}
             />
           </div>

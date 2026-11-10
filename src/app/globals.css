@@ -117,6 +117,18 @@ body {
   isolation: isolate;
 }
 
+.floor-contact {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 0.1rem;
+  height: 0.9rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.8);
+  filter: blur(7px);
+  pointer-events: none;
+}
+
 .scene-breath {
   height: clamp(4rem, 10vh, 8rem);
   background: linear-gradient(180deg, #05010f, #0a0014, #05010f);

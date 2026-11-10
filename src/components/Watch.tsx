@@ -25,17 +25,18 @@ export function Watch({ headline }: { headline: string }) {
     );
 
   return (
-    <section id="watch" data-youtube-id={now?.youtubeId ?? ""} className="scene-section relative overflow-hidden">
+    <section id="watch" data-youtube-id={now?.youtubeId ?? ""} className="scene-section relative min-h-[560px] overflow-hidden sm:min-h-[700px]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/scene-watch-table.jpg"
         alt=""
-        className="absolute inset-0 h-full w-full object-cover object-center"
+        className="absolute inset-0 h-full w-full object-cover object-[center_46%]"
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#05010f] via-[#05010f33] to-[#05010f]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto grid max-w-[1100px] items-center gap-4 px-3 py-8 sm:px-5 min-[640px]:grid-cols-[1.15fr_0.85fr] min-[640px]:py-10">
-        <div className="relative mx-auto w-full max-w-[520px]">
+      <div className="relative z-10 mx-auto flex min-h-[560px] w-full max-w-[1000px] items-end px-3 pb-[28%] sm:min-h-[700px] sm:px-6 sm:pb-[24%]">
+        <div className="flex w-full items-end justify-center gap-2 sm:gap-5">
+        <div className="relative w-[48%] max-w-[480px]">
           <div
             data-testid="tv-screen"
             data-screen="crt"
@@ -68,24 +69,18 @@ export function Watch({ headline }: { headline: string }) {
             )}
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
+          <div className="floor-contact" />
           <img
             src="/images/prop-crt-front.png"
             alt="Wood CRT television"
-            className="pointer-events-none relative z-10 block h-auto w-full drop-shadow-[0_24px_28px_rgba(0,0,0,0.6)]"
-            draggable={false}
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/prop-vinyl-stack.png"
-            alt=""
-            className="pointer-events-none absolute -left-1 bottom-[-4%] z-[12] w-[24%] drop-shadow-xl"
+            className="pointer-events-none relative z-10 block h-auto w-full"
             draggable={false}
           />
         </div>
 
-        <div className="relative text-center min-[640px]:pb-20 min-[640px]:text-left">
-          <h2 className="neon-script-lg text-[2.35rem] leading-[0.92] sm:text-5xl">{script}</h2>
-          <GreenSwoosh className="mx-auto mt-1 h-3 w-40 min-[640px]:mx-0" />
+        <div className="relative w-[30%] pb-2 text-left">
+          <h2 className="neon-script-lg text-[1.35rem] leading-[0.9] min-[640px]:text-[2.4rem]">{script}</h2>
+          <GreenSwoosh className="mt-1 h-3 w-28 min-[640px]:w-40" />
           <button
             type="button"
             className="btn-pink-outline mt-4 inline-flex items-center gap-2 text-xs font-bold tracking-[0.16em]"
@@ -96,7 +91,7 @@ export function Watch({ headline }: { headline: string }) {
             BROWSE VIDEOS
           </button>
           {browsing ? (
-            <ul className="mx-auto mt-4 max-h-52 max-w-sm space-y-1 overflow-auto text-left min-[640px]:mx-0">
+            <ul className="mt-4 max-h-40 space-y-1 overflow-auto text-left">
               {videos.map((video) => (
                 <li key={video.id}>
                   <button
@@ -116,13 +111,18 @@ export function Watch({ headline }: { headline: string }) {
               ))}
             </ul>
           ) : null}
+        </div>
+
+        <div className="relative w-[18%] max-w-[170px] shrink-0">
+          <div className="floor-contact" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/prop-roller-skate.png"
             alt=""
-            className="pointer-events-none mx-auto mt-5 w-[42%] max-w-[150px] drop-shadow-2xl min-[640px]:absolute min-[640px]:-right-1 min-[640px]:bottom-0 min-[640px]:mx-0 min-[640px]:mt-0 min-[640px]:w-[46%] min-[640px]:max-w-[190px]"
+            className="relative block h-auto w-full"
             draggable={false}
           />
+        </div>
         </div>
       </div>
     </section>

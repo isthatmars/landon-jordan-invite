@@ -33,42 +33,45 @@ export function Mixtape({ headline }: { headline: string }) {
   );
 
   return (
-    <section id="mixtape" data-track-id={loadedId} className="scene-section relative overflow-hidden">
+    <section id="mixtape" data-track-id={loadedId} className="scene-section relative min-h-[560px] overflow-hidden sm:min-h-[700px]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/scene-mixtape-table.jpg"
         alt=""
-        className="absolute inset-0 h-full w-full object-cover object-center"
+        className="absolute inset-0 h-full w-full object-cover object-[center_82%]"
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#05010f] via-transparent to-[#05010f]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto w-full max-w-[980px] px-3 pb-8 pt-24 sm:px-6 sm:pb-12 sm:pt-28">
-        <div className="relative mx-auto flex w-full max-w-[860px] items-end justify-center gap-2 sm:gap-6">
-          <div className="absolute bottom-full left-[34%] z-20 mb-1 flex items-end gap-1 sm:left-[46%] sm:mb-2">
-            <h2 className="neon-script-lg text-left text-[1.45rem] leading-[0.9] min-[640px]:text-[2.2rem]">
+      <div className="relative z-10 mx-auto flex min-h-[560px] w-full max-w-[1000px] items-end px-3 pb-7 sm:min-h-[700px] sm:px-6 sm:pb-12">
+        <div className="relative flex w-full items-end justify-center gap-2 sm:gap-4">
+          <div className="absolute bottom-full left-[28%] z-20 mb-2 flex items-end gap-1 sm:left-[40%]">
+            <h2 className="neon-script-lg text-left text-[1.4rem] leading-[0.9] min-[640px]:text-[2.2rem]">
               {script}
             </h2>
             <NeonArrow className="mb-0.5 h-7 w-9 shrink-0 drop-shadow-[0_0_8px_#ff4fd8] sm:h-9 sm:w-12" />
           </div>
 
-          <div className="relative w-[64%] max-w-[520px]" data-testid="boombox">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/prop-headphones-80s.png"
+            alt=""
+            className="mb-1 w-[16%] max-w-[120px] drop-shadow-[0_10px_8px_rgba(0,0,0,0.65)]"
+            draggable={false}
+          />
+
+          <div className="relative w-[50%] max-w-[500px]" data-testid="boombox">
+            <div className="floor-contact" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/prop-boombox-front.png"
               alt="Chrome boombox with a cassette in the deck"
-              className="block h-auto w-full drop-shadow-[0_28px_30px_rgba(0,0,0,0.65)]"
-              draggable={false}
-            />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/prop-headphones-80s.png"
-              alt=""
-              className="pointer-events-none absolute -left-1 bottom-[4%] w-[24%] drop-shadow-2xl sm:-left-3"
+              className="relative block h-auto w-full"
               draggable={false}
             />
           </div>
 
-          <div className="w-[34%] max-w-[220px] shrink-0 pb-1">
+          <div className="relative w-[28%] max-w-[210px] shrink-0">
+            <div className="floor-contact" />
             {stack.map((track, index) => (
               <Cassette
                 key={track.id}

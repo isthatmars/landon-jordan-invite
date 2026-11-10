@@ -8,6 +8,7 @@ import {
   sendGuestSmsBlast,
   type SmsProviderId,
 } from "@/lib/notifications";
+import { readRsvps } from "@/lib/rsvp-db";
 import { getStore, updateStore } from "@/lib/store";
 import type { MessageLog, RsvpRecord } from "@/lib/types";
 
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
 
   const store = await getStore();
   const segment = (body.segment || "all") as MessageLog["segment"];
-  const recipients = pickRecipients(store.rsvps, segment, body.recipientIds);
+  const recipients = pickRecipients(await readRsvps(store.rsvps), segment, body.recipientIds);
   const now = new Date().toISOString();
   const log: MessageLog = {
     id: uid("msg"),
@@ -73,7 +74,7 @@ export async function POST(request: Request) {
       headline: body.subject || "Party Update",
       bodyHtml: `<div>${String(body.body).replace(/\n/g, "<br/>")}</div>`,
       ctaLabel: "Open Invite",
-      ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+      ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com",
     });
     for (const r of recipients) {
       await sendGuestEmail({

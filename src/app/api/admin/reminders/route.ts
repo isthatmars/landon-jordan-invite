@@ -7,6 +7,7 @@ import {
   sendGuestEmail,
   sendOwnerEmail,
 } from "@/lib/notifications";
+import { readRsvps } from "@/lib/rsvp-db";
 import { getStore, updateStore } from "@/lib/store";
 import type { ReminderLog } from "@/lib/types";
 
@@ -16,7 +17,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const store = await getStore();
-  const abandoned = store.rsvps.filter((r) => r.abandoned || r.status === "incomplete");
+  const rsvps = await readRsvps(store.rsvps);
+  const abandoned = rsvps.filter((r) => r.abandoned || r.status === "incomplete");
   return NextResponse.json({
     reminders: store.reminders,
     abandoned,
@@ -31,11 +33,12 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const kind = (body.kind || "party_reminder") as ReminderLog["kind"];
   const store = await getStore();
+  const rsvps = await readRsvps(store.rsvps);
   const content = store.content;
   const now = new Date().toISOString();
 
   if (kind === "abandoned_digest") {
-    const abandoned = store.rsvps.filter((r) => r.abandoned || r.status === "incomplete");
+    const abandoned = rsvps.filter((r) => r.abandoned || r.status === "incomplete");
     await sendOwnerEmail({
       subject: `Abandoned RSVPs digest (${abandoned.length})`,
       html: neonEmailTemplate({
@@ -64,7 +67,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, reminder: log, abandoned });
   }
 
-  const guests = store.rsvps.filter((r) => r.status === "confirmed" || r.attend === "yes");
+  const guests = rsvps.filter((r) => r.status === "confirmed" || r.attend === "yes");
   for (const g of guests) {
     await sendGuestEmail({
       to: g.email,

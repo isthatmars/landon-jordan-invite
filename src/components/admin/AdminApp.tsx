@@ -515,7 +515,7 @@ export function AdminApp() {
 
       {tab === "reminders" && (
         <section className="admin-panel p-5 space-y-4">
-          <h2 className="text-lg font-bold">Reminders & abandoned forms</h2>
+          <h2 className="text-lg font-bold">Reminders and forms in progress</h2>
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
@@ -533,7 +533,7 @@ export function AdminApp() {
             </button>
           </div>
           <div>
-            <h3 className="text-sm tracking-widest text-violet-300 mb-2">INCOMPLETE / ABANDONED</h3>
+            <h3 className="text-sm tracking-widest text-violet-300 mb-2">IN PROGRESS</h3>
             <ul className="space-y-2 text-sm">
               {abandoned.length === 0 && <li className="text-violet-400">None right now.</li>}
               {abandoned.map((r) => (

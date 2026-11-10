@@ -4,9 +4,8 @@ import { createDefaultStore } from "./defaults";
 import type { AppStore } from "./types";
 
 /**
- * RSVP persistence stays in this file store.
- * Supabase is not wired in this pass. When NEXT_PUBLIC_SUPABASE_URL and
- * SUPABASE_SERVICE_ROLE_KEY are absent, reads and writes remain .data/store.json.
+ * Local content store. RSVPs move to Supabase when SUPABASE_URL and
+ * SUPABASE_SERVICE_ROLE_KEY are set. Without those, RSVPs stay in this file.
  */
 
 const DATA_DIR = path.join(process.cwd(), ".data");
@@ -29,10 +28,14 @@ async function readFromDisk(): Promise<AppStore | null> {
 }
 
 async function writeToDisk(store: AppStore) {
-  await ensureDir();
-  const tmp = `${STORE_PATH}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(store, null, 2), "utf8");
-  await fs.rename(tmp, STORE_PATH);
+  try {
+    await ensureDir();
+    const tmp = `${STORE_PATH}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(store, null, 2), "utf8");
+    await fs.rename(tmp, STORE_PATH);
+  } catch (err) {
+    console.warn("[store] disk unavailable, keeping the in-memory copy", err);
+  }
 }
 
 export async function getStore(): Promise<AppStore> {

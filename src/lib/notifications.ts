@@ -300,6 +300,10 @@ export async function forwardRsvpWebhook(opts: {
   }
 }
 
+export function partySiteUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com";
+}
+
 export function neonEmailTemplate(opts: {
   headline: string;
   bodyHtml: string;

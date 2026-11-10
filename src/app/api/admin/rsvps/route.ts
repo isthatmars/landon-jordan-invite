@@ -12,8 +12,18 @@ import {
   parseDraftRsvp,
   partyHeadcount,
 } from "@/lib/rsvp";
+import { readRsvps, saveRsvp, supabaseRsvpEnabled } from "@/lib/rsvp-db";
 import { getStore, updateStore } from "@/lib/store";
-import type { PartyPerson, RsvpStatus } from "@/lib/types";
+import type { PartyPerson, RsvpRecord, RsvpStatus } from "@/lib/types";
+
+async function persistRsvp(record: RsvpRecord) {
+  if (supabaseRsvpEnabled()) await saveRsvp(record);
+  await updateStore((s) => {
+    const idx = s.rsvps.findIndex((row) => row.id === record.id);
+    if (idx >= 0) s.rsvps[idx] = record;
+    else s.rsvps.unshift(record);
+  });
+}
 
 
 export async function GET(request: Request) {
@@ -21,15 +31,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const store = await getStore();
+  const all = await readRsvps(store.rsvps);
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get("filter");
-  let rsvps = store.rsvps;
+  let rsvps = all;
   if (filter === "incomplete" || filter === "abandoned") {
     rsvps = rsvps.filter((r) => r.abandoned || r.status === "incomplete");
   } else if (filter === "attending") {
     rsvps = rsvps.filter((r) => r.status === "confirmed" || r.attend === "yes");
   }
-  return NextResponse.json({ rsvps, headcount: partyHeadcount(store.rsvps) });
+  return NextResponse.json({ rsvps, headcount: partyHeadcount(all) });
 }
 
 export async function PATCH(request: Request) {
@@ -44,7 +55,7 @@ export async function PATCH(request: Request) {
   const content = store.content;
 
   if (action === "resend") {
-    const rsvp = store.rsvps.find((r) => r.id === body.id);
+    const rsvp = (await readRsvps(store.rsvps)).find((r) => r.id === body.id);
     if (!rsvp) return NextResponse.json({ error: "Not found" }, { status: 404 });
     const result = await sendGuestEmail({
       to: rsvp.email,
@@ -53,19 +64,18 @@ export async function PATCH(request: Request) {
         headline: "You're still invited!",
         bodyHtml: `<p>Hey ${escapeHtml(rsvp.fullName)},</p><p>Just a friendly nudge for <strong>${escapeHtml(content.eventDate)}</strong> at <strong>${escapeHtml(content.eventVenue)}</strong> (${escapeHtml(content.eventTime)}).</p><p>${escapeHtml(content.eventAddress)}</p>`,
         ctaLabel: "Open Invite",
-        ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+        ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com",
       }),
     });
-    await updateStore((s) => {
-      const r = s.rsvps.find((x) => x.id === body.id);
-      if (r) r.confirmationSentAt = new Date().toISOString();
-    });
+    rsvp.confirmationSentAt = new Date().toISOString();
+    await persistRsvp(rsvp);
     return NextResponse.json({ ok: true, result });
   }
 
-  await updateStore((s) => {
-    const r = s.rsvps.find((x) => x.id === body.id);
-    if (!r) return;
+  const existing = (await readRsvps(store.rsvps)).find((row) => row.id === body.id);
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const r = existing;
+  {
     if (body.status) {
       r.status = body.status as RsvpStatus;
       if (body.status === "confirmed") r.attend = "yes";
@@ -111,10 +121,10 @@ export async function PATCH(request: Request) {
       r.guestCount = 0;
     }
     r.updatedAt = new Date().toISOString();
-  });
-
-  const next = await getStore();
-  return NextResponse.json({ ok: true, rsvps: next.rsvps, headcount: partyHeadcount(next.rsvps) });
+  }
+  await persistRsvp(r);
+  const next = await readRsvps((await getStore()).rsvps);
+  return NextResponse.json({ ok: true, rsvps: next, headcount: partyHeadcount(next) });
 }
 
 export async function POST(request: Request) {
@@ -131,29 +141,27 @@ export async function POST(request: Request) {
   const [fallbackFirst, ...fallbackRest] = fallbackName.split(/\s+/);
   const attend = isAttendStatus(body.attend) ? body.attend : parsed?.attend || "yes";
   const companions = parsed?.companions.filter((person) => person.firstName && person.lastName) || [];
-  await updateStore((s) => {
-    s.rsvps.unshift({
-      id,
-      firstName: parsed?.firstName || fallbackFirst || "New",
-      lastName: parsed?.lastName || fallbackRest.join(" ") || "Guest",
-      fullName: parsed?.fullName || fallbackName,
-      attend,
-      guestCount: headcountFor(attend, companions),
-      companions,
-      phone: parsed?.phone || "",
-      email: parsed?.email || "",
-      dietary: parsed?.dietary || "",
-      dietaryNotes: parsed?.dietaryNotes || "",
-      anythingElse: parsed?.anythingElse || "",
-      specialRequests: parsed?.specialRequests || "",
-      status: body.status || "pending",
-      createdAt: now,
-      updatedAt: now,
-      formStartedAt: now,
-      formCompletedAt: now,
-      abandoned: false,
-    });
+  await persistRsvp({
+    id,
+    firstName: parsed?.firstName || fallbackFirst || "New",
+    lastName: parsed?.lastName || fallbackRest.join(" ") || "Guest",
+    fullName: parsed?.fullName || fallbackName,
+    attend,
+    guestCount: headcountFor(attend, companions),
+    companions,
+    phone: parsed?.phone || "",
+    email: parsed?.email || "",
+    dietary: parsed?.dietary || "",
+    dietaryNotes: parsed?.dietaryNotes || "",
+    anythingElse: parsed?.anythingElse || "",
+    specialRequests: parsed?.specialRequests || "",
+    status: body.status || "pending",
+    createdAt: now,
+    updatedAt: now,
+    formStartedAt: now,
+    formCompletedAt: now,
+    abandoned: false,
   });
-  const store = await getStore();
-  return NextResponse.json({ ok: true, id, rsvps: store.rsvps, headcount: partyHeadcount(store.rsvps) });
+  const listed = await readRsvps((await getStore()).rsvps);
+  return NextResponse.json({ ok: true, id, rsvps: listed, headcount: partyHeadcount(listed) });
 }

@@ -197,9 +197,23 @@ export function PacManGame({
       }
       }
 
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      const viewW = COLS * CELL;
+      const viewH = ROWS * CELL;
+      const cssW = canvas.clientWidth || viewW;
+      const cssH = canvas.clientHeight || viewH;
+      const backingW = Math.max(1, Math.round(cssW * dpr));
+      const backingH = Math.max(1, Math.round(cssH * dpr));
+      if (canvas.width !== backingW || canvas.height !== backingH) {
+        canvas.width = backingW;
+        canvas.height = backingH;
+      }
+      ctx.setTransform((cssW * dpr) / viewW, 0, 0, (cssH * dpr) / viewH, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+
       // draw
       ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, viewW, viewH);
       for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
           if (MAZE[y][x] === 1) {
@@ -261,7 +275,7 @@ export function PacManGame({
 
   return (
     <div
-      className={embed ? "relative flex h-full w-full touch-none flex-col bg-black" : "relative w-full touch-none"}
+      className={embed ? "relative flex h-full w-full touch-none flex-col bg-black" : "game-board"}
       onPointerDown={(e) => {
         swipe.current = { x: e.clientX, y: e.clientY };
       }}
@@ -294,18 +308,21 @@ export function PacManGame({
         className={
           embed
             ? "h-full min-h-0 w-full flex-1 bg-black"
-            : "mx-auto aspect-[19/21] w-full max-w-[420px] rounded-md border border-blue-400/40 bg-black"
+            : "game-canvas"
         }
       />
       {showPad && (
-        <div className="mx-auto mt-3 grid w-full max-w-[240px] grid-cols-3 gap-2">
-          <span />
-          <Pad onClick={() => setDir("U")}>▲</Pad>
-          <span />
-          <Pad onClick={() => setDir("L")}>◀</Pad>
-          <Pad onClick={() => setDir("D")}>▼</Pad>
-          <Pad onClick={() => setDir("R")}>▶</Pad>
+        <div className="game-pad" aria-label="Direction pad">
+          <Pad dir="U" onClick={() => setDir("U")} />
+          <Pad dir="L" onClick={() => setDir("L")} />
+          <Pad dir="D" onClick={() => setDir("D")} />
+          <Pad dir="R" onClick={() => setDir("R")} />
         </div>
+      )}
+      {showPad && (
+        <button type="button" className="game-restart" onClick={replay}>
+          RESTART GAME
+        </button>
       )}
       {phase !== "play" && (
         <div className="absolute inset-0 z-10 grid place-items-center bg-black/72 px-4 text-center">
@@ -324,14 +341,13 @@ export function PacManGame({
   );
 }
 
-function Pad({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+function Pad({ dir, onClick }: { dir: Dir; onClick: () => void }) {
+  const label = { U: "Up", D: "Down", L: "Left", R: "Right" }[dir];
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="rounded-lg border border-neon-pink/60 bg-black/50 py-3 text-lg active:bg-pink-500/20"
-    >
-      {children}
+    <button type="button" className={`game-pad-btn game-pad-${dir.toLowerCase()}`} aria-label={label} onClick={onClick}>
+      <svg viewBox="0 0 24 24" aria-hidden>
+        <path d="M12 4.5 5.5 12H10v7.5h4V12h4.5L12 4.5Z" fill="currentColor" />
+      </svg>
     </button>
   );
 }

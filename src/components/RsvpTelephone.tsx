@@ -30,9 +30,11 @@ export function RsvpTelephone() {
   const [buzzing, setBuzzing] = useState(false);
 
   const pickup = () => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setPickedUp(true);
-    setBuzzing(true);
+    setBuzzing(!reduce);
     window.setTimeout(() => setBuzzing(false), 1100);
+    if (reduce) return;
 
     const Ctor =
       window.AudioContext ||
@@ -57,9 +59,7 @@ export function RsvpTelephone() {
       <button type="button" className="phone-hit" onClick={pickup} aria-label="Pick up the telephone">
         <span className={`phone-prop ${buzzing ? "is-buzzing" : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="phone-base" src="/images/prop-rsvp-phone.png" alt="" draggable={false} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="phone-handset" src="/images/prop-rsvp-phone.png" alt="" draggable={false} />
+          <img className="phone-photo" src="/images/prop-rsvp-phone.png" alt="" draggable={false} />
         </span>
       </button>
       {!pickedUp ? (

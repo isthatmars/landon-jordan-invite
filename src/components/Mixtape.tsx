@@ -22,7 +22,7 @@ const STACK: {
 ];
 
 export function Mixtape({ headline }: { headline: string }) {
-  const { tracks, now, selectTape, insertingId } = usePlayback();
+  const { tracks, now, selectTape, insertingId, playing, toggleDeck, stop } = usePlayback();
   const [flyer, setFlyer] = useState<{
     label: string;
     left: number;
@@ -105,6 +105,12 @@ export function Mixtape({ headline }: { headline: string }) {
               aria-hidden
               style={{ maskImage: "url(/images/prop-boombox-scene.png)", WebkitMaskImage: "url(/images/prop-boombox-scene.png)" }}
             />
+            <div className={`mix-deck${playing ? " is-live" : ""}`} aria-hidden>
+              <span className="mix-reel mix-reel-l" />
+              <span className="mix-reel mix-reel-r" />
+            </div>
+            <span className={`mix-speaker mix-speaker-l${playing ? " is-live" : ""}`} aria-hidden />
+            <span className={`mix-speaker mix-speaker-r${playing ? " is-live" : ""}`} aria-hidden />
             <div className="mix-phones">
               <div className="mix-shadow mix-shadow-phones" aria-hidden />
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -157,6 +163,14 @@ export function Mixtape({ headline }: { headline: string }) {
               />
             ))}
           </div>
+        </div>
+        <div className="mix-transport">
+          <button type="button" className="btn-pink-outline" onClick={toggleDeck} aria-pressed={playing}>
+            {playing ? "PAUSE" : "PLAY"}
+          </button>
+          <button type="button" className="btn-pink-outline" onClick={stop}>
+            STOP
+          </button>
         </div>
       </div>
       {flyer ? (

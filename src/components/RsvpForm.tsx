@@ -282,7 +282,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                   </select>
                 </Field>
                 </div>
-                <StepNav onNext={goNext} />
+                <StepNav onNext={goNext} disabled={!form.attend} />
               </div>
 
               <div className="rsvp-step rsvp-step-2 space-y-4">
@@ -539,10 +539,12 @@ function StepNav({
   onNext,
   onBack,
   nextLabel = "Continue",
+  disabled = false,
 }: {
   onNext: () => void;
   onBack?: () => void;
   nextLabel?: string;
+  disabled?: boolean;
 }) {
   return (
     <div className="rsvp-next flex gap-3">
@@ -551,7 +553,12 @@ function StepNav({
           Back
         </button>
       ) : null}
-      <button type="button" className="btn-green-solid min-h-12 flex-1 text-center text-base" onClick={onNext}>
+      <button
+        type="button"
+        className="btn-green-solid min-h-12 flex-1 text-center text-base disabled:cursor-not-allowed disabled:opacity-45"
+        onClick={onNext}
+        disabled={disabled}
+      >
         {nextLabel}
       </button>
     </div>

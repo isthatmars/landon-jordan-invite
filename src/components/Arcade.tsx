@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { arcadeScreen } from "@/lib/cutouts";
 import { ArcadeBackdrop } from "./ArcadeBackdrop";
 import { GamepadIcon, GreenSwoosh, NeonArrow } from "./icons";
@@ -18,7 +19,19 @@ export function Arcade({ headline }: { headline: string }) {
     return () => query.removeEventListener("change", sync);
   }, []);
 
-  const expanded = narrow && running;
+  const overlay = narrow && running;
+
+  useEffect(() => {
+    if (!overlay) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const blockScroll = (event: TouchEvent) => event.preventDefault();
+    document.addEventListener("touchmove", blockScroll, { passive: false });
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener("touchmove", blockScroll);
+    };
+  }, [overlay]);
   const parts = headline.replace("!", "").trim().split(/\s+/);
   const script = (
     <>
@@ -29,7 +42,7 @@ export function Arcade({ headline }: { headline: string }) {
   );
 
   return (
-    <section id="arcade" className={`scene-section relative overflow-hidden${expanded ? " is-playing" : ""}`}>
+    <section id="arcade" className="scene-section relative overflow-hidden">
       <ArcadeBackdrop />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
@@ -49,9 +62,18 @@ export function Arcade({ headline }: { headline: string }) {
                 START GAME
               </button>
             )}
+            {!overlay && running && (
+              <button
+                type="button"
+                className="btn-pink-outline mt-3 inline-flex min-h-12 items-center px-5 py-3 text-base font-bold tracking-[0.14em] md:min-h-0 md:px-4 md:py-1.5 md:text-xs"
+                onClick={() => setRunning(false)}
+              >
+                CLOSE GAME
+              </button>
+            )}
           </div>
 
-          <div className={`relative order-2 w-[78%] max-w-[520px] md:order-2 md:w-[48%]${expanded ? " w-full max-w-none" : ""}`}>
+          <div className="relative order-2 w-[78%] max-w-[520px] md:order-2 md:w-[48%]">
             <div className="floor-contact" />
             <div className="cab-lights" aria-hidden>
               <span className="cab-glint cab-glint-a" />
@@ -62,25 +84,21 @@ export function Arcade({ headline }: { headline: string }) {
             <div
               data-testid="arcade-screen"
               data-screen="arcade"
-              className={
-                expanded
-                  ? "relative z-20 mx-auto w-full max-w-[430px] bg-black"
-                  : "absolute z-20 overflow-hidden bg-black"
-              }
-              style={expanded ? undefined : arcadeScreen}
+              className="absolute z-20 overflow-hidden bg-black"
+              style={arcadeScreen}
             >
-              <PacManGame running={running} embed={!expanded} showPad={expanded} />
+              {!overlay && <PacManGame running={running} embed />}
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/prop-arcade-bartop.png"
               alt="Front-facing Pac-Man arcade cabinet"
-              className={`pointer-events-none relative z-10 block h-auto w-full${expanded ? " hidden" : ""}`}
+              className="pointer-events-none relative z-10 block h-auto w-full"
               draggable={false}
             />
           </div>
 
-          <div className={`relative order-3 w-[34%] max-w-[140px] shrink-0 md:w-[22%] md:max-w-[210px]${expanded ? " hidden" : ""}`}>
+          <div className="relative order-3 w-[34%] max-w-[140px] shrink-0 md:w-[22%] md:max-w-[210px]">
             <div className="floor-contact" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -92,6 +110,18 @@ export function Arcade({ headline }: { headline: string }) {
           </div>
         </div>
       </div>
+      {overlay &&
+        createPortal(
+          <div className="game-overlay" role="dialog" aria-modal="true" aria-label="Pac-Man">
+            <button type="button" className="game-close" aria-label="Close game" onClick={() => setRunning(false)}>
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+              </svg>
+            </button>
+            <PacManGame running showPad />
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }

@@ -9,9 +9,13 @@ import { CalendarIcon, ClockIcon, Crown, GreenSwoosh, PinIcon, PinkSwoosh } from
 
 export function Hero({ content }: { content: SiteContent }) {
   const dateParts = content.eventDate.trim().split(/\s+/);
-  const dateKicker = dateParts[0] ?? "";
-  const dateRestRaw = dateParts.slice(1).join(" ");
-  const dateRest = /2026/.test(dateRestRaw) ? dateRestRaw : dateRestRaw.replace(/19(?:TH|th)?/, "19, 2026");
+  const dateKicker = (dateParts[0] ?? "").replace(/,$/, "");
+  const dateRestRaw = dateParts.slice(1).join(" ").replace(/,$/, "");
+  const dateRest = (/2026/.test(dateRestRaw) ? dateRestRaw : dateRestRaw.replace(/19(?:TH|th)?/, "19, 2026")).replace(
+    /\bDEC\b/i,
+    "DECEMBER",
+  );
+  const addressLines = formatAddress(content.eventAddress);
   const chromeIsArt = content.heroChrome.trim().toLowerCase() === "80s";
 
   return (
@@ -74,7 +78,11 @@ export function Hero({ content }: { content: SiteContent }) {
           <span className="fact-rule" aria-hidden />
           <Fact icon={<PinIcon className="fact-icon" />}>
             <span className="fact-value">{content.eventVenue}</span>
-            <span className="fact-address">{content.eventAddress}</span>
+            {addressLines.map((line) => (
+              <span className="fact-address" key={line}>
+                {line}
+              </span>
+            ))}
           </Fact>
           <span className="fact-rule" aria-hidden />
           <Fact icon={<ClockIcon className="fact-icon" />}>
@@ -88,6 +96,18 @@ export function Hero({ content }: { content: SiteContent }) {
       </div>
     </section>
   );
+}
+
+function formatAddress(address: string) {
+  const parts = address.split(",").map((part) => part.trim()).filter(Boolean);
+  const title = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
+      .replace(/\bFl\b/g, "FL")
+      .replace(/\bRd\b/g, "Rd");
+  if (parts.length >= 2) return [title(parts[0]), title(parts.slice(1).join(", "))];
+  return [title(address)];
 }
 
 function Fact({ icon, children }: { icon: ReactNode; children: ReactNode }) {

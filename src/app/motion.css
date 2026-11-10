@@ -512,28 +512,18 @@
 
 .phone-prop {
   position: relative;
+  display: block;
   filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.5));
+  transform-origin: 50% 28%;
 }
 
-.phone-base,
-.phone-handset {
+.phone-photo {
   display: block;
   width: 100%;
   height: auto;
 }
 
-.phone-base {
-  clip-path: inset(27% 0 0 0);
-}
-
-.phone-handset {
-  position: absolute;
-  inset: 0;
-  clip-path: inset(0 0 67% 0);
-  transform-origin: 50% 42%;
-}
-
-.is-buzzing .phone-handset {
+.is-buzzing {
   animation: receiver-buzz 0.07s linear infinite;
 }
 
@@ -574,7 +564,7 @@
   .lineup-sweep::before,
   .lineup-neon,
   .lineup-pill,
-  .phone-handset {
+  .phone-prop {
     animation: none !important;
   }
 }

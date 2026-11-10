@@ -2904,6 +2904,47 @@ form[data-step="1"] .rsvp-step-1 {
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     0 14px 28px rgba(0, 0, 0, 0.35),
     0 0 0 1px rgba(255, 57, 200, 0.28);
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    background 0.28s ease,
+    filter 0.28s ease;
+}
+
+@media (hover: hover) {
+  .lineup-card:hover {
+    transform: translateY(-5px);
+    filter: brightness(1.08);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 34%),
+      linear-gradient(180deg, #351856 0%, #1a0c24 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 20px 36px rgba(0, 0, 0, 0.42),
+      0 0 0 1px rgba(255, 57, 200, 0.72),
+      0 0 30px rgba(255, 57, 200, 0.48);
+  }
+}
+
+.lineup-card:active {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 16px 30px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(255, 57, 200, 0.6),
+    0 0 22px rgba(255, 57, 200, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lineup-card {
+    transition: box-shadow 0.2s ease, background 0.2s ease, filter 0.2s ease;
+  }
+
+  .lineup-card:hover,
+  .lineup-card:active {
+    transform: none;
+  }
 }
 
 .lineup-card-icon {

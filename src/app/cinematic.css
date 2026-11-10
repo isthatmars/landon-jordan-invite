@@ -806,6 +806,27 @@ html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-pill {
   transition: filter 0.45s ease;
 }
 
+/* Schedule cards: stagger fade/rise when the section is first seen. */
+html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-card {
+  opacity: 0;
+  transform: translateY(14px);
+}
+html[data-seen-lineup="1"] #lineup .lineup-card {
+  /* backwards keeps pre-delay hidden; after the run, cascade wins so hover lift works. */
+  opacity: 1;
+  transform: none;
+  animation: rise-in 0.52s ease backwards;
+}
+html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(1) {
+  animation-delay: 0.12s;
+}
+html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(2) {
+  animation-delay: 0.34s;
+}
+html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(3) {
+  animation-delay: 0.56s;
+}
+
 /* RSVP: frame traces, script illuminates, phone appears. Fields stay readable. */
 html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-frame {
   border-color: rgba(255, 57, 200, 0.18);
@@ -898,5 +919,11 @@ html[data-live-rsvp="0"] #rsvp .neon-script-lg {
   html[data-seen-mixtape="1"] #mixtape .mix-stack {
     animation: none !important;
     transform: translateY(var(--mix-stack-sit, 0));
+  }
+  html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-card,
+  html[data-seen-lineup="1"] #lineup .lineup-card {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
   }
 }

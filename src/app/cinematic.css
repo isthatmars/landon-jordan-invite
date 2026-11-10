@@ -547,6 +547,12 @@ html[data-motion="armed"] #rsvp .neon-script-lg {
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
 }
+
+/* Masks clip text-shadow to the border box — leave RSVP title unmasked so neon flourishes show. */
+html[data-motion="armed"] #rsvp .rsvp-title {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
 html[data-motion="armed"] #mixtape .neon-script-lg,
 html[data-motion="armed"] #arcade .neon-script-lg {
   -webkit-mask-image:

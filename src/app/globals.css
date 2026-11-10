@@ -88,16 +88,17 @@ body {
     0 0 36px #ff39c8cc;
 }
 
-/* Keep RSVP script flourishes unclipped (ascenders/descenders + glow). */
+/* Keep RSVP script flourishes + neon glow unclipped. */
 #rsvp .rsvp-title,
 #rsvp .neon-script-lg {
-  line-height: 1.22;
-  padding-block: 0.18em 0.28em;
+  line-height: 1.35;
+  padding-block: 0.5em 0.62em;
   overflow: visible;
 }
 
 #rsvp .neon-frame,
-#rsvp .neon-frame > div {
+#rsvp .neon-frame > div,
+#rsvp .rsvp-title {
   overflow: visible;
 }
 

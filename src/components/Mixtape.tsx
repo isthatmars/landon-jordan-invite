@@ -42,34 +42,33 @@ export function Mixtape({ headline }: { headline: string }) {
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#05010f] via-transparent to-[#05010f]" />
 
-      <div className="relative z-10 mx-auto grid max-w-[1100px] items-center gap-6 px-3 py-6 sm:px-5 min-[640px]:grid-cols-[1.25fr_0.62fr] min-[640px]:py-8">
-        <div>
-          <div className="mb-3 flex items-end justify-center gap-1 min-[640px]:justify-start">
-            <h2 className="neon-script-lg text-center text-[1.85rem] leading-[0.95] min-[640px]:text-left sm:text-[2.35rem]">
+      <div className="relative z-10 mx-auto w-full max-w-[980px] px-3 pb-8 pt-24 sm:px-6 sm:pb-12 sm:pt-28">
+        <div className="relative mx-auto flex w-full max-w-[860px] items-end justify-center gap-2 sm:gap-6">
+          <div className="absolute bottom-full left-[34%] z-20 mb-1 flex items-end gap-1 sm:left-[46%] sm:mb-2">
+            <h2 className="neon-script-lg text-left text-[1.45rem] leading-[0.9] min-[640px]:text-[2.2rem]">
               {script}
             </h2>
-            <NeonArrow className="mb-1 h-8 w-11 shrink-0 drop-shadow-[0_0_8px_#ff4fd8]" />
+            <NeonArrow className="mb-0.5 h-7 w-9 shrink-0 drop-shadow-[0_0_8px_#ff4fd8] sm:h-9 sm:w-12" />
           </div>
-          <div className="relative mx-auto w-full max-w-[560px]" data-testid="boombox">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/prop-boombox-front.png"
-            alt="Chrome boombox with a cassette in the deck"
-            className="block h-auto w-full drop-shadow-[0_28px_30px_rgba(0,0,0,0.65)]"
-            draggable={false}
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/prop-headphones-80s.png"
-            alt=""
-            className="pointer-events-none absolute -left-1 bottom-[4%] w-[26%] drop-shadow-2xl min-[640px]:-left-4"
-            draggable={false}
-          />
-          </div>
-        </div>
 
-        <div className="flex justify-center min-[640px]:justify-end">
-          <div className="flex flex-col items-center pb-2">
+          <div className="relative w-[64%] max-w-[520px]" data-testid="boombox">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/prop-boombox-front.png"
+              alt="Chrome boombox with a cassette in the deck"
+              className="block h-auto w-full drop-shadow-[0_28px_30px_rgba(0,0,0,0.65)]"
+              draggable={false}
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/prop-headphones-80s.png"
+              alt=""
+              className="pointer-events-none absolute -left-1 bottom-[4%] w-[24%] drop-shadow-2xl sm:-left-3"
+              draggable={false}
+            />
+          </div>
+
+          <div className="w-[34%] max-w-[220px] shrink-0 pb-1">
             {stack.map((track, index) => (
               <Cassette
                 key={track.id}

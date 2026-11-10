@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       subject: `Reminder: ${content.eventDate} at ${content.eventVenue}`,
       html: neonEmailTemplate({
         headline: "See you on the floor!",
-        bodyHtml: `<p>Hey ${g.fullName},</p><p>Quick reminder — <strong>${content.eventDate}</strong> · ${content.eventVenue} · ${content.eventTime}</p><p>Dress code: ${content.dressCode}</p>`,
+        bodyHtml: `<p>Hey ${g.fullName},</p><p>Quick reminder — <strong>${content.eventDate}</strong> · ${content.eventTime}</p><p>${content.eventVenue}<br/>${content.eventAddress}</p><p>Dress code: ${content.dressCode}</p>`,
         ctaLabel: "Open Invite",
         ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
       }),

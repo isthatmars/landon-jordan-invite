@@ -44,7 +44,7 @@ export async function PATCH(request: Request) {
       subject: `Reminder — ${content.brandName} 80s Party`,
       html: neonEmailTemplate({
         headline: "You're still invited!",
-        bodyHtml: `<p>Hey ${rsvp.fullName},</p><p>Just a friendly nudge for <strong>${content.eventDate}</strong> at <strong>${content.eventVenue}</strong> (${content.eventTime}).</p>`,
+        bodyHtml: `<p>Hey ${rsvp.fullName},</p><p>Just a friendly nudge for <strong>${content.eventDate}</strong> at <strong>${content.eventVenue}</strong> (${content.eventTime}).</p><p>${content.eventAddress}</p>`,
         ctaLabel: "Open Invite",
         ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
       }),
@@ -89,11 +89,17 @@ export async function POST(request: Request) {
   await updateStore((s) => {
     s.rsvps.unshift({
       id,
+      firstName: body.firstName || "New",
+      lastName: body.lastName || "Guest",
       fullName: body.fullName || "New Guest",
       attend: body.attend || "yes",
       guestCount: Number(body.guestCount) || 1,
+      companions: [],
       phone: body.phone || "",
       email: body.email || "",
+      dietary: "",
+      dietaryNotes: "",
+      anythingElse: "",
       specialRequests: "",
       status: body.status || "pending",
       createdAt: now,

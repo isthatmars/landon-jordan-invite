@@ -31,6 +31,7 @@ export async function PUT(request: Request) {
       if (typeof body.artist === "string") v.artist = body.artist;
       if (typeof body.posterUrl === "string") v.posterUrl = body.posterUrl;
       if (typeof body.videoUrl === "string") v.videoUrl = body.videoUrl;
+      if (typeof body.youtubeId === "string") v.youtubeId = body.youtubeId;
       if (typeof body.sortOrder === "number") v.sortOrder = body.sortOrder;
     });
   } else {
@@ -39,6 +40,7 @@ export async function PUT(request: Request) {
       title: body.title || "New Video",
       artist: body.artist || "Unknown",
       posterUrl: body.posterUrl || "/images/crt-tv.jpg",
+      youtubeId: body.youtubeId || "",
       videoUrl: body.videoUrl || "",
       sortOrder: body.sortOrder || 99,
     };

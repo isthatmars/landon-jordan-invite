@@ -26,10 +26,10 @@ const body = Outfit({
 export const metadata: Metadata = {
   title: "Landon & Jordan's 80s Birthday Party",
   description:
-    "You're invited to Landon & Jordan's 80s Birthday Party — Friday Dec 19th at The Rink, Miami.",
+    "You're invited to Landon & Jordan's 80s Birthday Party — Saturday, December 19th, 6pm to midnight at Xtreme Action Park, Fort Lauderdale.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"

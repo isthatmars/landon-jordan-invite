@@ -269,6 +269,7 @@ export function AdminApp() {
                 ["heroInvite", "Invite line"],
                 ["eventDate", "Date"],
                 ["eventVenue", "Venue"],
+                ["eventAddress", "Address"],
                 ["eventTime", "Time"],
                 ["mixtapeHeadline", "Mixtape headline"],
                 ["watchHeadline", "Watch headline"],

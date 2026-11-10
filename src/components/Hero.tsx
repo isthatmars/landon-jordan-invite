@@ -112,7 +112,11 @@ export function Hero({ content }: { content: SiteContent }) {
         >
           <div className="flex flex-col gap-3 text-sm font-semibold tracking-wide sm:flex-row sm:gap-8">
             <Detail label={content.eventDate} kind="date" />
-            <Detail label={content.eventVenue} kind="pin" />
+            <Detail
+              label={content.eventVenue}
+              detail={content.eventAddress}
+              kind="pin"
+            />
             <Detail label={content.eventTime} kind="time" />
           </div>
           <a href="#rsvp" className="btn-green whitespace-nowrap text-center">
@@ -126,9 +130,11 @@ export function Hero({ content }: { content: SiteContent }) {
 
 function Detail({
   label,
+  detail,
   kind,
 }: {
   label: string;
+  detail?: string;
   kind: "date" | "pin" | "time";
 }) {
   const icon =
@@ -152,7 +158,14 @@ function Detail({
       <span className="text-neon-pink" aria-hidden>
         {icon}
       </span>
-      <span>{label}</span>
+      <span>
+        <span className="block">{label}</span>
+        {detail ? (
+          <span className="block text-[11px] font-medium tracking-normal text-violet-200/90">
+            {detail}
+          </span>
+        ) : null}
+      </span>
     </div>
   );
 }

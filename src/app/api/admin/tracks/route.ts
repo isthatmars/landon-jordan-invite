@@ -30,6 +30,7 @@ export async function PUT(request: Request) {
       if (typeof body.title === "string") t.title = body.title;
       if (typeof body.artist === "string") t.artist = body.artist;
       if (typeof body.audioUrl === "string") t.audioUrl = body.audioUrl;
+      if (typeof body.youtubeId === "string") t.youtubeId = body.youtubeId;
       if (typeof body.color === "string") t.color = body.color;
       if (typeof body.sortOrder === "number") t.sortOrder = body.sortOrder;
     });
@@ -39,7 +40,8 @@ export async function PUT(request: Request) {
       title: body.title || "New Track",
       artist: body.artist || "Unknown",
       color: body.color || "#ec4899",
-      audioUrl: body.audioUrl || "/audio/beat-it.wav",
+      youtubeId: body.youtubeId || "",
+      audioUrl: body.audioUrl || "",
       sortOrder: body.sortOrder || 99,
     };
     await updateStore((s) => {

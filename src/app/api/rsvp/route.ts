@@ -50,11 +50,17 @@ export async function POST(request: Request) {
       } else {
         s.rsvps.unshift({
           id: draftId,
+          firstName: body.firstName || "",
+          lastName: body.lastName || "",
           fullName: body.fullName || "",
           attend: (body.attend as AttendStatus) || "yes",
           guestCount: Number(body.guestCount) || 1,
+          companions: Array.isArray(body.companions) ? body.companions : [],
           phone: body.phone || "",
           email: body.email || "",
+          dietary: body.dietary || "",
+          dietaryNotes: body.dietaryNotes || "",
+          anythingElse: body.anythingElse || "",
           specialRequests: body.specialRequests || "",
           status: "incomplete",
           createdAt: now,
@@ -92,11 +98,17 @@ export async function POST(request: Request) {
   const id = (body.id as string) || uid("rsvp");
   const record: RsvpRecord = {
     id,
+    firstName: String(body.firstName || fullName.split(" ")[0] || "").trim(),
+    lastName: String(body.lastName || fullName.split(" ").slice(1).join(" ") || "").trim(),
     fullName,
     attend,
     guestCount: Math.max(1, Number(body.guestCount) || 1),
+    companions: Array.isArray(body.companions) ? body.companions : [],
     phone: String(body.phone || "").trim(),
     email,
+    dietary: body.dietary === "yes" || body.dietary === "no" ? body.dietary : "",
+    dietaryNotes: String(body.dietaryNotes || "").trim(),
+    anythingElse: body.anythingElse === "yes" || body.anythingElse === "no" ? body.anythingElse : "",
     specialRequests: String(body.specialRequests || "").trim(),
     status: attendToStatus(attend),
     confirmationSentAt: null,
@@ -122,7 +134,7 @@ export async function POST(request: Request) {
   const content = (await getStore()).content;
   const guestHtml = neonEmailTemplate({
     headline: "You're on the list!",
-    bodyHtml: `<p>Hey ${fullName},</p><p>We got your RSVP for <strong>${content.heroScript} ${content.heroChrome} ${content.heroSubtitle}</strong>.</p><p><strong>${content.eventDate}</strong><br/>${content.eventVenue}<br/>${content.eventTime}</p><p>Status: <strong>${record.status}</strong> · Guests: ${record.guestCount}</p>`,
+    bodyHtml: `<p>Hey ${fullName},</p><p>We got your RSVP for <strong>${content.heroScript} ${content.heroChrome} ${content.heroSubtitle}</strong>.</p><p><strong>${content.eventDate}</strong><br/>${content.eventTime}<br/>${content.eventVenue}<br/>${content.eventAddress}</p><p>Status: <strong>${record.status}</strong> · Guests: ${record.guestCount}</p>`,
     ctaLabel: "View Invite",
     ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   });

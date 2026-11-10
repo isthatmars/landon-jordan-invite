@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import type { VideoItem } from "@/lib/types";
 import { useLightParallax } from "./Parallax";
+import { YoutubeScreen, type YoutubeHandle } from "./YoutubeScreen";
 
 export function Watch({
   headline,
@@ -15,9 +16,25 @@ export function Watch({
 }) {
   const sorted = [...videos].sort((a, b) => a.sortOrder - b.sortOrder);
   const [active, setActive] = useState(sorted[0] || null);
-  const [browsing, setBrowsing] = useState(false);
+  const [browsing, setBrowsing] = useState(true);
   const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [staticOn, setStaticOn] = useState(false);
+  const screenRef = useRef<YoutubeHandle>(null);
   const sectionRef = useRef<HTMLElement>(null);
+
+  const tuneTo = (video: (typeof sorted)[number]) => {
+    setStaticOn(true);
+    setActive(video);
+    setPlaying(true);
+    window.setTimeout(() => setStaticOn(false), 420);
+  };
+
+  const changeChannel = (dir: -1 | 1) => {
+    if (!sorted.length) return;
+    const index = Math.max(0, sorted.findIndex((v) => v.id === active?.id));
+    tuneTo(sorted[(index + dir + sorted.length) % sorted.length]);
+  };
   const light = useLightParallax();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -54,35 +71,21 @@ export function Watch({
               className="relative z-[2] h-auto w-full drop-shadow-[0_30px_60px_#000c]"
             />
             {/* Screen inset overlay */}
-            <div className="absolute left-[14%] right-[14%] top-[18%] bottom-[28%] z-[3] overflow-hidden rounded-sm crt-scanlines">
-              {active?.videoUrl && playing ? (
-                <video
-                  key={active.id}
-                  src={active.videoUrl}
-                  className="h-full w-full object-cover"
-                  controls
-                  autoPlay
-                  onEnded={() => setPlaying(false)}
+            <div className="absolute left-[14%] right-[14%] top-[18%] bottom-[28%] z-[3] overflow-hidden rounded-sm bg-black crt-scanlines">
+              {active?.youtubeId ? (
+                <YoutubeScreen
+                  ref={screenRef}
+                  videoId={active.youtubeId}
+                  title={`${active.artist} — ${active.title}`}
+                  onEnded={() => changeChannel(1)}
+                  onPlayingChange={setPlaying}
                 />
-              ) : (
-                <>
-                  <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-700/50 via-purple-900/70 to-black" />
-                  <button
-                    type="button"
-                    onClick={() => setPlaying(true)}
-                    className="absolute inset-0 flex items-center justify-center"
-                    aria-label="Play video"
-                  >
-                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/85 text-xl text-black shadow-[0_0_30px_#fff8]">
-                      ▶
-                    </span>
-                  </button>
-                  {playing && !active?.videoUrl && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/75 p-4 text-center text-xs text-violet-200">
-                      Add a videoUrl in Admin → Videos
-                    </div>
-                  )}
-                </>
+              ) : null}
+              {staticOn && (
+                <div
+                  className="absolute inset-0 z-10 animate-pulse bg-[repeating-linear-gradient(0deg,#111_0px,#111_2px,#333_3px)] opacity-80"
+                  aria-hidden
+                />
               )}
             </div>
             <Image
@@ -110,7 +113,42 @@ export function Watch({
         </motion.div>
 
         <div>
-          <h2 className="neon-script-lg mb-6 text-4xl sm:text-5xl">{headline}</h2>
+          <h2 className="neon-script-lg mb-4 text-4xl sm:text-5xl">{headline}</h2>
+          <p className="mb-4 max-w-md text-sm text-violet-100">
+            The party mix: the cassette songs, plus a few more videos in that same lane.
+          </p>
+          <div className="mb-4 flex flex-wrap gap-2">
+            <button type="button" className="btn-pink-outline px-3 py-2 text-xs" onClick={() => changeChannel(-1)}>
+              ⏮ BACK
+            </button>
+            <button type="button" className="btn-pink-outline px-3 py-2 text-xs" onClick={() => screenRef.current?.replay()}>
+              ↺ REPLAY
+            </button>
+            <button
+              type="button"
+              className="btn-green text-sm"
+              onClick={() => {
+                if (playing) screenRef.current?.pause();
+                else screenRef.current?.play();
+              }}
+            >
+              {playing ? "❚❚ PAUSE" : "▶ PLAY"}
+            </button>
+            <button type="button" className="btn-pink-outline px-3 py-2 text-xs" onClick={() => changeChannel(1)}>
+              NEXT ⏭
+            </button>
+            <button
+              type="button"
+              className="btn-pink-outline px-3 py-2 text-xs"
+              onClick={() => {
+                const next = !muted;
+                setMuted(next);
+                screenRef.current?.mute(next);
+              }}
+            >
+              {muted ? "UNMUTE" : "MUTE"}
+            </button>
+          </div>
           <button
             type="button"
             className="btn-pink-outline inline-flex items-center gap-2 text-sm font-bold tracking-widest"
@@ -130,10 +168,7 @@ export function Watch({
                   <li key={v.id}>
                     <button
                       type="button"
-                      onClick={() => {
-                        setActive(v);
-                        setPlaying(false);
-                      }}
+                      onClick={() => tuneTo(v)}
                       className={`w-full border-b px-1 py-3 text-left transition ${
                         active?.id === v.id
                           ? "border-neon-pink text-neon-pink"

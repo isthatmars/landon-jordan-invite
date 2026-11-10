@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Track } from "@/lib/types";
 import { Cassette, CassetteStackHeight } from "./Cassette";
 import { useLightParallax } from "./Parallax";
+import { YoutubeScreen, type YoutubeHandle } from "./YoutubeScreen";
 
 export function Mixtape({
   headline,
@@ -15,13 +16,15 @@ export function Mixtape({
   tracks: Track[];
 }) {
   const sorted = [...tracks].sort((a, b) => a.sortOrder - b.sortOrder);
-  const [activeId, setActiveId] = useState<string | null>(sorted[0]?.id ?? null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [insertingId, setInsertingId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const screenRef = useRef<YoutubeHandle>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const light = useLightParallax();
-  const active = sorted.find((t) => t.id === activeId) || sorted[0];
+  const active = sorted.find((t) => t.id === activeId) ?? null;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -31,35 +34,42 @@ export function Mixtape({
   const propY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["6%", "-6%"]);
 
   useEffect(() => {
-    const el = audioRef.current;
-    if (!el || !active) return;
-    el.src = active.audioUrl;
-    el.load();
-    if (playing) {
-      void el.play().catch(() => setPlaying(false));
-    }
-  }, [active?.id, active?.audioUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!playing) return;
+    const timer = window.setInterval(() => {
+      const time = screenRef.current?.readTime();
+      if (!time) return;
+      setProgress(time.current);
+      setDuration(time.duration);
+    }, 400);
+    return () => window.clearInterval(timer);
+  }, [playing, activeId]);
 
   const selectTape = (id: string) => {
     setInsertingId(id);
     setActiveId(id);
     setPlaying(true);
+    setProgress(0);
     window.setTimeout(() => setInsertingId(null), 700);
   };
 
-  const togglePlay = async () => {
-    const el = audioRef.current;
-    if (!el) return;
+  const step = (dir: -1 | 1) => {
+    if (!sorted.length) return;
+    const index = Math.max(0, sorted.findIndex((t) => t.id === activeId));
+    const next = sorted[(index + dir + sorted.length) % sorted.length];
+    selectTape(next.id);
+  };
+
+  const togglePlay = () => {
+    if (!active) {
+      if (sorted[0]) selectTape(sorted[0].id);
+      return;
+    }
     if (playing) {
-      el.pause();
+      screenRef.current?.pause();
       setPlaying(false);
     } else {
-      try {
-        await el.play();
-        setPlaying(true);
-      } catch {
-        setPlaying(false);
-      }
+      screenRef.current?.play();
+      setPlaying(true);
     }
   };
 
@@ -92,9 +102,20 @@ export function Mixtape({
               height={560}
               className="h-auto w-full drop-shadow-[0_30px_50px_#000c]"
             />
-            <div className="pointer-events-none absolute left-[28%] top-[42%] flex gap-8 sm:left-[30%] sm:top-[44%] sm:gap-12">
-              <DeckReel spinning={playing} />
-              <DeckReel spinning={playing} />
+            <div className="absolute left-[31%] top-[40%] z-20 h-[18%] w-[30%] overflow-hidden rounded-sm bg-black shadow-[inset_0_0_12px_#000]">
+              {active?.youtubeId ? (
+                <YoutubeScreen
+                  ref={screenRef}
+                  videoId={active.youtubeId}
+                  title={`${active.artist} — ${active.title}`}
+                  onEnded={() => step(1)}
+                  onPlayingChange={setPlaying}
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center px-2 text-center text-[10px] uppercase tracking-widest text-zinc-400">
+                  Deck empty
+                </div>
+              )}
             </div>
             <AnimatePresence>
               {insertingId && active && (
@@ -144,11 +165,51 @@ export function Mixtape({
                 </motion.p>
               </AnimatePresence>
             </div>
-            <button type="button" onClick={togglePlay} className="btn-green text-sm">
-              {playing ? "❚❚ PAUSE" : "▶ PLAY"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="btn-pink-outline px-3 py-2 text-xs" onClick={() => step(-1)}>
+                ⏮ PREV
+              </button>
+              <button type="button" className="btn-pink-outline px-3 py-2 text-xs" onClick={() => screenRef.current?.replay()}>
+                ↺ REPLAY
+              </button>
+              <button type="button" onClick={togglePlay} className="btn-green text-sm">
+                {playing ? "❚❚ PAUSE" : "▶ PLAY"}
+              </button>
+              <button
+                type="button"
+                className="btn-pink-outline px-3 py-2 text-xs"
+                onClick={() => {
+                  screenRef.current?.stop();
+                  setPlaying(false);
+                  setProgress(0);
+                }}
+              >
+                ■ STOP
+              </button>
+              <button type="button" className="btn-pink-outline px-3 py-2 text-xs" onClick={() => step(1)}>
+                NEXT ⏭
+              </button>
+            </div>
           </div>
-          <audio ref={audioRef} preload="none" onEnded={() => setPlaying(false)} className="hidden" />
+          <label className="mt-3 block">
+            <span className="sr-only">Playback position</span>
+            <input
+              type="range"
+              min={0}
+              max={duration || 0}
+              step={0.1}
+              value={Math.min(progress, duration || 0)}
+              onChange={(e) => {
+                const next = Number(e.target.value);
+                setProgress(next);
+                screenRef.current?.seek(next);
+              }}
+              className="w-full accent-pink-500"
+            />
+          </label>
+          <p className="mt-1 text-[11px] text-violet-300">
+            Official video plays in the deck. {formatTime(progress)} / {formatTime(duration)}
+          </p>
         </motion.div>
 
         {/* Physical cassette pile on the table */}
@@ -194,13 +255,10 @@ export function Mixtape({
   );
 }
 
-function DeckReel({ spinning }: { spinning: boolean }) {
-  return (
-    <motion.span
-      className="block h-5 w-5 rounded-full border border-zinc-400/80 bg-zinc-300/40 sm:h-7 sm:w-7"
-      animate={spinning ? { rotate: 360 } : { rotate: 0 }}
-      transition={spinning ? { duration: 0.9, repeat: Infinity, ease: "linear" } : undefined}
-      style={{ boxShadow: spinning ? "0 0 12px #39ff14" : undefined }}
-    />
-  );
+function formatTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0:00";
+  const whole = Math.floor(seconds);
+  const min = Math.floor(whole / 60);
+  const sec = String(whole % 60).padStart(2, "0");
+  return `${min}:${sec}`;
 }

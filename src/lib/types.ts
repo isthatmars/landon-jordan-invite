@@ -7,13 +7,30 @@ export type RsvpStatus =
   | "pending"
   | "incomplete";
 
+/** Someone coming with the person who filled out the form. Both names are required. */
+export interface PartyPerson {
+  firstName: string;
+  lastName: string;
+}
+
 export interface RsvpRecord {
   id: string;
+  firstName: string;
+  lastName: string;
+  /** firstName + lastName, kept so older admin and email code can greet them. */
   fullName: string;
   attend: AttendStatus;
+  /**
+   * Named people on the door list, including the person who submitted.
+   * 0 when they cannot attend. This is the headcount, not the number of forms.
+   */
   guestCount: number;
+  companions: PartyPerson[];
   phone: string;
   email: string;
+  dietary: "yes" | "no" | "";
+  dietaryNotes: string;
+  anythingElse: "yes" | "no" | "";
   specialRequests: string;
   status: RsvpStatus;
   confirmationSentAt?: string | null;
@@ -42,6 +59,7 @@ export interface SiteContent {
   heroInvite: string;
   eventDate: string;
   eventVenue: string;
+  eventAddress: string;
   eventTime: string;
   mixtapeHeadline: string;
   watchHeadline: string;
@@ -63,6 +81,8 @@ export interface Track {
   title: string;
   artist: string;
   color: string;
+  /** Official YouTube video. The boombox plays this inside the deck. */
+  youtubeId: string;
   audioUrl: string;
   sortOrder: number;
 }
@@ -71,9 +91,9 @@ export interface VideoItem {
   id: string;
   title: string;
   artist: string;
-  /** Placeholder poster or thumbnail path */
   posterUrl: string;
-  /** Placeholder video URL — swap later */
+  /** Official YouTube video played inside the television. */
+  youtubeId: string;
   videoUrl: string;
   sortOrder: number;
 }

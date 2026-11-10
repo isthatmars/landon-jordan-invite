@@ -652,6 +652,13 @@ body {
   order: 2;
 }
 
+@media (max-width: 859px) {
+  .hero-people {
+    /* Soles sit a little above the cutout edge. Nudge them onto the floor line. */
+    transform: translateY(20px);
+  }
+}
+
 .hero-couple {
   position: relative;
   z-index: 1;
@@ -844,14 +851,34 @@ body {
 }
 
 @media (min-width: 860px) {
+  .hero-scene {
+    min-height: 100svh;
+  }
+
+  /* The dark floor edge in the photo sits at 70.6% of its height.
+     A 102% tall, bottom-anchored cover puts that edge at 70% of the
+     scene, which is where the couple's feet are placed. */
+  .hero-bg {
+    top: auto;
+    bottom: 0;
+    height: 102%;
+    object-position: center bottom;
+  }
+
   .hero-frame {
-    padding: 5.7rem 1.25rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 100svh;
+    padding: 5.4rem 1.5rem 1.15rem;
   }
 
   .hero-stage {
+    position: static;
+    flex: 1;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 0.35rem;
   }
 
@@ -861,8 +888,21 @@ body {
   }
 
   .hero-people {
-    width: min(46%, 36rem);
+    position: absolute;
+    z-index: 3;
+    left: 1.5rem;
+    bottom: calc(30% - 42px);
+    width: min(40vw, 32rem, max(14rem, calc((70svh - 7.5rem) * 0.83)));
     flex: none;
+  }
+
+  .floor-contact {
+    left: 1%;
+    right: 2%;
+    bottom: 0.55rem;
+    height: 1.35rem;
+    background: rgba(0, 0, 0, 0.88);
+    filter: blur(7px);
   }
 
   .hero-copy {
@@ -889,25 +929,32 @@ body {
   }
 
   .hero-facts {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 0.85rem;
-    width: min(100%, 28rem);
-    margin-top: 1.15rem;
+    justify-content: stretch;
+    gap: 0;
+    width: 100%;
+    margin-top: 0.4rem;
+    padding: 0.95rem 1.2rem;
   }
 
   .hero-fact {
-    flex: 1;
-    justify-content: center;
+    flex: 1 1 0;
+    justify-content: start;
   }
 
   .fact-rule {
-    display: none;
+    display: block;
+    flex: none;
     width: 1px;
     align-self: stretch;
     min-height: 2.75rem;
-    background: rgba(255, 255, 255, 0.3);
+    margin: 0.15rem 1.15rem;
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  }
+
+  .hero-frame .btn-rsvp-now {
+    margin-top: 0.8rem;
   }
 
   .fact-icon {

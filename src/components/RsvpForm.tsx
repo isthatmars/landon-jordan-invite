@@ -274,9 +274,9 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   };
 
   return (
-    <section id="rsvp" className="bg-[#07010f] px-3 pb-6 pt-2 sm:px-5">
+    <section id="rsvp" className="bg-[#07010f] px-3 pt-2 sm:px-5">
       <div className="neon-frame mx-auto max-w-[1100px] bg-[#0b0615ee] p-4 sm:p-8 md:p-10">
-        <div className="grid items-start gap-6 md:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] md:gap-8 lg:gap-12">
+        <div className="rsvp-frame-grid grid items-stretch gap-6 md:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] md:gap-8 lg:gap-12">
           <div className="pt-2 text-center md:pt-6">
             <Crown className="icon-shake mx-auto h-10 w-14 drop-shadow-[0_0_12px_#ffc44d] sm:h-12 sm:w-16" />
             <h2 className="neon-script-lg rsvp-title text-6xl sm:text-7xl">{content.rsvpHeadline}</h2>
@@ -288,6 +288,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
 
           <form id="rsvp-form" data-step={step} onSubmit={onSubmit} noValidate className="rsvp-steps space-y-4">
             <div className="rsvp-step rsvp-step-1 space-y-4">
+              <div className="rsvp-attend-block">
               <p className="rsvp-ask">Are you able to attend?</p>
               <div id="rsvp-attend" data-testid="rsvp-attend" className="rsvp-attend">
                 <ChoiceButton
@@ -306,6 +307,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                 >
                   Sorry, I can&apos;t make it this time.
                 </ChoiceButton>
+              </div>
               </div>
             </div>
 

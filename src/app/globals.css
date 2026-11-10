@@ -184,6 +184,13 @@ body {
 #lineup,
 #rsvp {
   --plate-z: 1;
+  /* One scene per viewport; grow when content is taller (lineup/RSVP). */
+  width: 100%;
+  min-height: 100svh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  /* Safe interaction margin under sticky/parallax plate overlap. */
+  --section-pad-bottom: clamp(5.75rem, 14vh, 9.5rem);
 }
 
 #home {
@@ -861,7 +868,7 @@ body {
   padding:
     calc(5.2rem + env(safe-area-inset-top))
     max(1.1rem, env(safe-area-inset-right))
-    clamp(2.75rem, 7vw, 4.75rem)
+    var(--section-pad-bottom, clamp(5.75rem, 14vh, 9.5rem))
     max(1.1rem, env(safe-area-inset-left));
 }
 
@@ -1145,8 +1152,9 @@ body {
     flex-direction: column;
     justify-content: flex-end;
     min-height: 100svh;
-    /* Match mixtape top pad; also lifts facts + RSVP (~half the empty floor gap). */
-    padding: 5.4rem 1.5rem clamp(2.75rem, 7vw, 4.75rem);
+    min-height: 100dvh;
+    /* Match mixtape top pad; leave bottom clearance for sticky plate overlap. */
+    padding: 5.4rem 1.5rem var(--section-pad-bottom, clamp(5.75rem, 14vh, 9.5rem));
   }
 
   .hero-stage {
@@ -1447,9 +1455,10 @@ body {
   width: max-content;
   max-width: calc(100vw - 48px);
   flex: none;
-  padding: 1.6rem 1.8rem 1.35rem;
+  padding: 1.85rem 2rem 1.55rem;
   text-align: center;
-  font-size: clamp(2.2rem, 8vw, 2.85rem);
+  /* ~50% larger than prior clamp(2.2rem…2.85rem) so glow stays readable. */
+  font-size: clamp(3.3rem, 12vw, 4.275rem);
   line-height: 0.95;
   overflow: visible;
   color: #fff7fc;
@@ -1724,9 +1733,10 @@ body {
 
   .mix-script h2 {
     max-width: none;
-    padding: 1.75rem 2rem 1.45rem;
+    padding: 2rem 2.25rem 1.7rem;
     text-align: center;
-    font-size: clamp(2.85rem, 4.5vw, 3.6rem);
+    /* ~50% larger than prior clamp(2.85rem…3.6rem). */
+    font-size: clamp(4.275rem, 6.75vw, 5.4rem);
   }
 
   .mix-arrow {
@@ -1997,13 +2007,21 @@ body {
 
 #mixtape {
   padding-top: clamp(4.25rem, 10vw, 7rem);
-  padding-bottom: clamp(1.5rem, 4vw, 2.75rem);
+  padding-bottom: var(--section-pad-bottom);
 }
 
 #watch,
 #arcade {
   padding-top: clamp(3.5rem, 8vw, 5.75rem);
-  padding-bottom: clamp(2.25rem, 6vw, 4rem);
+  padding-bottom: var(--section-pad-bottom);
+}
+
+#lineup {
+  padding-bottom: var(--section-pad-bottom);
+}
+
+#rsvp {
+  padding-bottom: var(--section-pad-bottom);
 }
 
 #arcade {
@@ -2098,20 +2116,27 @@ body {
   z-index: 2;
   width: 100%;
   text-align: center;
+  overflow: visible;
+  padding-top: 0.55rem;
+  padding-inline: 0.35rem;
 }
 
 .watch-title {
   margin: 0;
+  overflow: visible;
+  padding-block: 0.28em 0.18em;
+  padding-inline: 0.2em;
 }
 
 .watch-line {
   display: block;
   white-space: nowrap;
+  overflow: visible;
 }
 
 .watch-line-lead {
   color: #ffc44d;
-  font-size: clamp(2.6rem, 9vw, 3.3rem);
+  font-size: clamp(3.1rem, 10.5vw, 3.95rem);
   line-height: 0.92;
   text-shadow:
     0 0 1px #fff6d8,
@@ -2120,7 +2145,7 @@ body {
 }
 
 .watch-line-hero {
-  font-size: clamp(4.4rem, 16vw, 5.6rem);
+  font-size: clamp(5.2rem, 18.5vw, 6.7rem);
   line-height: 0.86;
   text-shadow:
     0 0 1px #fff,
@@ -2132,7 +2157,7 @@ body {
 .watch-line-rest {
   margin-top: 0.08em;
   color: #38d9ff;
-  font-size: clamp(1.85rem, 6.4vw, 2.35rem);
+  font-size: clamp(2.2rem, 7.5vw, 2.85rem);
   line-height: 0.95;
   text-shadow:
     0 0 1px #fff,
@@ -2147,28 +2172,44 @@ body {
   margin: 0.2rem auto 0;
 }
 
-.watch-cta {
-  /* Keep neon title separate from Browse Videos */
-  margin-top: 3.25rem;
-  min-height: 3rem;
-  padding: 0.65rem 1.15rem;
-  font-size: 0.95rem;
-  letter-spacing: 0.14em;
-}
-
 .watch-list {
-  margin: 0.85rem auto 0;
+  margin: 1.65rem auto 0;
   width: min(100%, 34rem);
   max-width: none;
-  max-height: 11rem;
+  max-height: 12.5rem;
   overflow: auto;
   text-align: left;
   border-radius: 0.85rem;
   background: rgba(198, 255, 0, 0.28);
   border: 2px solid #c6ff00;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
-  padding: 0.2rem 0.85rem 0.35rem;
+  padding: 0;
   color: #fff;
+}
+
+.watch-browse-label {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0.7rem 0.95rem 0.45rem;
+  background: rgba(18, 28, 0, 0.72);
+  color: #f4ffe8;
+  font-family: var(--font-nav), sans-serif;
+  font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.28rem);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(198, 255, 0, 0.45);
+  border-bottom: 1px solid rgba(198, 255, 0, 0.45);
+  pointer-events: none;
+}
+
+.watch-list-items {
+  margin: 0;
+  padding: 0.15rem 0.85rem 0.4rem;
+  list-style: none;
 }
 
 .watch-list-item,
@@ -2215,7 +2256,7 @@ body {
     /* Reference lockup: the CRT sits on the table, type and skate beside it. */
     --watch-tv-w: min(38vw, 560px);
     padding-top: clamp(2rem, 6vh, 3.75rem);
-    padding-bottom: clamp(0.5rem, 2vh, 1.25rem);
+    padding-bottom: var(--section-pad-bottom);
   }
 
   #watch .watch-bg {
@@ -2280,15 +2321,15 @@ body {
   }
 
   #watch .watch-line-lead {
-    font-size: clamp(2.55rem, 3.25vw, 3.7rem);
+    font-size: clamp(3.05rem, 3.9vw, 4.4rem);
   }
 
   #watch .watch-line-hero {
-    font-size: clamp(4.85rem, 6.6vw, 7.55rem);
+    font-size: clamp(5.8rem, 7.9vw, 9.05rem);
   }
 
   #watch .watch-line-rest {
-    font-size: clamp(1.85rem, 2.35vw, 2.7rem);
+    font-size: clamp(2.2rem, 2.8vw, 3.25rem);
   }
 
   #watch .watch-swoosh {
@@ -2297,19 +2338,15 @@ body {
     margin: 0.25rem 0 0 0.1rem;
   }
 
-  #watch .watch-cta {
-    margin-top: 3.1rem;
-    margin-left: 0.05rem;
-    min-height: 3rem;
-    padding: 0.65rem 1.2rem;
-    font-size: 0.98rem;
-    letter-spacing: 0.14em;
-  }
-
   #watch .watch-list {
     width: min(34rem, 100%);
     max-width: min(34rem, 48vw);
+    margin-top: 1.55rem;
     margin-left: 0;
+  }
+
+  #watch .watch-browse-label {
+    font-size: clamp(1.12rem, 0.2rem + 0.85vw, 1.35rem);
   }
 
   #watch .watch-skate {
@@ -2567,7 +2604,7 @@ body {
 
 @media (max-width: 767px) {
   #rsvp {
-    padding: 24px 16px max(32px, env(safe-area-inset-bottom));
+    padding: 24px 16px max(var(--section-pad-bottom), env(safe-area-inset-bottom));
   }
 
   #rsvp .neon-script-lg {
@@ -2586,7 +2623,7 @@ body {
   }
 
   #lineup {
-    padding: 32px 16px;
+    padding: 32px 16px var(--section-pad-bottom);
   }
 
   #lineup h3 {
@@ -2618,6 +2655,20 @@ form[data-step="3"] .rsvp-step-3 {
     width: 100%;
     margin-top: 0.35rem;
   }
+}
+
+.rsvp-frame-grid {
+  min-height: min(32rem, 58svh);
+}
+
+.rsvp-attend-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  padding-bottom: clamp(2.5rem, 6vh, 4.5rem);
 }
 
 .rsvp-attend {
@@ -2742,10 +2793,32 @@ form[data-step="3"] .rsvp-step-3 {
   text-transform: uppercase;
 }
 
+form[data-step="1"].rsvp-steps {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  min-height: 100%;
+}
+
 form[data-step="1"] .rsvp-step-1 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: min(22rem, 48svh);
+}
+
+@media (min-width: 768px) {
+  .rsvp-frame-grid {
+    min-height: min(36rem, 62svh);
+  }
+
+  form[data-step="1"] .rsvp-step-1 {
+    min-height: 100%;
+  }
 }
 
 .lineup-wrap {

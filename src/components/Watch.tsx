@@ -9,7 +9,6 @@ import { YoutubeScreen } from "./YoutubeScreen";
 export function Watch({ headline }: { headline: string }) {
   const { videos, now, playing, toggleCurrent, tuneVideo, onEnded, onPlayingChange, registerPlayer } =
     usePlayback();
-  const [browsing, setBrowsing] = useState(true);
   const [staticOn, setStaticOn] = useState(false);
   const skipStatic = useRef(true);
 
@@ -28,7 +27,11 @@ export function Watch({ headline }: { headline: string }) {
   const rest = words.length > 2 ? words.slice(2).join(" ") : "";
 
   return (
-    <section id="watch" data-youtube-id={now?.youtubeId ?? ""} className="scene-section watch-scene relative overflow-hidden">
+    <section
+      id="watch"
+      data-youtube-id={now?.youtubeId ?? ""}
+      className="scene-section watch-scene relative overflow-x-clip overflow-y-visible"
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/scene-watch-table.jpg" alt="" className="watch-bg" />
       <div className="watch-shade" aria-hidden />
@@ -88,17 +91,9 @@ export function Watch({ headline }: { headline: string }) {
               {rest ? <span className="watch-line watch-line-rest">{rest}</span> : null}
             </h2>
             <GreenSwoosh className="watch-swoosh" stroke="#C6FF00" />
-            <button
-              type="button"
-              className="btn-pink-outline watch-cta"
-              aria-expanded={browsing}
-              onClick={() => setBrowsing((value) => !value)}
-            >
-              <span aria-hidden>▶</span>
-              BROWSE VIDEOS
-            </button>
-            {browsing ? (
-              <ul className="watch-list">
+            <div className="watch-list" role="region" aria-label="Browse videos">
+              <p className="watch-browse-label">Browse Videos</p>
+              <ul className="watch-list-items">
                 {videos.map((video) => (
                   <li key={video.id}>
                     <button
@@ -117,7 +112,7 @@ export function Watch({ headline }: { headline: string }) {
                   </li>
                 ))}
               </ul>
-            ) : null}
+            </div>
           </div>
 
           <div className="watch-skate">

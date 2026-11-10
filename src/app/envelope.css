@@ -6,6 +6,10 @@ html[data-intro="reveal"] {
   overflow: hidden;
 }
 
+html:not([data-intro="invite"]):not([data-intro="opening"]):not([data-intro="reveal"]) .invite-overlay {
+  display: none;
+}
+
 html[data-intro="invite"] body,
 html[data-intro="opening"] body {
   background: #07010f;

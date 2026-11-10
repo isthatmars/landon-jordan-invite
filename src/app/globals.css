@@ -1903,10 +1903,10 @@ body {
 
 .arcade-title {
   overflow: visible;
-  line-height: 1.18;
-  padding-top: 0.32em;
-  padding-bottom: 0.1em;
-  padding-inline: 0.14em;
+  line-height: 1.28;
+  padding-top: 0.72em;
+  padding-bottom: 0.22em;
+  padding-inline: 0.28em;
 }
 
 .arcade-copy .arcade-start {

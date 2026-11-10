@@ -548,28 +548,10 @@ html[data-motion="armed"] #rsvp .neon-script-lg {
   mask-repeat: no-repeat;
 }
 
-/* Masks clip text-shadow to the border box — leave RSVP title unmasked so neon flourishes show. */
-html[data-motion="armed"] #rsvp .rsvp-title {
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-html[data-motion="armed"] #arcade .neon-script-lg {
-  -webkit-mask-image:
-    linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a)),
-    linear-gradient(108deg, #000 calc(var(--pen-b) - 3%), transparent var(--pen-b));
-  mask-image:
-    linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a)),
-    linear-gradient(108deg, #000 calc(var(--pen-b) - 3%), transparent var(--pen-b));
-  -webkit-mask-size: 100% 54%, 100% 54%;
-  mask-size: 100% 54%, 100% 54%;
-  -webkit-mask-position: left top, left bottom;
-  mask-position: left top, left bottom;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-}
-
-/* Mixtape headline keeps full neon bloom — no handwriting mask (it boxes the glow). */
-html[data-motion="armed"] #mixtape .neon-script-lg {
+/* Masks clip text-shadow to the border box — leave neon titles unmasked so flourishes show. */
+html[data-motion="armed"] #rsvp .rsvp-title,
+html[data-motion="armed"] #mixtape .neon-script-lg,
+html[data-motion="armed"] #arcade .arcade-title {
   -webkit-mask-image: none;
   mask-image: none;
 }
@@ -581,12 +563,14 @@ html[data-motion="armed"] #watch .watch-line {
 }
 
 html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .neon-script-lg,
-html[data-motion="armed"]:not([data-seen-arcade]) #arcade .neon-script-lg,
 html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-kicker,
 html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-script-lg {
   --pen-a: 130%;
   --pen-b: 130%;
   --pen-c: 130%;
+}
+html[data-motion="armed"]:not([data-seen-arcade]) #arcade .arcade-title {
+  opacity: 0;
 }
 html[data-motion="armed"]:not([data-seen-watch]) #watch .watch-line {
   --pen: 130%;
@@ -601,8 +585,16 @@ html[data-seen-mixtape="1"] #mixtape .neon-script-lg {
   to { opacity: 1; }
 }
 
-html[data-seen-arcade="1"] #arcade .neon-script-lg {
-  animation: write-two 1.15s cubic-bezier(0.33, 0.04, 0.22, 1) both;
+html[data-seen-arcade="1"] #arcade .arcade-title {
+  animation: arcade-title-in 1.05s cubic-bezier(0.33, 0.04, 0.22, 1) both;
+}
+@keyframes arcade-title-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 html[data-seen-lineup="1"] #lineup .lineup-kicker {
   animation: write-one 0.9s cubic-bezier(0.33, 0.04, 0.22, 1) 0.2s both;

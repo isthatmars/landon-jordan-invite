@@ -9,7 +9,7 @@ import { YoutubeScreen } from "./YoutubeScreen";
 export function Watch({ headline }: { headline: string }) {
   const { videos, now, playing, toggleCurrent, tuneVideo, onEnded, onPlayingChange, registerPlayer } =
     usePlayback();
-  const [browsing, setBrowsing] = useState(false);
+  const [browsing, setBrowsing] = useState(true);
   const [staticOn, setStaticOn] = useState(false);
   const skipStatic = useRef(true);
 
@@ -105,14 +105,14 @@ export function Watch({ headline }: { headline: string }) {
                       type="button"
                       data-youtube-id={video.youtubeId}
                       onClick={() => tuneVideo(video)}
-                      className={`w-full border-b px-1 py-2 text-left text-sm ${
+                      className={`watch-list-item w-full border-b px-1 py-2 text-left text-sm text-white ${
                         now?.youtubeId === video.youtubeId
-                          ? "border-[#ff4fd8] text-[#ff4fd8]"
-                          : "border-white/15 text-white"
+                          ? "is-current border-white/35"
+                          : "border-white/20"
                       }`}
                     >
-                      <span className="font-semibold">{video.title}</span>
-                      <span className="block text-xs text-white/60">{video.artist}</span>
+                      <span className="font-semibold text-white">{video.title}</span>
+                      <span className="block text-xs text-white">{video.artist}</span>
                     </button>
                   </li>
                 ))}

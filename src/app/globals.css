@@ -1893,7 +1893,8 @@ body {
 }
 
 .watch-cta {
-  margin-top: 0.85rem;
+  /* Keep neon title separate from Browse Videos */
+  margin-top: 1.85rem;
   min-height: 3rem;
   padding: 0.65rem 1.15rem;
   font-size: 0.95rem;
@@ -1902,14 +1903,22 @@ body {
 
 .watch-list {
   margin: 0.85rem auto 0;
+  width: min(100%, 28rem);
+  max-width: none;
   max-height: 11rem;
   overflow: auto;
   text-align: left;
   border-radius: 0.85rem;
-  background: rgba(11, 6, 21, 0.88);
-  border: 1px solid rgba(255, 57, 200, 0.45);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
-  padding: 0.2rem 0.45rem 0.35rem;
+  background: rgba(198, 255, 0, 0.16);
+  border: 2px solid #c6ff00;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+  padding: 0.2rem 0.65rem 0.35rem;
+  color: #fff;
+}
+
+.watch-list-item,
+.watch-list-item span {
+  color: #fff;
 }
 
 .watch-skate {
@@ -2006,7 +2015,7 @@ body {
     order: 0;
     flex: 0 1 auto;
     width: auto;
-    max-width: min(100%, 26rem);
+    max-width: min(100%, 32rem);
     text-align: left;
     padding: 0 0 0.15rem;
   }
@@ -2030,7 +2039,7 @@ body {
   }
 
   #watch .watch-cta {
-    margin-top: 0.75rem;
+    margin-top: 1.75rem;
     margin-left: 0.05rem;
     min-height: 2.85rem;
     padding: 0.6rem 1.1rem;
@@ -2039,7 +2048,8 @@ body {
   }
 
   #watch .watch-list {
-    width: min(20rem, 100%);
+    width: min(32rem, 118%);
+    max-width: min(32rem, 52vw);
     margin-left: 0;
   }
 

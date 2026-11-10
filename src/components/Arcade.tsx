@@ -47,7 +47,7 @@ export function Arcade({ headline }: { headline: string }) {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-4 py-4 md:px-6 md:py-3">
-        <div className="flex w-full flex-col items-center justify-center gap-1 md:flex-row md:items-end md:gap-3">
+        <div className="flex w-full flex-col items-center justify-center gap-1 md:flex-row md:items-center md:gap-6">
           <div className="arcade-copy relative z-20 order-1 w-full text-center md:order-1 md:w-[30%] md:pb-4 md:text-left">
             <h2 className="neon-script-lg arcade-title">{script}</h2>
             <GreenSwoosh className="mx-auto mt-1 h-3 w-24 md:mx-0 min-[640px]:w-36" />

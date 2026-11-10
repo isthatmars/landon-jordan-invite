@@ -1549,7 +1549,7 @@ body {
 .arcade-machine .arcade-start {
   position: absolute;
   z-index: 30;
-  top: 4.5%;
+  top: 22%;
   left: 0;
   right: 0;
   width: max-content;
@@ -1827,8 +1827,8 @@ body {
   #watch .watch-skate {
     order: 0;
     flex: 0 0 auto;
-    width: clamp(11rem, 13vw, 14.5rem);
-    max-width: 14.5rem;
+    width: clamp(13rem, 15vw, 16.5rem);
+    max-width: 16.5rem;
     margin-top: 0;
     margin-left: 0;
     align-self: flex-end;

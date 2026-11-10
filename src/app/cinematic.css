@@ -753,22 +753,6 @@ html[data-live-arcade="0"] #arcade .cab-glint {
 }
 
 /* Lineup */
-html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-card,
-html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-dress,
-html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-private {
-  opacity: 0;
-  transform: translateY(12px);
-}
-html[data-seen-lineup="1"] #lineup .lineup-card,
-html[data-seen-lineup="1"] #lineup .lineup-dress,
-html[data-seen-lineup="1"] #lineup .lineup-private {
-  animation: rise-in 0.5s ease both;
-}
-html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(1) { animation-delay: 0.08s; }
-html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(2) { animation-delay: 0.2s; }
-html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(3) { animation-delay: 0.32s; }
-html[data-seen-lineup="1"] #lineup .lineup-dress { animation-delay: 0.42s; }
-html[data-seen-lineup="1"] #lineup .lineup-private { animation-delay: 0.52s; }
 html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-pill {
   filter: saturate(0.45) brightness(0.62);
 }

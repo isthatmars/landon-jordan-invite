@@ -566,6 +566,50 @@
   }
 }
 
+/* Short wiggle, then a few seconds of rest — lineup dress / private / RSVP icons. */
+@keyframes icon-shake {
+  0%,
+  12%,
+  100% {
+    transform: rotate(0deg);
+  }
+  2% {
+    transform: rotate(-9deg);
+  }
+  4% {
+    transform: rotate(8deg);
+  }
+  6% {
+    transform: rotate(-6deg);
+  }
+  8% {
+    transform: rotate(4deg);
+  }
+  10% {
+    transform: rotate(-2deg);
+  }
+}
+
+.icon-shake {
+  display: inline-block;
+  transform-origin: 50% 60%;
+  animation: icon-shake 3.75s ease-in-out infinite;
+}
+
+.lineup-card:nth-child(2) .icon-shake,
+.lineup-dress-prize .icon-shake {
+  animation-delay: 0.45s;
+}
+
+.lineup-card:nth-child(3) .icon-shake,
+.lineup-lock.icon-shake {
+  animation-delay: 0.9s;
+}
+
+#rsvp .icon-shake {
+  animation-delay: 1.2s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .disco-video,
   .cab-glint,
@@ -585,7 +629,8 @@
   .lineup-sweep::before,
   .lineup-neon,
   .lineup-pill,
-  .phone-prop {
+  .phone-prop,
+  .icon-shake {
     animation: none !important;
   }
 }

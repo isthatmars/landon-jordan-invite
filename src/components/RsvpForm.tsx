@@ -278,8 +278,8 @@ export function RsvpForm({ content }: { content: SiteContent }) {
       <div className="neon-frame mx-auto max-w-[1100px] bg-[#0b0615ee] p-4 sm:p-8 md:p-10">
         <div className="grid items-start gap-6 md:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] md:gap-8 lg:gap-12">
           <div className="pt-2 text-center md:pt-6">
-            <Crown className="mx-auto h-10 w-14 drop-shadow-[0_0_12px_#ffc44d] sm:h-12 sm:w-16" />
-            <h2 className="neon-script-lg text-6xl leading-none sm:text-7xl">{content.rsvpHeadline}</h2>
+            <Crown className="icon-shake mx-auto h-10 w-14 drop-shadow-[0_0_12px_#ffc44d] sm:h-12 sm:w-16" />
+            <h2 className="neon-script-lg rsvp-title text-6xl sm:text-7xl">{content.rsvpHeadline}</h2>
             <p className="font-nav mx-auto mt-3 max-w-[17rem] text-[11px] leading-relaxed text-[#f8f4fa]/85">
               {content.rsvpSubhead}
             </p>

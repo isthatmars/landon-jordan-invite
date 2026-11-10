@@ -88,6 +88,19 @@ body {
     0 0 36px #ff39c8cc;
 }
 
+/* Keep RSVP script flourishes unclipped (ascenders/descenders + glow). */
+#rsvp .rsvp-title,
+#rsvp .neon-script-lg {
+  line-height: 1.22;
+  padding-block: 0.18em 0.28em;
+  overflow: visible;
+}
+
+#rsvp .neon-frame,
+#rsvp .neon-frame > div {
+  overflow: visible;
+}
+
 .font-nav {
   font-family: var(--font-nav), sans-serif;
   font-weight: 500;
@@ -2591,7 +2604,9 @@ form[data-step="3"] .rsvp-step-3 {
 .lineup-dress-script {
   margin: 0;
   font-size: clamp(2.4rem, 1.4rem + 3vw, 3.8rem);
-  line-height: 0.95;
+  line-height: 1.15;
+  padding-block: 0.08em 0.12em;
+  overflow: visible;
 }
 
 .lineup-dress-prize {

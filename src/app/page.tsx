@@ -1,4 +1,5 @@
 import { Arcade } from "@/components/Arcade";
+import { BackToTop } from "@/components/BackToTop";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { Lineup } from "@/components/Lineup";
@@ -28,6 +29,7 @@ export default async function HomePage() {
       <Lineup content={content} />
       <RsvpForm content={content} />
       <Footer tagline={content.footerTagline} />
+      <BackToTop />
     </main>
   );
 }

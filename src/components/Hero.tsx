@@ -67,28 +67,32 @@ export function Hero({ content }: { content: SiteContent }) {
         </div>
 
         <div className="hero-facts">
-          <Fact icon={<CalendarIcon className="fact-icon" />}>
-            <span className="fact-label">{dateKicker}</span>
-            <span className="fact-value">{dateRest}</span>
-          </Fact>
-          <span className="fact-rule" aria-hidden />
-          <Fact icon={<PinIcon className="fact-icon" />}>
-            <span className="fact-value">{content.eventVenue}</span>
-            {addressLines.map((line) => (
-              <span className="fact-address" key={line}>
-                {line}
-              </span>
-            ))}
-          </Fact>
-          <span className="fact-rule" aria-hidden />
-          <Fact icon={<ClockIcon className="fact-icon" />}>
-            <span className="fact-value">{content.eventTime}</span>
-          </Fact>
+          <div className="hero-facts-main">
+            <Fact icon={<CalendarIcon className="fact-icon" />}>
+              <span className="fact-label">{dateKicker}</span>
+              <span className="fact-value">{dateRest}</span>
+            </Fact>
+            <span className="fact-rule" aria-hidden />
+            <Fact icon={<PinIcon className="fact-icon" />}>
+              <span className="fact-value">{content.eventVenue}</span>
+              {addressLines.map((line) => (
+                <span className="fact-address" key={line}>
+                  {line}
+                </span>
+              ))}
+            </Fact>
+            <span className="fact-rule" aria-hidden />
+            <Fact icon={<ClockIcon className="fact-icon" />}>
+              <span className="fact-value">{content.eventTime}</span>
+            </Fact>
+          </div>
+          <div className="hero-facts-divider" aria-hidden />
+          <a href="#rsvp" className="hero-facts-rsvp">
+            <span className="hero-facts-rsvp-label">
+              RSVP <span className="rsvp-arrow" aria-hidden>→</span>
+            </span>
+          </a>
         </div>
-
-        <a href="#rsvp" className="btn-rsvp-now">
-          RSVP NOW <span className="rsvp-arrow" aria-hidden>→</span>
-        </a>
       </div>
     </section>
   );

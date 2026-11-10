@@ -27,6 +27,7 @@ function playRing(ctx: AudioContext) {
 export function RsvpTelephone() {
   const audio = useRef<AudioContext | null>(null);
   const greeted = useRef(false);
+  const cueTimer = useRef<number | null>(null);
   const [pickedUp, setPickedUp] = useState(false);
   const [buzzing, setBuzzing] = useState(false);
   const [greeting, setGreeting] = useState(false);
@@ -45,7 +46,10 @@ export function RsvpTelephone() {
       { threshold: 0.4 },
     );
     io.observe(section);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      if (cueTimer.current != null) window.clearTimeout(cueTimer.current);
+    };
   }, []);
 
   const pickup = () => {
@@ -65,12 +69,26 @@ export function RsvpTelephone() {
     playRing(ctx);
   };
 
-  const scrollToQuestion = () => {
-    const field = document.getElementById("rsvp-form");
-    if (!(field instanceof HTMLElement)) return;
+  const cueFirstQuestion = () => {
+    const attend = document.getElementById("rsvp-attend");
+    const step = document.querySelector<HTMLElement>("#rsvp-form .rsvp-step-1");
+    const target = attend ?? document.getElementById("rsvp-form");
+    if (!(target instanceof HTMLElement)) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    field.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-    const focusable = field.querySelector<HTMLElement>("button, input, textarea");
+    target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+
+    if (step) {
+      step.classList.add("is-cue-lit");
+      if (cueTimer.current != null) window.clearTimeout(cueTimer.current);
+      cueTimer.current = window.setTimeout(() => {
+        step.classList.remove("is-cue-lit");
+        cueTimer.current = null;
+      }, 1800);
+    }
+
+    const focusable =
+      attend?.querySelector<HTMLElement>("button") ??
+      target.querySelector<HTMLElement>("button, input, textarea");
     focusable?.focus({ preventScroll: true });
   };
 
@@ -85,11 +103,18 @@ export function RsvpTelephone() {
       {!pickedUp ? (
         <p className="mt-2 text-center text-[10px] font-bold tracking-[0.18em] text-[#c6ff00]">TAP THE PHONE</p>
       ) : (
-        <div className="mt-3 text-center" data-testid="rsvp-phone-message" aria-live="polite">
-          <p className="text-sm leading-snug text-white">You&apos;re on the list? Let&apos;s make it official!</p>
-          <button type="button" className="btn-green-solid mt-3 px-4 py-2 text-[11px]" onClick={scrollToQuestion}>
-            Answer the first question
-          </button>
+        <div className="rsvp-phone-copy mt-3 w-full max-w-full text-center" data-testid="rsvp-phone-message" aria-live="polite">
+          <p className="text-sm leading-snug text-white">
+            You&apos;re on the list?{" "}
+            <button
+              type="button"
+              className="rsvp-official-cue"
+              data-testid="rsvp-official-cue"
+              onClick={cueFirstQuestion}
+            >
+              Let&apos;s make it official!
+            </button>
+          </p>
         </div>
       )}
     </div>

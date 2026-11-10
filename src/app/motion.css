@@ -498,7 +498,8 @@
 
 .phone-hit {
   display: block;
-  width: min(230px, 86%);
+  width: 100%;
+  max-width: 100%;
   margin: 0.9rem auto 0;
   padding: 0;
   border: 0;
@@ -509,6 +510,94 @@
 .phone-hit:focus-visible {
   outline: 2px solid #c6ff00;
   outline-offset: 4px;
+}
+
+.rsvp-phone-copy {
+  box-sizing: border-box;
+}
+
+.rsvp-official-cue {
+  display: inline;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #c6ff00;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-align: inherit;
+  text-decoration: none;
+  text-shadow:
+    0 0 6px rgba(198, 255, 0, 0.55),
+    0 0 16px rgba(198, 255, 0, 0.35);
+  cursor: pointer;
+  animation: rsvp-official-pulse 2.2s ease-in-out infinite;
+}
+
+.rsvp-official-cue:hover,
+.rsvp-official-cue:focus-visible {
+  outline: none;
+  color: #e8ff7a;
+  text-shadow:
+    0 0 8px rgba(198, 255, 0, 0.85),
+    0 0 22px rgba(198, 255, 0, 0.55),
+    0 0 30px rgba(255, 57, 200, 0.28);
+}
+
+.rsvp-official-cue:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+@keyframes rsvp-official-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+    text-shadow:
+      0 0 4px rgba(198, 255, 0, 0.4),
+      0 0 12px rgba(198, 255, 0, 0.25);
+  }
+  50% {
+    filter: brightness(1.18);
+    text-shadow:
+      0 0 8px rgba(198, 255, 0, 0.9),
+      0 0 22px rgba(198, 255, 0, 0.55),
+      0 0 34px rgba(255, 57, 200, 0.28);
+  }
+}
+
+.rsvp-step-1.is-cue-lit .rsvp-ask {
+  animation: rsvp-attend-ask-glow 1.6s ease-out 1;
+}
+
+.rsvp-step-1.is-cue-lit .rsvp-attend {
+  animation: rsvp-attend-block-glow 1.6s ease-out 1;
+}
+
+@keyframes rsvp-attend-ask-glow {
+  0%,
+  100% {
+    text-shadow: none;
+    filter: brightness(1);
+  }
+  35% {
+    filter: brightness(1.18);
+    text-shadow:
+      0 0 10px rgba(198, 255, 0, 0.55),
+      0 0 22px rgba(255, 57, 200, 0.35);
+  }
+}
+
+@keyframes rsvp-attend-block-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  35% {
+    filter: brightness(1.12);
+  }
 }
 
 .phone-prop {
@@ -630,6 +719,9 @@
   .lineup-neon,
   .lineup-pill,
   .phone-prop,
+  .rsvp-official-cue,
+  .rsvp-step-1.is-cue-lit .rsvp-ask,
+  .rsvp-step-1.is-cue-lit .rsvp-attend,
   .icon-shake {
     animation: none !important;
   }

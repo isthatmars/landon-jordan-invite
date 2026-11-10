@@ -46,9 +46,9 @@ export function Watch({ headline }: { headline: string }) {
       />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-2 py-3 sm:px-4 sm:py-6">
-        <div className="flex w-full items-end justify-center gap-2 sm:gap-4">
-        <div className="relative w-[58%] max-w-[680px]">
+      <div className="watch-stage relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-4 py-6 sm:px-4 sm:py-6">
+        <div className="watch-row flex w-full flex-col items-center justify-center gap-3 md:flex-row md:items-end md:gap-4">
+        <div className="watch-tv relative order-2 w-[86%] max-w-[680px] md:order-1 md:w-[58%]">
           <div className="crt-screen-light" aria-hidden />
           <div
             data-testid="tv-screen"
@@ -93,12 +93,12 @@ export function Watch({ headline }: { headline: string }) {
           />
         </div>
 
-        <div className="relative w-[28%] pb-2 text-left">
-          <h2 className="neon-script-lg text-[1.7rem] leading-[0.86] sm:text-[3rem]">{script}</h2>
-          <GreenSwoosh className="mt-1 h-3 w-28 min-[640px]:w-40" />
+        <div className="watch-copy relative order-1 w-full pb-1 text-center md:order-2 md:w-[28%] md:pb-2 md:text-left">
+          <h2 className="neon-script-lg text-[34px] leading-[0.92] sm:text-[3rem]">{script}</h2>
+          <GreenSwoosh className="mx-auto mt-1 h-3 w-28 md:mx-0 min-[640px]:w-40" />
           <button
             type="button"
-            className="btn-pink-outline mt-2 inline-flex items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[8px] font-bold tracking-[0.12em] sm:mt-4 sm:gap-2 sm:px-4 sm:text-xs sm:tracking-[0.16em]"
+            className="btn-pink-outline mt-3 inline-flex min-h-12 items-center gap-2 whitespace-nowrap px-5 py-3 text-base font-bold tracking-[0.14em] md:mt-4 md:min-h-0 md:px-4 md:py-1.5 md:text-xs md:tracking-[0.16em]"
             aria-expanded={browsing}
             onClick={() => setBrowsing((value) => !value)}
           >
@@ -128,7 +128,7 @@ export function Watch({ headline }: { headline: string }) {
           ) : null}
         </div>
 
-        <div className="relative w-[18%] max-w-[170px] shrink-0">
+        <div className="watch-skate relative order-3 w-[28%] max-w-[120px] shrink-0 md:w-[18%] md:max-w-[170px]">
           <div className="floor-contact" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

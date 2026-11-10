@@ -145,7 +145,7 @@ export function PlaybackProvider({
     setInsertingId(id);
     window.setTimeout(() => {
       if (insertToken.current === token) setInsertingId(null);
-    }, 700);
+    }, 820);
   }, []);
 
   const publish = useCallback((next: NowPlaying, follow: Follow, insert: boolean) => {

@@ -580,14 +580,11 @@ html[data-motion="armed"] #watch .neon-script-lg {
 html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .neon-script-lg,
 html[data-motion="armed"]:not([data-seen-arcade]) #arcade .neon-script-lg,
 html[data-motion="armed"]:not([data-seen-lineup]) #lineup .neon-script,
-html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-script-lg {
-  --pen-a: -18%;
-  --pen-b: -18%;
-}
+html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-script-lg,
 html[data-motion="armed"]:not([data-seen-watch]) #watch .neon-script-lg {
-  --pen-a: -18%;
-  --pen-b: -18%;
-  --pen-c: -18%;
+  --pen-a: 130%;
+  --pen-b: 130%;
+  --pen-c: 130%;
 }
 
 html[data-seen-mixtape="1"] #mixtape .neon-script-lg {
@@ -703,9 +700,6 @@ html[data-seen-mixtape="1"] #mixtape .mix-arrow path {
   stroke-dasharray: 140;
   animation: arrow-on 0.55s ease-out 0.9s both;
 }
-html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .mix-tape-ink {
-  opacity: 0;
-}
 html[data-seen-mixtape="1"] #mixtape .mix-tape-ink {
   animation: rise-in 0.4s ease both;
 }
@@ -797,10 +791,6 @@ html[data-seen-rsvp="1"] #rsvp .neon-frame::before {
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   animation: trace-on 1.15s linear both;
-}
-html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp [data-testid="rsvp-phone"] {
-  opacity: 0;
-  transform: translateY(10px);
 }
 html[data-seen-rsvp="1"] #rsvp [data-testid="rsvp-phone"] {
   animation: rise-in 0.55s ease 0.35s both;

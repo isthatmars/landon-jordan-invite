@@ -42,6 +42,8 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [step, setStep] = useState(1);
+  const [stepError, setStepError] = useState("");
   formRef.current = form;
 
   const coming = form.attend === "yes" || form.attend === "maybe";
@@ -121,6 +123,84 @@ export function RsvpForm({ content }: { content: SiteContent }) {
     }
   };
 
+  const goNext = () => {
+    const current = formRef.current;
+    const attending = current.attend === "yes" || current.attend === "maybe";
+    setStepError("");
+    if (step === 1) {
+      if (!current.attend) {
+        setStepError("Let us know if you are able to attend.");
+        return;
+      }
+      if (!attending) {
+        const next = {
+          ...current,
+          dietary: current.dietary || "no",
+          anythingElse: current.anythingElse || "no",
+          companions: [] as PartyPerson[],
+        };
+        formRef.current = next;
+        setForm(next);
+      }
+      setStep(2);
+      return;
+    }
+    if (step === 2) {
+      if (!current.firstName.trim() || !current.lastName.trim()) {
+        setStepError("Add your first and last name.");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(current.email.trim())) {
+        setStepError("Add an email address so we can confirm your RSVP.");
+        return;
+      }
+      if (attending && current.phone.replace(/\D/g, "").length < 7) {
+        setStepError("Add a phone number so we can reach you if you're coming.");
+        return;
+      }
+      setStep(attending ? 3 : 4);
+      return;
+    }
+    if (step === 3) {
+      if (!current.dietary) {
+        setStepError("Let us know if anyone has dietary restrictions or food allergies.");
+        return;
+      }
+      if (current.dietary === "yes" && !current.dietaryNotes.trim()) {
+        setStepError("Tell us the dietary restrictions so we can get more food.");
+        return;
+      }
+      if (!current.anythingElse) {
+        setStepError("Let us know if there's anything else.");
+        return;
+      }
+      if (current.anythingElse === "yes" && !current.specialRequests.trim()) {
+        setStepError("Add a note so we know what else to plan for.");
+        return;
+      }
+      const incomplete = current.companions.some(
+        (person) =>
+          (person.firstName.trim() && !person.lastName.trim()) ||
+          (!person.firstName.trim() && person.lastName.trim()),
+      );
+      if (incomplete) {
+        setStepError("Every adult and child needs a first and last name.");
+        return;
+      }
+      setStep(4);
+    }
+  };
+
+  const goBack = () => {
+    setStepError("");
+    const attending = formRef.current.attend === "yes" || formRef.current.attend === "maybe";
+    if (step === 4 && !attending) {
+      setStep(2);
+      return;
+    }
+    setStep((value) => Math.max(1, value - 1));
+  };
+
   const addCompanion = () => {
     if (form.companions.length >= MAX_COMPANIONS) return;
     const next = {
@@ -155,7 +235,57 @@ export function RsvpForm({ content }: { content: SiteContent }) {
               <RsvpTelephone />
             </div>
 
-            <form onSubmit={onSubmit} noValidate className="space-y-4">
+            <form id="rsvp-form" data-step={step} onSubmit={onSubmit} noValidate className="rsvp-steps space-y-4">
+              <div className="rsvp-step rsvp-step-1 space-y-4">
+                <p className="rsvp-mobile-copy font-nav text-center text-[15px] tracking-[0.14em] text-white">
+                  Will you attend?
+                </p>
+                <div className="rsvp-attend-picks grid grid-cols-3 gap-2">
+                  {(
+                    [
+                      ["yes", "Yes"],
+                      ["maybe", "Maybe"],
+                      ["no", "No"],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`min-h-12 rounded-full border-2 px-2 text-base font-bold tracking-[0.08em] ${
+                        form.attend === value
+                          ? "border-[#c6ff00] bg-[#c6ff00] text-black"
+                          : "border-[#ff39c8] bg-[#09060f] text-white"
+                      }`}
+                      aria-pressed={form.attend === value}
+                      onClick={() => {
+                        update({ attend: value });
+                        void saveDraft("attend", { ...formRef.current, attend: value });
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="rsvp-attend-select-wrap">
+                <Field label="Are you able to attend? *">
+                  <select
+                    required
+                    className="input-dark rsvp-attend-select"
+                    value={form.attend}
+                    onChange={(e) => update({ attend: e.target.value as FormState["attend"] })}
+                    onBlur={() => void saveDraft("attend")}
+                  >
+                    <option value="">Select an option</option>
+                    <option value="yes">Yes, I&apos;ll be there</option>
+                    <option value="maybe">Maybe</option>
+                    <option value="no">No, I can&apos;t make it</option>
+                  </select>
+                </Field>
+                </div>
+                <StepNav onNext={goNext} />
+              </div>
+
+              <div className="rsvp-step rsvp-step-2 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="What's your first name? *">
                   <input
@@ -181,21 +311,6 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                   />
                 </Field>
               </div>
-
-              <Field label="Are you able to attend? *">
-                <select
-                  required
-                  className="input-dark"
-                  value={form.attend}
-                  onChange={(e) => update({ attend: e.target.value as FormState["attend"] })}
-                  onBlur={() => void saveDraft("attend")}
-                >
-                  <option value="">Select an option</option>
-                  <option value="yes">Yes, I&apos;ll be there</option>
-                  <option value="maybe">Maybe</option>
-                  <option value="no">No, I can&apos;t make it</option>
-                </select>
-              </Field>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label={coming ? "Phone number *" : "Phone number"}>
@@ -223,7 +338,10 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                   />
                 </Field>
               </div>
+              <StepNav onBack={goBack} onNext={goNext} />
+              </div>
 
+              <div className="rsvp-step rsvp-step-3 space-y-4">
               <Field label="Do you have dietary restrictions or food allergies? *">
                 <select
                   required
@@ -346,14 +464,53 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                       : "Headcount shows up once you tell us if you can attend."}
                 </p>
               </fieldset>
+              <StepNav onBack={goBack} onNext={goNext} nextLabel="Review" />
+              </div>
 
-              <button
-                type="submit"
-                disabled={status === "saving" || status === "done"}
-                className="btn-green-solid w-full text-center"
-              >
-                {status === "saving" ? "SENDING…" : "SUBMIT RSVP →"}
-              </button>
+              <div className="rsvp-step rsvp-step-4 space-y-4">
+                <div className="rsvp-summary space-y-2 rounded-2xl border border-white/15 p-4 text-[15px] leading-relaxed text-white">
+                  <p className="font-nav text-[13px] tracking-[0.16em] text-[#c6ff00]">Your RSVP</p>
+                  <p>
+                    {form.firstName} {form.lastName}
+                  </p>
+                  <p>{form.email}</p>
+                  {form.phone ? <p>{form.phone}</p> : null}
+                  <p>
+                    {form.attend === "yes"
+                      ? "Attending"
+                      : form.attend === "maybe"
+                        ? "Maybe"
+                        : "Can't make it"}
+                  </p>
+                  {coming && (
+                    <p>
+                      Headcount: {headcount}.{" "}
+                      {namedCompanions.length
+                        ? `Also coming: ${namedCompanions.map((person) => `${person.firstName} ${person.lastName}`).join(", ")}.`
+                        : "No additional guests."}
+                    </p>
+                  )}
+                  {coming && form.dietary === "yes" ? <p>Dietary: {form.dietaryNotes}</p> : null}
+                  {coming && form.anythingElse === "yes" ? <p>Note: {form.specialRequests}</p> : null}
+                </div>
+                <div className="flex flex-col gap-3">
+                  <button type="button" className="rsvp-back btn-pink-outline min-h-12 text-base" onClick={goBack}>
+                    Back / Edit
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={status === "saving" || status === "done"}
+                    className="btn-green-solid w-full text-center"
+                  >
+                    {status === "saving" ? "SENDING…" : "SUBMIT RSVP →"}
+                  </button>
+                </div>
+              </div>
+              {stepError ? (
+                <p className="text-sm text-red-400" role="alert">
+                  {stepError}
+                </p>
+              ) : null}
               {message && (
                 <p
                   className={`text-sm ${status === "error" ? "text-red-400" : "text-neon-green"}`}
@@ -372,8 +529,31 @@ export function RsvpForm({ content }: { content: SiteContent }) {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[12px] text-white/75">{label}</span>
+      <span className="mb-1.5 block text-[15px] text-white/80">{label}</span>
       {children}
     </label>
+  );
+}
+
+function StepNav({
+  onNext,
+  onBack,
+  nextLabel = "Continue",
+}: {
+  onNext: () => void;
+  onBack?: () => void;
+  nextLabel?: string;
+}) {
+  return (
+    <div className="rsvp-next flex gap-3">
+      {onBack ? (
+        <button type="button" className="btn-pink-outline min-h-12 flex-1 text-base" onClick={onBack}>
+          Back
+        </button>
+      ) : null}
+      <button type="button" className="btn-green-solid min-h-12 flex-1 text-center text-base" onClick={onNext}>
+        {nextLabel}
+      </button>
+    </div>
   );
 }

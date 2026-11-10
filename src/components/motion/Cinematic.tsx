@@ -110,7 +110,27 @@ export function Cinematic() {
       const node = document.getElementById(id);
       if (node) io.observe(node);
     }
-    return () => io.disconnect();
+    const markVisible = () => {
+      for (const [id, seenKey, liveKey] of SECTIONS) {
+        const node = document.getElementById(id);
+        if (!node) continue;
+        const rect = node.getBoundingClientRect();
+        const visible = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+        const ratio = rect.height > 0 ? visible / rect.height : 0;
+        if (ratio >= 0.18) {
+          root.dataset[seenKey] = "1";
+          root.dataset[liveKey] = "1";
+        } else if (root.dataset[seenKey] === "1") {
+          root.dataset[liveKey] = "0";
+        }
+      }
+    };
+    markVisible();
+    window.addEventListener("scroll", markVisible, { passive: true });
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", markVisible);
+    };
   }, []);
 
   return null;

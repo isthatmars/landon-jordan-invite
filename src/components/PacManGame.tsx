@@ -57,10 +57,23 @@ function canMove(x: number, y: number) {
   return MAZE[y][x] === 0;
 }
 
-export function PacManGame({ running, embed = false }: { running: boolean; embed?: boolean }) {
+export function PacManGame({
+  running,
+  embed = false,
+  showPad = false,
+}: {
+  running: boolean;
+  embed?: boolean;
+  showPad?: boolean;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
+  const [phase, setPhase] = useState<"play" | "won" | "lost">("play");
+  const phaseRef = useRef(phase);
+  const livesRef = useRef(lives);
+  phaseRef.current = phase;
+  livesRef.current = lives;
   const state = useRef({
     pac: { x: 9, y: 15, dir: "L" as Dir, next: "L" as Dir },
     ghosts: [
@@ -70,6 +83,7 @@ export function PacManGame({ running, embed = false }: { running: boolean; embed
     ],
     pellets: pelletsFromMaze(),
     tick: 0,
+    hurt: 0,
   });
 
   const resetPac = () => {
@@ -144,7 +158,7 @@ export function PacManGame({ running, embed = false }: { running: boolean; embed
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
       const s = state.current;
-      if (running && t - last >= 110) {
+      if (running && phaseRef.current === "play" && t - last >= 110) {
       last = t;
       s.tick++;
 
@@ -162,18 +176,24 @@ export function PacManGame({ running, embed = false }: { running: boolean; embed
         const pick =
           options[Math.floor(Math.random() * Math.max(options.length, 1))] || g.dir;
         stepEntity(g, pick);
-        if (g.x === s.pac.x && g.y === s.pac.y) {
-          setLives((v) => {
-            const next = v - 1;
-            return next;
-          });
-          resetPac();
+        if (g.x === s.pac.x && g.y === s.pac.y && s.tick - s.hurt > 6) {
+          s.hurt = s.tick;
+          const nextLives = livesRef.current - 1;
+          livesRef.current = Math.max(nextLives, 0);
+          setLives(livesRef.current);
+          if (nextLives <= 0) {
+            phaseRef.current = "lost";
+            setPhase("lost");
+          } else {
+            resetPac();
+          }
         }
       }
 
       if (s.pellets.size === 0) {
-        s.pellets = pelletsFromMaze();
+        phaseRef.current = "won";
         setScore((v) => v + 200);
+        setPhase("won");
       }
       }
 
@@ -226,20 +246,22 @@ export function PacManGame({ running, embed = false }: { running: boolean; embed
     return () => cancelAnimationFrame(raf);
   }, [running]);
 
-  useEffect(() => {
-    if (lives <= 0) {
-      state.current.pellets = pelletsFromMaze();
-      setLives(3);
-      setScore(0);
-      resetPac();
-    }
-  }, [lives]);
+  const replay = () => {
+    state.current.pellets = pelletsFromMaze();
+    state.current.hurt = 0;
+    resetPac();
+    setScore(0);
+    livesRef.current = 3;
+    setLives(3);
+    phaseRef.current = "play";
+    setPhase("play");
+  };
 
   const swipe = useRef<{ x: number; y: number } | null>(null);
 
   return (
     <div
-      className={embed ? "flex h-full w-full touch-none flex-col bg-black" : "w-full"}
+      className={embed ? "relative flex h-full w-full touch-none flex-col bg-black" : "relative w-full touch-none"}
       onPointerDown={(e) => {
         swipe.current = { x: e.clientX, y: e.clientY };
       }}
@@ -253,25 +275,17 @@ export function PacManGame({ running, embed = false }: { running: boolean; embed
         else setDir(dy > 0 ? "D" : "U");
       }}
     >
-      {embed ? (
-        <div className="flex justify-between px-1 pt-0.5 font-mono text-[8px] leading-tight tracking-wider text-[#ffe14a]">
-          <span>
-            1UP
-            <br />
-            {String(score).padStart(2, "0")}
-          </span>
-          <span className="text-right">
-            HIGH SCORE
-            <br />
-            {Math.max(score, 10000)}
-          </span>
-        </div>
-      ) : (
-        <div className="mb-2 flex justify-between text-xs tracking-widest text-neon-teal">
-          <span>SCORE {score}</span>
-          <span>LIVES {Math.max(lives, 0)}</span>
-        </div>
-      )}
+      <div
+        className={
+          embed
+            ? "flex justify-between px-1 pt-0.5 font-mono text-[9px] leading-tight tracking-wider text-[#ffe14a]"
+            : "mb-2 flex justify-between px-1 text-sm tracking-widest text-[#ffe14a]"
+        }
+      >
+        <span>1UP {String(score).padStart(2, "0")}</span>
+        <span>LIVES {Math.max(lives, 0)}</span>
+        <span>HI {Math.max(score, 10000)}</span>
+      </div>
       <canvas
         ref={canvasRef}
         width={COLS * CELL}
@@ -280,17 +294,30 @@ export function PacManGame({ running, embed = false }: { running: boolean; embed
         className={
           embed
             ? "h-full min-h-0 w-full flex-1 bg-black"
-            : "mx-auto w-full max-w-[304px] rounded-md border border-blue-400/40 bg-black"
+            : "mx-auto aspect-[19/21] w-full max-w-[420px] rounded-md border border-blue-400/40 bg-black"
         }
       />
-      {!embed && (
-        <div className="mx-auto mt-3 grid max-w-[220px] grid-cols-3 gap-2 md:hidden">
+      {showPad && (
+        <div className="mx-auto mt-3 grid w-full max-w-[240px] grid-cols-3 gap-2">
           <span />
           <Pad onClick={() => setDir("U")}>▲</Pad>
           <span />
           <Pad onClick={() => setDir("L")}>◀</Pad>
           <Pad onClick={() => setDir("D")}>▼</Pad>
           <Pad onClick={() => setDir("R")}>▶</Pad>
+        </div>
+      )}
+      {phase !== "play" && (
+        <div className="absolute inset-0 z-10 grid place-items-center bg-black/72 px-4 text-center">
+          <div>
+            <p className="font-nav text-lg tracking-[0.16em] text-[#ffe14a]">
+              {phase === "won" ? "YOU WIN" : "GAME OVER"}
+            </p>
+            <p className="mt-1 text-sm text-white">Score {score}</p>
+            <button type="button" className="btn-pink-outline mt-3 min-h-12 px-4 text-base" onClick={replay}>
+              PLAY AGAIN
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Cassette } from "./Cassette";
 import { NeonArrow } from "./icons";
 import { usePlayback } from "./Playback";
@@ -22,12 +23,42 @@ const STACK: {
 
 export function Mixtape({ headline }: { headline: string }) {
   const { tracks, now, selectTape, insertingId } = usePlayback();
+  const [flyer, setFlyer] = useState<{
+    label: string;
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    x: string;
+    y: string;
+  } | null>(null);
   const byId = new Map(tracks.map((track) => [track.id, track]));
   const stack = STACK.flatMap((row) => {
     const track = byId.get(row.id);
     return track ? [{ ...row, track }] : [];
   });
   const loadedId = now?.trackId ?? "";
+
+  useEffect(() => {
+    if (!insertingId) return;
+    const from = document.querySelector<HTMLElement>(`#mixtape .mix-tape[data-track-id="${insertingId}"]`);
+    const deck = document.querySelector<HTMLElement>("[data-testid='boombox']");
+    if (!from || !deck) return;
+    const tape = from.getBoundingClientRect();
+    const stereo = deck.getBoundingClientRect();
+    const endX = stereo.left + stereo.width * 0.42;
+    const endY = stereo.top + stereo.height * 0.46;
+    const row = STACK.find((item) => item.id === insertingId);
+    setFlyer({
+      label: row?.label ?? "Tape",
+      left: tape.left,
+      top: tape.top,
+      width: tape.width,
+      height: Math.max(tape.height, 28),
+      x: `${endX - tape.left}px`,
+      y: `${endY - tape.top}px`,
+    });
+  }, [insertingId]);
   const [lead, ...rest] = headline.split(/ and /i);
   const script = rest.length ? (
     <>
@@ -128,6 +159,22 @@ export function Mixtape({ headline }: { headline: string }) {
           </div>
         </div>
       </div>
+      {flyer ? (
+        <span
+          className="mix-flyer"
+          aria-hidden
+          style={{
+            left: flyer.left,
+            top: flyer.top,
+            width: flyer.width,
+            height: flyer.height,
+            ["--fly-x" as string]: flyer.x,
+            ["--fly-y" as string]: flyer.y,
+          }}
+        >
+          {flyer.label}
+        </span>
+      ) : null}
     </section>
   );
 }

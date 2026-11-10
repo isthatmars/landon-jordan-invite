@@ -81,7 +81,7 @@ export interface Track {
   title: string;
   artist: string;
   color: string;
-  /** Official YouTube video. The boombox plays this inside the deck. */
+  /** Official YouTube video. Choosing this tape plays it inside the TV. */
   youtubeId: string;
   audioUrl: string;
   sortOrder: number;

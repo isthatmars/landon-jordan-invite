@@ -1447,12 +1447,14 @@ body {
   width: max-content;
   max-width: calc(100vw - 48px);
   flex: none;
-  padding: 0.95rem 1.25rem 0.75rem;
+  padding: 1.6rem 1.8rem 1.35rem;
   text-align: center;
   font-size: clamp(2.2rem, 8vw, 2.85rem);
   line-height: 0.95;
   overflow: visible;
   color: #fff7fc;
+  /* Avoid filter: on this node — it boxes text-shadow in Blink. */
+  filter: none;
   text-shadow:
     0 0 1px #fff,
     0 0 8px #ff39c8,
@@ -1567,11 +1569,11 @@ body {
 }
 
 .mix-shadow-stack {
-  top: 96%;
+  top: 92%;
   bottom: auto;
   left: 7%;
   right: 7%;
-  height: 14%;
+  height: 16%;
   background:
     radial-gradient(ellipse at 72% 40%, rgba(140, 0, 80, 0.6), transparent 58%),
     radial-gradient(ellipse at center, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.45) 48%, transparent 76%);
@@ -1722,7 +1724,7 @@ body {
 
   .mix-script h2 {
     max-width: none;
-    padding: 0.95rem 1.4rem 0.75rem;
+    padding: 1.75rem 2rem 1.45rem;
     text-align: center;
     font-size: clamp(2.85rem, 4.5vw, 3.6rem);
   }
@@ -1740,7 +1742,7 @@ body {
     flex-direction: row;
     align-items: flex-end;
     justify-content: center;
-    gap: clamp(3rem, 7vw, 5.5rem);
+    gap: clamp(3.5rem, 8vw, 6.25rem);
     padding-top: 0.2rem;
   }
 
@@ -1750,8 +1752,8 @@ body {
   }
 
   .mix-stack {
-    --mix-stack-sit: 9.5%;
-    width: 20%;
+    --mix-stack-sit: 12%;
+    width: 18.5%;
     flex: none;
     margin: 0;
   }

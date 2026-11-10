@@ -769,7 +769,7 @@ body {
 
 .hero-people {
   position: relative;
-  width: min(100%, 38rem);
+  width: min(100%, 34rem);
   order: 2;
 }
 

@@ -143,12 +143,12 @@ export function RsvpForm({ content }: { content: SiteContent }) {
 
   return (
     <section id="rsvp" className="bg-[#07010f] px-3 pb-6 pt-2 sm:px-5">
-        <div className="neon-frame mx-auto max-w-[1100px] bg-[#07010ee8] p-4 sm:p-8 md:p-10">
-          <div className="grid items-start gap-6 min-[640px]:grid-cols-[0.7fr_1.3fr] min-[640px]:gap-10">
-            <div className="pt-4 text-center min-[640px]:pt-8">
-              <Crown className="mx-auto h-12 w-16 drop-shadow-[0_0_12px_#ffd45a]" />
-              <h2 className="neon-script-lg text-6xl leading-none sm:text-7xl">{content.rsvpHeadline}</h2>
-              <p className="mx-auto mt-3 max-w-[17rem] text-[11px] font-semibold leading-relaxed tracking-[0.14em] text-white/85">
+        <div className="neon-frame mx-auto max-w-[1100px] bg-[#07010ee8] p-2 sm:p-8 md:p-10">
+          <div className="grid grid-cols-[0.58fr_1.42fr] items-start gap-2 sm:grid-cols-[0.7fr_1.3fr] sm:gap-10">
+            <div className="pt-1 text-center sm:pt-8">
+              <Crown className="mx-auto h-8 w-10 drop-shadow-[0_0_12px_#ffd45a] sm:h-12 sm:w-16" />
+              <h2 className="neon-script-lg text-4xl leading-none sm:text-7xl">{content.rsvpHeadline}</h2>
+              <p className="mx-auto mt-2 max-w-[17rem] text-[7px] font-semibold leading-relaxed tracking-[0.08em] text-white/85 sm:mt-3 sm:text-[11px] sm:tracking-[0.14em]">
                 {content.rsvpSubhead}
               </p>
             </div>

@@ -33,16 +33,16 @@ export function Mixtape({ headline }: { headline: string }) {
   );
 
   return (
-    <section id="mixtape" data-track-id={loadedId} className="scene-section relative min-h-[560px] overflow-hidden sm:min-h-[700px]">
+    <section id="mixtape" data-track-id={loadedId} className="scene-section relative overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/scene-mixtape-table.jpg"
         alt=""
-        className="absolute inset-0 h-full w-full object-cover object-[center_82%]"
+        className="absolute inset-0 h-full w-full object-cover object-[center_88%]"
       />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#05010f] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto flex min-h-[560px] w-full max-w-[1000px] items-end px-3 pb-7 sm:min-h-[700px] sm:px-6 sm:pb-12">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1000px] items-end px-2 pb-3 pt-14 sm:px-6 sm:pb-12 sm:pt-24">
         <div className="relative flex w-full items-end justify-center gap-2 sm:gap-4">
           <div className="absolute bottom-full left-[28%] z-20 mb-2 flex items-end gap-1 sm:left-[40%]">
             <h2 className="neon-script-lg text-left text-[1.4rem] leading-[0.9] min-[640px]:text-[2.2rem]">

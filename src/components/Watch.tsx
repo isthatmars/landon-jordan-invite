@@ -25,16 +25,16 @@ export function Watch({ headline }: { headline: string }) {
     );
 
   return (
-    <section id="watch" data-youtube-id={now?.youtubeId ?? ""} className="scene-section relative min-h-[560px] overflow-hidden sm:min-h-[700px]">
+    <section id="watch" data-youtube-id={now?.youtubeId ?? ""} className="scene-section relative overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/scene-watch-table.jpg"
         alt=""
-        className="absolute inset-0 h-full w-full object-cover object-[center_46%]"
+        className="absolute inset-0 h-full w-full object-cover object-[center_62%]"
       />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#05010f] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto flex min-h-[560px] w-full max-w-[1000px] items-end px-3 pb-[28%] sm:min-h-[700px] sm:px-6 sm:pb-[24%]">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1000px] items-end px-2 py-3 sm:px-6 sm:py-14">
         <div className="flex w-full items-end justify-center gap-2 sm:gap-5">
         <div className="relative w-[48%] max-w-[480px]">
           <div
@@ -83,7 +83,7 @@ export function Watch({ headline }: { headline: string }) {
           <GreenSwoosh className="mt-1 h-3 w-28 min-[640px]:w-40" />
           <button
             type="button"
-            className="btn-pink-outline mt-4 inline-flex items-center gap-2 text-xs font-bold tracking-[0.16em]"
+            className="btn-pink-outline mt-2 inline-flex items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[8px] font-bold tracking-[0.12em] sm:mt-4 sm:gap-2 sm:px-4 sm:text-xs sm:tracking-[0.16em]"
             aria-expanded={browsing}
             onClick={() => setBrowsing((value) => !value)}
           >

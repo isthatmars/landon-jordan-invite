@@ -5,7 +5,7 @@ import { LineIcon } from "./icons";
 
 export function Lineup({ content }: { content: SiteContent }) {
   return (
-    <section id="lineup" className="bg-[#07010f] px-3 py-12 sm:px-5 sm:py-16">
+    <section id="lineup" className="bg-[#07010f] px-2 py-6 sm:px-5 sm:py-16">
       <div className="mx-auto max-w-[1100px]">
         <div className="mb-2 flex items-center justify-center gap-4">
           <span className="h-px w-10 bg-white/50 sm:w-16" />
@@ -18,30 +18,30 @@ export function Lineup({ content }: { content: SiteContent }) {
           {content.lineupTagline}
         </p>
 
-        <div className="grid gap-8 min-[640px]:grid-cols-3 min-[640px]:gap-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-6">
           {content.lineup.map((block) => (
-            <div key={block.id} className="flex items-start gap-3">
+            <div key={block.id} className="flex items-start gap-1.5 sm:gap-3">
               <LineIcon
                 name={block.icon}
-                className="mt-1 h-12 w-12 shrink-0 text-[#ff4fd8] drop-shadow-[0_0_8px_#ff4fd8]"
+                className="mt-0.5 h-7 w-7 shrink-0 text-[#ff4fd8] drop-shadow-[0_0_8px_#ff4fd8] sm:h-12 sm:w-12"
               />
               <div>
-                <p className="text-[12px] font-bold tracking-wide text-[#ff4fd8]">{block.time}</p>
-                <h3 className="mt-0.5 text-[15px] font-extrabold tracking-wide text-[#f6c945]">
+                <p className="text-[8px] font-bold tracking-wide text-[#ff4fd8] sm:text-[12px]">{block.time}</p>
+                <h3 className="mt-0.5 text-[9px] font-extrabold leading-tight tracking-wide text-[#f6c945] sm:text-[15px]">
                   {block.title}
                 </h3>
-                <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/80">{block.description}</p>
+                <p className="mt-1 text-[8px] leading-snug text-white/80 sm:text-[12.5px] sm:leading-relaxed">{block.description}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 rounded-full border-2 border-[#ff4fd8] bg-black/40 px-4 py-3 shadow-[0_0_18px_#ff4fd855] min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-4 min-[640px]:px-5">
-          <div className="flex flex-1 items-center justify-center gap-2 min-[640px]:justify-start">
+        <div className="mt-6 flex flex-row items-center gap-2 rounded-full border-2 border-[#ff4fd8] bg-black/40 px-2 py-2 shadow-[0_0_18px_#ff4fd855] sm:mt-10 sm:gap-4 sm:px-5 sm:py-3">
+          <div className="flex flex-1 items-center justify-start gap-1.5 sm:gap-2">
             <LineIcon name="hanger" className="h-7 w-7 shrink-0 text-[#ff4fd8]" />
             <p className="text-sm font-bold tracking-wide">
               DRESS CODE:{" "}
-              <span className="font-[family-name:var(--font-script)] text-2xl font-normal text-[#ff4fd8]">
+              <span className="font-[family-name:var(--font-script)] text-lg font-normal text-[#ff4fd8] sm:text-2xl">
                 {content.dressCode}
               </span>
             </p>

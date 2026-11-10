@@ -17,16 +17,16 @@ export function Arcade({ headline }: { headline: string }) {
   );
 
   return (
-    <section id="arcade" className="scene-section relative min-h-[620px] overflow-hidden sm:min-h-[760px]">
+    <section id="arcade" className="scene-section relative overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/scene-arcade-room.jpg"
         alt=""
-        className="absolute inset-0 h-full w-full object-cover object-[center_68%]"
+        className="absolute inset-0 h-full w-full object-cover object-[center_72%]"
       />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#05010f] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="relative z-10 mx-auto flex min-h-[620px] w-full max-w-[1000px] items-end px-3 pb-6 sm:min-h-[760px] sm:px-6 sm:pb-10">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1000px] items-end px-2 py-3 sm:px-6 sm:py-12">
         <div className="flex w-full items-end justify-center gap-2 sm:gap-4">
           <div className="relative z-20 w-[30%] pb-3 text-left sm:pb-8">
             <h2 className="neon-script-lg text-[1.45rem] leading-[0.9] min-[640px]:text-[2.6rem]">{script}</h2>

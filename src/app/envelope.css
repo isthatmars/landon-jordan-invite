@@ -351,22 +351,36 @@ html[data-intro="invite"] .invite-open {
 }
 
 .invite-open:hover,
-.invite-open:focus-visible {
+.invite-open:focus-visible,
+html[data-intro="invite"] .invite-open:hover,
+html[data-intro="invite"] .invite-open:focus-visible {
   color: #fff;
   background: transparent;
   outline: none;
+  border-color: #ff39c8;
+  /* Drop the resting green outline pulse so hover pink can paint. */
+  animation: none;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  text-shadow: 0 0 10px rgba(255, 57, 200, 0.28);
   box-shadow:
-    0 0 0 1px rgba(198, 255, 0, 0.45),
-    0 0 16px rgba(198, 255, 0, 0.42),
-    0 0 34px rgba(198, 255, 0, 0.22);
+    0 0 0 1px rgba(255, 57, 200, 0.45),
+    0 0 16px rgba(255, 57, 200, 0.42),
+    0 0 34px rgba(255, 57, 200, 0.22);
 }
 
-.invite-open:active {
+.invite-open:active,
+html[data-intro="invite"] .invite-open:active {
+  animation: none;
+  opacity: 1;
+  pointer-events: auto;
   transform: translateY(1px);
   background: transparent;
+  border-color: #ff39c8;
   box-shadow:
-    0 0 0 1px rgba(198, 255, 0, 0.4),
-    0 0 10px rgba(198, 255, 0, 0.28);
+    0 0 0 1px rgba(255, 57, 200, 0.4),
+    0 0 10px rgba(255, 57, 200, 0.28);
 }
 
 html[data-intro='reveal'] .invite-overlay .invite-open,

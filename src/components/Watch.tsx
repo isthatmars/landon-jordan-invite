@@ -83,7 +83,7 @@ export function Watch({ headline }: { headline: string }) {
           />
         </div>
 
-        <div className="relative pb-16 text-center min-[640px]:pb-20 min-[640px]:text-left">
+        <div className="relative text-center min-[640px]:pb-20 min-[640px]:text-left">
           <h2 className="neon-script-lg text-[2.35rem] leading-[0.92] sm:text-5xl">{script}</h2>
           <GreenSwoosh className="mx-auto mt-1 h-3 w-40 min-[640px]:mx-0" />
           <button
@@ -120,7 +120,7 @@ export function Watch({ headline }: { headline: string }) {
           <img
             src="/images/prop-roller-skate.png"
             alt=""
-            className="pointer-events-none absolute -right-1 bottom-0 w-[46%] max-w-[190px] drop-shadow-2xl"
+            className="pointer-events-none mx-auto mt-5 w-[42%] max-w-[150px] drop-shadow-2xl min-[640px]:absolute min-[640px]:-right-1 min-[640px]:bottom-0 min-[640px]:mx-0 min-[640px]:mt-0 min-[640px]:w-[46%] min-[640px]:max-w-[190px]"
             draggable={false}
           />
         </div>

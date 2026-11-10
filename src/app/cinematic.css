@@ -553,7 +553,6 @@ html[data-motion="armed"] #rsvp .rsvp-title {
   -webkit-mask-image: none;
   mask-image: none;
 }
-html[data-motion="armed"] #mixtape .neon-script-lg,
 html[data-motion="armed"] #arcade .neon-script-lg {
   -webkit-mask-image:
     linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a)),
@@ -567,6 +566,12 @@ html[data-motion="armed"] #arcade .neon-script-lg {
   mask-position: left top, left bottom;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+}
+
+/* Mixtape headline keeps full neon bloom — no handwriting mask (it boxes the glow). */
+html[data-motion="armed"] #mixtape .neon-script-lg {
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 html[data-motion="armed"] #watch .watch-line {
   -webkit-mask-image: linear-gradient(108deg, #000 calc(var(--pen) - 3%), transparent var(--pen));
@@ -588,20 +593,17 @@ html[data-motion="armed"]:not([data-seen-watch]) #watch .watch-line {
 }
 
 html[data-seen-mixtape="1"] #mixtape .neon-script-lg {
-  animation:
-    write-two 1.28s cubic-bezier(0.33, 0.04, 0.22, 1) both,
-    mix-clear-mask 0.01s linear 1.28s forwards;
+  animation: mix-neon-settle 0.7s ease-out both;
 }
 
-/* Drop the handwriting mask after ink finishes so letter boxes cannot shear bloom. */
-@keyframes mix-clear-mask {
+@keyframes mix-neon-settle {
   from {
-    -webkit-mask-image: linear-gradient(#000, #000);
-    mask-image: linear-gradient(#000, #000);
+    opacity: 0.35;
+    filter: brightness(0.7);
   }
   to {
-    -webkit-mask-image: none;
-    mask-image: none;
+    opacity: 1;
+    filter: none;
   }
 }
 

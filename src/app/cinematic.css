@@ -560,19 +560,9 @@ html[data-motion="armed"] #arcade .neon-script-lg {
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
 }
-html[data-motion="armed"] #watch .neon-script-lg {
-  -webkit-mask-image:
-    linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a)),
-    linear-gradient(108deg, #000 calc(var(--pen-b) - 3%), transparent var(--pen-b)),
-    linear-gradient(108deg, #000 calc(var(--pen-c) - 3%), transparent var(--pen-c));
-  mask-image:
-    linear-gradient(108deg, #000 calc(var(--pen-a) - 3%), transparent var(--pen-a)),
-    linear-gradient(108deg, #000 calc(var(--pen-b) - 3%), transparent var(--pen-b)),
-    linear-gradient(108deg, #000 calc(var(--pen-c) - 3%), transparent var(--pen-c));
-  -webkit-mask-size: 100% 36%, 100% 36%, 100% 36%;
-  mask-size: 100% 36%, 100% 36%, 100% 36%;
-  -webkit-mask-position: left top, left center, left bottom;
-  mask-position: left top, left center, left bottom;
+html[data-motion="armed"] #watch .watch-line {
+  -webkit-mask-image: linear-gradient(108deg, #000 calc(var(--pen) - 3%), transparent var(--pen));
+  mask-image: linear-gradient(108deg, #000 calc(var(--pen) - 3%), transparent var(--pen));
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
 }
@@ -580,11 +570,13 @@ html[data-motion="armed"] #watch .neon-script-lg {
 html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .neon-script-lg,
 html[data-motion="armed"]:not([data-seen-arcade]) #arcade .neon-script-lg,
 html[data-motion="armed"]:not([data-seen-lineup]) #lineup .neon-script,
-html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-script-lg,
-html[data-motion="armed"]:not([data-seen-watch]) #watch .neon-script-lg {
+html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-script-lg {
   --pen-a: 130%;
   --pen-b: 130%;
   --pen-c: 130%;
+}
+html[data-motion="armed"]:not([data-seen-watch]) #watch .watch-line {
+  --pen: 130%;
 }
 
 html[data-seen-mixtape="1"] #mixtape .neon-script-lg {
@@ -599,8 +591,17 @@ html[data-seen-lineup="1"] #lineup .neon-script {
 html[data-seen-rsvp="1"] #rsvp .neon-script-lg {
   animation: write-one 0.85s cubic-bezier(0.33, 0.04, 0.22, 1) 0.15s both, neon-breathe 10.4s ease-in-out 1.1s infinite;
 }
+html[data-seen-watch="1"] #watch .watch-line {
+  animation: write-line 0.7s cubic-bezier(0.33, 0.04, 0.22, 1) both;
+}
+html[data-seen-watch="1"] #watch .watch-line-hero {
+  animation-delay: 0.28s;
+}
+html[data-seen-watch="1"] #watch .watch-line-rest {
+  animation-delay: 0.56s;
+}
 html[data-seen-watch="1"] #watch .neon-script-lg {
-  animation: write-three 1.55s cubic-bezier(0.33, 0.04, 0.22, 1) both, neon-breathe 8.6s ease-in-out 1.6s infinite;
+  animation: neon-breathe 8.6s ease-in-out 1.6s infinite;
 }
 
 @keyframes write-one {
@@ -647,6 +648,25 @@ html[data-seen-watch="1"] #watch .neon-script-lg {
   100% {
     --pen-a: 122%;
     --pen-b: 122%;
+    filter: brightness(1);
+  }
+}
+@keyframes write-line {
+  0% {
+    --pen: -18%;
+  }
+  78% {
+    --pen: 122%;
+    filter: brightness(1);
+  }
+  88% {
+    filter: brightness(1.55);
+  }
+  94% {
+    filter: brightness(0.7);
+  }
+  100% {
+    --pen: 122%;
     filter: brightness(1);
   }
 }
@@ -832,6 +852,7 @@ html[data-live-lineup="0"] .lineup-pill {
 }
 html[data-live-mixtape="0"] #mixtape .neon-script-lg,
 html[data-live-watch="0"] #watch .neon-script-lg,
+html[data-live-watch="0"] #watch .watch-line,
 html[data-live-arcade="0"] #arcade .neon-script-lg,
 html[data-live-rsvp="0"] #rsvp .neon-script-lg {
   animation-play-state: paused;
@@ -847,6 +868,7 @@ html[data-live-rsvp="0"] #rsvp .neon-script-lg {
   .hero-people::after,
   #mixtape .neon-script-lg,
   #watch .neon-script-lg,
+  #watch .watch-line,
   #arcade .neon-script-lg,
   #lineup .neon-script,
   #rsvp .neon-script-lg,

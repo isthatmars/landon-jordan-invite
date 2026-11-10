@@ -22,33 +22,20 @@ export function Watch({ headline }: { headline: string }) {
     const timer = window.setTimeout(() => setStaticOn(false), 460);
     return () => window.clearTimeout(timer);
   }, [now?.youtubeId]);
-  const lines = headline.trim().split(/\s+/);
-  const script =
-    lines.length >= 3 ? (
-      <>
-        {lines[0]}
-        <br />
-        {lines[1]}
-        <br />
-        {lines.slice(2).join(" ")}
-      </>
-    ) : (
-      headline
-    );
+  const words = headline.trim().split(/\s+/).filter(Boolean);
+  const lead = words.length > 1 ? words[0] : "";
+  const hero = words.length > 1 ? words[1] : words[0] || "";
+  const rest = words.length > 2 ? words.slice(2).join(" ") : "";
 
   return (
-    <section id="watch" data-youtube-id={now?.youtubeId ?? ""} className="scene-section relative overflow-hidden">
+    <section id="watch" data-youtube-id={now?.youtubeId ?? ""} className="scene-section watch-scene relative overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/scene-watch-table.jpg"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover object-[center_62%]"
-      />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
+      <img src="/images/scene-watch-table.jpg" alt="" className="watch-bg" />
+      <div className="watch-shade" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-[#05010f] to-transparent" />
 
-      <div className="watch-stage relative z-10 mx-auto flex w-full max-w-[1180px] items-end px-4 py-6 sm:px-4 sm:py-6">
-        <div className="watch-row flex w-full flex-col items-center justify-center gap-3 md:flex-row md:items-end md:gap-4">
-        <div className="watch-tv relative order-2 w-[86%] max-w-[680px] md:order-1 md:w-[58%]">
+      <div className="watch-stage">
+        <div className="watch-tv">
           <div className="crt-screen-light" aria-hidden />
           <div
             data-testid="tv-screen"
@@ -83,8 +70,8 @@ export function Watch({ headline }: { headline: string }) {
             <div className="crt-scanlines" aria-hidden />
             <div className={`crt-static${staticOn ? " is-on" : ""}`} aria-hidden />
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="floor-contact" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/prop-crt-front.png"
             alt="Wood CRT television"
@@ -93,51 +80,50 @@ export function Watch({ headline }: { headline: string }) {
           />
         </div>
 
-        <div className="watch-copy relative order-1 w-full pb-1 text-center md:order-2 md:w-[28%] md:pb-2 md:text-left">
-          <h2 className="neon-script-lg text-[34px] leading-[0.92] sm:text-[3rem]">{script}</h2>
-          <GreenSwoosh className="mx-auto mt-1 h-3 w-28 md:mx-0 min-[640px]:w-40" />
-          <button
-            type="button"
-            className="btn-pink-outline mt-3 inline-flex min-h-12 items-center gap-2 whitespace-nowrap px-5 py-3 text-base font-bold tracking-[0.14em] md:mt-4 md:min-h-0 md:px-4 md:py-1.5 md:text-xs md:tracking-[0.16em]"
-            aria-expanded={browsing}
-            onClick={() => setBrowsing((value) => !value)}
-          >
-            <span aria-hidden>▶</span>
-            BROWSE VIDEOS
-          </button>
-          {browsing ? (
-            <ul className="mt-4 max-h-40 space-y-1 overflow-auto text-left">
-              {videos.map((video) => (
-                <li key={video.id}>
-                  <button
-                    type="button"
-                    data-youtube-id={video.youtubeId}
-                    onClick={() => tuneVideo(video)}
-                    className={`w-full border-b px-1 py-2 text-left text-sm ${
-                      now?.youtubeId === video.youtubeId
-                        ? "border-[#ff4fd8] text-[#ff4fd8]"
-                        : "border-white/15 text-white"
-                    }`}
-                  >
-                    <span className="font-semibold">{video.title}</span>
-                    <span className="block text-xs text-white/60">{video.artist}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
+        <div className="watch-side">
+          <div className="watch-copy">
+            <h2 className="neon-script-lg watch-title">
+              {lead ? <span className="watch-line watch-line-lead">{lead}</span> : null}
+              {hero ? <span className="watch-line watch-line-hero">{hero}</span> : null}
+              {rest ? <span className="watch-line watch-line-rest">{rest}</span> : null}
+            </h2>
+            <GreenSwoosh className="watch-swoosh" stroke="#C6FF00" />
+            <button
+              type="button"
+              className="btn-pink-outline watch-cta"
+              aria-expanded={browsing}
+              onClick={() => setBrowsing((value) => !value)}
+            >
+              <span aria-hidden>▶</span>
+              BROWSE VIDEOS
+            </button>
+            {browsing ? (
+              <ul className="watch-list">
+                {videos.map((video) => (
+                  <li key={video.id}>
+                    <button
+                      type="button"
+                      data-youtube-id={video.youtubeId}
+                      onClick={() => tuneVideo(video)}
+                      className={`w-full border-b px-1 py-2 text-left text-sm ${
+                        now?.youtubeId === video.youtubeId
+                          ? "border-[#ff4fd8] text-[#ff4fd8]"
+                          : "border-white/15 text-white"
+                      }`}
+                    >
+                      <span className="font-semibold">{video.title}</span>
+                      <span className="block text-xs text-white/60">{video.artist}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
 
-        <div className="watch-skate relative order-3 w-[28%] max-w-[120px] shrink-0 md:w-[18%] md:max-w-[170px]">
-          <div className="floor-contact" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/prop-roller-skate.png"
-            alt=""
-            className="relative block h-auto w-full"
-            draggable={false}
-          />
-        </div>
+          <div className="watch-skate">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/prop-roller-skate.png" alt="" draggable={false} />
+          </div>
         </div>
       </div>
     </section>

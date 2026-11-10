@@ -814,8 +814,11 @@ html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-card {
 html[data-seen-lineup="1"] #lineup .lineup-card {
   /* backwards keeps pre-delay hidden; after the run, cascade wins so hover lift works. */
   opacity: 1;
-  transform: none;
   animation: rise-in 0.52s ease backwards;
+}
+html[data-seen-lineup="1"] #lineup .lineup-card:hover,
+html[data-seen-lineup="1"] #lineup .lineup-card:active {
+  transform: translateY(-5px);
 }
 html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(1) {
   animation-delay: 0.12s;
@@ -924,6 +927,10 @@ html[data-live-rsvp="0"] #rsvp .neon-script-lg {
   html[data-seen-lineup="1"] #lineup .lineup-card {
     animation: none !important;
     opacity: 1;
+    transform: none;
+  }
+  html[data-seen-lineup="1"] #lineup .lineup-card:hover,
+  html[data-seen-lineup="1"] #lineup .lineup-card:active {
     transform: none;
   }
 }

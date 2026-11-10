@@ -13,52 +13,54 @@ export function Hero({ content }: { content: SiteContent }) {
     target: ref,
     offset: ["start start", "end start"],
   });
-  const bgY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["0%", "22%"]);
-  const coupleY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["0%", "10%"]);
-  const coupleX = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["0%", "-3%"]);
-  const textY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["0%", "28%"]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0.15]);
+  const bgY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["0%", "18%"]);
+  const coupleY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["0%", "8%"]);
+  const textY = useTransform(scrollYProgress, [0, 1], light ? ["0%", "0%"] : ["0%", "22%"]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0.2]);
 
   return (
     <section ref={ref} id="home" className="relative min-h-[100svh] w-full overflow-hidden">
-      {/* Layer 1 — Miami night / palms */}
-      <motion.div className="absolute inset-[-8%] z-0" style={{ y: bgY }}>
+      {/* Separate Miami night / palm background */}
+      <motion.div className="absolute inset-[-6%] z-0" style={{ y: bgY }}>
         <Image
           src="/images/hero-bg-miami.jpg"
           alt=""
           fill
           priority
-          className="object-cover object-center"
+          className="object-cover object-[center_40%]"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05010ff0] via-[#05010f88] to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05010f] via-transparent to-[#05010f55]" />
       </motion.div>
+      {/* Readability gradients — do NOT fade the couple layer */}
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[#05010ff5] via-[#05010f66] to-transparent md:via-[#05010f40]" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[#05010f] via-transparent to-[#05010f55]" />
 
-      {/* Layer 2 — birthday boys cutout (strong presence, left/center) */}
+      {/* Hard cutout couple — opaque PNG via <img>, no blend into city */}
       <motion.div
-        className="pointer-events-none absolute inset-y-0 left-[-4%] right-0 z-[2] md:left-[8%] lg:left-[18%]"
-        style={{ y: coupleY, x: coupleX }}
+        className="pointer-events-none absolute bottom-0 right-[-4%] z-[4] flex h-[84%] w-[85%] max-w-[780px] items-end justify-center sm:right-[0%] md:left-[26%] md:right-auto md:w-[60%] lg:left-[30%] lg:w-[54%]"
+        style={{ y: coupleY }}
       >
-        <div className="relative h-full w-full max-w-[920px]">
-          <Image
-            src="/images/hero-couple-cutout.png"
-            alt="Landon and Jordan in 80s windbreakers"
-            fill
-            priority
-            className="object-contain object-bottom drop-shadow-[0_20px_50px_#000c]"
-            sizes="(max-width:768px) 100vw, 70vw"
-          />
-        </div>
+        {/* Contact shadow so subjects sit ON the scene, not dissolve into pier */}
+        <div
+          aria-hidden
+          className="absolute bottom-[2%] left-1/2 z-0 h-[7%] w-[62%] -translate-x-1/2 rounded-[100%] bg-black/70 blur-2xl"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`/images/hero-couple-cutout.png?v=hard2`}
+          alt="Landon and Jordan in 80s windbreakers"
+          className="relative z-[1] max-h-full w-auto max-w-full object-contain object-bottom"
+          style={{
+            opacity: 1,
+            mixBlendMode: "normal",
+            isolation: "isolate",
+            filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.9))",
+          }}
+          draggable={false}
+        />
       </motion.div>
 
-      {/* Soft floor glow under couple */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-[8%] left-[10%] z-[3] h-24 w-[50%] max-w-xl rounded-[100%] bg-fuchsia-500/25 blur-3xl"
-      />
-
-      {/* Layer 3 — typography */}
+      {/* Typography layer */}
       <motion.div
         className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-center px-4 pb-28 pt-28 md:px-6"
         style={{ y: textY, opacity: textOpacity }}
@@ -67,7 +69,7 @@ export function Hero({ content }: { content: SiteContent }) {
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-xl"
+          className="max-w-[min(100%,28rem)]"
         >
           <div className="mb-1 flex items-center gap-2">
             <span className="text-2xl text-neon-gold drop-shadow-[0_0_10px_#ffd700]" aria-hidden>

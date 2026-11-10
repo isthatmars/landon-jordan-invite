@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion"
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Track } from "@/lib/types";
-import { Cassette } from "./Cassette";
+import { Cassette, CassetteStackHeight } from "./Cassette";
 import { useLightParallax } from "./Parallax";
 
 export function Mixtape({
@@ -44,7 +44,7 @@ export function Mixtape({
     setInsertingId(id);
     setActiveId(id);
     setPlaying(true);
-    window.setTimeout(() => setInsertingId(null), 650);
+    window.setTimeout(() => setInsertingId(null), 700);
   };
 
   const togglePlay = async () => {
@@ -63,6 +63,8 @@ export function Mixtape({
     }
   };
 
+  const stackH = CassetteStackHeight(sorted.length);
+
   return (
     <section
       ref={sectionRef}
@@ -80,8 +82,7 @@ export function Mixtape({
         <div className="absolute inset-0 bg-gradient-to-b from-[#05010f] via-transparent to-[#05010f]" />
       </motion.div>
 
-      <div className="relative z-10 mx-auto grid min-h-[100svh] max-w-6xl items-end gap-6 px-4 pb-16 pt-28 md:grid-cols-[1.15fr_0.85fr] md:items-center md:px-6 md:pb-24">
-        {/* Boombox + headphones on the table */}
+      <div className="relative z-10 mx-auto grid min-h-[100svh] max-w-6xl items-end gap-8 px-4 pb-16 pt-28 md:grid-cols-[1.1fr_0.9fr] md:items-center md:gap-4 md:px-6 md:pb-24">
         <motion.div className="relative" style={{ y: propY }}>
           <div className="relative mx-auto w-full max-w-xl">
             <Image
@@ -90,24 +91,33 @@ export function Mixtape({
               width={900}
               height={560}
               className="h-auto w-full drop-shadow-[0_30px_50px_#000c]"
-              priority={false}
             />
-            {/* Spinning reels overlay on deck area */}
             <div className="pointer-events-none absolute left-[28%] top-[42%] flex gap-8 sm:left-[30%] sm:top-[44%] sm:gap-12">
               <DeckReel spinning={playing} />
               <DeckReel spinning={playing} />
             </div>
-            {/* Inserting tape ghost */}
             <AnimatePresence>
               {insertingId && active && (
                 <motion.div
                   key={insertingId}
-                  initial={{ opacity: 0, x: 80, y: 40, scale: 0.6 }}
-                  animate={{ opacity: 1, x: 0, y: 0, scale: 0.85 }}
-                  exit={{ opacity: 0, scale: 0.4, y: -10 }}
-                  className="absolute left-[32%] top-[38%] h-10 w-28 rounded-sm border border-white/40"
-                  style={{ background: active.color }}
-                />
+                  initial={{ opacity: 0, x: 100, y: 50, rotate: 12, scale: 0.7 }}
+                  animate={{ opacity: 1, x: 0, y: 0, rotate: 0, scale: 0.9 }}
+                  exit={{ opacity: 0, scale: 0.3, y: -8 }}
+                  transition={{ duration: 0.45 }}
+                  className="absolute left-[30%] top-[36%] z-10 w-[34%]"
+                >
+                  <Image
+                    src="/images/cassette-case-blank.png"
+                    alt=""
+                    width={280}
+                    height={160}
+                    className="h-auto w-full"
+                  />
+                  <div
+                    className="absolute left-[14%] right-[14%] top-[38%] h-[22%] rounded-[2px]"
+                    style={{ background: active.color }}
+                  />
+                </motion.div>
               )}
             </AnimatePresence>
             <Image
@@ -141,36 +151,37 @@ export function Mixtape({
           <audio ref={audioRef} preload="none" onEnded={() => setPlaying(false)} className="hidden" />
         </motion.div>
 
-        {/* Cassette stack */}
-        <div className="relative pb-6 md:pb-0">
-          <div className="mb-6 flex items-start gap-3">
+        {/* Physical cassette pile on the table */}
+        <div className="relative pb-4 md:pb-0">
+          <div className="mb-5 flex items-end gap-3">
             <h2 className="neon-script-lg text-3xl leading-tight sm:text-4xl md:text-5xl">
               {headline}
             </h2>
             <svg
-              className="mt-3 hidden shrink-0 text-neon-pink sm:block"
+              className="mb-2 hidden shrink-0 text-neon-pink sm:block"
               width="56"
-              height="40"
-              viewBox="0 0 56 40"
+              height="36"
+              viewBox="0 0 56 36"
               fill="none"
               aria-hidden
             >
               <path
-                d="M4 20c12-12 28-14 40-8"
+                d="M4 18c12-10 28-12 40-6"
                 stroke="currentColor"
                 strokeWidth="2.5"
                 strokeLinecap="round"
-                filter="url(#g)"
               />
               <path d="M38 8l10 6-8 4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
           </div>
-          <div className="flex flex-col gap-3">
+
+          <div className="relative mx-auto w-full max-w-[320px]" style={{ height: stackH }}>
             {sorted.map((t, idx) => (
               <Cassette
                 key={t.id}
                 track={t}
                 index={idx}
+                total={sorted.length}
                 selected={t.id === active?.id}
                 inserting={insertingId === t.id}
                 onSelect={() => selectTape(t.id)}

@@ -6,7 +6,7 @@ export const defaultContent: SiteContent = {
   heroChrome: "80s",
   heroSubtitle: "BIRTHDAY PARTY",
   heroInvite: "You're Invited!",
-  eventDate: "SATURDAY DEC 19TH",
+  eventDate: "SATURDAY DEC 19, 2026",
   eventVenue: "XTREME ACTION PARK",
   eventAddress: "5300 POWERLINE RD, FORT LAUDERDALE, FL 33309",
   eventTime: "6:00 PM – MIDNIGHT",
@@ -21,7 +21,7 @@ export const defaultContent: SiteContent = {
       time: "6:00 PM – 7:30 PM",
       title: "LET'S ROLL!",
       description:
-        "Lace up and hit the floor. Whether you're showing off a move or just riding the music, it's about a good time.",
+        "Lace up your skates and hit the floor! Whether you're showing off your moves or just enjoying the music, it's all about having a good time!",
       icon: "skate",
     },
     {
@@ -29,7 +29,7 @@ export const defaultContent: SiteContent = {
       time: "7:30 PM – 9:00 PM",
       title: "DINNER & GOOD VIBES",
       description:
-        "Take a break from the floor, grab a plate, and catch up over dinner.",
+        "Take a break from the floor, grab a plate, and enjoy a delicious dinner buffet while catching up with friends.",
       icon: "dinner",
     },
     {
@@ -37,7 +37,7 @@ export const defaultContent: SiteContent = {
       time: "9:00 PM – MIDNIGHT",
       title: "THE DJ BATTLE & DANCE PARTY",
       description:
-        "Two DJs go head-to-head with old-school hip-hop, R&B, South Florida bass, and 80s jams until midnight.",
+        "Get ready for an unforgettable night of old-school hip-hop, R&B, South Florida bass, and your favorite 80s jams. Let the DJ battle begin!",
       icon: "dj",
     },
   ],

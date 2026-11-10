@@ -20,7 +20,6 @@ export function PartyPlayback({
   return (
     <PlaybackProvider tracks={tracks} videos={videos}>
       <Mixtape headline={mixtapeHeadline} />
-      <div className="scene-breath" aria-hidden />
       <Watch headline={watchHeadline} />
     </PlaybackProvider>
   );

@@ -3,7 +3,7 @@
 import { FormEvent, useRef, useState, type ReactNode } from "react";
 import { MAX_COMPANIONS, parseCompletedRsvp } from "@/lib/rsvp";
 import type { AttendStatus, PartyPerson, SiteContent } from "@/lib/types";
-import { Reveal } from "./Reveal";
+import { Crown } from "./icons";
 
 type YesNo = "" | "yes" | "no";
 
@@ -142,21 +142,14 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   };
 
   return (
-    <section id="rsvp" className="section-pad">
-      <Reveal>
-        <div className="neon-frame mx-auto max-w-5xl bg-black/50 p-5 sm:p-10">
-          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-10">
-            <div className="text-center lg:text-left">
-              <p className="text-neon-gold mb-2 text-4xl sm:text-5xl" aria-hidden>
-                ♛
-              </p>
-              <h2 className="neon-script-lg mb-4 text-6xl sm:text-7xl">{content.rsvpHeadline}</h2>
-              <p className="text-sm tracking-wide text-violet-100 sm:text-base">
+    <section id="rsvp" className="bg-[#07010f] px-3 pb-6 pt-2 sm:px-5">
+        <div className="neon-frame mx-auto max-w-[1100px] bg-[#07010ee8] p-4 sm:p-8 md:p-10">
+          <div className="grid items-start gap-6 min-[640px]:grid-cols-[0.7fr_1.3fr] min-[640px]:gap-10">
+            <div className="pt-4 text-center min-[640px]:pt-8">
+              <Crown className="mx-auto h-12 w-16 drop-shadow-[0_0_12px_#ffd45a]" />
+              <h2 className="neon-script-lg text-6xl leading-none sm:text-7xl">{content.rsvpHeadline}</h2>
+              <p className="mx-auto mt-3 max-w-[17rem] text-[11px] font-semibold leading-relaxed tracking-[0.14em] text-white/85">
                 {content.rsvpSubhead}
-              </p>
-              <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-violet-100/90 lg:mx-0">
-                Please register every adult and child. If a name isn&apos;t on this form, they
-                can&apos;t come in.
               </p>
             </div>
 
@@ -279,7 +272,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                 </Field>
               )}
 
-              <fieldset className="space-y-3 rounded-2xl border border-pink-500/30 p-4">
+              <fieldset className="space-y-3 border-t border-white/15 pt-4">
                 <legend className="px-2 text-xs tracking-[0.14em] text-violet-200 uppercase">
                   Other people coming with you
                 </legend>
@@ -369,7 +362,6 @@ export function RsvpForm({ content }: { content: SiteContent }) {
             </form>
           </div>
         </div>
-      </Reveal>
     </section>
   );
 }
@@ -377,7 +369,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="label-muted">{label}</span>
+      <span className="mb-1 block text-[12px] text-white/75">{label}</span>
       {children}
     </label>
   );

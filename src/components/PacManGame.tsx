@@ -57,7 +57,7 @@ function canMove(x: number, y: number) {
   return MAZE[y][x] === 0;
 }
 
-export function PacManGame({ running }: { running: boolean }) {
+export function PacManGame({ running, embed = false }: { running: boolean; embed?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
@@ -79,6 +79,8 @@ export function PacManGame({ running }: { running: boolean }) {
   const setDir = useCallback((dir: Dir) => {
     state.current.pac.next = dir;
   }, []);
+  const runningRef = useRef(running);
+  runningRef.current = running;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -93,7 +95,7 @@ export function PacManGame({ running }: { running: boolean }) {
         d: "R",
       };
       const dir = map[e.key];
-      if (!dir) return;
+      if (!dir || !runningRef.current) return;
       e.preventDefault();
       setDir(dir);
     };
@@ -102,7 +104,6 @@ export function PacManGame({ running }: { running: boolean }) {
   }, [setDir]);
 
   useEffect(() => {
-    if (!running) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -142,9 +143,9 @@ export function PacManGame({ running }: { running: boolean }) {
 
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
-      if (t - last < 110) return;
-      last = t;
       const s = state.current;
+      if (running && t - last >= 110) {
+      last = t;
       s.tick++;
 
       stepEntity(s.pac, s.pac.next);
@@ -173,6 +174,7 @@ export function PacManGame({ running }: { running: boolean }) {
       if (s.pellets.size === 0) {
         s.pellets = pelletsFromMaze();
         setScore((v) => v + 200);
+      }
       }
 
       // draw
@@ -233,29 +235,64 @@ export function PacManGame({ running }: { running: boolean }) {
     }
   }, [lives]);
 
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+
   return (
-    <div className="w-full">
-      <div className="mb-2 flex justify-between text-xs tracking-widest text-neon-teal">
-        <span>SCORE {score}</span>
-        <span>LIVES {Math.max(lives, 0)}</span>
-      </div>
+    <div
+      className={embed ? "flex h-full w-full touch-none flex-col bg-black" : "w-full"}
+      onPointerDown={(e) => {
+        swipe.current = { x: e.clientX, y: e.clientY };
+      }}
+      onPointerUp={(e) => {
+        if (!swipe.current) return;
+        const dx = e.clientX - swipe.current.x;
+        const dy = e.clientY - swipe.current.y;
+        swipe.current = null;
+        if (Math.abs(dx) < 16 && Math.abs(dy) < 16) return;
+        if (Math.abs(dx) > Math.abs(dy)) setDir(dx > 0 ? "R" : "L");
+        else setDir(dy > 0 ? "D" : "U");
+      }}
+    >
+      {embed ? (
+        <div className="flex justify-between px-1 pt-0.5 font-mono text-[8px] leading-tight tracking-wider text-[#ffe14a]">
+          <span>
+            1UP
+            <br />
+            {String(score).padStart(2, "0")}
+          </span>
+          <span className="text-right">
+            HIGH SCORE
+            <br />
+            {Math.max(score, 10000)}
+          </span>
+        </div>
+      ) : (
+        <div className="mb-2 flex justify-between text-xs tracking-widest text-neon-teal">
+          <span>SCORE {score}</span>
+          <span>LIVES {Math.max(lives, 0)}</span>
+        </div>
+      )}
       <canvas
         ref={canvasRef}
         width={COLS * CELL}
         height={ROWS * CELL}
-        className="mx-auto w-full max-w-[304px] rounded-md border border-blue-400/40 bg-black shadow-[0_0_24px_#3b82f680]"
+        aria-label="Pac-Man"
+        className={
+          embed
+            ? "h-full min-h-0 w-full flex-1 bg-black"
+            : "mx-auto w-full max-w-[304px] rounded-md border border-blue-400/40 bg-black"
+        }
       />
-      <div className="mt-3 grid grid-cols-3 gap-2 max-w-[220px] mx-auto md:hidden">
-        <span />
-        <Pad onClick={() => setDir("U")}>▲</Pad>
-        <span />
-        <Pad onClick={() => setDir("L")}>◀</Pad>
-        <Pad onClick={() => setDir("D")}>▼</Pad>
-        <Pad onClick={() => setDir("R")}>▶</Pad>
-      </div>
-      <p className="mt-2 text-center text-[11px] text-violet-300/80">
-        Keyboard: arrows / WASD · Touch pads on mobile
-      </p>
+      {!embed && (
+        <div className="mx-auto mt-3 grid max-w-[220px] grid-cols-3 gap-2 md:hidden">
+          <span />
+          <Pad onClick={() => setDir("U")}>▲</Pad>
+          <span />
+          <Pad onClick={() => setDir("L")}>◀</Pad>
+          <Pad onClick={() => setDir("D")}>▼</Pad>
+          <Pad onClick={() => setDir("R")}>▶</Pad>
+        </div>
+      )}
     </div>
   );
 }

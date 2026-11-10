@@ -18,7 +18,7 @@
   --glow-green: 0 0 12px #39ff14, 0 0 28px #39ff1480;
   --glow-teal: 0 0 12px #2ef2c6, 0 0 24px #2ef2c680;
   --font-script: var(--font-script);
-  --font-display: var(--font-display);
+  --font-display: var(--font-chrome);
   --font-sans: var(--font-body);
 }
 
@@ -31,7 +31,7 @@
   --color-neon-gold: var(--neon-gold);
   --font-sans: var(--font-body);
   --font-script: var(--font-script);
-  --font-display: var(--font-display);
+  --font-display: var(--font-chrome);
 }
 
 * {
@@ -81,8 +81,9 @@ body {
 }
 
 .chrome-80s {
-  font-family: var(--font-display), Impact, sans-serif;
-  font-weight: 900;
+  font-family: var(--font-chrome), Impact, sans-serif;
+  font-style: italic;
+  font-weight: 400;
   letter-spacing: -0.04em;
   line-height: 0.85;
   background: linear-gradient(
@@ -171,15 +172,28 @@ body {
   outline: none;
 }
 
+.btn-rsvp-now {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #7cff3a;
+  color: #fff;
+  background: transparent;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 14px #39ff1466, inset 0 0 12px #39ff1422;
+}
+
 .btn-green-solid {
   border: none;
-  background: var(--neon-green);
-  color: #0a0a0a;
+  background: linear-gradient(180deg, #dcff57 0%, #b6ef2e 100%);
+  color: #10140a;
   border-radius: 999px;
   padding: 0.85rem 1.75rem;
   font-weight: 900;
-  letter-spacing: 0.06em;
-  box-shadow: var(--glow-green);
+  letter-spacing: 0.14em;
+  box-shadow: 0 0 18px #b6ef2e88;
   transition: transform 0.2s ease, filter 0.2s;
 }
 .btn-green-solid:hover,

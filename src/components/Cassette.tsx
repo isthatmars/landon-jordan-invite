@@ -6,12 +6,14 @@ import type { Track } from "@/lib/types";
 export function Cassette({
   track,
   index,
+  label,
   selected,
   inserting,
   onSelect,
 }: {
   track: Track;
   index: number;
+  label?: string;
   selected: boolean;
   inserting: boolean;
   onSelect: () => void;
@@ -25,7 +27,7 @@ export function Cassette({
       data-track-id={track.id}
       data-youtube-id={track.youtubeId}
       data-selected={selected ? "true" : "false"}
-      className={`relative block w-[210px] max-w-full border-0 bg-transparent p-0 outline-none transition-transform duration-500 focus-visible:ring-2 focus-visible:ring-pink-400/70 ${
+      className={`relative block w-[228px] max-w-full border-0 bg-transparent p-0 outline-none transition-transform duration-500 focus-visible:ring-2 focus-visible:ring-pink-400/70 ${
         index === 0 ? "" : "-mt-[58px]"
       } ${inserting ? "-translate-x-24 -rotate-12 scale-90 opacity-30" : ""} ${
         selected ? "z-30" : ""
@@ -48,8 +50,8 @@ export function Cassette({
         className="pointer-events-none absolute left-[12%] right-[12%] top-[22%] flex h-[16%] items-center overflow-hidden px-1"
         style={{ background: track.color }}
       >
-        <span className="block w-full truncate text-center font-[family-name:var(--font-script)] text-[12px] leading-none text-[#1a1020] sm:text-[13px]">
-          {track.artist} – {track.title}
+        <span className="block w-full truncate text-center font-[family-name:var(--font-script)] text-[11px] leading-none text-[#1a1020]">
+          {label ?? `${track.artist} – ${track.title}`}
         </span>
       </span>
     </button>

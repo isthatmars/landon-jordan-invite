@@ -1,7 +1,6 @@
 "use client";
 
-import { NeonCursor } from "./NeonCursor";
-
+/** The comps use the system pointer. No extra cursor graphic. */
 export function SiteEffects() {
-  return <NeonCursor />;
+  return null;
 }

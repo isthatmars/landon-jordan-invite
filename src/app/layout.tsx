@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Great_Vibes, Orbitron, Outfit } from "next/font/google";
+import { Fugaz_One, Great_Vibes, Outfit } from "next/font/google";
 import { SiteEffects } from "@/components/SiteEffects";
 import "./globals.css";
 
@@ -10,10 +10,10 @@ const script = Great_Vibes({
   display: "swap",
 });
 
-const display = Orbitron({
-  weight: ["700", "800", "900"],
+const chrome = Fugaz_One({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-display",
+  variable: "--font-chrome",
   display: "swap",
 });
 
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${script.variable} ${display.variable} ${body.variable} h-full antialiased`}
+      className={`${script.variable} ${chrome.variable} ${body.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col night-sky">
         <SiteEffects />

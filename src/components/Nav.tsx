@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Crown } from "./icons";
 
 const links = [
   { href: "#home", label: "HOME" },
@@ -11,42 +11,27 @@ const links = [
 ];
 
 export function Nav({ brandName }: { brandName: string }) {
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <motion.header
-      initial={{ y: -24, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed inset-x-0 top-0 z-50 transition-colors ${
-        scrolled ? "bg-[#05010fcc] backdrop-blur-md border-b border-pink-500/20" : "bg-transparent"
-      }`}
-    >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6">
-        <a href="#home" className="flex items-center gap-2 shrink-0">
-          <span className="text-neon-gold text-lg drop-shadow-[0_0_8px_#ffd700]" aria-hidden>
-            ♛
-          </span>
-          <span className="font-[family-name:var(--font-script)] text-xl md:text-2xl text-white">
+    <header className="absolute inset-x-0 top-0 z-50">
+      <div className="mx-auto flex max-w-[1100px] items-center gap-3 px-3 py-3 sm:px-5">
+        <a href="#home" className="flex shrink-0 items-center gap-1.5">
+          <Crown className="h-4 w-5 drop-shadow-[0_0_6px_#ffd45a]" />
+          <span className="font-[family-name:var(--font-script)] text-[1.35rem] leading-none text-[#ffe6fb] drop-shadow-[0_0_8px_#ff4fd888] sm:text-[1.55rem]">
             {brandName}
           </span>
         </a>
 
-        <nav className="hidden md:flex items-center gap-6 text-xs tracking-[0.18em] font-semibold">
+        <nav className="ml-auto hidden min-w-0 items-center gap-2.5 whitespace-nowrap text-[9px] font-semibold tracking-[0.12em] min-[680px]:flex sm:gap-3.5 sm:text-[11px] sm:tracking-[0.16em]">
           {links.map((l, i) => (
             <a
               key={l.href}
               href={l.href}
-              className={`hover:text-neon-pink transition-colors ${
-                i === 0 ? "text-neon-pink underline underline-offset-8 decoration-2" : "text-white"
+              className={`shrink-0 ${
+                i === 0
+                  ? "text-[#ff4fd8] underline decoration-2 underline-offset-[7px]"
+                  : "text-white hover:text-[#ff4fd8]"
               }`}
             >
               {l.label}
@@ -54,35 +39,30 @@ export function Nav({ brandName }: { brandName: string }) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <a href="#rsvp" className="btn-pink-outline text-xs tracking-[0.16em] font-bold">
-            RSVP
-          </a>
-          <button
-            type="button"
-            className="md:hidden btn-pink-outline px-3 py-2 text-xs"
-            aria-label="Menu"
-            onClick={() => setOpen((v) => !v)}
-          >
-            ☰
-          </button>
-        </div>
+        <a
+          href="#rsvp"
+          className="btn-pink-outline ml-auto shrink-0 px-3 py-1.5 text-[10px] font-bold tracking-[0.18em] min-[680px]:ml-1 sm:px-4 sm:text-[11px]"
+        >
+          RSVP
+        </a>
+        <button
+          type="button"
+          className="text-[10px] font-bold tracking-[0.16em] text-white min-[680px]:hidden"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? "CLOSE" : "MENU"}
+        </button>
       </div>
-
       {open && (
-        <div className="md:hidden border-t border-pink-500/20 bg-[#05010fee] px-4 py-3 space-y-2">
+        <nav className="flex flex-col gap-2 bg-[#07010fcc] px-4 py-3 text-xs tracking-[0.18em] min-[680px]:hidden">
           {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="block py-2 text-sm tracking-widest"
-              onClick={() => setOpen(false)}
-            >
+            <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
               {l.label}
             </a>
           ))}
-        </div>
+        </nav>
       )}
-    </motion.header>
+    </header>
   );
 }

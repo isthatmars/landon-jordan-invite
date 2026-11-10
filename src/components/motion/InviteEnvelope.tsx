@@ -79,8 +79,14 @@ export function InviteEnvelope() {
       aria-modal="true"
       aria-label="You're invited"
     >
+      <div className="invite-atmosphere" aria-hidden>
+        <span className="invite-atmosphere-bloom invite-atmosphere-bloom--violet" />
+        <span className="invite-atmosphere-bloom invite-atmosphere-bloom--pink" />
+        <span className="invite-atmosphere-bloom invite-atmosphere-bloom--core" />
+        <span className="invite-atmosphere-veil" />
+      </div>
       <div className="invite-glow" aria-hidden />
-      <p className="invite-kicker">You&apos;re Invited</p>
+      <p className="invite-kicker neon-script script-hot">You&apos;re Invited</p>
       <div className={`envelope${openClass}${zoomClass}`}>
         <div className="envelope-shadow" aria-hidden />
         <div className="envelope-shell">

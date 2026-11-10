@@ -12,7 +12,7 @@ html:not([data-intro="invite"]):not([data-intro="opening"]):not([data-intro="rev
 
 html[data-intro="invite"] body,
 html[data-intro="opening"] body {
-  background: #07010f;
+  background: #0b0615;
 }
 
 html[data-intro="invite"] main,
@@ -37,10 +37,10 @@ html[data-intro="opening"] .site-header {
   gap: clamp(1.1rem, 3vh, 1.8rem);
   padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(4.5rem, env(safe-area-inset-bottom));
   background:
-    radial-gradient(ellipse 55% 42% at 50% 46%, rgba(135, 56, 255, 0.45), transparent 68%),
-    radial-gradient(ellipse 40% 32% at 50% 58%, rgba(255, 57, 200, 0.28), transparent 70%),
-    #07010f;
+    radial-gradient(ellipse 70% 55% at 50% 42%, #210c2c 0%, transparent 72%),
+    #0b0615;
   overflow: hidden;
+  isolation: isolate;
 }
 
 html[data-intro='reveal'] .invite-overlay {
@@ -48,38 +48,107 @@ html[data-intro='reveal'] .invite-overlay {
   pointer-events: none;
 }
 
+/* Soft neon field behind the envelope — cinematic, not busy. */
+.invite-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.invite-atmosphere-bloom {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(42px);
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+.invite-atmosphere-bloom--violet {
+  left: -14%;
+  top: 2%;
+  width: min(98vw, 48rem);
+  height: min(98vw, 48rem);
+  background: radial-gradient(circle, rgba(135, 56, 255, 0.72) 0%, rgba(135, 56, 255, 0.28) 38%, transparent 68%);
+  animation: invite-glow-drift-a 22s ease-in-out infinite alternate;
+}
+
+.invite-atmosphere-bloom--pink {
+  right: -16%;
+  bottom: -4%;
+  width: min(94vw, 44rem);
+  height: min(94vw, 44rem);
+  background: radial-gradient(circle, rgba(255, 57, 200, 0.62) 0%, rgba(255, 57, 200, 0.22) 40%, transparent 70%);
+  animation: invite-glow-drift-b 26s ease-in-out infinite alternate;
+}
+
+.invite-atmosphere-bloom--core {
+  left: 50%;
+  top: 44%;
+  width: min(78vw, 32rem);
+  height: min(58vw, 22rem);
+  margin-left: calc(min(78vw, 32rem) / -2);
+  margin-top: calc(min(58vw, 22rem) / -2);
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(255, 57, 200, 0.42), transparent 60%),
+    radial-gradient(ellipse at 48% 55%, rgba(135, 56, 255, 0.48), transparent 66%);
+  filter: blur(28px);
+  animation: invite-glow-breathe 14s ease-in-out infinite alternate;
+}
+
+.invite-atmosphere-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 62% 52% at 50% 46%, transparent 30%, rgba(11, 6, 21, 0.22) 78%, rgba(11, 6, 21, 0.55) 100%),
+    linear-gradient(180deg, rgba(33, 12, 44, 0.22) 0%, transparent 30%, transparent 70%, rgba(11, 6, 21, 0.4) 100%);
+}
+
+@media (max-width: 640px) {
+  .invite-atmosphere-bloom {
+    filter: blur(28px);
+  }
+
+  .invite-atmosphere-bloom--core {
+    filter: blur(20px);
+  }
+}
+
 .invite-glow {
   position: absolute;
+  z-index: 1;
   left: 50%;
   top: 46%;
   width: min(78vw, 34rem);
   height: min(52vw, 22rem);
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 57, 200, 0.35), rgba(135, 56, 255, 0.18) 42%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 57, 200, 0.28), rgba(135, 56, 255, 0.14) 42%, transparent 70%);
   filter: blur(8px);
   animation: invite-pulse 1.5s ease-out both;
   pointer-events: none;
 }
 
-.invite-kicker {
+.invite-overlay .invite-kicker {
   position: relative;
   z-index: 2;
   margin: 0;
+  max-width: min(94vw, 40rem);
   color: #fff;
-  font-family: var(--font-nav), sans-serif;
-  font-size: clamp(1.85rem, 2.4vw + 1.1rem, 3.15rem);
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  line-height: 1.1;
+  -webkit-text-fill-color: #fff;
+  background: none;
+  filter: none;
+  font-family: var(--font-hastron), var(--font-script-fallback), cursive;
+  font-size: clamp(2.7rem, 7.4vw, 4.8rem);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0;
+  line-height: 1.05;
   text-align: center;
-  text-indent: 0.18em;
-  text-transform: uppercase;
-  text-shadow:
-    0 2px 0 #140818,
-    0 0 12px #fff,
-    0 0 22px #ff39c8,
-    0 0 40px rgba(135, 56, 255, 0.85);
+  text-indent: 0;
+  text-transform: none;
+  text-shadow: none;
 }
 
 .envelope {
@@ -88,6 +157,11 @@ html[data-intro='reveal'] .invite-overlay {
   width: min(86vw, 26rem);
   perspective: 900px;
   filter: drop-shadow(0 28px 24px rgba(0, 0, 0, 0.55));
+}
+
+html[data-intro="invite"] .envelope,
+html[data-intro="opening"] .envelope {
+  animation: envelope-float 4s ease-in-out infinite;
 }
 
 html[data-intro='reveal'] .envelope {
@@ -244,25 +318,25 @@ html[data-intro='reveal'] .envelope-seal {
 .invite-open {
   position: relative;
   z-index: 2;
+  margin-top: clamp(1.75rem, 4.5vh, 2.75rem);
   min-height: 3.25rem;
   padding: 0.8rem 1.35rem;
-  border: 1px solid rgba(230, 255, 160, 0.75);
+  border: 2px solid #c6ff00;
   border-radius: 0.9rem;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 40%),
-    linear-gradient(180deg, #f4ff9a 0%, #c6ff00 48%, #8fb800 100%);
-  color: #141806;
+  background: transparent;
+  color: #fff;
   font-family: var(--font-nav), sans-serif;
   font-size: clamp(0.95rem, 2.2vw, 1.15rem);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  text-shadow:
+    0 0 8px rgba(198, 255, 0, 0.45),
+    0 0 18px rgba(198, 255, 0, 0.22);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.22),
-    0 4px 0 #3d5200,
-    0 10px 18px rgba(0, 0, 0, 0.4);
+    0 0 0 1px rgba(198, 255, 0, 0.28),
+    0 0 12px rgba(198, 255, 0, 0.32),
+    0 0 28px rgba(198, 255, 0, 0.16);
   cursor: pointer;
   opacity: 0;
   transform: translateY(8px);
@@ -270,19 +344,34 @@ html[data-intro='reveal'] .envelope-seal {
 }
 
 html[data-intro="invite"] .invite-open {
-  animation: invite-button 0.45s ease 1.5s both;
+  animation:
+    invite-button 0.45s ease 1.5s both,
+    invite-open-outline 2.8s ease-in-out 1.95s infinite;
+}
+
+.invite-open:hover,
+.invite-open:focus-visible {
+  color: #fff;
+  background: transparent;
+  outline: none;
+  box-shadow:
+    0 0 0 1px rgba(198, 255, 0, 0.45),
+    0 0 16px rgba(198, 255, 0, 0.42),
+    0 0 34px rgba(198, 255, 0, 0.22);
 }
 
 .invite-open:active {
-  transform: translateY(4px);
+  transform: translateY(1px);
+  background: transparent;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 1px 0 #3d5200;
+    0 0 0 1px rgba(198, 255, 0, 0.4),
+    0 0 10px rgba(198, 255, 0, 0.28);
 }
 
 html[data-intro='reveal'] .invite-overlay .invite-open,
 html[data-intro='reveal'] .invite-overlay .invite-kicker,
-html[data-intro='reveal'] .invite-overlay .invite-glow {
+html[data-intro='reveal'] .invite-overlay .invite-glow,
+html[data-intro='reveal'] .invite-overlay .invite-atmosphere {
   opacity: 0;
   transition: opacity 0.35s ease;
 }
@@ -311,6 +400,24 @@ html[data-intro='reveal'] .invite-overlay .invite-glow {
   }
 }
 
+@keyframes invite-open-outline {
+  0%,
+  100% {
+    border-color: #c6ff00;
+    box-shadow:
+      0 0 0 1px rgba(198, 255, 0, 0.24),
+      0 0 10px rgba(198, 255, 0, 0.26),
+      0 0 24px rgba(198, 255, 0, 0.12);
+  }
+  50% {
+    border-color: #e6ff66;
+    box-shadow:
+      0 0 0 1px rgba(198, 255, 0, 0.5),
+      0 0 16px rgba(198, 255, 0, 0.48),
+      0 0 34px rgba(198, 255, 0, 0.26);
+  }
+}
+
 @keyframes card-rise {
   to {
     transform: translateY(-46%);
@@ -331,8 +438,65 @@ html[data-intro='reveal'] .invite-overlay .invite-glow {
   }
 }
 
+@keyframes envelope-float {
+  0%,
+  100% {
+    transform: translateY(6px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes invite-glow-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.78;
+  }
+  to {
+    transform: translate3d(10%, 6%, 0) scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes invite-glow-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.04);
+    opacity: 0.72;
+  }
+  to {
+    transform: translate3d(-9%, -7%, 0) scale(1);
+    opacity: 0.95;
+  }
+}
+
+@keyframes invite-glow-breathe {
+  from {
+    transform: scale(0.92);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .invite-overlay {
-    display: none;
+  .invite-atmosphere-bloom--violet,
+  .invite-atmosphere-bloom--pink,
+  .invite-atmosphere-bloom--core {
+    animation: none;
+    opacity: 0.85;
+    will-change: auto;
+  }
+
+  .invite-glow {
+    animation: none;
+    opacity: 1;
+  }
+
+  html[data-intro="invite"] .envelope,
+  html[data-intro="opening"] .envelope {
+    animation: none;
   }
 }

@@ -588,7 +588,17 @@ html[data-motion="armed"]:not([data-seen-watch]) #watch .watch-line {
 }
 
 html[data-seen-mixtape="1"] #mixtape .neon-script-lg {
-  animation: write-two 1.28s cubic-bezier(0.33, 0.04, 0.22, 1) both;
+  animation:
+    write-two 1.28s cubic-bezier(0.33, 0.04, 0.22, 1) both,
+    mix-clear-mask 0.01s linear 1.3s forwards;
+}
+
+/* Drop the handwriting mask after ink finishes so letter boxes cannot shear bloom. */
+@keyframes mix-clear-mask {
+  to {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 html[data-seen-arcade="1"] #arcade .neon-script-lg {
   animation: write-two 1.15s cubic-bezier(0.33, 0.04, 0.22, 1) both;
@@ -738,6 +748,26 @@ html[data-seen-mixtape="1"] #mixtape .mix-tape:nth-of-type(4) .mix-tape-ink { an
 html[data-seen-mixtape="1"] #mixtape .mix-tape:nth-of-type(5) .mix-tape-ink { animation-delay: 0.4s; }
 html[data-seen-mixtape="1"] #mixtape .mix-tape:nth-of-type(6) .mix-tape-ink { animation-delay: 0.48s; }
 
+/* Cassette stack pops onto the table when the mixtape scene is seen. */
+html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .mix-stack {
+  transform: translateY(var(--mix-stack-sit, 0)) scale(0.9);
+}
+html[data-seen-mixtape="1"] #mixtape .mix-stack {
+  animation: mix-stack-pop 0.58s cubic-bezier(0.22, 1.15, 0.36, 1) 0.12s both;
+}
+
+@keyframes mix-stack-pop {
+  0% {
+    transform: translateY(var(--mix-stack-sit, 0)) scale(0.9);
+  }
+  62% {
+    transform: translateY(var(--mix-stack-sit, 0)) scale(1.08);
+  }
+  100% {
+    transform: translateY(var(--mix-stack-sit, 0)) scale(1);
+  }
+}
+
 @keyframes arrow-on {
   from { stroke-dashoffset: 140; }
   to { stroke-dashoffset: 0; }
@@ -870,5 +900,10 @@ html[data-live-rsvp="0"] #rsvp .neon-script-lg {
     -webkit-mask-image: none;
     mask-image: none;
     animation: none !important;
+  }
+  html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .mix-stack,
+  html[data-seen-mixtape="1"] #mixtape .mix-stack {
+    animation: none !important;
+    transform: translateY(var(--mix-stack-sit, 0));
   }
 }

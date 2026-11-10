@@ -769,7 +769,7 @@ body {
 
 .hero-people {
   position: relative;
-  width: min(100%, 34rem);
+  width: min(100%, 38rem);
   order: 2;
 }
 
@@ -1894,7 +1894,7 @@ body {
 
 .watch-cta {
   /* Keep neon title separate from Browse Videos */
-  margin-top: 2.75rem;
+  margin-top: 3.25rem;
   min-height: 3rem;
   padding: 0.65rem 1.15rem;
   font-size: 0.95rem;
@@ -2014,9 +2014,9 @@ body {
   #watch .watch-copy {
     order: 0;
     flex: 0 1 auto;
-    width: min(100%, 34rem);
-    min-width: min(28rem, 100%);
-    max-width: min(100%, 36rem);
+    width: min(100%, 38rem);
+    min-width: min(32rem, 100%);
+    max-width: min(100%, 40rem);
     text-align: left;
     padding: 0 0 0.15rem;
   }
@@ -2040,7 +2040,7 @@ body {
   }
 
   #watch .watch-cta {
-    margin-top: 2.5rem;
+    margin-top: 3.1rem;
     margin-left: 0.05rem;
     min-height: 2.85rem;
     padding: 0.6rem 1.1rem;
@@ -2049,9 +2049,9 @@ body {
   }
 
   #watch .watch-list {
-    width: min(34rem, 100%);
-    min-width: min(28rem, 100%);
-    max-width: min(34rem, 48vw);
+    width: min(38rem, 100%);
+    min-width: min(32rem, 100%);
+    max-width: min(38rem, 52vw);
     margin-left: 0;
   }
 

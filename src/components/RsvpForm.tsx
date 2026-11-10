@@ -309,8 +309,9 @@ export function RsvpForm({ content }: { content: SiteContent }) {
               </div>
             </div>
 
+            {/* Mount later steps only when active so autofill/focus can't scroll to #rsvp-first on load. */}
             <div className="rsvp-step rsvp-step-2 space-y-4">
-              {attending ? (
+              {step === 2 && attending ? (
                 <div data-testid="rsvp-attending" className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="What's your first name? *">
@@ -446,7 +447,8 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                     )}
                   </fieldset>
                 </div>
-              ) : (
+              ) : null}
+              {step === 2 && !attending ? (
                 <div data-testid="rsvp-declining" className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="What's your first name? *">
@@ -483,57 +485,61 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                     />
                   </Field>
                 </div>
-              )}
-              <StepNav onBack={goBack} onNext={goNext} nextLabel="Review" />
+              ) : null}
+              {step === 2 ? <StepNav onBack={goBack} onNext={goNext} nextLabel="Review" /> : null}
             </div>
 
             <div className="rsvp-step rsvp-step-3 space-y-4">
-              <div
-                className="rsvp-summary space-y-2 rounded-2xl border border-white/15 p-4 text-[15px] leading-relaxed text-white"
-                data-testid="rsvp-summary"
-              >
-                <p className="font-nav text-[13px] tracking-[0.16em] text-[#c6ff00]">Your RSVP</p>
-                <p>
-                  {form.firstName} {form.lastName}
-                </p>
-                {attending ? (
-                  <>
-                    <p>{form.email}</p>
-                    {form.phone.trim() ? <p>{form.phone}</p> : null}
-                    <p>Attending</p>
+              {step === 3 ? (
+                <>
+                  <div
+                    className="rsvp-summary space-y-2 rounded-2xl border border-white/15 p-4 text-[15px] leading-relaxed text-white"
+                    data-testid="rsvp-summary"
+                  >
+                    <p className="font-nav text-[13px] tracking-[0.16em] text-[#c6ff00]">Your RSVP</p>
                     <p>
-                      {form.dietaryNotes.trim()
-                        ? `Dietary: ${form.dietaryNotes.trim()}`
-                        : "No dietary restrictions."}
+                      {form.firstName} {form.lastName}
                     </p>
-                    <p data-testid="headcount">
-                      Headcount: {headcount}.{" "}
-                      {namedKids.length
-                        ? `Children: ${namedKids.map((person) => `${person.firstName.trim()} ${person.lastName.trim()}`).join(", ")}.`
-                        : "No children on this RSVP."}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p>Can&apos;t make it</p>
-                    {form.specialRequests.trim() ? <p>Note: {form.specialRequests.trim()}</p> : null}
-                    <p data-testid="headcount">Headcount: 0.</p>
-                  </>
-                )}
-              </div>
-              <div className="flex flex-col gap-3">
-                <button type="button" className="rsvp-back btn-pink-outline min-h-12 text-base" onClick={goBack}>
-                  Back
-                </button>
-                <button
-                  type="submit"
-                  data-testid="rsvp-submit"
-                  disabled={status === "saving" || status === "done"}
-                  className="btn-green-solid w-full text-center"
-                >
-                  {status === "saving" ? "SENDING…" : "SUBMIT RSVP →"}
-                </button>
-              </div>
+                    {attending ? (
+                      <>
+                        <p>{form.email}</p>
+                        {form.phone.trim() ? <p>{form.phone}</p> : null}
+                        <p>Attending</p>
+                        <p>
+                          {form.dietaryNotes.trim()
+                            ? `Dietary: ${form.dietaryNotes.trim()}`
+                            : "No dietary restrictions."}
+                        </p>
+                        <p data-testid="headcount">
+                          Headcount: {headcount}.{" "}
+                          {namedKids.length
+                            ? `Children: ${namedKids.map((person) => `${person.firstName.trim()} ${person.lastName.trim()}`).join(", ")}.`
+                            : "No children on this RSVP."}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p>Can&apos;t make it</p>
+                        {form.specialRequests.trim() ? <p>Note: {form.specialRequests.trim()}</p> : null}
+                        <p data-testid="headcount">Headcount: 0.</p>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <button type="button" className="rsvp-back btn-pink-outline min-h-12 text-base" onClick={goBack}>
+                      Back
+                    </button>
+                    <button
+                      type="submit"
+                      data-testid="rsvp-submit"
+                      disabled={status === "saving" || status === "done"}
+                      className="btn-green-solid w-full text-center"
+                    >
+                      {status === "saving" ? "SENDING…" : "SUBMIT RSVP →"}
+                    </button>
+                  </div>
+                </>
+              ) : null}
             </div>
 
             {stepError ? (

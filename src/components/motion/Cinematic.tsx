@@ -17,6 +17,39 @@ const SECTIONS = [
   ["rsvp", "seenRsvp", "liveRsvp"],
 ] as const;
 
+const HASH_SECTIONS = new Set(["home", "mixtape", "watch", "arcade", "lineup", "rsvp"]);
+
+function intentionalHash(): string | null {
+  const id = (location.hash || "").replace(/^#/, "");
+  return HASH_SECTIONS.has(id) ? id : null;
+}
+
+/** Keep first load at the hero/intro unless the URL hash asked for a section. */
+function settleLoadScroll() {
+  if (typeof window === "undefined") return;
+  try {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  } catch {
+    /* ignore */
+  }
+  const intro = document.documentElement.dataset.intro;
+  const introBusy = intro === "invite" || intro === "opening" || intro === "reveal";
+  const hash = intentionalHash();
+  if (hash) {
+    // Wait until the envelope is gone so hash scroll isn't hidden underneath.
+    if (introBusy) {
+      window.scrollTo(0, 0);
+      return;
+    }
+    const el = document.getElementById(hash);
+    if (el) el.scrollIntoView();
+    return;
+  }
+  window.scrollTo(0, 0);
+  const active = document.activeElement;
+  if (active instanceof HTMLElement && active.closest("#rsvp")) active.blur();
+}
+
 export function skipIntro() {
   const root = document.documentElement;
   document.getElementById("lj-intro-hold")?.remove();
@@ -26,6 +59,7 @@ export function skipIntro() {
   } catch {
     /* private mode */
   }
+  settleLoadScroll();
 }
 
 export function Cinematic() {
@@ -43,17 +77,43 @@ export function Cinematic() {
     if (!home || reduced || seen) {
       root.dataset.intro = "done";
       root.dataset.motion = reduced ? "off" : "armed";
+      settleLoadScroll();
       return;
     }
     if (!root.dataset.intro || root.dataset.intro === "play") {
       root.dataset.intro = "invite";
     }
     root.dataset.motion = "armed";
+    // Intro still up — stay pinned to the top under the envelope.
+    window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
     const root = document.documentElement;
-    if (root.dataset.motion === "off") return;
+    // Re-assert after hydration; browsers may restore scroll after paint.
+    settleLoadScroll();
+    let guard = true;
+    const reassert = () => {
+      if (!guard || intentionalHash()) return;
+      if (window.scrollY > 0) window.scrollTo(0, 0);
+    };
+    const timers = [40, 200].map((ms) => window.setTimeout(reassert, ms));
+    const release = window.setTimeout(() => {
+      guard = false;
+    }, 700);
+    const onIntroDone = () => {
+      if (root.dataset.intro === "done") settleLoadScroll();
+    };
+    const introWatch = new MutationObserver(onIntroDone);
+    introWatch.observe(root, { attributes: true, attributeFilter: ["data-intro"] });
+
+    if (root.dataset.motion === "off") {
+      return () => {
+        for (const id of timers) window.clearTimeout(id);
+        window.clearTimeout(release);
+        introWatch.disconnect();
+      };
+    }
     root.dataset.motion = "armed";
 
     const io = new IntersectionObserver(
@@ -102,6 +162,9 @@ export function Cinematic() {
     markVisible();
     window.addEventListener("scroll", markVisible, { passive: true });
     return () => {
+      for (const id of timers) window.clearTimeout(id);
+      window.clearTimeout(release);
+      introWatch.disconnect();
       io.disconnect();
       window.removeEventListener("scroll", markVisible);
     };

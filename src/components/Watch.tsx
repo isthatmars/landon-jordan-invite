@@ -85,12 +85,15 @@ export function Watch({ headline }: { headline: string }) {
 
         <div className="watch-side">
           <div className="watch-copy">
-            <h2 className="neon-script-lg watch-title">
-              {lead ? <span className="watch-line watch-line-lead">{lead}</span> : null}
-              {hero ? <span className="watch-line watch-line-hero">{hero}</span> : null}
-              {rest ? <span className="watch-line watch-line-rest">{rest}</span> : null}
-            </h2>
-            <GreenSwoosh className="watch-swoosh" stroke="#C6FF00" />
+            <div className="watch-heading">
+              <h2 className="neon-script-lg watch-title">
+                {lead ? <span className="watch-line watch-line-lead">{lead}</span> : null}
+                {hero ? <span className="watch-line watch-line-hero">{hero}</span> : null}
+                {rest ? <span className="watch-line watch-line-rest">{rest}</span> : null}
+              </h2>
+              <GreenSwoosh className="watch-swoosh" stroke="#C6FF00" />
+            </div>
+
             <div className="watch-list" role="region" aria-label="Browse videos">
               <p className="watch-browse-label">Browse Videos</p>
               <ul className="watch-list-items">

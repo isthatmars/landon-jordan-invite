@@ -5,7 +5,7 @@ import type { SiteContent } from "@/lib/types";
 import { HeroAtmosphere } from "./HeroAtmosphere";
 import { Handwrite } from "./motion/Handwrite";
 import { IntroVeil } from "./motion/IntroVeil";
-import { CalendarIcon, ClockIcon, Crown, GreenSwoosh, PinIcon, PinkSwoosh } from "./icons";
+import { CalendarIcon, ClockIcon, Crown, GreenSwoosh, PinIcon } from "./icons";
 
 export function Hero({ content }: { content: SiteContent }) {
   const dateParts = content.eventDate.trim().split(/\s+/);
@@ -63,14 +63,6 @@ export function Hero({ content }: { content: SiteContent }) {
             )}
             <p className="hero-birthday">{content.heroSubtitle}</p>
             <GreenSwoosh className="hero-swoosh-lime" stroke="#C6FF00" />
-          </div>
-
-          <div className="hero-invite-lockup">
-            <span className="hero-invite-glow" aria-hidden />
-            <Handwrite as="p" className="hero-invite" inkClassName="script-hot" delay={1180} duration={420}>
-              {content.heroInvite}
-            </Handwrite>
-            <PinkSwoosh className="hero-swoosh" />
           </div>
         </div>
 

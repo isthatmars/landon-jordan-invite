@@ -96,13 +96,13 @@ export function Arcade({ headline }: { headline: string }) {
             </div>
           </div>
 
-          <div className="relative order-3 w-[34%] max-w-[140px] shrink-0 md:w-[22%] md:max-w-[210px]">
+          <div className="arcade-skates relative order-3 w-[34%] max-w-[140px] shrink-0 md:w-[22%] md:max-w-[210px]">
             <div className="floor-contact" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/prop-skate-pair.png"
               alt=""
-              className="relative block h-auto w-full"
+              className="relative z-[1] block h-auto w-full"
               draggable={false}
             />
           </div>

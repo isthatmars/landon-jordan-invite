@@ -46,6 +46,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Clear the fixed header when jumping to #section anchors */
+  scroll-padding-top: calc(5.75rem + env(safe-area-inset-top));
 }
 
 html.neon-cursor-on,
@@ -217,55 +219,23 @@ body {
   --plate-z: 6;
 }
 
-@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+/* Full-viewport scenes without sticky plate ghosts (orphan CTAs from prior sections).
+   Soft scroll-snap keeps desktop/mobile feeling like one condensed journey. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+
   #home,
   #mixtape,
   #watch,
-  #arcade {
-    position: sticky;
-    top: 0;
-    z-index: var(--plate-z);
-    box-shadow: 0 28px 56px rgba(0, 0, 0, 0.42);
-  }
-
-  #lineup,
-  #rsvp {
-    position: relative;
-    z-index: var(--plate-z);
-    box-shadow: 0 -20px 48px rgba(0, 0, 0, 0.38);
-  }
-
-  /* Next plate pulls up under / over the previous scene */
-  #mixtape,
-  #watch,
-  #arcade,
-  #lineup,
-  #rsvp {
-    margin-top: -3.25rem;
-  }
-
-  footer {
-    position: relative;
-    z-index: 7;
-  }
-}
-
-@media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
-  /* Lighter mobile stack: overlap only, no sticky (keeps touch scroll usable) */
-  #mixtape,
-  #watch,
   #arcade,
   #lineup,
   #rsvp {
     position: relative;
     z-index: var(--plate-z);
-    margin-top: -1.25rem;
-    box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.28);
-  }
-
-  footer {
-    position: relative;
-    z-index: 7;
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
   }
 }
 
@@ -886,20 +856,55 @@ body {
 }
 
 @media (max-width: 859px) {
+  /* Condensed desktop: brand stack → couple → facts + RSVP in one continuous read. */
+  .hero-frame {
+    padding-top: calc(4.55rem + env(safe-area-inset-top));
+    padding-bottom: clamp(3.5rem, 10vh, 6rem);
+  }
+
+  .hero-stage {
+    gap: 0;
+  }
+
+  .hero-copy {
+    width: min(100%, 22rem);
+  }
+
+  .hero-script {
+    font-size: clamp(2.35rem, 9.5vw, 3.1rem);
+  }
+
+  .chrome-80s-art {
+    width: min(88vw, 19rem);
+  }
+
+  .hero-birthday {
+    font-size: clamp(1.15rem, 4.2vw, 1.55rem);
+    letter-spacing: 0.22em;
+    text-indent: 0.22em;
+  }
+
   .hero-people {
+    width: min(78%, 18.5rem);
     /* Seat soles/wheels on the floor band above the stacked facts. */
-    transform: translateY(clamp(24px, 6.2vw, 38px));
+    transform: translateY(clamp(14px, 4vw, 26px));
     z-index: 3;
   }
 
   .hero-people .floor-contact {
-    bottom: 0.2rem;
-    height: 1.15rem;
+    bottom: 0.15rem;
+    height: 1rem;
     background: rgba(0, 0, 0, 0.9);
   }
 
   .hero-facts {
-    /* translateY on people eats most of this; keep a hairline gap only. */
+    width: min(100%, 22rem);
+    margin-top: 0.55rem;
+    padding: 0.85rem 0.85rem 0.9rem 0.7rem;
+    gap: 0.8rem;
+  }
+
+  .hero-frame .btn-rsvp-now {
     margin-top: 0.85rem;
   }
 }
@@ -959,53 +964,6 @@ body {
   padding-bottom: 0.08em;
   color: #fff;
   filter: none;
-}
-
-.hero-invite-lockup {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  order: 1;
-  width: max-content;
-  max-width: min(100%, 22rem);
-  margin: 0.35rem auto 0.15rem;
-  transform: rotate(-5deg);
-  transform-origin: center center;
-}
-
-.hero-invite-glow {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  z-index: 0;
-  width: 130%;
-  height: 140%;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 57, 200, 0.72) 0%,
-    rgba(255, 57, 200, 0.34) 38%,
-    rgba(255, 57, 200, 0.1) 62%,
-    transparent 78%
-  );
-  filter: blur(10px);
-}
-
-.hero-invite {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  max-width: 100%;
-  font-size: clamp(2.5rem, 11vw, 3.35rem);
-  line-height: 1.08;
-  overflow: visible;
-  padding-bottom: 0.08em;
-  color: #fff;
-  filter: none;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .chrome-80s-art {
@@ -1212,48 +1170,6 @@ body {
     font-size: clamp(4.85rem, 6vw, 6.2rem);
   }
 
-  .hero-invite-lockup {
-    position: absolute;
-    /* Left sky / palm pocket beside the standing guy; under .hero-people so he overlaps. */
-    left: max(-5.25rem, -6.5vw);
-    top: auto;
-    bottom: 40%;
-    z-index: 1;
-    order: 0;
-    width: max-content;
-    max-width: min(24vw, 15.5rem);
-    margin: 0;
-    align-items: flex-start;
-    text-align: left;
-    pointer-events: none;
-    transform: rotate(-9deg);
-    transform-origin: left center;
-  }
-
-  .hero-invite-glow {
-    left: 42%;
-    top: 48%;
-    width: 145%;
-    height: 160%;
-    background: radial-gradient(
-      ellipse at center,
-      rgba(255, 57, 200, 0.78) 0%,
-      rgba(255, 57, 200, 0.4) 36%,
-      rgba(255, 57, 200, 0.12) 60%,
-      transparent 76%
-    );
-    filter: blur(12px);
-  }
-
-  .hero-invite {
-    font-size: clamp(3.1rem, 3.9vw, 4.15rem);
-  }
-
-  .hero-swoosh {
-    width: min(100%, 14rem);
-    align-self: flex-start;
-  }
-
   .chrome-80s-art {
     width: min(100%, 38.5rem);
   }
@@ -1348,17 +1264,6 @@ body {
 
   .hero-script {
     font-size: 6.25rem;
-  }
-
-  .hero-invite {
-    font-size: 4.2rem;
-  }
-
-  .hero-invite-lockup {
-    left: max(-5.75rem, -7vw);
-    top: auto;
-    bottom: 42%;
-    max-width: min(22vw, 16rem);
   }
 
   .fact-label {
@@ -2006,13 +1911,14 @@ body {
 }
 
 #mixtape {
-  padding-top: clamp(4.25rem, 10vw, 7rem);
+  padding-top: clamp(5.75rem, 10vw, 7rem);
   padding-bottom: var(--section-pad-bottom);
 }
 
 #watch,
 #arcade {
-  padding-top: clamp(3.5rem, 8vw, 5.75rem);
+  /* Clear fixed header so neon titles never sit under the brand lockup */
+  padding-top: clamp(5.75rem, 9vw, 6.5rem);
   padding-bottom: var(--section-pad-bottom);
 }
 
@@ -2045,6 +1951,44 @@ body {
 .arcade-copy .arcade-start {
   display: inline-flex;
   margin-top: 0.85rem;
+}
+
+/* Seat the skate pair on the arcade floor (cutout has empty pixels under wheels).
+   translateY drops the art below the layout box — park the contact under the wheels. */
+.arcade-skates {
+  align-self: flex-end;
+  line-height: 0;
+  margin-bottom: -0.35rem;
+}
+
+.arcade-skates .floor-contact {
+  left: 10%;
+  right: 10%;
+  bottom: -1.35rem;
+  height: 1rem;
+  background: rgba(0, 0, 0, 0.9);
+  filter: blur(7px);
+}
+
+.arcade-skates img {
+  transform: translateY(14%);
+  transform-origin: bottom center;
+  filter: drop-shadow(0 10px 6px rgba(0, 0, 0, 0.62));
+}
+
+@media (min-width: 768px) {
+  .arcade-skates img {
+    transform: translateY(16%);
+  }
+
+  .arcade-skates .floor-contact {
+    left: 8%;
+    right: 8%;
+    bottom: -1.85rem;
+    height: 1.25rem;
+    background: rgba(0, 0, 0, 0.94);
+    filter: blur(8px);
+  }
 }
 
 .arcade-machine {
@@ -2106,11 +2050,13 @@ body {
   width: min(92%, 34rem);
 }
 
-.watch-side {
+.watch-side,
+.watch-copy {
+  /* Flatten so mobile can reorder: heading → TV → list → skate */
   display: contents;
 }
 
-.watch-copy {
+.watch-heading {
   order: 1;
   position: relative;
   z-index: 2;
@@ -2173,14 +2119,15 @@ body {
 }
 
 .watch-list {
-  margin: 1.65rem auto 0;
+  order: 3;
+  margin: 0.85rem auto 0;
   width: min(100%, 34rem);
   max-width: none;
-  max-height: 12.5rem;
+  max-height: 11rem;
   overflow: auto;
   text-align: left;
   border-radius: 0.85rem;
-  background: rgba(198, 255, 0, 0.28);
+  background: rgba(198, 255, 0, 0.22);
   border: 2px solid #c6ff00;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
   padding: 0;
@@ -2192,17 +2139,17 @@ body {
   top: 0;
   z-index: 2;
   margin: 0;
-  padding: 0.85rem 0.95rem 0.55rem;
+  padding: 0.7rem 0.95rem 0.45rem;
   /* Sticky list header label — not a control/button. */
-  background: linear-gradient(180deg, rgba(198, 255, 0, 0.34), rgba(198, 255, 0, 0.18));
+  background: rgba(12, 4, 22, 0.92);
   color: #ffffff;
   font-family: var(--font-nav), sans-serif;
-  font-size: clamp(1.18rem, 1.05rem + 0.55vw, 1.42rem);
+  font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.28rem);
   font-weight: 600;
   letter-spacing: 0.14em;
   line-height: 1.2;
   text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(198, 255, 0, 0.5);
+  text-shadow: 0 0 10px rgba(198, 255, 0, 0.45);
   border: 0;
   border-bottom: 1px solid rgba(198, 255, 0, 0.35);
   border-radius: 0;
@@ -2222,10 +2169,10 @@ body {
 }
 
 .watch-skate {
-  order: 3;
+  order: 4;
   position: relative;
-  width: min(58%, 15.5rem);
-  margin-top: -0.35rem;
+  width: min(48%, 12.5rem);
+  margin-top: 0.15rem;
   line-height: 0;
   pointer-events: none;
 }
@@ -2236,7 +2183,8 @@ body {
   z-index: 0;
   left: 18%;
   width: 46%;
-  bottom: 7%;
+  /* Match translateY on the cutout so the contact sits under the wheels */
+  bottom: -4%;
   height: 0.85rem;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.82);
@@ -2251,8 +2199,8 @@ body {
   width: 100%;
   height: auto;
   /* The cutout has empty pixels under the wheels. Drop them onto the wood. */
-  transform: translateY(10%);
-  filter: drop-shadow(0 16px 8px rgba(0, 0, 0, 0.62));
+  transform: translateY(14%);
+  filter: drop-shadow(0 12px 7px rgba(0, 0, 0, 0.65));
 }
 
 @media (min-width: 1024px) {
@@ -2315,6 +2263,9 @@ body {
   }
 
   #watch .watch-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     order: 0;
     flex: 0 1 auto;
     width: auto;
@@ -2322,6 +2273,13 @@ body {
     max-width: min(100%, 34rem);
     text-align: left;
     padding: 0 0 0.15rem;
+  }
+
+  #watch .watch-heading {
+    order: 0;
+    width: auto;
+    text-align: left;
+    padding: 0;
   }
 
   #watch .watch-line-lead {
@@ -2343,8 +2301,10 @@ body {
   }
 
   #watch .watch-list {
+    order: 0;
     width: min(34rem, 100%);
     max-width: min(34rem, 48vw);
+    max-height: 12.5rem;
     margin-top: 1.55rem;
     margin-left: 0;
   }

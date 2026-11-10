@@ -35,7 +35,7 @@ export function Nav({ brandName }: { brandName: string }) {
 
         <nav className="site-nav font-nav" aria-label="Primary">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className={l.href === "#home" ? "is-home" : undefined}>
+            <a key={l.href} href={l.href}>
               {l.label}
             </a>
           ))}

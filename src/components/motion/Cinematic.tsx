@@ -175,8 +175,11 @@ export function Cinematic() {
     };
     markVisible();
     window.addEventListener("scroll", markVisible, { passive: true });
+    // Programmatic scrollIntoView / scroll-snap can skip a scroll event; re-check shortly after.
+    const settleTimers = [120, 400, 900].map((ms) => window.setTimeout(markVisible, ms));
     return () => {
       for (const id of timers) window.clearTimeout(id);
+      for (const id of settleTimers) window.clearTimeout(id);
       window.clearTimeout(release);
       introWatch.disconnect();
       io.disconnect();

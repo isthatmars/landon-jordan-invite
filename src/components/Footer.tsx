@@ -7,7 +7,7 @@ export function Footer({ tagline }: { tagline: string }) {
       <div className="site-footer-inner">
         <p className="site-footer-tagline">{tagline}</p>
 
-        <div className="site-footer-grid">
+        <div className="site-footer-credits">
           <p className="site-footer-credit">
             <span className="site-footer-label">Created by</span>
             <a
@@ -17,12 +17,21 @@ export function Footer({ tagline }: { tagline: string }) {
               rel="noopener noreferrer"
               data-testid="creator-link"
             >
-              Australian Bleu Media Group
+              Australian Bleu
             </a>
-            <span className="site-footer-url" aria-hidden="true">
+            <a
+              href={CREATOR_URL}
+              className="site-footer-url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               www.Australianbleu.com
-            </span>
+            </a>
           </p>
+
+          <span className="site-footer-sep" aria-hidden="true">
+            ·
+          </span>
 
           <p className="site-footer-social">
             <span className="site-footer-label">Instagram</span>
@@ -37,15 +46,19 @@ export function Footer({ tagline }: { tagline: string }) {
             </a>
           </p>
 
-          <p className="site-footer-host">
-            <a href="/admin" className="host-tools-link" data-testid="host-tools-link">
-              Host tools
-            </a>
+          <span className="site-footer-sep" aria-hidden="true">
+            ·
+          </span>
+
+          <p className="site-footer-copy">
+            Copyright © 2026 Australian Bleu Media Group. All rights reserved.
           </p>
         </div>
 
-        <p className="site-footer-copy">
-          Copyright © 2026 Australian Bleu Media Group. All rights reserved.
+        <p className="site-footer-host">
+          <a href="/admin" className="host-tools-link" data-testid="host-tools-link">
+            Host tools
+          </a>
         </p>
       </div>
     </footer>

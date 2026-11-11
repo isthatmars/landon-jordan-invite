@@ -2517,13 +2517,25 @@ body {
   color: #fff;
 }
 
-.watch-skate {
+.watch-skate-rail {
   order: 4;
   position: relative;
-  width: min(48%, 12.5rem);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  /* Mobile: no horizontal hang clip needed. */
+  overflow: visible;
+}
+
+.watch-skate {
+  position: relative;
+  /* Mobile: tuck smaller — never hang halfway off-screen. */
+  width: min(42%, 11rem);
   margin-top: 0.15rem;
   line-height: 0;
   pointer-events: none;
+  transform: none;
 }
 
 .watch-skate::before {
@@ -2554,9 +2566,9 @@ body {
 
 @media (min-width: 1024px) {
   #watch {
-    /* Reference lockup: the CRT sits on the table, type and skate beside it. */
-    --watch-tv-w: min(38vw, 560px);
-    padding-top: clamp(2rem, 6vh, 3.75rem);
+    /* Title on top, CRT + browse mid-locked, skate as a side balance element. */
+    --watch-tv-w: min(36vw, 540px);
+    padding-top: clamp(1.6rem, 4.5vh, 3rem);
     padding-bottom: var(--section-pad-bottom);
   }
 
@@ -2569,68 +2581,39 @@ body {
   }
 
   #watch .watch-stage {
-    /* One centered composition: TV + title + CTA + skate as a group */
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: flex-end;
-    width: min(100%, 1360px);
-    max-width: 1360px;
-    min-height: clamp(480px, 62vh, 680px);
+    /* Grid: title spans top center; TV + browse share the lower row. */
+    display: grid;
+    grid-template-columns: var(--watch-tv-w) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: clamp(1.25rem, 2.6vw, 2.75rem);
+    row-gap: clamp(0.35rem, 1.2vh, 0.9rem);
+    align-items: stretch;
+    justify-content: stretch;
+    width: min(100%, 1400px);
+    max-width: 1400px;
+    min-height: clamp(520px, 68vh, 740px);
     margin: 0 auto;
-    padding: 0 clamp(1rem, 2.4vw, 2rem) clamp(1.25rem, 3vh, 2.25rem);
-    gap: clamp(1.1rem, 2.2vw, 2.4rem);
-  }
-
-  #watch .watch-tv {
-    order: 0;
-    flex: 0 0 var(--watch-tv-w);
-    width: var(--watch-tv-w);
-  }
-
-  #watch .watch-tv .floor-contact {
-    left: 8%;
-    right: 16%;
-    bottom: 0.2rem;
-    height: 1.05rem;
-    background: rgba(0, 0, 0, 0.78);
-    filter: blur(9px);
-  }
-
-  #watch .watch-side {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: flex-start;
-    flex: 0 0 auto;
-    width: auto;
-    max-width: none;
-    min-width: 0;
-    gap: clamp(0.95rem, 2.1vw, 1.9rem);
-    padding-bottom: 0.15rem;
-  }
-
-  #watch .watch-copy {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    order: 0;
-    flex: 0 1 auto;
-    width: auto;
-    min-width: 0;
-    max-width: min(100%, 40rem);
-    text-align: left;
-    padding: 0 0 0.15rem;
+    padding: 0 clamp(0.75rem, 2vw, 1.75rem) clamp(1.1rem, 2.8vh, 2rem);
     overflow: visible;
+  }
+
+  #watch .watch-side,
+  #watch .watch-copy {
+    /* Keep flattened so heading / list / skate are stage grid items. */
+    display: contents;
   }
 
   #watch .watch-heading {
+    grid-column: 1 / -1;
+    grid-row: 1;
     order: 0;
-    width: auto;
-    text-align: left;
-    padding: 0.15rem 0.35rem 0 0;
+    justify-self: center;
+    width: max-content;
+    max-width: 100%;
+    text-align: center;
+    padding: 0.2rem 0.5rem 0;
     overflow: visible;
+    z-index: 3;
   }
 
   #watch .watch-title {
@@ -2658,44 +2641,87 @@ body {
   #watch .watch-swoosh {
     width: 11.5rem;
     height: 1.05rem;
-    margin: 0.4rem 0 0 0.15rem;
+    margin: 0.4rem auto 0;
+  }
+
+  #watch .watch-tv {
+    grid-column: 1;
+    grid-row: 2;
+    order: 0;
+    width: var(--watch-tv-w);
+    align-self: end;
+    justify-self: start;
+  }
+
+  #watch .watch-tv .floor-contact {
+    left: 8%;
+    right: 16%;
+    bottom: 0.2rem;
+    height: 1.05rem;
+    background: rgba(0, 0, 0, 0.78);
+    filter: blur(9px);
   }
 
   #watch .watch-list {
+    grid-column: 2;
+    grid-row: 2;
     order: 0;
-    width: min(22rem, 100%);
-    max-width: min(22rem, 32vw);
-    max-height: 9.75rem;
-    margin-top: 1.35rem;
-    margin-left: 0;
+    /* Longer toward the right; taller; mid-aligned with the CRT. */
+    width: 100%;
+    max-width: none;
+    min-height: clamp(16rem, 38vh, 22.5rem);
+    max-height: min(24rem, 58%);
+    margin: 0;
+    align-self: center;
+    justify-self: stretch;
     background: rgba(198, 255, 0, 0.12);
     border-width: 1.5px;
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+    z-index: 2;
   }
 
   #watch .watch-browse-label {
     font-size: clamp(0.95rem, 0.15rem + 0.7vw, 1.12rem);
-    padding: 0.55rem 0.8rem 0.35rem;
+    padding: 0.65rem 1rem 0.45rem;
     background: rgba(12, 4, 22, 0.88);
   }
 
   #watch .watch-list-items {
-    padding: 0.1rem 0.7rem 0.3rem;
+    padding: 0.2rem 0.9rem 0.55rem;
   }
 
   #watch .watch-list-item {
-    padding-block: 0.45rem;
-    font-size: 0.86rem;
+    padding-block: 0.55rem;
+    font-size: 0.92rem;
+  }
+
+  #watch .watch-skate-rail {
+    /* Bottom band only: clips skate hang without clipping the top title. */
+    position: absolute;
+    grid-column: unset;
+    grid-row: unset;
+    order: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: min(48%, 22rem);
+    width: auto;
+    display: block;
+    overflow: hidden;
+    z-index: 1;
+    pointer-events: none;
   }
 
   #watch .watch-skate {
-    order: 0;
-    flex: 0 0 auto;
-    width: clamp(14rem, 16vw, 18rem);
-    max-width: 18rem;
-    margin-top: 0;
-    margin-left: 0;
-    align-self: flex-end;
+    /* Side balance element: ~10% larger, hung ~halfway off the right edge. */
+    position: absolute;
+    right: 0;
+    bottom: clamp(0.35rem, 1.6vh, 1.1rem);
+    width: clamp(15.4rem, 17.6vw, 19.8rem);
+    max-width: none;
+    margin: 0;
+    /* Static hang when reduced-motion / no JS spring; motion.div may override x. */
+    transform: translateX(46%);
   }
 
   #watch .watch-skate::before {
@@ -2705,6 +2731,12 @@ body {
     height: 0.95rem;
     background: rgba(0, 0, 0, 0.88);
     filter: blur(8px);
+  }
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  #watch .watch-skate {
+    transform: translateX(46%);
   }
 }
 

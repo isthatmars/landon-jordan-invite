@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { crtScreen } from "@/lib/cutouts";
 import { GreenSwoosh } from "./icons";
@@ -11,6 +18,9 @@ export function Watch({ headline }: { headline: string }) {
     usePlayback();
   const [staticOn, setStaticOn] = useState(false);
   const skipStatic = useRef(true);
+  const sectionRef = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
+  const [desktopMotion, setDesktopMotion] = useState(false);
 
   useEffect(() => {
     if (skipStatic.current) {
@@ -21,6 +31,24 @@ export function Watch({ headline }: { headline: string }) {
     const timer = window.setTimeout(() => setStaticOn(false), 460);
     return () => window.clearTimeout(timer);
   }, [now?.youtubeId]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: fine) and (min-width: 1024px)");
+    const sync = () => setDesktopMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  /* Hang ~halfway off, then ease a few percent back-and-forth with scroll. */
+  const skateXRaw = useTransform(scrollYProgress, [0, 0.5, 1], ["54%", "46%", "38%"]);
+  const skateX = useSpring(skateXRaw, { stiffness: 38, damping: 26, mass: 0.7 });
+  const skateMotionOn = Boolean(desktopMotion && !reduceMotion);
+
   const words = headline.trim().split(/\s+/).filter(Boolean);
   const lead = words.length > 1 ? words[0] : "";
   const hero = words.length > 1 ? words[1] : words[0] || "";
@@ -28,6 +56,7 @@ export function Watch({ headline }: { headline: string }) {
 
   return (
     <section
+      ref={sectionRef}
       id="watch"
       data-youtube-id={now?.youtubeId ?? ""}
       className="scene-section watch-scene relative overflow-visible"
@@ -118,9 +147,14 @@ export function Watch({ headline }: { headline: string }) {
             </div>
           </div>
 
-          <div className="watch-skate">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/prop-roller-skate.png" alt="" draggable={false} />
+          <div className="watch-skate-rail" aria-hidden>
+            <motion.div
+              className="watch-skate"
+              style={skateMotionOn ? { x: skateX } : undefined}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/prop-roller-skate.png" alt="" draggable={false} />
+            </motion.div>
           </div>
         </div>
       </div>

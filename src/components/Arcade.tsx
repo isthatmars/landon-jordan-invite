@@ -22,6 +22,8 @@ export function Arcade({ headline }: { headline: string }) {
   }, []);
 
   const overlay = narrow && running;
+  /** Desktop: soft zoom into the cabinet screen while playing. */
+  const playZoom = running && !narrow;
 
   useEffect(() => {
     if (!overlay) return;
@@ -44,13 +46,16 @@ export function Arcade({ headline }: { headline: string }) {
   );
 
   return (
-    <section id="arcade" className="scene-section relative overflow-x-clip overflow-y-visible">
+    <section
+      id="arcade"
+      className={`scene-section relative overflow-x-clip overflow-y-visible${playZoom ? " is-play-zoom" : ""}`}
+    >
       <ArcadeBackdrop />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />
 
       {/* Stage fills the plate and centers the composition so sticky overlap
           cannot clip cabinet controls / sneakers / START GAME. */}
-      <div className="arcade-stage">
+      <div className={`arcade-stage${playZoom ? " is-zoomed" : ""}`}>
         <div className="arcade-row">
           <div className="arcade-copy relative z-20 order-1 w-full overflow-visible text-center md:order-1 md:w-[30%] md:text-left">
             <h2 className="neon-script-lg arcade-title">{script}</h2>

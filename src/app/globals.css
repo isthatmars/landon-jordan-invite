@@ -3775,6 +3775,8 @@ form[data-step="1"] .rsvp-step-1 {
   font-size: clamp(2.4rem, 1.4rem + 3vw, 3.8rem);
   line-height: 1.15;
   padding-block: 0.08em 0.12em;
+  /* ~10px more room so script→divider matches divider→trophy. */
+  padding-inline-end: 10px;
   overflow: visible;
 }
 

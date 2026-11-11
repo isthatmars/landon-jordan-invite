@@ -884,15 +884,15 @@ body {
   border-radius: 1rem;
   background: linear-gradient(165deg, rgba(26, 5, 48, 0.92), rgba(10, 0, 20, 0.95));
   margin-top: 0;
-  padding: 0 1.1rem;
+  padding: 0 2.2rem;
 }
 
 .admin-template-panel.is-open {
   max-height: 2200px;
   opacity: 1;
   transform: translateY(0);
-  margin-top: 0.35rem;
-  padding: 1.15rem 1.1rem 1.25rem;
+  margin-top: 0.7rem;
+  padding: 2.3rem 2.2rem 2.5rem;
   border-color: rgba(255, 43, 214, 0.45);
   box-shadow: 0 0 22px rgba(255, 43, 214, 0.22);
 }

@@ -722,7 +722,7 @@ export function AdminApp() {
       )}
 
       {tab === "reminders" && content && (
-        <section className="admin-panel p-5 space-y-5">
+        <section className="admin-panel admin-templates-section p-10 space-y-10">
           <div>
             <p className="text-neon-gold text-lg leading-none">♛</p>
             <h2 className="neon-script text-3xl sm:text-4xl mt-1">Email Templates</h2>
@@ -732,7 +732,7 @@ export function AdminApp() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-2 max-w-xl">
+          <div className="admin-templates-grid grid grid-cols-1 gap-4 md:grid-cols-2">
             {EMAIL_TEMPLATE_META.map((tpl) => {
               const active = openTemplate === tpl.id;
               return (

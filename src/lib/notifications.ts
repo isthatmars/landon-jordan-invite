@@ -395,7 +395,7 @@ export function neonEmailTemplate(opts: {
               <v:fill type="frame" src="${heroBg}" color="#1a0a28" />
               <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
               <![endif]-->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(7,1,15,0.52)">
                 <tr>
                   <td style="padding:22px 16px 10px">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
@@ -404,7 +404,7 @@ export function neonEmailTemplate(opts: {
                           <img src="${couple}" width="230" alt="Landon and Jordan in 80s windbreakers" style="display:block;width:100%;max-width:230px;height:auto;border:0;outline:none;text-decoration:none" />
                         </td>
                         <td width="54%" valign="middle" align="center" style="width:54%;vertical-align:middle;padding:6px 0 10px 4px;text-align:center">
-                          <p style="Margin:0 0 2px;color:#FFD700;font-size:20px;line-height:1;text-shadow:0 0 12px rgba(255,215,0,0.55)">♛</p>
+                          <p style="Margin:0 0 2px;color:#FFD700;font-size:20px;line-height:1;text-shadow:0 0 12px rgba(255,215,0,0.55)">&#9813;</p>
                           <p style="Margin:0 0 4px;color:#ffffff;font-size:26px;line-height:1.05;font-family:Georgia,'Brush Script MT','Segoe Script',cursive;font-style:italic;font-weight:400;text-shadow:0 2px 10px rgba(0,0,0,0.55)">Landon &amp; Jordan's</p>
                           <img src="${chrome}" width="150" alt="80s" style="display:block;margin:2px auto 6px auto;width:150px;max-width:72%;height:auto;border:0;outline:none" />
                           <p style="Margin:0;color:#ffffff;font-size:12px;letter-spacing:0.28em;text-transform:uppercase;font-weight:800;font-family:Helvetica,Arial,sans-serif;text-shadow:0 1px 6px rgba(0,0,0,0.55)">Birthday Party</p>
@@ -434,7 +434,7 @@ export function neonEmailTemplate(opts: {
                     <div style="color:#f3e8ff;line-height:1.65;font-size:15px;font-family:Helvetica,Arial,sans-serif">${opts.bodyHtml}</div>
                     ${cta}
                     <p style="Margin:20px 0 0;text-align:center;color:#9ca3af;font-size:12px;letter-spacing:0.04em;font-family:Helvetica,Arial,sans-serif">
-                      <a href="${origin}" style="color:#c4b5d8;text-decoration:none">Landon &amp; Jordan · 80s Birthday Party</a>
+                      <a href="${origin}" style="color:#c4b5d8;text-decoration:none">Landon &amp; Jordan &#183; 80s Birthday Party</a>
                     </p>
                   </td>
                 </tr>

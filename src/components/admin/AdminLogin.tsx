@@ -7,26 +7,31 @@ export function AdminLogin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const unlock = async () => {
+    const trimmed = code.trim();
+    if (!trimmed || loading) return;
     setLoading(true);
     setError("");
     try {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code: trimmed }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Invalid code");
       }
-      window.location.reload();
+      window.location.assign("/admin");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
-    } finally {
       setLoading(false);
     }
+  };
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    void unlock();
   };
 
   return (
@@ -49,7 +54,16 @@ export function AdminLogin() {
               required
             />
           </label>
-          <button type="submit" className="btn-green-solid w-full" disabled={loading}>
+          <button
+            type="submit"
+            className="btn-green-solid w-full"
+            disabled={loading || !code.trim()}
+            onClick={(e) => {
+              // Explicit click path — some automation hosts miss form submit.
+              e.preventDefault();
+              void unlock();
+            }}
+          >
             {loading ? "UNLOCKING…" : "ENTER →"}
           </button>
           {error && <p className="text-sm text-red-400">{error}</p>}

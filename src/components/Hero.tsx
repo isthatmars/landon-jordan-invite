@@ -42,7 +42,7 @@ export function Hero({ content }: { content: SiteContent }) {
             <div className="floor-contact" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/hero-couple-cutout.png"
+              src="/images/hero-couple-cutout-cartoon.png"
               alt="Landon and Jordan in 80s windbreakers"
               className="hero-couple"
               draggable={false}

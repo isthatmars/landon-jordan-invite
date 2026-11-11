@@ -8,7 +8,7 @@ import {
   useTransform,
 } from "framer-motion";
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
-import { crtScreen } from "@/lib/cutouts";
+import { crtScreen, crtScreenFill } from "@/lib/cutouts";
 import { useLiveFlag } from "@/lib/useLiveFlag";
 import { TapHand } from "./icons";
 import { usePlayback } from "./Playback";
@@ -308,10 +308,18 @@ export function Watch({ headline }: { headline: string }) {
       <div className="watch-stage">
         <div className="watch-tv">
           <div className="crt-screen-light" aria-hidden />
+          {/* Oversized black plate under the video so the lounge never shows
+              through the CRT PNG screen hole / chroma fringe. */}
+          <div
+            className="pointer-events-none absolute z-[1] bg-black"
+            style={crtScreenFill}
+            aria-hidden
+            data-testid="tv-screen-fill"
+          />
           <div
             data-testid="tv-screen"
             data-screen="crt"
-            className="crt-bezel-glow absolute z-[1] overflow-hidden bg-black"
+            className="crt-bezel-glow absolute z-[2] overflow-hidden bg-black"
             style={crtScreen}
           >
             {now?.youtubeId ? (

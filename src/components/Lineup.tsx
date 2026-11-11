@@ -33,6 +33,7 @@ export function Lineup({ content }: { content: SiteContent }) {
             <p className="lineup-dress-label">Dress code</p>
             <p className="neon-script lineup-dress-script">{dressCodeScript(content.dressCode)}</p>
           </div>
+          <div className="lineup-dress-divider" aria-hidden />
           <p className="lineup-dress-prize">
             <LineIcon name="trophy" className="lineup-dress-icon icon-shake" />
             <span>{content.dressCodePrize}</span>

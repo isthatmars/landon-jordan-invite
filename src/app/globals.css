@@ -3573,9 +3573,11 @@ form[data-step="1"] .rsvp-step-1 {
 .lineup-dress {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 1rem;
   margin-top: clamp(1.5rem, 3vw, 2.25rem);
-  padding: clamp(1.1rem, 2vw, 1.5rem);
+  padding: clamp(1.25rem, 2.5vw, 1.75rem) clamp(1.35rem, 3vw, 2.25rem);
   border-radius: 1.25rem;
   background: #09060f;
   box-shadow:
@@ -3590,7 +3592,16 @@ form[data-step="1"] .rsvp-step-1 {
 .lineup-dress-prize {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.85rem;
+  min-width: 0;
+}
+
+.lineup-dress-divider {
+  width: min(12rem, 55%);
+  height: 1px;
+  flex: none;
+  background: rgba(255, 57, 200, 0.45);
 }
 
 .lineup-dress-icon {
@@ -3626,6 +3637,7 @@ form[data-step="1"] .rsvp-step-1 {
   color: #f8f4fa;
   font-size: clamp(1.05rem, 0.95rem + 0.35vw, 1.25rem);
   line-height: 1.35;
+  text-align: center;
 }
 
 .lineup-private {
@@ -3674,12 +3686,29 @@ form[data-step="1"] .rsvp-step-1 {
 
   .lineup-dress {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    column-gap: 10px;
+    row-gap: 0.85rem;
+  }
+
+  .lineup-dress-divider {
+    width: 1px;
+    height: 2.75rem;
+    align-self: center;
+    margin-inline: 0;
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  .lineup-dress-main,
+  .lineup-dress-prize {
+    justify-content: flex-start;
   }
 
   .lineup-dress-prize {
     max-width: 28rem;
+    text-align: left;
   }
 }
 

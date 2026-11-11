@@ -1,7 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import type { SiteContent } from "@/lib/types";
 import { LineIcon } from "./icons";
+import { LineupAmbient } from "./LineupAmbient";
 
 /** Sentence-case ALL-CAPS words for neon script legibility; leave stored/email copy alone. */
 function neonScriptCopy(text: string) {
@@ -9,8 +11,15 @@ function neonScriptCopy(text: string) {
 }
 
 export function Lineup({ content }: { content: SiteContent }) {
+  const sectionRef = useRef<HTMLElement>(null);
+
   return (
-    <section id="lineup" className="lineup-ambient relative overflow-visible bg-[#07010f]">
+    <section
+      ref={sectionRef}
+      id="lineup"
+      className="lineup-ambient relative overflow-visible bg-[#07010f]"
+    >
+      <LineupAmbient sectionRef={sectionRef} />
       <div className="lineup-sweep" aria-hidden />
       <div className="lineup-wrap">
         <p className="lineup-kicker">{neonScriptCopy(content.lineupTitle)}</p>

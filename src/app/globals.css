@@ -3583,6 +3583,204 @@ form[data-step="1"] .rsvp-step-1 {
   }
 }
 
+/* Party atmosphere behind lineup cards — scroll-linked blobs + light grain. */
+.lineup-ambient {
+  isolation: isolate;
+  background-color: #07010f;
+}
+
+.lineup-ambient-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.lineup-ambient-base {
+  position: absolute;
+  inset: -8%;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -10%, rgba(255, 57, 200, 0.2), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 100% 40%, rgba(56, 217, 255, 0.14), transparent 62%),
+    radial-gradient(ellipse 50% 40% at 0% 70%, rgba(135, 56, 255, 0.16), transparent 60%),
+    radial-gradient(ellipse 60% 35% at 55% 100%, rgba(255, 196, 77, 0.12), transparent 55%),
+    #07010f;
+}
+
+.lineup-ambient-parallax {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.lineup-ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(42px);
+  will-change: transform;
+  opacity: 0.72;
+}
+
+.lineup-ambient-blob-a {
+  width: min(62vw, 34rem);
+  height: min(62vw, 34rem);
+  top: -8%;
+  left: -12%;
+  background: radial-gradient(
+    circle at 40% 40%,
+    rgba(255, 57, 200, 0.55),
+    rgba(135, 56, 255, 0.18) 48%,
+    transparent 72%
+  );
+}
+
+.lineup-ambient-blob-b {
+  width: min(58vw, 30rem);
+  height: min(58vw, 30rem);
+  top: 28%;
+  right: -14%;
+  background: radial-gradient(
+    circle at 55% 45%,
+    rgba(56, 217, 255, 0.48),
+    rgba(198, 255, 0, 0.14) 50%,
+    transparent 74%
+  );
+}
+
+.lineup-ambient-blob-c {
+  width: min(70vw, 38rem);
+  height: min(48vw, 28rem);
+  bottom: -12%;
+  left: 18%;
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgba(255, 196, 77, 0.32),
+    rgba(255, 57, 200, 0.18) 42%,
+    transparent 70%
+  );
+}
+
+.lineup-ambient-wash {
+  position: absolute;
+  inset: -12%;
+  background:
+    linear-gradient(
+      125deg,
+      rgba(255, 57, 200, 0.12) 0%,
+      transparent 32%,
+      rgba(56, 217, 255, 0.1) 58%,
+      transparent 78%,
+      rgba(198, 255, 0, 0.07) 100%
+    );
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  will-change: transform;
+}
+
+.lineup-ambient-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.11;
+  mix-blend-mode: soft-light;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.02) 2px,
+      rgba(255, 255, 255, 0.02) 3px
+    );
+  background-size: 160px 160px, 100% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lineup-ambient-blob-a {
+    animation: lineup-ambient-drift-a 18s ease-in-out infinite alternate;
+  }
+
+  .lineup-ambient-blob-b {
+    animation: lineup-ambient-drift-b 22s ease-in-out infinite alternate;
+  }
+
+  .lineup-ambient-blob-c {
+    animation: lineup-ambient-drift-c 16s ease-in-out infinite alternate;
+  }
+
+  .lineup-ambient-wash {
+    animation: lineup-ambient-wash-shift 20s ease-in-out infinite alternate;
+  }
+
+  .lineup-ambient-grain {
+    animation: lineup-ambient-grain-shift 12s steps(6) infinite;
+  }
+}
+
+@keyframes lineup-ambient-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6%, 4%, 0) scale(1.06);
+  }
+}
+
+@keyframes lineup-ambient-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-5%, 6%, 0) scale(1.08);
+  }
+}
+
+@keyframes lineup-ambient-drift-c {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4%, -5%, 0) scale(1.04);
+  }
+}
+
+@keyframes lineup-ambient-wash-shift {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lineup-ambient-grain-shift {
+  0%,
+  100% {
+    background-position: 0 0, 0 0;
+  }
+  50% {
+    background-position: -40px 28px, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lineup-ambient-blob,
+  .lineup-ambient-wash,
+  .lineup-ambient-grain {
+    animation: none !important;
+    will-change: auto;
+  }
+
+  .lineup-ambient-blob {
+    opacity: 0.48;
+  }
+
+  .lineup-ambient-grain {
+    opacity: 0.08;
+  }
+}
+
 .lineup-wrap {
   position: relative;
   z-index: 1;

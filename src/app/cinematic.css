@@ -945,6 +945,7 @@ html[data-live-arcade="0"] #arcade a {
 html[data-live-home="0"] .hero-water,
 html[data-live-home="0"] .hero-shimmer,
 html[data-live-home="0"] .hero-palm img,
+html[data-live-home="0"] .hero-couple,
 html[data-intro="done"][data-live-home="0"] .hero-script[data-neon="breathing"],
 html[data-intro="done"][data-live-home="0"] .hero-invite[data-neon="breathing"],
 html[data-intro="done"][data-live-home="0"] .chrome-art-shine::after {
@@ -958,7 +959,10 @@ html[data-live-watch="0"] .crt-scanlines::after {
 html[data-live-lineup="0"] .lineup-sweep::before,
 html[data-live-lineup="0"] .lineup-neon,
 html[data-live-lineup="0"] .lineup-pill,
-html[data-live-lineup="0"] #lineup .lineup-kicker {
+html[data-live-lineup="0"] #lineup .lineup-kicker,
+html[data-live-lineup="0"] .lineup-ambient-blob,
+html[data-live-lineup="0"] .lineup-ambient-wash,
+html[data-live-lineup="0"] .lineup-ambient-grain {
   animation-play-state: paused;
 }
 html[data-live-mixtape="0"] #mixtape .mix-palm img,

@@ -61,11 +61,18 @@ const label = Caveat({
   display: "swap",
 });
 
+const siteTitle = "Landon & Jordan's 80s Birthday Party";
+const siteDescription =
+  "You're invited to Landon & Jordan's 80s Birthday Party — Saturday, December 19th, 6pm to midnight at Xtreme Action Park, Fort Lauderdale.";
+const siteUrl =
+  (process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com").replace(/\/$/, "") ||
+  "https://www.landonandjordan.com";
+
 export const metadata: Metadata = {
-  title: "Landon & Jordan's 80s Birthday Party",
-  description:
-    "You're invited to Landon & Jordan's 80s Birthday Party — Saturday, December 19th, 6pm to midnight at Xtreme Action Park, Fort Lauderdale.",
-  applicationName: "Landon & Jordan's 80s Birthday Party",
+  metadataBase: new URL(siteUrl),
+  title: siteTitle,
+  description: siteDescription,
+  applicationName: siteTitle,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -74,6 +81,28 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: siteTitle,
+    title: siteTitle,
+    description: siteDescription,
+    images: [
+      {
+        url: "/og-invite.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Landon & Jordan's 80s Birthday Party — You're Invited",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+    images: ["/og-invite.jpg"],
   },
   other: {
     "mobile-web-app-capable": "yes",

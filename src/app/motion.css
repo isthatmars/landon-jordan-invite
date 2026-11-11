@@ -331,7 +331,7 @@
 }
 
 .crt-static.is-switching {
-  animation: crt-channel-hold 0.42s linear forwards;
+  animation: crt-channel-hold 0.5s linear forwards;
 }
 
 .crt-static-snow {
@@ -341,7 +341,7 @@
   background-size: 160px 160px;
   opacity: 0.92;
   mix-blend-mode: screen;
-  animation: crt-snow-jitter 0.42s steps(4, end) forwards;
+  animation: crt-snow-jitter 0.5s steps(4, end) forwards;
 }
 
 .crt-static-roll {
@@ -355,7 +355,7 @@
     transparent 3px
   );
   opacity: 0.55;
-  animation: crt-h-roll 0.42s steps(3, end) forwards;
+  animation: crt-h-roll 0.5s steps(3, end) forwards;
 }
 
 .crt-static-flash {
@@ -368,7 +368,7 @@
     rgba(255, 255, 255, 0.35)
   );
   opacity: 0;
-  animation: crt-flash 0.42s linear forwards;
+  animation: crt-flash 0.5s linear forwards;
 }
 
 @keyframes crt-channel-hold {

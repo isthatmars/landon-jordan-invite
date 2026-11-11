@@ -4325,13 +4325,14 @@ main {
   pointer-events: none;
 }
 
-/* Pinned now-playing row — stays under the header while the list scrolls. */
+/* Pinned now-playing row — stays under the header while the list scrolls.
+   No opaque plate — share the panel glass with the rest of the list. */
 .watch-now-playing {
   flex: 0 0 auto;
   position: relative;
   z-index: 1;
   padding: 0.1rem 0.85rem 0;
-  background: rgba(12, 4, 22, 0.9);
+  background: transparent;
   border-bottom: 1px solid rgba(198, 255, 0, 0.28);
 }
 

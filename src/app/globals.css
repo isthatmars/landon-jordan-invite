@@ -2783,7 +2783,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Visible so a small optical lift is not clipped at the top of the spine band. */
+  /* Visible so the optical lift on .mix-tape-ink-text is not clipped. */
   overflow: visible;
   /* Keep labels painted even if a parent ghost-CTA rule toggles visibility. */
   visibility: visible;
@@ -2797,11 +2797,14 @@ main {
   white-space: nowrap;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
   pointer-events: none;
-  /*
-   * Caveat sits optically low in its em-box on these short spines.
-   * Prefer `translate` over `transform` so rise-in / flash keep the lift.
-   * overflow is visible above so this lift is not clipped.
-   */
+}
+
+/*
+ * Caveat sits optically low in its em-box. Lift lives on an inner span so
+ * mixtape rise-in (transform on .mix-tape-ink) cannot wipe the centering.
+ */
+.mix-tape-ink-text {
+  display: block;
   translate: 0 -0.45em;
 }
 
@@ -2933,8 +2936,11 @@ main {
 
   .mix-tape-ink {
     font-size: clamp(11px, 0.9vw, 14px);
-    /* Desktop spines read bottom-heavy — Caveat optical lift. */
-    translate: 0 -0.5em;
+  }
+
+  .mix-tape-ink-text {
+    /* Desktop spines read bottom-heavy — stronger Caveat optical lift. */
+    translate: 0 -0.55em;
   }
 
   .mix-phones {

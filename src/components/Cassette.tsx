@@ -37,7 +37,7 @@ export function Cassette({
       style={{ top, height }}
     >
       <span className="mix-tape-ink" style={{ top: labelTop, height: labelHeight }}>
-        {label}
+        <span className="mix-tape-ink-text">{label}</span>
       </span>
     </button>
   );

@@ -797,7 +797,8 @@ html[data-motion="armed"]:not([data-seen-watch]) #watch [data-screen="crt"] {
 #watch [data-screen="crt"] {
   transition: filter 0.45s ease;
 }
-html[data-seen-watch="1"] #watch .crt-static:not(.is-on) {
+/* Boot snow uses a dedicated layer so channel-switch toggles do not re-fire it. */
+html[data-seen-watch="1"] #watch .crt-boot-static {
   animation: crt-snow 0.46s steps(3, end) 0.05s both;
 }
 html[data-motion="armed"]:not([data-seen-watch]) #watch .btn-pink-outline {

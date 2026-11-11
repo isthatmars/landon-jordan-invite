@@ -336,7 +336,7 @@ body {
   text-shadow: 0 0 18px rgba(255, 57, 200, 0.35);
 }
 
-/* Quiet credit band: links in one lined-up row, copyright under it */
+/* Quiet credit band under Host tools: links in one lined-up row, copyright under it */
 .site-footer-credits {
   width: 100%;
   display: flex;
@@ -431,9 +431,9 @@ body {
   outline-offset: 3px;
 }
 
-/* Isolated from credit band — text/ghost only, lights up on hover/focus */
+/* Between tagline and credit band — text/ghost only, lights up on hover/focus */
 .site-footer-host {
-  margin: 0.35rem 0 0;
+  margin: 0;
   padding-inline: 3.25rem; /* keep clear of fixed back-to-top on narrow screens */
 }
 
@@ -483,7 +483,6 @@ body {
   }
 
   .site-footer-host {
-    margin-top: 0.55rem;
     padding-inline: 0;
   }
 }
@@ -512,9 +511,6 @@ body {
     display: none;
   }
 
-  .site-footer-host {
-    margin-top: 0.65rem;
-  }
 }
 
 /*
@@ -4851,7 +4847,8 @@ form[data-step="1"] .rsvp-step-1 {
 }
 
 .lineup-tagline {
-  margin: 0.85rem 0 0;
+  /* ~30% closer to the lineup kicker (was 0.85rem). */
+  margin: 0.6rem 0 0;
   color: #f8f4fa;
   font-family: var(--font-nav), sans-serif;
   font-size: clamp(0.95rem, 0.8rem + 0.5vw, 1.2rem);
@@ -4944,7 +4941,21 @@ form[data-step="1"] .rsvp-step-1 {
   text-shadow: 0 0 10px rgba(198, 255, 0, 0.28);
 }
 
+@property --lineup-beam-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes lineup-border-beam {
+  to {
+    --lineup-beam-angle: 360deg;
+  }
+}
+
 .lineup-dress {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4959,8 +4970,43 @@ form[data-step="1"] .rsvp-step-1 {
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
     inset 0 -4px 0 rgba(0, 0, 0, 0.45),
     0 5px 0 #3a1030,
-    0 0 0 2px #ff39c8,
+    0 0 0 2px rgba(255, 57, 200, 0.55),
     0 0 22px rgba(255, 57, 200, 0.35);
+}
+
+.lineup-dress::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--lineup-beam-angle),
+    transparent 0%,
+    transparent 62%,
+    rgba(255, 57, 200, 0.15) 70%,
+    #ff39c8 78%,
+    #ffc44d 84%,
+    #ff39c8 90%,
+    transparent 98%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lineup-dress::before {
+    animation: lineup-border-beam 3.2s linear infinite;
+  }
 }
 
 .lineup-dress-main,
@@ -5018,16 +5064,62 @@ form[data-step="1"] .rsvp-step-1 {
 }
 
 .lineup-private {
+  position: relative;
+  isolation: isolate;
   margin-top: clamp(1.35rem, 2.5vw, 2rem);
   padding: clamp(1.1rem, 2vw, 1.5rem);
   border-radius: 1.15rem;
   text-align: center;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow:
-    0 0 8px rgba(255, 255, 255, 0.45),
-    0 0 22px rgba(255, 255, 255, 0.28),
-    0 0 40px rgba(255, 255, 255, 0.16);
+    0 0 8px rgba(255, 255, 255, 0.35),
+    0 0 22px rgba(255, 255, 255, 0.2),
+    0 0 40px rgba(255, 255, 255, 0.12);
+}
+
+.lineup-private::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--lineup-beam-angle),
+    transparent 0%,
+    transparent 58%,
+    rgba(255, 255, 255, 0.2) 68%,
+    #fff 76%,
+    #38d9ff 82%,
+    #fff 90%,
+    transparent 98%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lineup-private::before {
+    animation: lineup-border-beam 3.6s linear infinite reverse;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lineup-dress::before,
+  .lineup-private::before {
+    animation: none;
+    /* Soft static highlight so the border still reads as glowing. */
+    --lineup-beam-angle: 210deg;
+  }
 }
 
 .lineup-private-title {

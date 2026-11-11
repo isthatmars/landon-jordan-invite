@@ -7,6 +7,12 @@ export function Footer({ tagline }: { tagline: string }) {
       <div className="site-footer-inner">
         <p className="site-footer-tagline">{tagline}</p>
 
+        <p className="site-footer-host">
+          <a href="/admin" className="host-tools-link" data-testid="host-tools-link">
+            Host tools
+          </a>
+        </p>
+
         <div className="site-footer-credits">
           <div className="site-footer-credit-row">
             <p className="site-footer-credit">
@@ -57,12 +63,6 @@ export function Footer({ tagline }: { tagline: string }) {
             Copyright © 2026 Australian Bleu Media Group. All rights reserved.
           </p>
         </div>
-
-        <p className="site-footer-host">
-          <a href="/admin" className="host-tools-link" data-testid="host-tools-link">
-            Host tools
-          </a>
-        </p>
       </div>
     </footer>
   );

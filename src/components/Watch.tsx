@@ -63,7 +63,8 @@ export function Watch({ headline }: { headline: string }) {
     onPlayingChange,
     registerPlayer,
   } = usePlayback();
-  const [staticOn, setStaticOn] = useState(false);
+  const [channelSwitching, setChannelSwitching] = useState(false);
+  const [switchKey, setSwitchKey] = useState(0);
   const [muted, setMuted] = useState(false);
   const skipStatic = useRef(true);
   const sectionRef = useRef<HTMLElement>(null);
@@ -71,15 +72,18 @@ export function Watch({ headline }: { headline: string }) {
   const reduceMotion = useReducedMotion();
   const [desktopMotion, setDesktopMotion] = useState(false);
 
+  /* CRT channel switch: snow + brief roll whenever the tuned video changes. */
   useEffect(() => {
     if (skipStatic.current) {
       skipStatic.current = false;
       return;
     }
-    setStaticOn(true);
-    const timer = window.setTimeout(() => setStaticOn(false), 460);
+    if (reduceMotion) return;
+    setSwitchKey((key) => key + 1);
+    setChannelSwitching(true);
+    const timer = window.setTimeout(() => setChannelSwitching(false), 420);
     return () => window.clearTimeout(timer);
-  }, [now?.youtubeId]);
+  }, [now?.youtubeId, reduceMotion]);
 
   useEffect(() => {
     const mq = window.matchMedia("(pointer: fine) and (min-width: 1024px)");
@@ -211,7 +215,14 @@ export function Watch({ headline }: { headline: string }) {
               </button>
             )}
             <div className="crt-scanlines" aria-hidden />
-            <div className={`crt-static${staticOn ? " is-on" : ""}`} aria-hidden />
+            <div className="crt-boot-static" aria-hidden />
+            {channelSwitching ? (
+              <div key={switchKey} className="crt-static is-switching" aria-hidden>
+                <span className="crt-static-snow" />
+                <span className="crt-static-roll" />
+                <span className="crt-static-flash" />
+              </div>
+            ) : null}
           </div>
           <div className="floor-contact" />
           {/* eslint-disable-next-line @next/next/no-img-element */}

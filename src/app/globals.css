@@ -531,12 +531,16 @@ body {
     box-shadow: 0 28px 56px rgba(0, 0, 0, 0.42);
   }
 
-  /* Clip home/mixtape so stuck chrome cannot paint outside the plate bounds.
-     Watch/Arcade keep overflow open for neon titles — live flags handle their CTAs. */
-  #home,
-  #mixtape {
+  /* Clip home horizontally; mixtape keeps overflow-y open so boom/cassette
+     reflections can paint on the raised floor under the props. */
+  #home {
     overflow-x: clip;
     overflow-y: clip;
+  }
+
+  #mixtape {
+    overflow-x: clip;
+    overflow-y: visible;
   }
 
   #lineup,
@@ -2208,10 +2212,11 @@ body {
   /* visible on both axes — mixed clip/visible collapses and shears neon bloom. */
   overflow: visible;
   background: #120612;
-  /* Raise the photographed table to the propped boombox/cassettes.
-     Plate is landscape-wider than the section, so object-position Y is ignored;
-     scale from the bottom edge so the reflective floor meets prop feet. */
-  --mix-floor-scale: 1.72;
+  /* Raise the photographed floor plane UP to the propped boombox/cassettes
+     (do not drop the props). Landscape cover ignores object-position Y, so
+     zoom from the bottom, then nudge the plate up so reflective sheen meets feet. */
+  --mix-floor-scale: 1.95;
+  --mix-floor-nudge: 12%;
 }
 
 .mix-plate {
@@ -2220,10 +2225,10 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 40% 84%;
+  object-position: 40% 100%;
   pointer-events: none;
   user-select: none;
-  transform: scale(var(--mix-floor-scale));
+  transform: translate3d(0, calc(-1 * var(--mix-floor-nudge)), 0) scale(var(--mix-floor-scale));
   transform-origin: center bottom;
   will-change: transform;
 }
@@ -2236,7 +2241,7 @@ body {
   pointer-events: none;
   overflow: hidden;
   /* Keep palm/bokeh locked to the raised plate crop. */
-  transform: scale(var(--mix-floor-scale));
+  transform: translate3d(0, calc(-1 * var(--mix-floor-nudge)), 0) scale(var(--mix-floor-scale));
   transform-origin: center bottom;
   will-change: transform;
 }
@@ -2533,24 +2538,42 @@ body {
 }
 
 .mix-reflect {
-  /* Negative offset closes the hairline float seam under cassette bottoms. */
-  -webkit-box-reflect: below -6px linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.12) 46%, transparent 72%);
+  /* Kept for older engines; stack uses an explicit mirror img for reliable contact. */
+  -webkit-box-reflect: below -18px linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.14) 46%, transparent 72%);
 }
 
 .mix-mirror {
   position: absolute;
   z-index: 0;
   left: 0;
-  /* Overlap the boombox feet so the reflection PNG fade-in does not read as a float gap. */
-  top: 88%;
+  /* Reflection PNG fades in from transparent — pull it up so feet meet the floor. */
+  top: 100%;
   width: 100%;
   height: auto;
+  transform: translateY(-22%);
   pointer-events: none;
   user-select: none;
 }
 
+.mix-stack-mirror {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  /* Sit just under the purple tape; flip in-box so the reflection reads on the floor. */
+  top: 100%;
+  width: 100%;
+  height: auto;
+  margin-top: -8%;
+  transform: scaleY(-1);
+  opacity: 0.78;
+  pointer-events: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.58) 40%, transparent 76%);
+  mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.58) 40%, transparent 76%);
+}
+
 .mix-reflect-short {
-  -webkit-box-reflect: below -4px linear-gradient(rgba(0, 0, 0, 0.38), transparent 58%);
+  -webkit-box-reflect: below -12px linear-gradient(rgba(0, 0, 0, 0.4), transparent 58%);
 }
 
 .mix-shadow {
@@ -2770,19 +2793,19 @@ body {
 
 @media (min-width: 768px) {
   .mix-scene {
-    --mix-floor-scale: 2.05;
+    --mix-floor-scale: 2.45;
+    --mix-floor-nudge: 23%;
   }
 
   .mix-plate {
-    /* Desktop props sit mid-high; zoom the plate from the floor so the
-       reflective table sheen meets boombox + cassette bottoms. */
+    /* Desktop props sit mid-high; lift the reflective table to their feet. */
     object-position: 46% 100%;
-    transform: scale(var(--mix-floor-scale));
+    transform: translate3d(0, calc(-1 * var(--mix-floor-nudge)), 0) scale(var(--mix-floor-scale));
     transform-origin: center bottom;
   }
 
   .mix-atmosphere {
-    transform: scale(var(--mix-floor-scale));
+    transform: translate3d(0, calc(-1 * var(--mix-floor-nudge)), 0) scale(var(--mix-floor-scale));
     transform-origin: center bottom;
   }
 
@@ -2864,8 +2887,8 @@ body {
   }
 
   .mix-table-pool {
-    /* Ride with the raised floor plane under the cassette stack. */
-    bottom: 24%;
+    /* Sit the glow on the raised floor under the cassette stack. */
+    bottom: 28%;
     height: 38%;
   }
 }

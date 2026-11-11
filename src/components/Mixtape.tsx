@@ -250,6 +250,15 @@ export function Mixtape({ headline }: { headline: string }) {
               className="mix-photo mix-reflect"
               draggable={false}
             />
+            {/* Explicit floor mirror — box-reflect is clipped by sticky plate overflow. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/cassette-stack-cut.png"
+              alt=""
+              className="mix-stack-mirror"
+              draggable={false}
+              aria-hidden
+            />
             <div
               className="mix-grade mix-grade-stack"
               aria-hidden

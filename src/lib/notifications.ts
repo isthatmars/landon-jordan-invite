@@ -368,6 +368,11 @@ export function neonEmailTemplate(opts: {
         </table>`
       : "";
 
+  // Yellowtail is the site's Hastron fallback (next/font Google). Email clients
+  // cannot load local .otf; link + @import + @font-face + inline stack get close.
+  const brandScriptFont =
+    "'Yellowtail', 'Brush Script MT', 'Segoe Script', cursive";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -375,9 +380,29 @@ export function neonEmailTemplate(opts: {
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="color-scheme" content="dark" />
 <title>${opts.headline}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Yellowtail&display=swap" rel="stylesheet" />
+<style type="text/css">
+  @import url('https://fonts.googleapis.com/css2?family=Yellowtail&display=swap');
+  @font-face {
+    font-family: 'Yellowtail';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/yellowtail/v25/OZpGg_pnoDtINPfRIlLohlvHwQ.woff2) format('woff2'),
+         url(https://fonts.gstatic.com/s/yellowtail/v25/OZpGg_pnoDtINPfRIlLotlw.ttf) format('truetype');
+  }
+  .brand-script {
+    font-family: ${brandScriptFont} !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+  }
+</style>
 <!--[if mso]>
 <style type="text/css">
   body, table, td { font-family: Arial, Helvetica, sans-serif !important; }
+  .brand-script { font-family: 'Segoe Script', 'Brush Script MT', cursive !important; }
 </style>
 <![endif]-->
 </head>
@@ -405,7 +430,7 @@ export function neonEmailTemplate(opts: {
                         </td>
                         <td width="54%" valign="middle" align="center" style="width:54%;vertical-align:middle;padding:6px 0 10px 4px;text-align:center">
                           <p style="Margin:0 0 2px;color:#FFD700;font-size:20px;line-height:1;text-shadow:0 0 12px rgba(255,215,0,0.55)">&#9813;</p>
-                          <p style="Margin:0 0 4px;color:#ffffff;font-size:26px;line-height:1.05;font-family:Georgia,'Brush Script MT','Segoe Script',cursive;font-style:italic;font-weight:400;text-shadow:0 2px 10px rgba(0,0,0,0.55)">Landon &amp; Jordan's</p>
+                          <p class="brand-script" style="Margin:0 0 4px;color:#ffffff;font-size:28px;line-height:1.05;font-family:${brandScriptFont};font-style:normal;font-weight:400;text-shadow:0 2px 10px rgba(0,0,0,0.55)">Landon &amp; Jordan's</p>
                           <img src="${chrome}" width="150" alt="80s" style="display:block;margin:2px auto 6px auto;width:150px;max-width:72%;height:auto;border:0;outline:none" />
                           <p style="Margin:0;color:#ffffff;font-size:12px;letter-spacing:0.28em;text-transform:uppercase;font-weight:800;font-family:Helvetica,Arial,sans-serif;text-shadow:0 1px 6px rgba(0,0,0,0.55)">Birthday Party</p>
                           <p style="Margin:6px 0 0;line-height:0;font-size:0">

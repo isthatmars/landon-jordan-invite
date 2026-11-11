@@ -846,20 +846,25 @@ function TemplateEditor({
   onClose: () => void;
 }) {
   const meta = EMAIL_TEMPLATE_META.find((t) => t.id === id)!;
-  const preview = renderEditableEmail(copy, content, {
-    guestName: "Sample Guest",
-    guestEmail: "guest@example.com",
-    guestPhone: "305-555-0100",
-    guestCount: 2,
-    status: "confirmed",
-    namedPeopleHtml:
-      "<ul style='margin:8px 0;padding-left:18px;color:#fff'><li>Sample Guest</li><li>Demo Plusone</li></ul>",
-    dietaryBlockHtml: "<p style='margin:8px 0;color:#c4b5d8'>No dietary notes.</p>",
-    abandonedListHtml:
-      "<ul style='margin:8px 0;padding-left:18px'><li>Started Form — almost@example.com</li></ul>",
-    inviteUrl: "https://www.landonandjordan.com",
-    uploadLink: copy.uploadLink || "https://example.com/upload-party-photos",
-  });
+  const preview = renderEditableEmail(
+    copy,
+    content,
+    {
+      guestName: "Sample Guest",
+      guestEmail: "guest@example.com",
+      guestPhone: "305-555-0100",
+      guestCount: 2,
+      status: "confirmed",
+      namedPeopleHtml:
+        "<ul style='margin:8px 0;padding-left:18px;color:#fff'><li>Sample Guest</li><li>Demo Plusone</li></ul>",
+      dietaryBlockHtml: "<p style='margin:8px 0;color:#c4b5d8'>No dietary notes.</p>",
+      abandonedListHtml:
+        "<ul style='margin:8px 0;padding-left:18px'><li>Started Form — almost@example.com</li></ul>",
+      inviteUrl: "https://www.landonandjordan.com",
+      uploadLink: copy.uploadLink || "https://example.com/upload-party-photos",
+    },
+    id,
+  );
 
   const patch = (key: keyof EmailTemplateCopy, value: string) => {
     onChange({ ...copy, [key]: value });

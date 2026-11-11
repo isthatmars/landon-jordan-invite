@@ -347,6 +347,10 @@ export function neonEmailTemplate(opts: {
   ctaLabel?: string;
   ctaUrl?: string;
   eyebrow?: string;
+  /** ~20% larger accent headline (e.g. “You're Booked!”). */
+  largeHeadline?: boolean;
+  /** Optional save-the-date buttons (Google Calendar + ICS download). */
+  calendarLinks?: { googleUrl: string; icsUrl: string };
 }): string {
   const origin = partySiteUrl();
   const heroBg = partyAssetUrl("/images/hero-bg-miami.jpg");
@@ -354,18 +358,44 @@ export function neonEmailTemplate(opts: {
   const chrome = partyAssetUrl("/images/chrome-80s.png");
   const inviteHref = opts.ctaUrl || origin;
 
+  // Inset ~10% tighter than edge-to-edge (≈28px on 560px shell).
+  const inset = 28;
+  const headlinePx = opts.largeHeadline ? 29 : 24;
+  const headlineBottom = opts.largeHeadline ? 28 : 24;
+
   const eyebrow = opts.eyebrow
-    ? `<p style="Margin:0 0 10px;color:#c6ff00;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700;font-family:Helvetica,Arial,sans-serif">${opts.eyebrow}</p>`
+    ? `<p style="Margin:0 0 8px;color:#c6ff00;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;font-weight:400;font-family:Helvetica,Arial,sans-serif;text-align:center">${opts.eyebrow}</p>`
     : "";
+
+  const pill = (href: string, label: string, solid: boolean) =>
+    `<td align="center" style="padding:6px">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+        <tr>
+          <td align="center" bgcolor="${solid ? "#c6ff00" : "transparent"}" style="border-radius:999px;border:2px solid #c6ff00;${solid ? "" : "box-shadow:0 0 8px rgba(198,255,0,0.35);"}">
+            <a href="${href}" style="display:inline-block;padding:12px 22px;border-radius:999px;color:${solid ? "#14081f" : "#c6ff00"};font-weight:800;text-decoration:none;letter-spacing:0.05em;font-family:Helvetica,Arial,sans-serif;font-size:13px">${label}</a>
+          </td>
+        </tr>
+      </table>
+    </td>`;
+
   const cta =
     opts.ctaLabel && inviteHref
-      ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="Margin:22px auto 6px">
-          <tr>
-            <td align="center" bgcolor="transparent" style="border-radius:999px;border:2px solid #c6ff00;box-shadow:0 0 8px rgba(198,255,0,0.4)">
-              <a href="${inviteHref}" style="display:inline-block;padding:13px 26px;border-radius:999px;color:#c6ff00;font-weight:800;text-decoration:none;letter-spacing:0.06em;font-family:Helvetica,Arial,sans-serif;font-size:14px">${opts.ctaLabel}</a>
-            </td>
-          </tr>
+      ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="Margin:26px auto 4px">
+          <tr>${pill(inviteHref, opts.ctaLabel, true)}</tr>
         </table>`
+      : "";
+
+  const calendarCtas =
+    opts.calendarLinks?.googleUrl && opts.calendarLinks?.icsUrl
+      ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="Margin:10px auto 2px">
+          <tr>
+            ${pill(opts.calendarLinks.googleUrl, "Add to Google Calendar", false)}
+          </tr>
+          <tr>
+            ${pill(opts.calendarLinks.icsUrl, "Download calendar (.ics)", false)}
+          </tr>
+        </table>
+        <p style="Margin:10px 0 0;text-align:center;color:#a78bb8;font-size:11px;line-height:1.45;font-family:Helvetica,Arial,sans-serif">Tap a button to save the party on your phone or computer.</p>`
       : "";
 
   // Yellowtail is the site's Hastron fallback (next/font Google). Email clients
@@ -422,7 +452,7 @@ export function neonEmailTemplate(opts: {
               <![endif]-->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(7,1,15,0.52)">
                 <tr>
-                  <td style="padding:22px 16px 10px">
+                  <td style="padding:22px 16px 0">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
                       <tr>
                         <td width="46%" valign="bottom" style="width:46%;vertical-align:bottom;padding:0 4px 0 0">
@@ -448,22 +478,37 @@ export function neonEmailTemplate(opts: {
               <![endif]-->
             </td>
           </tr>
-          <!-- Darkened details-bar overlay: editable email content -->
+          <!-- Details box: pulled up toward hero, inset, curved, semi-transparent -->
           <tr>
-            <td background="${heroBg}" bgcolor="#07010f" style="background-image:url('${heroBg}');background-size:cover;background-position:center bottom;background-repeat:no-repeat;background-color:#07010f;border:2px solid #ff2bd6;border-top:0;border-radius:0 0 18px 18px;padding:0 12px 14px">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+            <td background="${heroBg}" bgcolor="#07010f" style="background-image:url('${heroBg}');background-size:cover;background-position:center bottom;background-repeat:no-repeat;background-color:#07010f;border:2px solid #ff2bd6;border-top:0;border-radius:0 0 18px 18px;padding:0 ${inset}px ${inset - 8}px">
+              <!--[if mso]>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-top:${inset}px">
+              <![endif]-->
+              <!-- Pull box up over hero feet (Apple Mail / iOS / Gmail). Outlook uses the MSO top pad (= L/R inset) instead. -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:-24px">
                 <tr>
-                  <td bgcolor="#0a0614" style="background-color:rgba(7,1,15,0.88);background-image:linear-gradient(180deg,rgba(10,6,20,0.92),rgba(7,1,15,0.94));border:1px solid rgba(255,43,214,0.35);border-radius:14px;padding:22px 20px 20px;box-shadow:0 0 18px rgba(255,43,214,0.28),inset 0 0 28px rgba(255,43,214,0.06)">
-                    ${eyebrow}
-                    <h1 style="Margin:0 0 14px;color:#ff2bd6;font-size:24px;line-height:1.25;font-weight:800;font-family:Helvetica,Arial,sans-serif;text-shadow:0 0 12px #ff2bd6,0 0 28px rgba(255,43,214,0.45)">${opts.headline}</h1>
-                    <div style="color:#f3e8ff;line-height:1.65;font-size:15px;font-family:Helvetica,Arial,sans-serif">${opts.bodyHtml}</div>
-                    ${cta}
-                    <p style="Margin:20px 0 0;text-align:center;color:#9ca3af;font-size:12px;letter-spacing:0.04em;font-family:Helvetica,Arial,sans-serif">
-                      <a href="${origin}" style="color:#c4b5d8;text-decoration:none">Landon &amp; Jordan &#183; 80s Birthday Party</a>
-                    </p>
+                  <td align="center" bgcolor="#1a1028" style="background-color:#1a1028;border-radius:24px">
+                    <!-- Nested rgba overlay — glass when rgba kept; solid #1a1028 fallback otherwise -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(10,6,20,0.70);border-radius:24px">
+                      <tr>
+                        <td align="center" bgcolor="transparent" style="background-color:rgba(7,1,15,0.55);border:1px solid rgba(255,43,214,0.4);border-radius:24px;padding:26px 22px 22px;text-align:center">
+                          ${eyebrow}
+                          <h1 style="Margin:0 0 ${headlineBottom}px;color:#ff2bd6;font-size:${headlinePx}px;line-height:1.2;font-weight:800;font-family:Helvetica,Arial,sans-serif;text-align:center;text-shadow:0 0 12px #ff2bd6,0 0 28px rgba(255,43,214,0.45)">${opts.headline}</h1>
+                          <div style="color:#f3e8ff;line-height:1.65;font-size:15px;font-family:Helvetica,Arial,sans-serif;text-align:center">${opts.bodyHtml}</div>
+                          ${cta}
+                          ${calendarCtas}
+                          <p style="Margin:22px 0 0;text-align:center;color:#9ca3af;font-size:12px;letter-spacing:0.04em;font-family:Helvetica,Arial,sans-serif">
+                            <a href="${origin}" style="color:#c4b5d8;text-decoration:none">Landon &amp; Jordan &#183; 80s Birthday Party</a>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
+              <!--[if mso]>
+              </td></tr></table>
+              <![endif]-->
             </td>
           </tr>
         </table>

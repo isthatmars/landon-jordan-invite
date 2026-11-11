@@ -62,17 +62,23 @@ export async function PATCH(request: Request) {
     if (!rsvp) return NextResponse.json({ error: "Not found" }, { status: 404 });
     const templates = mergeEmailTemplates(store.emailTemplates);
     const coming = rsvp.status !== "declined" && rsvp.attend !== "no";
-    const copy = coming ? templates.signup_confirm : templates.signup_declined;
-    const rendered = renderEditableEmail(copy, content, {
-      guestName: rsvp.fullName || "Friend",
-      guestEmail: rsvp.email,
-      guestPhone: rsvp.phone,
-      guestCount: rsvp.guestCount,
-      status: rsvp.status,
-      namedPeopleHtml: namedPeopleEmailList(partyPeople(rsvp)),
-      dietaryBlockHtml: dietaryBlockHtml(rsvp),
-      inviteUrl: partySiteUrl(),
-    });
+    const templateId = coming ? "signup_confirm" : "signup_declined";
+    const copy = templates[templateId];
+    const rendered = renderEditableEmail(
+      copy,
+      content,
+      {
+        guestName: rsvp.fullName || "Friend",
+        guestEmail: rsvp.email,
+        guestPhone: rsvp.phone,
+        guestCount: rsvp.guestCount,
+        status: rsvp.status,
+        namedPeopleHtml: namedPeopleEmailList(partyPeople(rsvp)),
+        dietaryBlockHtml: dietaryBlockHtml(rsvp),
+        inviteUrl: partySiteUrl(),
+      },
+      templateId,
+    );
     const result = await sendGuestEmail({
       to: rsvp.email,
       subject: rendered.subject,

@@ -10,6 +10,7 @@ import {
   neonEmailTemplate,
   partySiteUrl,
 } from "@/lib/notifications";
+import { partyGoogleCalendarUrl, partyIcsUrl } from "@/lib/party-calendar";
 
 export type EditableEmailTemplateId =
   | "signup_confirm"
@@ -147,7 +148,7 @@ Party size from you: {{guestCount}}
 
 Dress code: {{dressCode}}
 
-Every adult and child needs a first and last name on this invite. Lace up, dress 80s, and we'll see you on the floor!`,
+Save the night with the calendar buttons below (Google Calendar or .ics). Lace up, dress 80s, and we'll see you on the floor!`,
     ctaLabel: "View Invite",
     ctaUrl: INVITE,
     uploadLink: "",
@@ -251,8 +252,7 @@ See you on the floor!`,
 
 Thank you for helping make Landon & Jordan's 80s Birthday Party unforgettable. The music, the fits, the energy — you brought it.
 
-Got pictures? Please upload them here so we can share the night:
-{{uploadLink}}
+Got pictures? Hit the button below to upload them so we can share the night.
 
 Love,
 The family`,
@@ -345,17 +345,29 @@ function fillPlain(template: string, map: Record<string, string>): string {
   );
 }
 
+const CALENDAR_CTA_TEMPLATES = new Set<EditableEmailTemplateId>([
+  "signup_confirm",
+  "signup_declined",
+  "party_30_days",
+  "what_to_bring",
+  "party_tomorrow",
+  "party_today",
+]);
+
 /** Build neon HTML from editable copy + site facts + guest vars. */
 export function renderEditableEmail(
   copy: EmailTemplateCopy,
   content: SiteContent,
   vars: TemplateVars = {},
+  templateId?: EditableEmailTemplateId,
 ): { subject: string; html: string; headline: string; eyebrow: string; bodyText: string } {
   const inviteUrl = vars.inviteUrl || partySiteUrl();
   const uploadLink = (vars.uploadLink ?? copy.uploadLink ?? "").trim() || inviteUrl;
   const partyTitle =
     vars.partyTitle ||
     `${content.heroScript} ${content.heroChrome} ${content.heroSubtitle}`.replace(/\s+/g, " ").trim();
+  const googleCalendarUrl = partyGoogleCalendarUrl(content);
+  const icsUrl = partyIcsUrl();
 
   const plainMap: Record<string, string> = {
     guestName: vars.guestName || "Friend",
@@ -372,6 +384,8 @@ export function renderEditableEmail(
     partyTitle,
     inviteUrl,
     uploadLink,
+    googleCalendarUrl,
+    icsUrl,
     // HTML slots stay as markers until after escape
     namedPeople: "%%NAMED_PEOPLE%%",
     dietaryBlock: "%%DIETARY%%",
@@ -391,12 +405,22 @@ export function renderEditableEmail(
     .replace(/%%DIETARY%%/g, vars.dietaryBlockHtml || "")
     .replace(/%%ABANDONED%%/g, vars.abandonedListHtml || "");
 
+  const largeHeadline =
+    templateId === "signup_confirm" ||
+    /you.?re booked/i.test(headline);
+
+  const showCalendar = Boolean(templateId && CALENDAR_CTA_TEMPLATES.has(templateId));
+
   const html = neonEmailTemplate({
     eyebrow: escapeHtml(eyebrow),
     headline: escapeHtml(headline),
-    bodyHtml: `<div style="margin:0">${bodyHtml}</div>`,
+    bodyHtml: `<div style="margin:0;text-align:center">${bodyHtml}</div>`,
     ctaLabel: ctaLabel || undefined,
     ctaUrl: ctaUrl || undefined,
+    largeHeadline,
+    calendarLinks: showCalendar
+      ? { googleUrl: googleCalendarUrl, icsUrl }
+      : undefined,
   });
 
   return { subject, html, headline, eyebrow, bodyText: bodyFilled };

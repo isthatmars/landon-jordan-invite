@@ -81,10 +81,15 @@ export async function POST(request: Request) {
                 `<li>${escapeHtml(r.fullName || "(no name)")} — ${escapeHtml(r.email || "no email")} — last: ${escapeHtml(r.lastFieldTouched || "?")}</li>`,
             )
             .join("")}</ul>`;
-    const rendered = renderEditableEmail(templates.abandoned_digest, content, {
-      abandonedListHtml,
-      inviteUrl,
-    });
+    const rendered = renderEditableEmail(
+      templates.abandoned_digest,
+      content,
+      {
+        abandonedListHtml,
+        inviteUrl,
+      },
+      "abandoned_digest",
+    );
     const owner = await sendOwnerEmail({
       subject: rendered.subject,
       html: rendered.html,
@@ -122,17 +127,22 @@ export async function POST(request: Request) {
 
   const results: NotifyResult[] = [];
   for (const g of guests) {
-    const rendered = renderEditableEmail(copy, content, {
-      guestName: g.fullName || "Friend",
-      guestEmail: g.email,
-      guestPhone: g.phone,
-      guestCount: g.guestCount,
-      status: g.status,
-      namedPeopleHtml: namedPeopleEmailList(partyPeople(g)),
-      dietaryBlockHtml: dietaryBlockHtml(g),
-      inviteUrl,
-      uploadLink: copy.uploadLink,
-    });
+    const rendered = renderEditableEmail(
+      copy,
+      content,
+      {
+        guestName: g.fullName || "Friend",
+        guestEmail: g.email,
+        guestPhone: g.phone,
+        guestCount: g.guestCount,
+        status: g.status,
+        namedPeopleHtml: namedPeopleEmailList(partyPeople(g)),
+        dietaryBlockHtml: dietaryBlockHtml(g),
+        inviteUrl,
+        uploadLink: copy.uploadLink,
+      },
+      kind,
+    );
     results.push(
       await sendGuestEmail({
         to: g.email,

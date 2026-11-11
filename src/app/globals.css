@@ -2884,7 +2884,7 @@ body {
   width: min(92%, 34rem);
   overflow: visible;
   /* Room for the table remote hanging off the CRT feet. */
-  margin-bottom: 2.4rem;
+  margin-bottom: 3rem;
 }
 
 .watch-side,
@@ -3032,7 +3032,7 @@ body {
   left: 50%;
   bottom: 0.15rem;
   width: min(58%, 14rem);
-  transform: translate(-50%, 48%);
+  transform: translate(-50%, 70%);
   display: block;
   z-index: 14;
   pointer-events: none;
@@ -3212,7 +3212,7 @@ body {
     align-self: start;
     justify-self: start;
     overflow: visible;
-    margin-bottom: 2.75rem;
+    margin-bottom: 3.35rem;
   }
 
   #watch .watch-tv .floor-contact {
@@ -3270,7 +3270,7 @@ body {
     overflow: visible;
     z-index: 14;
     pointer-events: none;
-    transform: translateY(48%);
+    transform: translateY(72%);
   }
 
   #watch .watch-remote {

@@ -94,6 +94,7 @@ html:not([data-intro="reveal"]) .hero-invite[data-neon="breathing"] {
 .btn-pink-outline:focus-visible,
 .btn-green-solid:focus-visible,
 .hero-facts-rsvp:focus-visible,
+.site-float-btn:focus-visible,
 .back-to-top:focus-visible,
 .game-close:focus-visible,
 .skip-intro:focus-visible,

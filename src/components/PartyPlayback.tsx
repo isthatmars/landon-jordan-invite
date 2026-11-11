@@ -1,6 +1,7 @@
 "use client";
 
 import type { Track, VideoItem } from "@/lib/types";
+import { BackToTop } from "./BackToTop";
 import { Mixtape } from "./Mixtape";
 import { PlaybackProvider } from "./Playback";
 import { Watch } from "./Watch";
@@ -21,6 +22,7 @@ export function PartyPlayback({
     <PlaybackProvider tracks={tracks} videos={videos}>
       <Mixtape headline={mixtapeHeadline} />
       <Watch headline={watchHeadline} />
+      <BackToTop />
     </PlaybackProvider>
   );
 }

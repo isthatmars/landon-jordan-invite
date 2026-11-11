@@ -146,13 +146,49 @@ export function Watch({ headline }: { headline: string }) {
     const list = listRef.current;
     if (!list) return;
     list.focus({ preventScroll: true });
+    const scroller = list.closest(".watch-list");
     if (!dir) {
-      list.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" });
+      (scroller ?? list).scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "nearest",
+      });
       return;
     }
-    const amount = Math.max(48, Math.floor(list.clientHeight * 0.35));
-    list.scrollBy({ top: dir * amount, behavior: reduceMotion ? "auto" : "smooth" });
+    const target = scroller instanceof HTMLElement ? scroller : list;
+    const amount = Math.max(48, Math.floor(target.clientHeight * 0.35));
+    target.scrollBy({ top: dir * amount, behavior: reduceMotion ? "auto" : "smooth" });
   };
+
+  /* Keep the browse list scrolled to whatever is on the CRT. */
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || !now?.youtubeId) return;
+    const active = list.querySelector(
+      `[data-youtube-id="${CSS.escape(now.youtubeId)}"]`,
+    ) as HTMLElement | null;
+    if (!active) return;
+
+    const scroller = list.closest(".watch-list");
+    const behavior: ScrollBehavior = reduceMotion ? "auto" : "smooth";
+    if (!(scroller instanceof HTMLElement)) {
+      active.scrollIntoView({ block: "nearest", behavior });
+      return;
+    }
+
+    const label = scroller.querySelector(".watch-browse-label");
+    const labelH = label instanceof HTMLElement ? label.getBoundingClientRect().height : 0;
+    const pad = 6;
+    const btn = active.getBoundingClientRect();
+    const box = scroller.getBoundingClientRect();
+    const viewTop = box.top + labelH + pad;
+    const viewBottom = box.bottom - pad;
+
+    if (btn.top < viewTop) {
+      scroller.scrollBy({ top: btn.top - viewTop, behavior });
+    } else if (btn.bottom > viewBottom) {
+      scroller.scrollBy({ top: btn.bottom - viewBottom, behavior });
+    }
+  }, [now?.youtubeId, reduceMotion, videos, watchLive]);
 
   const onRemoteAction = (action: RemoteAction) => {
     if (action === "play") {

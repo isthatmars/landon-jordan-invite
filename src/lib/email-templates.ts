@@ -133,7 +133,7 @@ export const DEFAULT_EMAIL_TEMPLATES: StoredEmailTemplates = {
     subject: "You're booked for {{brandName}} 80s Party!",
     eyebrow: "RSVP confirmed",
     headline: "You're Booked!",
-    body: `Hey {{guestName}} — you're booked for Landon & Jordan's {{partyTitle}}.
+    body: `Hey {{guestName}} — you're booked for {{partyTitle}}.
 
 When & where:
 {{eventDate}}

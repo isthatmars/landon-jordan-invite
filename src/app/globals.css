@@ -3418,6 +3418,14 @@ main {
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
 }
 
+/* Desktop: clear the chassis (photo bottom ≈ 1.5 key-heights below the keys). */
+.mix-keys-caption {
+  position: absolute;
+  left: 50%;
+  top: calc(250% + 0.85rem);
+  transform: translateX(-50%);
+}
+
 .mix-key:hover,
 .mix-key:focus-visible {
   outline: none;
@@ -3488,6 +3496,10 @@ main {
     height: 1.05rem;
     max-width: none;
     max-height: none;
+  }
+
+  .mix-keys-caption {
+    top: calc(100% + 0.6rem);
   }
 }
 
@@ -4199,8 +4211,8 @@ main {
   order: 2;
   width: min(92%, 34rem);
   overflow: visible;
-  /* Room for the table remote hanging off the CRT feet (kept in-viewport). */
-  margin-bottom: 1.75rem;
+  /* Room for the table remote hanging off the CRT feet, plus its caption. */
+  margin-bottom: 4.1rem;
 }
 
 .watch-side,
@@ -4418,6 +4430,53 @@ main {
   outline-offset: -2px;
 }
 
+/* Editorial caption under interactive props (remote, boombox, phone).
+   Type only — no boxes, glows, or icons — so the photographed props stay clean. */
+.prop-caption {
+  margin: 0;
+  font-family: var(--font-nav), sans-serif;
+  font-size: clamp(0.62rem, 0.56rem + 0.22vw, 0.74rem);
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 244, 230, 0.8);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 14px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.prop-caption.is-shown {
+  opacity: 1;
+  transition: opacity 1.2s ease 0.8s;
+}
+
+.prop-verb-fine {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .prop-verb-touch {
+    display: none;
+  }
+
+  .prop-verb-fine {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prop-caption,
+  .prop-caption.is-shown {
+    transition: none;
+  }
+}
+
 .watch-remote-rail {
   position: absolute;
   left: 50%;
@@ -4488,17 +4547,22 @@ main {
 }
 
 .watch-remote-btn:focus-visible {
-  outline: 2px solid rgba(198, 255, 0, 0.95);
-  outline-offset: 1px;
-  background: rgba(198, 255, 0, 0.18);
+  outline: 1px solid rgba(255, 246, 232, 0.7);
+  outline-offset: 2px;
 }
 
-.watch-remote-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+.watch-remote-caption {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 0.3rem);
+  z-index: 3;
+  transform: translateX(-50%);
 }
 
-.watch-remote-btn:active {
-  background: rgba(198, 255, 0, 0.22);
+@media (min-width: 1024px) {
+  .watch-remote-caption {
+    top: calc(100% + 0.55rem);
+  }
 }
 
 @media (min-width: 1024px) {

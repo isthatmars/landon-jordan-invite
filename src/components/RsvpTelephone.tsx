@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLiveFlag } from "@/lib/useLiveFlag";
+import { useSessionDismiss } from "@/lib/useSessionDismiss";
+import { PropCaption, TapVerb } from "./PropCaption";
+
+/** Once-per-session dismiss for the RSVP telephone caption. */
+const RSVP_PHONE_CUES_KEY = "lj-rsvp-phone-cues";
 
 function playRing(ctx: AudioContext) {
   const start = ctx.currentTime + 0.02;
@@ -31,6 +37,8 @@ export function RsvpTelephone() {
   const [pickedUp, setPickedUp] = useState(false);
   const [buzzing, setBuzzing] = useState(false);
   const [greeting, setGreeting] = useState(false);
+  const rsvpLive = useLiveFlag("liveRsvp");
+  const [phoneCueDismissed, dismissPhoneCue] = useSessionDismiss(RSVP_PHONE_CUES_KEY);
 
   useEffect(() => {
     const section = document.getElementById("rsvp");
@@ -66,6 +74,7 @@ export function RsvpTelephone() {
   };
 
   const pickup = () => {
+    dismissPhoneCue();
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setPickedUp(true);
     setBuzzing(!reduce);
@@ -101,6 +110,9 @@ export function RsvpTelephone() {
           <img className="phone-photo" src="/images/prop-rsvp-phone.png" alt="" draggable={false} />
         </span>
       </button>
+      <PropCaption show={rsvpLive && !phoneCueDismissed && !pickedUp} className="phone-caption">
+        <TapVerb /> the phone to pick up
+      </PropCaption>
       {pickedUp ? (
         <div className="rsvp-phone-copy mt-3 w-full max-w-full text-center" data-testid="rsvp-phone-message" aria-live="polite">
           <p className="text-sm leading-snug text-white">

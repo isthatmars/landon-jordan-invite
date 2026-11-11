@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLiveFlag } from "@/lib/useLiveFlag";
+import { useSessionDismiss } from "@/lib/useSessionDismiss";
 import { Cassette } from "./Cassette";
 import { NeonArrow } from "./icons";
 import { usePlayback } from "./Playback";
+import { PropCaption } from "./PropCaption";
 
 /** Spine ink boxes measured against colored bands in cassette-stack-cut.png. */
 const STACK: {
@@ -21,6 +24,9 @@ const STACK: {
   { id: "t6", label: "Miami Sound Machine – Conga", top: "66.3%", height: "15.7%", labelTop: "15.9%", labelHeight: "68.2%" },
   { id: "t7", label: "Prince – Purple Rain", top: "82.0%", height: "18%", labelTop: "12.8%", labelHeight: "58.3%" },
 ];
+
+/** Once-per-session dismiss for the boombox caption. */
+const MIX_CUES_KEY = "lj-mix-cues";
 
 function TransportIcon({ name }: { name: "back" | "play" | "pause" | "forward" | "stop" }) {
   const common = {
@@ -76,6 +82,8 @@ export function Mixtape({ headline }: { headline: string }) {
     x: string;
     y: string;
   } | null>(null);
+  const mixLive = useLiveFlag("liveMixtape");
+  const [cuesDismissed, dismissCues] = useSessionDismiss(MIX_CUES_KEY);
   const byId = new Map(tracks.map((track) => [track.id, track]));
   const stack = STACK.flatMap((row) => {
     const track = byId.get(row.id);
@@ -187,7 +195,7 @@ export function Mixtape({ headline }: { headline: string }) {
               </span>
               <span className="mix-lamp" />
             </div>
-            <div className="mix-keys" role="group" aria-label="Boombox transport">
+            <div className="mix-keys" role="group" aria-label="Boombox transport" onClickCapture={dismissCues}>
               <button
                 type="button"
                 className="mix-key"
@@ -229,6 +237,9 @@ export function Mixtape({ headline }: { headline: string }) {
               <button type="button" className="mix-key" aria-label="Stop the tape" onClick={stop}>
                 <TransportIcon name="stop" />
               </button>
+              <PropCaption show={mixLive && !cuesDismissed} className="mix-keys-caption">
+                Use the buttons to play &amp; pause
+              </PropCaption>
             </div>
             <div className="mix-phones">
               <div className="mix-shadow mix-shadow-phones" aria-hidden />
@@ -287,7 +298,10 @@ export function Mixtape({ headline }: { headline: string }) {
                 labelHeight={row.labelHeight}
                 selected={row.id === loadedId}
                 inserting={insertingId === row.id}
-                onSelect={() => selectTape(row.id)}
+                onSelect={() => {
+                  dismissCues();
+                  selectTape(row.id);
+                }}
               />
             ))}
           </div>

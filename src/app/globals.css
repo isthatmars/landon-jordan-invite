@@ -2208,6 +2208,10 @@ body {
   /* visible on both axes — mixed clip/visible collapses and shears neon bloom. */
   overflow: visible;
   background: #120612;
+  /* Raise the photographed table to the propped boombox/cassettes.
+     Plate is landscape-wider than the section, so object-position Y is ignored;
+     scale from the bottom edge so the reflective floor meets prop feet. */
+  --mix-floor-scale: 1.72;
 }
 
 .mix-plate {
@@ -2219,6 +2223,9 @@ body {
   object-position: 40% 84%;
   pointer-events: none;
   user-select: none;
+  transform: scale(var(--mix-floor-scale));
+  transform-origin: center bottom;
+  will-change: transform;
 }
 
 /* Living atmosphere: palm sway + stationary bokeh breath (hero-like overlays). */
@@ -2228,6 +2235,10 @@ body {
   z-index: 1;
   pointer-events: none;
   overflow: hidden;
+  /* Keep palm/bokeh locked to the raised plate crop. */
+  transform: scale(var(--mix-floor-scale));
+  transform-origin: center bottom;
+  will-change: transform;
 }
 
 .mix-palm {
@@ -2522,14 +2533,16 @@ body {
 }
 
 .mix-reflect {
-  -webkit-box-reflect: below 0 linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.12) 46%, transparent 72%);
+  /* Negative offset closes the hairline float seam under cassette bottoms. */
+  -webkit-box-reflect: below -6px linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.12) 46%, transparent 72%);
 }
 
 .mix-mirror {
   position: absolute;
   z-index: 0;
   left: 0;
-  top: 99.2%;
+  /* Overlap the boombox feet so the reflection PNG fade-in does not read as a float gap. */
+  top: 88%;
   width: 100%;
   height: auto;
   pointer-events: none;
@@ -2537,7 +2550,7 @@ body {
 }
 
 .mix-reflect-short {
-  -webkit-box-reflect: below 0 linear-gradient(rgba(0, 0, 0, 0.38), transparent 58%);
+  -webkit-box-reflect: below -4px linear-gradient(rgba(0, 0, 0, 0.38), transparent 58%);
 }
 
 .mix-shadow {
@@ -2756,13 +2769,25 @@ body {
 }
 
 @media (min-width: 768px) {
+  .mix-scene {
+    --mix-floor-scale: 2.05;
+  }
+
   .mix-plate {
-    /* Show more of the reflective table under the raised props. */
-    object-position: 46% 84%;
+    /* Desktop props sit mid-high; zoom the plate from the floor so the
+       reflective table sheen meets boombox + cassette bottoms. */
+    object-position: 46% 100%;
+    transform: scale(var(--mix-floor-scale));
+    transform-origin: center bottom;
+  }
+
+  .mix-atmosphere {
+    transform: scale(var(--mix-floor-scale));
+    transform-origin: center bottom;
   }
 
   .mix-palm img {
-    object-position: 46% 84%;
+    object-position: 46% 100%;
   }
 
   .mix-stage {
@@ -2814,7 +2839,8 @@ body {
   }
 
   .mix-stack {
-    --mix-stack-sit: 12%;
+    /* Tiny sit after floor raise so the purple tape shares the boombox contact line. */
+    --mix-stack-sit: 16%;
     width: 17.5%;
     flex: none;
     margin: 0;
@@ -2838,8 +2864,9 @@ body {
   }
 
   .mix-table-pool {
-    bottom: 10%;
-    height: 30%;
+    /* Ride with the raised floor plane under the cassette stack. */
+    bottom: 24%;
+    height: 38%;
   }
 }
 

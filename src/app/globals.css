@@ -1264,9 +1264,10 @@ body {
 }
 
 .admin-back-link {
+  display: inline-block;
   border: 0;
   background: transparent;
-  padding: 0 0 0.85rem;
+  padding: 0 0 1.4rem;
   color: var(--neon-teal);
   font-size: 0.85rem;
   font-weight: 600;
@@ -1283,7 +1284,7 @@ body {
 }
 
 .admin-panel-title {
-  margin-top: 0.35rem;
+  margin-top: 0.2rem;
 }
 
 

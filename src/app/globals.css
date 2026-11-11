@@ -269,6 +269,7 @@ body {
   --plate-z: 6;
 }
 
+<<<<<<< HEAD
 /* Full-viewport scenes without sticky plate ghosts (orphan CTAs from prior sections).
    Soft scroll-snap keeps desktop/mobile feeling like one condensed journey.
    Do NOT snap #rsvp: last section before a short footer; snap-align:start +
@@ -278,16 +279,34 @@ body {
     scroll-snap-type: y proximity;
   }
 
+=======
+/*
+ * Stacked sticky plates (desktop): short photographic scenes stick while the next
+ * plate slides over. Lineup/RSVP stay in normal flow (tall). Reduced-motion: no stick.
+ * Ghost CTAs are killed via data-live-* (see cinematic.css) — sticky alone is not enough
+ * because stuck plates remain under later ones for the rest of the page.
+ */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+>>>>>>> 2b1f296 (Restore sticky scene-plate parallax without ghost CTAs.)
   #home,
   #mixtape,
   #watch,
   #arcade {
-    position: relative;
+    position: sticky;
+    top: 0;
     z-index: var(--plate-z);
-    scroll-snap-align: start;
-    scroll-snap-stop: normal;
+    box-shadow: 0 28px 56px rgba(0, 0, 0, 0.42);
   }
 
+  /* Clip home/mixtape so stuck chrome cannot paint outside the plate bounds.
+     Watch/Arcade keep overflow open for neon titles — live flags handle their CTAs. */
+  #home,
+  #mixtape {
+    overflow-x: clip;
+    overflow-y: clip;
+  }
+
+<<<<<<< HEAD
   /* Tall text section: soft snap under the header; never force-stop past it. */
   #lineup {
     position: relative;
@@ -306,6 +325,54 @@ body {
   .site-footer {
     scroll-snap-align: end;
     scroll-snap-stop: normal;
+=======
+  #lineup,
+  #rsvp {
+    position: relative;
+    z-index: var(--plate-z);
+    box-shadow: 0 -20px 48px rgba(0, 0, 0, 0.38);
+  }
+
+  /* Next plate pulls up over the previous scene */
+  #mixtape,
+  #watch,
+  #arcade,
+  #lineup,
+  #rsvp {
+    margin-top: -3.25rem;
+  }
+
+  footer {
+    position: relative;
+    z-index: 7;
+  }
+}
+
+@media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+  /* Lighter mobile stack: overlap only, no sticky (keeps touch scroll usable) */
+  #home,
+  #mixtape,
+  #watch,
+  #arcade,
+  #lineup,
+  #rsvp {
+    position: relative;
+    z-index: var(--plate-z);
+  }
+
+  #mixtape,
+  #watch,
+  #arcade,
+  #lineup,
+  #rsvp {
+    margin-top: -1.25rem;
+    box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.28);
+  }
+
+  footer {
+    position: relative;
+    z-index: 7;
+>>>>>>> 2b1f296 (Restore sticky scene-plate parallax without ghost CTAs.)
   }
 }
 

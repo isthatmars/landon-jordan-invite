@@ -1679,6 +1679,23 @@ body {
   overflow: visible;
 }
 
+/* Desktop/tablet: fill the plate and mid-align neon + props so table shows below.
+   Phone keeps the default top-flow stack (keys/reflections stay grounded). */
+@media (min-width: 768px) {
+  #mixtape {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #mixtape .mix-stage {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+  }
+}
+
 .mix-script {
   position: relative;
   z-index: 6;
@@ -2028,11 +2045,17 @@ body {
 
 @media (min-width: 768px) {
   .mix-plate {
-    object-position: 46% 76%;
+    /* Show more of the reflective table under the raised props. */
+    object-position: 46% 84%;
+  }
+
+  .mix-palm img {
+    object-position: 46% 84%;
   }
 
   .mix-stage {
-    padding: 2.1rem 1.1rem 6.4rem;
+    /* Section pad owns the floor; keep stage chrome thin so flex mid-align can work. */
+    padding: 0.25rem 1.1rem 0.35rem;
   }
 
   .mix-script {
@@ -2044,13 +2067,13 @@ body {
     justify-content: center;
     gap: 1rem;
     width: 100%;
-    margin: 0 0 1.35rem;
-    padding: 3rem 3.5rem 2.25rem;
+    margin: 0 0 0.45rem;
+    padding: 0.85rem 3rem 0.45rem;
   }
 
   .mix-script h2 {
     max-width: none;
-    padding: 2rem 2.25rem 1.7rem;
+    padding: 1.15rem 2rem 0.95rem;
     text-align: center;
     /* ~50% larger than prior clamp(2.85rem…3.6rem). */
     font-size: clamp(4.275rem, 6.75vw, 5.4rem);
@@ -2070,17 +2093,17 @@ body {
     align-items: flex-end;
     justify-content: center;
     gap: clamp(3.5rem, 8vw, 6.25rem);
-    padding-top: 0.2rem;
+    padding-top: 0.15rem;
   }
 
   .mix-boom {
-    width: 54%;
+    width: 50%;
     flex: none;
   }
 
   .mix-stack {
     --mix-stack-sit: 12%;
-    width: 18.5%;
+    width: 17.5%;
     flex: none;
     margin: 0;
   }
@@ -2097,9 +2120,35 @@ body {
 
   .mix-neon-throw {
     left: 36%;
-    top: 0;
+    top: 8%;
     width: 42%;
-    height: 42%;
+    height: 36%;
+  }
+
+  .mix-table-pool {
+    bottom: 10%;
+    height: 30%;
+  }
+}
+
+@media (min-width: 1024px) {
+  #mixtape .mix-stage {
+    /* Bias the mid-aligned cluster high so table + reflections read below. */
+    justify-content: safe center;
+    padding-bottom: 0.5rem;
+  }
+
+  #mixtape .mix-boom {
+    width: 48%;
+  }
+
+  #mixtape .mix-stack {
+    width: 16.75%;
+  }
+
+  #mixtape .mix-row {
+    margin-top: -8vh;
+    margin-bottom: 11vh;
   }
 }
 

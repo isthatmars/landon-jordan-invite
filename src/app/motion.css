@@ -166,8 +166,9 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 44%;
+  /* Sit on the bay band above the lifted terrace under the couple. */
+  bottom: 22%;
+  height: 28%;
   pointer-events: none;
   background: linear-gradient(
     102deg,
@@ -187,8 +188,8 @@
 }
 
 .hero-water-b {
-  height: 38%;
-  opacity: 0.35;
+  height: 24%;
+  opacity: 0.3;
   animation-duration: 17s;
   animation-direction: reverse;
   background: linear-gradient(

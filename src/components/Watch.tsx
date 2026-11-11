@@ -10,14 +10,9 @@ import {
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { crtScreen, crtScreenFill } from "@/lib/cutouts";
 import { useLiveFlag } from "@/lib/useLiveFlag";
-import { useSessionDismiss } from "@/lib/useSessionDismiss";
 import { usePlayback } from "./Playback";
-import { PropCaption, TapVerb } from "./PropCaption";
 import { YoutubeScreen } from "./YoutubeScreen";
 import { YoutubeThumb } from "./YoutubeThumb";
-
-/** Once-per-session dismiss for the Watch remote caption. */
-const WATCH_REMOTE_CUES_KEY = "lj-watch-remote-cues";
 
 type RemoteAction =
   | "play"
@@ -85,7 +80,6 @@ export function Watch({ headline }: { headline: string }) {
   const reduceMotion = useReducedMotion();
   const watchLive = useLiveFlag("liveWatch");
   const [desktopMotion, setDesktopMotion] = useState(false);
-  const [remoteCueDismissed, dismissRemoteCue] = useSessionDismiss(WATCH_REMOTE_CUES_KEY);
 
   /* CRT channel switch: quick snow (≤1s), then clear as the new video plays underneath. */
   useEffect(() => {
@@ -174,7 +168,6 @@ export function Watch({ headline }: { headline: string }) {
   };
 
   const onRemoteAction = (action: RemoteAction) => {
-    dismissRemoteCue();
     if (action === "play") {
       toggleCurrent();
       return;
@@ -316,9 +309,6 @@ export function Watch({ headline }: { headline: string }) {
                   />
                 ))}
               </div>
-              <PropCaption show={watchLive && !remoteCueDismissed} className="watch-remote-caption">
-                <TapVerb /> the remote to change the channel
-              </PropCaption>
             </motion.div>
           </div>
         </div>

@@ -651,126 +651,9 @@
   outline-offset: 4px;
 }
 
-/* Soft neon tap guidance — same once-per-session pattern as mixtape/remote. */
-@property --phone-glow {
-  syntax: "<number>";
-  inherits: false;
-  initial-value: 1;
-}
-
-@keyframes phone-glow-breathe {
-  0%,
-  100% {
-    --phone-glow: 0.72;
-  }
-  50% {
-    --phone-glow: 1.22;
-  }
-}
-
-@keyframes phone-tap-bob {
-  0%,
-  100% {
-    transform: translate(-18%, 8%) rotate(-12deg) scale(1);
-  }
-  50% {
-    transform: translate(-18%, -4%) rotate(-8deg) scale(1.06);
-  }
-}
-
-@keyframes phone-hint-fade {
-  0%,
-  100% {
-    opacity: 0.72;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.phone-hit.is-guiding .phone-prop {
-  --phone-glow: 1;
-  filter:
-    drop-shadow(0 16px 14px rgba(0, 0, 0, 0.5))
-    drop-shadow(0 0 calc(8px * var(--phone-glow)) rgba(255, 57, 200, calc(0.55 * var(--phone-glow))))
-    drop-shadow(0 0 calc(18px * var(--phone-glow)) rgba(198, 255, 0, calc(0.35 * var(--phone-glow))))
-    drop-shadow(0 0 calc(28px * var(--phone-glow)) rgba(56, 217, 255, calc(0.28 * var(--phone-glow))));
-}
-
-.phone-tap-cue {
-  position: absolute;
-  left: 52%;
-  top: 58%;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  width: 2.55rem;
-  height: 2.55rem;
-  pointer-events: none;
-  color: #c6ff00;
-  filter:
-    drop-shadow(0 0 6px rgba(198, 255, 0, 0.8))
-    drop-shadow(0 0 14px rgba(255, 57, 200, 0.45));
-  transform: translate(-18%, 8%) rotate(-12deg);
-}
-
-.phone-tap-hand {
-  width: 100%;
-  height: 100%;
-}
-
-.phone-tap-hint {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 0.2rem);
-  z-index: 4;
-  margin: 0;
-  padding: 0.28rem 0.55rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 57, 200, 0.55);
-  background: rgba(12, 4, 22, 0.82);
-  color: #ff9adf;
-  font-family: var(--font-nav), sans-serif;
-  font-size: clamp(0.58rem, 1.5vw, 0.72rem);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  line-height: 1.2;
-  text-transform: uppercase;
-  white-space: nowrap;
-  pointer-events: none;
-  transform: translateX(-50%);
-  text-shadow:
-    0 0 8px rgba(255, 57, 200, 0.55),
-    0 0 14px rgba(198, 255, 0, 0.28);
-  box-shadow:
-    0 0 12px rgba(255, 57, 200, 0.28),
-    0 4px 12px rgba(0, 0, 0, 0.45);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .phone-hit.is-guiding .phone-prop:not(.is-buzzing):not(.is-ring-once) {
-    animation: phone-glow-breathe 2.8s ease-in-out infinite;
-  }
-
-  .phone-hit.is-guiding .phone-tap-cue {
-    animation: phone-tap-bob 1.8s ease-in-out infinite;
-  }
-
-  .phone-hit.is-guiding .phone-tap-hint {
-    animation: phone-hint-fade 2.8s ease-in-out infinite;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .phone-hit.is-guiding .phone-prop,
-  .phone-hit.is-guiding .phone-tap-cue,
-  .phone-hit.is-guiding .phone-tap-hint {
-    animation: none !important;
-  }
-
-  .phone-hit.is-guiding .phone-prop {
-    --phone-glow: 1;
-  }
+.phone-caption {
+  margin-top: 0.55rem;
+  text-align: center;
 }
 
 .rsvp-phone-copy {
@@ -975,17 +858,10 @@
   .lineup-neon,
   .lineup-pill,
   .phone-prop,
-  .phone-tap-cue,
-  .phone-tap-hint,
   .rsvp-official-cue,
   .rsvp-step-1.is-cue-lit .rsvp-ask,
   .rsvp-step-1.is-cue-lit .rsvp-attend,
   .icon-shake {
     animation: none !important;
-  }
-
-  .phone-hit.is-guiding .phone-tap-cue {
-    opacity: 0.92;
-    transform: translate(-18%, 8%) rotate(-12deg);
   }
 }

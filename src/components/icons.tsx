@@ -118,29 +118,6 @@ export function PacManIcon({ className = "" }: { className?: string }) {
   );
 }
 
-/** Soft tap/hand cue for mixtape, remote, and RSVP telephone props. */
-export function TapHand({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 48 48" className={className} fill="none" aria-hidden>
-      <path
-        d="M18.5 22.5V12.8a2.6 2.6 0 0 1 5.2 0V22M23.7 21.2V10.4a2.6 2.6 0 1 1 5.2 0v12.2M28.9 22V13a2.6 2.6 0 1 1 5.2 0v14.8c0 5.4-3.2 9.7-8.4 9.7h-2.2c-3.4 0-5.5-1.1-7.6-3.4l-5.8-6.3a2.5 2.5 0 0 1 3.5-3.6l2.7 2.6V22.5a2.6 2.6 0 0 1 5.2 0Z"
-        fill="currentColor"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <circle cx="34.5" cy="9.5" r="2.2" fill="currentColor" opacity="0.9" />
-      <path
-        d="M37.6 6.8 40 4.4M39.2 10.8h3.4M37.4 13.8l2.2 2.2"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        opacity="0.85"
-      />
-    </svg>
-  );
-}
-
 type GlyphName = "skate" | "dinner" | "dj" | "hanger" | "trophy" | "lock";
 
 export function LineIcon({ name, className = "" }: { name: GlyphName; className?: string }) {

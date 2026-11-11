@@ -33,7 +33,7 @@ type PlaybackContextValue = {
   insertingId: string | null;
   playSerial: number;
   transportRevision: number;
-  selectTape: (id: string) => void;
+  selectTape: (id: string, insert?: boolean) => void;
   stepTape: (dir: -1 | 1) => void;
   toggleDeck: () => void;
   toggleCurrent: () => void;
@@ -69,6 +69,22 @@ export function syncPartyVideos(tracks: Track[], videos: VideoItem[]) {
   });
 }
 
+/** Green spine in the stack — preferred open-invite autoplay tape. */
+export const DEFAULT_PARTY_TAPE_ID = "t2";
+
+function cuePartyTape(tracks: Track[]): NowPlaying | null {
+  const preferred =
+    tracks.find((track) => track.id === DEFAULT_PARTY_TAPE_ID && track.youtubeId) ??
+    tracks.find((track) => track.youtubeId);
+  if (!preferred?.youtubeId) return null;
+  return {
+    youtubeId: preferred.youtubeId,
+    title: preferred.title,
+    artist: preferred.artist,
+    trackId: preferred.id,
+  };
+}
+
 function cueFrom(videos: VideoItem[]): NowPlaying | null {
   const first = videos.find((video) => video.youtubeId);
   if (!first) return null;
@@ -92,7 +108,9 @@ export function PlaybackProvider({
   const tracks = useMemo(() => byOrder(trackList), [trackList]);
   const videos = useMemo(() => syncPartyVideos(tracks, videoList), [tracks, videoList]);
 
-  const [now, setNow] = useState<NowPlaying | null>(() => cueFrom(syncPartyVideos(byOrder(trackList), videoList)));
+  const [now, setNow] = useState<NowPlaying | null>(
+    () => cuePartyTape(byOrder(trackList)) ?? cueFrom(syncPartyVideos(byOrder(trackList), videoList)),
+  );
   const [playing, setPlaying] = useState(false);
   const [engaged, setEngaged] = useState(false);
   const [insertingId, setInsertingId] = useState<string | null>(null);
@@ -104,12 +122,14 @@ export function PlaybackProvider({
   const nowRef = useRef(now);
   const playingRef = useRef(playing);
   const engagedRef = useRef(engaged);
-  const followRef = useRef<Follow>("videos");
+  const followRef = useRef<Follow>("tapes");
   const playerRef = useRef<YoutubeHandle | null>(null);
   const pendingLoad = useRef<string | null>(null);
+  const pendingMute = useRef<boolean | null>(null);
   const insertToken = useRef(0);
   const commandAt = useRef(0);
   const commandPlaying = useRef<boolean | null>(null);
+  const autoplayStarted = useRef(false);
 
   useEffect(() => {
     tracksRef.current = tracks;
@@ -136,8 +156,15 @@ export function PlaybackProvider({
 
   const load = useCallback((youtubeId: string) => {
     if (!youtubeId) return;
-    if (playerRef.current) playerRef.current.load(youtubeId);
-    else pendingLoad.current = youtubeId;
+    if (playerRef.current) {
+      if (pendingMute.current !== null) {
+        playerRef.current.mute(pendingMute.current);
+        pendingMute.current = null;
+      }
+      playerRef.current.load(youtubeId);
+    } else {
+      pendingLoad.current = youtubeId;
+    }
   }, []);
 
   const beginInsert = useCallback((id: string) => {
@@ -163,7 +190,7 @@ export function PlaybackProvider({
     load(next.youtubeId);
   }, [beginInsert, load, markCommand]);
 
-  const selectTape = useCallback((id: string) => {
+  const selectTape = useCallback((id: string, insert = true) => {
     const track = tracksRef.current.find((item) => item.id === id);
     if (!track?.youtubeId) return;
     publish(
@@ -174,9 +201,91 @@ export function PlaybackProvider({
         trackId: track.id,
       },
       "tapes",
-      true,
+      insert,
     );
   }, [publish]);
+
+  /** Start the party tape as soon as the invite opens (or on return visits). */
+  const startInviteAutoplay = useCallback((opts?: { mutedFirst?: boolean }) => {
+    if (autoplayStarted.current || playingRef.current) return;
+    const track =
+      tracksRef.current.find((item) => item.id === DEFAULT_PARTY_TAPE_ID && item.youtubeId) ??
+      tracksRef.current.find((item) => item.youtubeId);
+    if (!track?.youtubeId) return;
+    autoplayStarted.current = true;
+    const mutedFirst = Boolean(opts?.mutedFirst);
+    pendingMute.current = mutedFirst;
+    if (playerRef.current) {
+      playerRef.current.mute(mutedFirst);
+      pendingMute.current = null;
+    }
+    followRef.current = "tapes";
+    const alreadyCued = nowRef.current?.trackId === track.id && nowRef.current.youtubeId === track.youtubeId;
+    if (alreadyCued && playerRef.current) {
+      holdScroll();
+      markCommand(true);
+      engagedRef.current = true;
+      setEngaged(true);
+      playingRef.current = true;
+      setPlaying(true);
+      setPlaySerial((n) => n + 1);
+      playerRef.current.play();
+    } else {
+      publish(
+        {
+          youtubeId: track.youtubeId,
+          title: track.title,
+          artist: track.artist,
+          trackId: track.id,
+        },
+        "tapes",
+        false,
+      );
+    }
+    if (!mutedFirst) return;
+    const unlock = () => {
+      playerRef.current?.mute(false);
+      window.removeEventListener("pointerdown", unlock, true);
+      window.removeEventListener("keydown", unlock, true);
+      window.removeEventListener("touchstart", unlock, true);
+    };
+    window.addEventListener("pointerdown", unlock, true);
+    window.addEventListener("keydown", unlock, true);
+    window.addEventListener("touchstart", unlock, true);
+  }, [markCommand, publish]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const intro = root.dataset.intro;
+    // Returning visitors / skipped intro: try muted autoplay, unmute on first gesture.
+    if (intro === "done" || intro === "reveal") {
+      const timer = window.setTimeout(() => startInviteAutoplay({ mutedFirst: true }), 120);
+      return () => window.clearTimeout(timer);
+    }
+
+    const onGesture = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest("#open-invitation") || target.closest("#skip-intro")) {
+        // Open/skip is a real user gesture — unmuted autoplay is allowed.
+        startInviteAutoplay({ mutedFirst: false });
+      }
+    };
+    const onIntro = () => {
+      const next = root.dataset.intro;
+      if (next === "opening" || next === "reveal" || next === "done") {
+        // If something else flipped intro without our click handler, fall back to muted.
+        if (!autoplayStarted.current) startInviteAutoplay({ mutedFirst: true });
+      }
+    };
+    document.addEventListener("click", onGesture, true);
+    const obs = new MutationObserver(onIntro);
+    obs.observe(root, { attributes: true, attributeFilter: ["data-intro"] });
+    return () => {
+      document.removeEventListener("click", onGesture, true);
+      obs.disconnect();
+    };
+  }, [startInviteAutoplay]);
 
   const tuneVideo = useCallback((video: Pick<VideoItem, "youtubeId" | "title" | "artist">) => {
     if (!video.youtubeId) return;
@@ -346,7 +455,12 @@ export function PlaybackProvider({
 
   const registerPlayer = useCallback((handle: YoutubeHandle | null) => {
     playerRef.current = handle;
-    if (!handle || !pendingLoad.current) return;
+    if (!handle) return;
+    if (pendingMute.current !== null) {
+      handle.mute(pendingMute.current);
+      pendingMute.current = null;
+    }
+    if (!pendingLoad.current) return;
     const id = pendingLoad.current;
     pendingLoad.current = null;
     handle.load(id);

@@ -685,45 +685,6 @@
   text-underline-offset: 0.18em;
 }
 
-/* After phone tap: soft pink lift on Yes/No — no halo chrome. */
-.rsvp-step-1.is-cue-lit .rsvp-ask {
-  animation: rsvp-attend-ask-pink 1.6s ease-out 1;
-}
-
-.rsvp-step-1.is-cue-lit .rsvp-attend {
-  animation: rsvp-attend-block-pink 1.6s ease-out 1;
-}
-
-.rsvp-step-1.is-cue-lit .keycap-yes,
-.rsvp-step-1.is-cue-lit .keycap-no {
-  border-color: #ff39c8;
-  color: #ff9adf;
-  text-shadow: none;
-  box-shadow: 0 0 0 1px rgba(255, 57, 200, 0.35);
-}
-
-@keyframes rsvp-attend-ask-pink {
-  0%,
-  100% {
-    color: inherit;
-    filter: brightness(1);
-  }
-  35% {
-    color: #ff9adf;
-    filter: brightness(1.06);
-  }
-}
-
-@keyframes rsvp-attend-block-pink {
-  0%,
-  100% {
-    filter: brightness(1);
-  }
-  35% {
-    filter: brightness(1.05);
-  }
-}
-
 .phone-prop {
   position: relative;
   display: block;
@@ -838,8 +799,6 @@
   .lineup-neon,
   .lineup-pill,
   .phone-prop,
-  .rsvp-step-1.is-cue-lit .rsvp-ask,
-  .rsvp-step-1.is-cue-lit .rsvp-attend,
   .icon-shake {
     animation: none !important;
   }

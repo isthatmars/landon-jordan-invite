@@ -7,70 +7,12 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { crtScreen, crtScreenFill } from "@/lib/cutouts";
 import { useLiveFlag } from "@/lib/useLiveFlag";
-import { TapHand } from "./icons";
 import { usePlayback } from "./Playback";
 import { YoutubeScreen } from "./YoutubeScreen";
 import { YoutubeThumb } from "./YoutubeThumb";
-
-/** Once-per-session dismiss for the Watch remote tap guidance. */
-const WATCH_REMOTE_CUES_KEY = "lj-watch-remote-cues";
-
-function readRemoteCueDismissed() {
-  try {
-    return sessionStorage.getItem(WATCH_REMOTE_CUES_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function writeRemoteCueDismissed() {
-  try {
-    sessionStorage.setItem(WATCH_REMOTE_CUES_KEY, "1");
-  } catch {
-    /* private mode / blocked storage */
-  }
-}
-
-/** Start dismissed to match SSR; hydrate from sessionStorage on subscribe. */
-let remoteCueDismissedStore = true;
-let remoteCueHydrated = false;
-const remoteCueListeners = new Set<() => void>();
-
-function subscribeRemoteCue(onStoreChange: () => void) {
-  remoteCueListeners.add(onStoreChange);
-  if (!remoteCueHydrated) {
-    remoteCueHydrated = true;
-    const next = readRemoteCueDismissed();
-    if (next !== remoteCueDismissedStore) {
-      remoteCueDismissedStore = next;
-      queueMicrotask(() => {
-        remoteCueListeners.forEach((listener) => listener());
-      });
-    }
-  }
-  return () => {
-    remoteCueListeners.delete(onStoreChange);
-  };
-}
-
-function getRemoteCueSnapshot() {
-  return remoteCueDismissedStore;
-}
-
-/** SSR / first paint: treat as dismissed so the cue never flashes wrong. */
-function getRemoteCueServerSnapshot() {
-  return true;
-}
-
-function dismissRemoteCueStore() {
-  if (remoteCueDismissedStore) return;
-  remoteCueDismissedStore = true;
-  writeRemoteCueDismissed();
-  remoteCueListeners.forEach((listener) => listener());
-}
 
 type RemoteAction =
   | "play"
@@ -138,12 +80,6 @@ export function Watch({ headline }: { headline: string }) {
   const reduceMotion = useReducedMotion();
   const watchLive = useLiveFlag("liveWatch");
   const [desktopMotion, setDesktopMotion] = useState(false);
-  const remoteCueDismissed = useSyncExternalStore(
-    subscribeRemoteCue,
-    getRemoteCueSnapshot,
-    getRemoteCueServerSnapshot,
-  );
-  const showRemoteCue = watchLive && !remoteCueDismissed;
 
   /* CRT channel switch: quick snow (≤1s), then clear as the new video plays underneath. */
   useEffect(() => {
@@ -232,7 +168,6 @@ export function Watch({ headline }: { headline: string }) {
   };
 
   const onRemoteAction = (action: RemoteAction) => {
-    dismissRemoteCueStore();
     if (action === "play") {
       toggleCurrent();
       return;
@@ -355,7 +290,7 @@ export function Watch({ headline }: { headline: string }) {
           />
           <div className="watch-remote-rail">
             <motion.div
-              className={`watch-remote${showRemoteCue ? " is-guiding" : ""}`}
+              className="watch-remote"
               style={remoteMotionOn ? { x: remoteX } : undefined}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -371,20 +306,9 @@ export function Watch({ headline }: { headline: string }) {
                     aria-label={spot.label}
                     aria-pressed={spot.action === "mute" ? muted : undefined}
                     onClick={() => onRemoteAction(spot.action)}
-                  >
-                    {showRemoteCue && spot.id === "pause" ? (
-                      <span className="watch-remote-tap-cue" aria-hidden>
-                        <TapHand className="watch-remote-tap-hand" />
-                      </span>
-                    ) : null}
-                  </button>
+                  />
                 ))}
               </div>
-              {showRemoteCue ? (
-                <p className="watch-remote-hint" role="status">
-                  Tap the remote
-                </p>
-              ) : null}
             </motion.div>
           </div>
         </div>

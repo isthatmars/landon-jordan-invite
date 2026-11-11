@@ -1,7 +1,6 @@
 "use client";
 
 import type { Track } from "@/lib/types";
-import { TapHand } from "./icons";
 
 /** Click target over one photographed case in the shared stack. */
 export function Cassette({
@@ -9,7 +8,6 @@ export function Cassette({
   label,
   selected,
   inserting,
-  showTapCue = false,
   onSelect,
   top,
   height,
@@ -20,7 +18,6 @@ export function Cassette({
   label: string;
   selected: boolean;
   inserting: boolean;
-  showTapCue?: boolean;
   onSelect: () => void;
   top: string;
   height: string;
@@ -42,11 +39,6 @@ export function Cassette({
       <span className="mix-tape-ink" style={{ top: labelTop, height: labelHeight }}>
         <span className="mix-tape-ink-text">{label}</span>
       </span>
-      {showTapCue ? (
-        <span className="mix-tap-cue mix-tap-cue-tape" aria-hidden>
-          <TapHand className="mix-tap-cue-hand" />
-        </span>
-      ) : null}
     </button>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Cassette } from "./Cassette";
-import { NeonArrow, TapHand } from "./icons";
+import { NeonArrow } from "./icons";
 import { usePlayback } from "./Playback";
 
 /** Spine ink boxes measured against colored bands in cassette-stack-cut.png. */
@@ -21,8 +21,6 @@ const STACK: {
   { id: "t6", label: "Miami Sound Machine – Conga", top: "66.3%", height: "15.7%", labelTop: "15.9%", labelHeight: "68.2%" },
   { id: "t7", label: "Prince – Purple Rain", top: "82.0%", height: "18%", labelTop: "12.8%", labelHeight: "58.3%" },
 ];
-
-const MIX_CUES_KEY = "lj-mix-cues";
 
 function TransportIcon({ name }: { name: "back" | "play" | "pause" | "forward" | "stop" }) {
   const common = {
@@ -78,32 +76,12 @@ export function Mixtape({ headline }: { headline: string }) {
     x: string;
     y: string;
   } | null>(null);
-  /** Gentle once-per-session tap cues while the mixtape plate is live. */
-  const [cuesOn, setCuesOn] = useState(false);
-  const cuesArmedRef = useRef(false);
-  const dismissTimerRef = useRef<number | null>(null);
   const byId = new Map(tracks.map((track) => [track.id, track]));
   const stack = STACK.flatMap((row) => {
     const track = byId.get(row.id);
     return track ? [{ ...row, track }] : [];
   });
   const loadedId = now?.trackId ?? "";
-  const cueTapeId = stack.find((row) => row.id !== loadedId)?.id ?? stack[0]?.id ?? "";
-
-  const dismissCues = () => {
-    if (!cuesArmedRef.current) return;
-    cuesArmedRef.current = false;
-    setCuesOn(false);
-    if (dismissTimerRef.current != null) {
-      window.clearTimeout(dismissTimerRef.current);
-      dismissTimerRef.current = null;
-    }
-    try {
-      sessionStorage.setItem(MIX_CUES_KEY, "1");
-    } catch {
-      /* private mode */
-    }
-  };
 
   useEffect(() => {
     if (!insertingId) return;
@@ -130,62 +108,6 @@ export function Mixtape({ headline }: { headline: string }) {
     return () => window.cancelAnimationFrame(id);
   }, [insertingId]);
 
-  useEffect(() => {
-    try {
-      if (sessionStorage.getItem(MIX_CUES_KEY) === "1") return;
-    } catch {
-      /* private mode — still show cues once this visit */
-    }
-
-    const root = document.documentElement;
-    const section = document.getElementById("mixtape");
-    if (!section) return;
-
-    let plateTapBound = false;
-    const onPlateTap = () => dismissCues();
-
-    const sync = () => {
-      if (!cuesArmedRef.current) return;
-      setCuesOn(root.dataset.liveMixtape === "1");
-    };
-
-    cuesArmedRef.current = true;
-    sync();
-
-    const mo = new MutationObserver(sync);
-    mo.observe(root, { attributes: true, attributeFilter: ["data-live-mixtape"] });
-
-    // Reinforce live detection when the plate scrolls into view.
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) sync();
-      },
-      { threshold: 0.28, rootMargin: "0px 0px -8% 0px" },
-    );
-    io.observe(section);
-
-    // After a short beat, the next tap anywhere on the plate dismisses cues.
-    dismissTimerRef.current = window.setTimeout(() => {
-      section.addEventListener("pointerdown", onPlateTap, { passive: true });
-      plateTapBound = true;
-      dismissTimerRef.current = null;
-    }, 4200);
-
-    // Soft fallback so cues don't linger forever if the guest never taps.
-    const expire = window.setTimeout(() => dismissCues(), 14000);
-
-    return () => {
-      mo.disconnect();
-      io.disconnect();
-      window.clearTimeout(expire);
-      if (dismissTimerRef.current != null) {
-        window.clearTimeout(dismissTimerRef.current);
-        dismissTimerRef.current = null;
-      }
-      if (plateTapBound) section.removeEventListener("pointerdown", onPlateTap);
-    };
-  }, []);
-
   const [lead, ...rest] = headline.split(/ and /i);
   const script = rest.length ? (
     <>
@@ -198,12 +120,7 @@ export function Mixtape({ headline }: { headline: string }) {
   );
 
   return (
-    <section
-      id="mixtape"
-      data-track-id={loadedId}
-      data-mix-cues={cuesOn ? "1" : "0"}
-      className="mix-scene scene-section"
-    >
+    <section id="mixtape" data-track-id={loadedId} className="mix-scene scene-section">
       {/* Floor plate is clipped here so scale/nudge cannot bleed over #home. */}
       <div className="mix-floor" aria-hidden>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -275,10 +192,7 @@ export function Mixtape({ headline }: { headline: string }) {
                 type="button"
                 className="mix-key"
                 aria-label="Previous tape"
-                onClick={() => {
-                  dismissCues();
-                  stepTape(-1);
-                }}
+                onClick={() => stepTape(-1)}
               >
                 <TransportIcon name="back" />
               </button>
@@ -288,7 +202,6 @@ export function Mixtape({ headline }: { headline: string }) {
                 aria-label="Play the tape"
                 aria-pressed={playing}
                 onClick={() => {
-                  dismissCues();
                   if (!playing) toggleDeck();
                 }}
               >
@@ -296,46 +209,24 @@ export function Mixtape({ headline }: { headline: string }) {
               </button>
               <button
                 type="button"
-                className={`mix-key mix-key--guide${!playing && engaged ? " is-down" : ""}`}
+                className={`mix-key${!playing && engaged ? " is-down" : ""}`}
                 aria-label="Pause the tape"
                 aria-pressed={!playing && engaged}
                 onClick={() => {
-                  dismissCues();
                   if (playing) toggleDeck();
                 }}
               >
                 <TransportIcon name="pause" />
-                {cuesOn ? (
-                  <span className="mix-tap-cue mix-tap-cue-pause" aria-hidden>
-                    <TapHand className="mix-tap-cue-hand" />
-                  </span>
-                ) : null}
-              </button>
-              <button
-                type="button"
-                className="mix-key mix-key--guide"
-                aria-label="Next tape"
-                onClick={() => {
-                  dismissCues();
-                  stepTape(1);
-                }}
-              >
-                <TransportIcon name="forward" />
-                {cuesOn ? (
-                  <span className="mix-tap-cue mix-tap-cue-forward" aria-hidden>
-                    <TapHand className="mix-tap-cue-hand" />
-                  </span>
-                ) : null}
               </button>
               <button
                 type="button"
                 className="mix-key"
-                aria-label="Stop the tape"
-                onClick={() => {
-                  dismissCues();
-                  stop();
-                }}
+                aria-label="Next tape"
+                onClick={() => stepTape(1)}
               >
+                <TransportIcon name="forward" />
+              </button>
+              <button type="button" className="mix-key" aria-label="Stop the tape" onClick={stop}>
                 <TransportIcon name="stop" />
               </button>
             </div>
@@ -396,11 +287,7 @@ export function Mixtape({ headline }: { headline: string }) {
                 labelHeight={row.labelHeight}
                 selected={row.id === loadedId}
                 inserting={insertingId === row.id}
-                showTapCue={cuesOn && row.id === cueTapeId}
-                onSelect={() => {
-                  dismissCues();
-                  selectTape(row.id);
-                }}
+                onSelect={() => selectTape(row.id)}
               />
             ))}
           </div>

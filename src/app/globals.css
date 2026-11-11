@@ -3356,7 +3356,6 @@ main {
   gap: 2.4%;
   padding: 0.35% 0.45%;
   border-radius: 3px;
-  overflow: visible;
   background:
     linear-gradient(180deg, rgba(20, 12, 18, 0.55), rgba(8, 4, 10, 0.72));
   box-shadow:
@@ -3374,14 +3373,13 @@ main {
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid rgba(255, 180, 230, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.34);
   border-radius: 2px 2px 3px 3px;
   color: #1a1520;
   cursor: pointer;
-  --mix-key-glow: 0.55;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.18) 28%, transparent 48%),
-    linear-gradient(90deg, rgba(255, 80, 180, 0.18), transparent 40%, rgba(255, 80, 180, 0.12)),
+    linear-gradient(90deg, rgba(255, 80, 180, 0.12), transparent 40%, rgba(255, 80, 180, 0.08)),
     linear-gradient(180deg, #f4f0f6 0%, #cfc6d4 42%, #9e93a8 78%, #7a7084 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.85),
@@ -3389,9 +3387,7 @@ main {
     inset 1px 0 0 rgba(255, 255, 255, 0.28),
     inset -1px 0 0 rgba(30, 10, 35, 0.18),
     0 3px 0 #2a1828,
-    0 5px 8px rgba(0, 0, 0, 0.38),
-    0 0 calc(6px * var(--mix-key-glow)) rgba(255, 57, 200, calc(0.28 * var(--mix-key-glow))),
-    0 0 calc(14px * var(--mix-key-glow)) rgba(255, 57, 200, calc(0.16 * var(--mix-key-glow)));
+    0 5px 8px rgba(0, 0, 0, 0.38);
   transform: translateY(0) scale(1);
   transform-origin: center bottom;
   transition:
@@ -3413,32 +3409,6 @@ main {
   pointer-events: none;
 }
 
-/* Soft halo — always-on when the mixtape plate is live so keys read as tappable. */
-html[data-live-mixtape="1"] #mixtape .mix-key::after {
-  content: "";
-  position: absolute;
-  inset: -22%;
-  z-index: -1;
-  border-radius: 4px;
-  pointer-events: none;
-  background: radial-gradient(
-    circle at center,
-    rgba(255, 57, 200, calc(0.28 * var(--mix-key-glow))) 0%,
-    rgba(255, 120, 210, calc(0.12 * var(--mix-key-glow))) 45%,
-    transparent 72%
-  );
-  box-shadow:
-    0 0 calc(4px * var(--mix-key-glow)) rgba(255, 255, 255, calc(0.25 * var(--mix-key-glow))),
-    0 0 calc(10px * var(--mix-key-glow)) rgba(255, 57, 200, calc(0.55 * var(--mix-key-glow))),
-    0 0 calc(18px * var(--mix-key-glow)) rgba(255, 57, 200, calc(0.28 * var(--mix-key-glow)));
-  opacity: 0.85;
-}
-
-html[data-live-mixtape="1"] #mixtape .mix-key {
-  --mix-key-glow: 0.85;
-  border-color: rgba(255, 150, 220, 0.72);
-}
-
 .mix-key-icon {
   width: 55%;
   height: 55%;
@@ -3448,208 +3418,19 @@ html[data-live-mixtape="1"] #mixtape .mix-key {
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
 }
 
-/* Neon tap/hand cues — once-per-session guidance on pause, next, + a cassette. */
-.mix-tap-cue {
-  position: absolute;
-  z-index: 9;
-  display: grid;
-  place-items: center;
-  width: 1.85rem;
-  height: 1.85rem;
-  pointer-events: none;
-  color: #ff39c8;
-  filter:
-    drop-shadow(0 0 4px rgba(255, 255, 255, 0.55))
-    drop-shadow(0 0 10px rgba(255, 57, 200, 0.85));
-  opacity: 0;
-  transform: translate3d(0, 4px, 0) scale(0.92);
-  transition:
-    opacity 0.35s ease,
-    transform 0.35s ease;
-}
-
-#mixtape[data-mix-cues="1"] .mix-tap-cue {
-  opacity: 1;
-  transform: none;
-}
-
-/* Cue session: light the whole transport row so hotspots scream “tap me”. */
-#mixtape[data-mix-cues="1"] .mix-key {
-  --mix-key-glow: 1.15;
-  border-color: rgba(255, 180, 235, 0.95);
-  z-index: 1;
-}
-
-#mixtape[data-mix-cues="1"] .mix-key--guide {
-  --mix-key-glow: 1.45;
-  border-color: #ff9de0;
-  filter: brightness(1.06);
-}
-
-#mixtape[data-mix-cues="1"] .mix-keys {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
-    0 0 10px rgba(255, 57, 200, 0.35),
-    0 0 22px rgba(255, 57, 200, 0.22);
-}
-
-.mix-tap-cue-hand {
-  width: 100%;
-  height: 100%;
-}
-
-.mix-tap-cue-pause {
-  right: -0.15rem;
-  bottom: -0.95rem;
-}
-
-.mix-tap-cue-forward {
-  right: -0.2rem;
-  top: -1.05rem;
-}
-
-.mix-tap-cue-tape {
-  right: 4%;
-  top: 52%;
-  width: 2.15rem;
-  height: 2.15rem;
-  translate: 0 -50%;
-}
-
-@media (max-width: 767px) {
-  .mix-tap-cue-pause {
-    right: 0.05rem;
-    bottom: -0.55rem;
-    width: 2rem;
-    height: 2rem;
-  }
-
-  .mix-tap-cue-forward {
-    right: 0.05rem;
-    top: -0.7rem;
-    width: 2rem;
-    height: 2rem;
-  }
-
-  .mix-tap-cue-tape {
-    width: 2rem;
-    height: 2rem;
-    right: 6%;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  html[data-live-mixtape="1"] #mixtape .mix-key::after {
-    animation: mix-key-glow-breathe 2.6s ease-in-out infinite;
-  }
-
-  html[data-live-mixtape="1"] #mixtape .mix-key:nth-child(2)::after {
-    animation-delay: 0.2s;
-  }
-
-  html[data-live-mixtape="1"] #mixtape .mix-key:nth-child(3)::after,
-  html[data-live-mixtape="1"] #mixtape .mix-key:nth-child(4)::after {
-    animation-delay: 0.45s;
-  }
-
-  html[data-live-mixtape="1"] #mixtape .mix-key:nth-child(5)::after {
-    animation-delay: 0.7s;
-  }
-
-  #mixtape[data-mix-cues="1"] .mix-key::after {
-    animation-duration: 1.7s;
-  }
-
-  #mixtape[data-mix-cues="1"] .mix-tap-cue-hand {
-    animation: mix-tap-bounce 1.7s ease-in-out infinite;
-  }
-
-  #mixtape[data-mix-cues="1"] .mix-tap-cue-pause,
-  #mixtape[data-mix-cues="1"] .mix-tap-cue-forward {
-    animation: mix-tap-glow 1.7s ease-in-out infinite;
-  }
-
-  #mixtape[data-mix-cues="1"] .mix-tap-cue-forward .mix-tap-cue-hand {
-    animation-delay: 0.35s;
-  }
-}
-
-@keyframes mix-key-glow-breathe {
-  0%,
-  100% {
-    --mix-key-glow: 0.72;
-    opacity: 0.72;
-  }
-  50% {
-    --mix-key-glow: 1.28;
-    opacity: 1;
-  }
-}
-
-@keyframes mix-tap-bounce {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 0.78;
-  }
-  45% {
-    transform: translate3d(0, 5px, 0) scale(1.06);
-    opacity: 1;
-  }
-  70% {
-    transform: translate3d(0, 1px, 0) scale(1.02);
-    opacity: 0.92;
-  }
-}
-
-@keyframes mix-tap-glow {
-  0%,
-  100% {
-    filter:
-      drop-shadow(0 0 3px rgba(255, 255, 255, 0.4))
-      drop-shadow(0 0 8px rgba(255, 57, 200, 0.65));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))
-      drop-shadow(0 0 14px rgba(255, 57, 200, 0.95));
-  }
-}
-
-/* Hide cues when the plate is covered / not live (also pauses via cinematic.css). */
-html[data-live-mixtape="0"] #mixtape .mix-tap-cue,
-html[data-page-hidden="1"] #mixtape .mix-tap-cue {
-  opacity: 0 !important;
-  visibility: hidden;
-}
-
-html[data-live-mixtape="0"] #mixtape .mix-key {
-  --mix-key-glow: 0.22;
-  border-color: rgba(255, 255, 255, 0.34);
-}
-
-html[data-live-mixtape="0"] #mixtape .mix-key::after,
-html[data-page-hidden="1"] #mixtape .mix-key::after {
-  opacity: 0 !important;
-  animation: none !important;
-}
-
 .mix-key:hover,
 .mix-key:focus-visible {
   outline: none;
-  z-index: 2;
-  --mix-key-glow: 1.35;
-  border-color: rgba(255, 210, 245, 0.95);
-  filter: brightness(1.12);
+  z-index: 1;
+  border-color: rgba(255, 240, 250, 0.7);
+  filter: brightness(1.08);
   transform: translateY(-18%) scale(1.12);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     inset 0 -2px 0 rgba(40, 20, 45, 0.3),
     0 6px 0 #241018,
     0 10px 14px rgba(0, 0, 0, 0.42),
-    0 0 12px rgba(255, 120, 210, 0.55),
-    0 0 22px rgba(255, 57, 200, 0.4);
+    0 0 10px rgba(255, 120, 210, 0.28);
 }
 
 .mix-key.is-down,
@@ -4720,170 +4501,6 @@ html[data-page-hidden="1"] #mixtape .mix-key::after {
   background: rgba(198, 255, 0, 0.22);
 }
 
-/* Soft neon pulse on actionable remote keys until the first tap. */
-@property --remote-glow {
-  syntax: "<number>";
-  inherits: false;
-  initial-value: 1;
-}
-
-@keyframes watch-remote-glow-breathe {
-  0%,
-  100% {
-    --remote-glow: 0.72;
-  }
-  50% {
-    --remote-glow: 1.22;
-  }
-}
-
-@keyframes watch-remote-tap-bob {
-  0%,
-  100% {
-    transform: translate(-35%, -110%) scale(1);
-  }
-  50% {
-    transform: translate(-35%, -124%) scale(1.05);
-  }
-}
-
-@keyframes watch-remote-hint-fade {
-  0%,
-  100% {
-    opacity: 0.72;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.watch-remote.is-guiding .watch-remote-btn::after {
-  content: "";
-  position: absolute;
-  inset: -18%;
-  border-radius: 999px;
-  pointer-events: none;
-  --remote-glow: 1;
-  background: radial-gradient(
-    circle at center,
-    rgba(198, 255, 0, calc(0.22 * var(--remote-glow))) 0%,
-    rgba(56, 217, 255, calc(0.12 * var(--remote-glow))) 42%,
-    transparent 72%
-  );
-  box-shadow:
-    0 0 calc(4px * var(--remote-glow)) rgba(198, 255, 0, calc(0.55 * var(--remote-glow))),
-    0 0 calc(12px * var(--remote-glow)) rgba(56, 217, 255, calc(0.4 * var(--remote-glow))),
-    0 0 calc(22px * var(--remote-glow)) rgba(255, 57, 200, calc(0.22 * var(--remote-glow)));
-}
-
-.watch-remote.is-guiding .watch-remote-btn--pause::after,
-.watch-remote.is-guiding .watch-remote-btn--ch1::after,
-.watch-remote.is-guiding .watch-remote-btn--dpad-up::after,
-.watch-remote.is-guiding .watch-remote-btn--dpad-down::after,
-.watch-remote.is-guiding .watch-remote-btn--dpad-left::after,
-.watch-remote.is-guiding .watch-remote-btn--dpad-right::after {
-  inset: -28%;
-  background: radial-gradient(
-    circle at center,
-    rgba(198, 255, 0, calc(0.34 * var(--remote-glow))) 0%,
-    rgba(56, 217, 255, calc(0.18 * var(--remote-glow))) 48%,
-    transparent 74%
-  );
-  box-shadow:
-    0 0 calc(5px * var(--remote-glow)) rgba(255, 255, 255, calc(0.35 * var(--remote-glow))),
-    0 0 calc(10px * var(--remote-glow)) rgba(198, 255, 0, calc(0.7 * var(--remote-glow))),
-    0 0 calc(20px * var(--remote-glow)) rgba(56, 217, 255, calc(0.45 * var(--remote-glow)));
-}
-
-.watch-remote-tap-cue {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  width: 2.4rem;
-  height: 2.4rem;
-  pointer-events: none;
-  color: #c6ff00;
-  filter: drop-shadow(0 0 6px rgba(198, 255, 0, 0.75)) drop-shadow(0 0 14px rgba(56, 217, 255, 0.45));
-  transform: translate(-35%, -110%);
-}
-
-.watch-remote-tap-hand {
-  width: 100%;
-  height: 100%;
-}
-
-.watch-remote-hint {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 0.35rem);
-  z-index: 4;
-  margin: 0;
-  padding: 0.28rem 0.55rem;
-  border-radius: 999px;
-  border: 1px solid rgba(198, 255, 0, 0.45);
-  background: rgba(8, 6, 16, 0.78);
-  color: #e8ff9a;
-  font-family: var(--font-nav), sans-serif;
-  font-size: clamp(0.58rem, 1.5vw, 0.72rem);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  line-height: 1.2;
-  text-transform: uppercase;
-  white-space: nowrap;
-  pointer-events: none;
-  transform: translateX(-50%);
-  text-shadow: 0 0 8px rgba(198, 255, 0, 0.45);
-  box-shadow:
-    0 0 10px rgba(198, 255, 0, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.45);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .watch-remote.is-guiding .watch-remote-btn::after {
-    animation: watch-remote-glow-breathe 2.8s ease-in-out infinite;
-  }
-
-  .watch-remote.is-guiding .watch-remote-btn--pause::after {
-    animation-delay: 0s;
-  }
-
-  .watch-remote.is-guiding .watch-remote-btn--dpad-up::after,
-  .watch-remote.is-guiding .watch-remote-btn--dpad-left::after,
-  .watch-remote.is-guiding .watch-remote-btn--ch1::after {
-    animation-delay: 0.35s;
-  }
-
-  .watch-remote.is-guiding .watch-remote-btn--dpad-down::after,
-  .watch-remote.is-guiding .watch-remote-btn--dpad-right::after,
-  .watch-remote.is-guiding .watch-remote-btn--ch2::after {
-    animation-delay: 0.7s;
-  }
-
-  .watch-remote.is-guiding .watch-remote-tap-cue {
-    animation: watch-remote-tap-bob 1.8s ease-in-out infinite;
-  }
-
-  .watch-remote.is-guiding .watch-remote-hint {
-    animation: watch-remote-hint-fade 2.8s ease-in-out infinite;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .watch-remote.is-guiding .watch-remote-btn::after,
-  .watch-remote.is-guiding .watch-remote-tap-cue,
-  .watch-remote.is-guiding .watch-remote-hint {
-    animation: none !important;
-  }
-
-  .watch-remote.is-guiding .watch-remote-btn::after {
-    --remote-glow: 1;
-    opacity: 0.9;
-  }
-}
-
 @media (min-width: 1024px) {
   #watch {
     /* Title on top; CRT dominates; browse is a slim companion panel.
@@ -5382,32 +4999,8 @@ html[data-page-hidden="1"] #mixtape .mix-key::after {
   .mix-table-pool,
   .mix-palm img,
   .mix-bokeh,
-  .mix-shine,
-  .mix-tap-cue,
-  .mix-tap-cue-hand,
-  .mix-tap-cue-pause,
-  .mix-tap-cue-forward,
-  html[data-live-mixtape="1"] #mixtape .mix-key::after,
-  #mixtape[data-mix-cues="1"] .mix-key::after {
+  .mix-shine {
     animation: none !important;
-  }
-
-  html[data-live-mixtape="1"] #mixtape .mix-key::after {
-    --mix-key-glow: 1;
-    opacity: 0.9;
-  }
-
-  #mixtape[data-mix-cues="1"] .mix-key {
-    --mix-key-glow: 1.2;
-  }
-
-  #mixtape[data-mix-cues="1"] .mix-tap-cue {
-    opacity: 0.92;
-    transform: none;
-  }
-
-  #mixtape[data-mix-cues="1"] .mix-tap-cue-hand {
-    opacity: 0.9;
   }
 
   .mix-palm img {

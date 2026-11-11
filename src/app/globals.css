@@ -1368,7 +1368,8 @@ body {
 .site-header {
   position: fixed;
   inset: 0 0 auto 0;
-  z-index: 50;
+  /* Above sticky scene plates (1–7) and back-to-top (60); below envelope/game overlays. */
+  z-index: 65;
   min-height: 82px;
   background: transparent;
   border-bottom: 1px solid transparent;

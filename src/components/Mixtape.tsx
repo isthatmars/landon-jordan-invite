@@ -115,17 +115,20 @@ export function Mixtape({ headline }: { headline: string }) {
 
   return (
     <section id="mixtape" data-track-id={loadedId} className="mix-scene scene-section">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/images/scene-mixtape-plate.jpg" alt="" className="mix-plate" />
-      <div className="mix-atmosphere" aria-hidden>
-        <div className="mix-palm">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/scene-mixtape-plate.jpg" alt="" />
-        </div>
-        <div className="mix-bokeh-field">
-          <span className="mix-bokeh mix-bokeh-1" />
-          <span className="mix-bokeh mix-bokeh-2" />
-          <span className="mix-bokeh mix-bokeh-3" />
+      {/* Floor plate is clipped here so scale/nudge cannot bleed over #home. */}
+      <div className="mix-floor" aria-hidden>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/scene-mixtape-plate.jpg" alt="" className="mix-plate" />
+        <div className="mix-atmosphere">
+          <div className="mix-palm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/scene-mixtape-plate.jpg" alt="" />
+          </div>
+          <div className="mix-bokeh-field">
+            <span className="mix-bokeh mix-bokeh-1" />
+            <span className="mix-bokeh mix-bokeh-2" />
+            <span className="mix-bokeh mix-bokeh-3" />
+          </div>
         </div>
       </div>
       <div className="mix-neon-throw" aria-hidden />

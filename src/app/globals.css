@@ -541,16 +541,13 @@ main {
     box-shadow: 0 28px 56px rgba(0, 0, 0, 0.42);
   }
 
-  /* Clip home horizontally; mixtape keeps overflow-y open so boom/cassette
-     reflections can paint on the raised floor under the props. */
+  /* Clip both plates — mixtape floor scale must never paint over sticky #home. */
   #home {
-    overflow-x: clip;
-    overflow-y: clip;
+    overflow: clip;
   }
 
   #mixtape {
-    overflow-x: clip;
-    overflow-y: visible;
+    overflow: clip;
   }
 
   #lineup,
@@ -2252,15 +2249,23 @@ main {
 .mix-scene {
   position: relative;
   isolation: isolate;
-  /* Clip the scaled floor plate so it cannot bleed over #home or widen the page.
-     Neon titles live in .mix-stage above this crop. */
+  /* Scene clips as a safety net; .mix-floor is the hard clip for the scaled plate. */
   overflow: clip;
   background: #120612;
-  /* Raise the photographed floor plane UP to the propped boombox/cassettes
-     (do not drop the props). Landscape cover ignores object-position Y, so
-     zoom from the bottom, then nudge the plate up so reflective sheen meets feet. */
-  --mix-floor-scale: 1.55;
-  --mix-floor-nudge: 8%;
+  /* Moderate floor zoom — enough reflective sheen under boombox/cassettes
+     without escaping the mixtape container or covering #home. */
+  --mix-floor-scale: 1.22;
+  --mix-floor-nudge: 3%;
+}
+
+/* Hard clip layer for the scaled plate + atmosphere only (neon stage stays above). */
+.mix-floor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: clip;
+  pointer-events: none;
+  contain: paint;
 }
 
 .mix-plate {
@@ -2838,15 +2843,14 @@ main {
 
 @media (min-width: 768px) {
   .mix-scene {
-    --mix-floor-scale: 2.45;
-    --mix-floor-nudge: 23%;
-    /* Desktop can open Y for mirror contact under props; keep X clipped. */
-    overflow-x: clip;
-    overflow-y: visible;
+    /* Contained zoom — boombox feet meet floor sheen inside the scene box. */
+    --mix-floor-scale: 1.32;
+    --mix-floor-nudge: 5%;
+    overflow: clip;
   }
 
   .mix-plate {
-    /* Desktop props sit mid-high; lift the reflective table to their feet. */
+    /* Desktop props sit mid-high; bias crop to the reflective table edge. */
     object-position: 46% 100%;
     transform: translate3d(0, calc(-1 * var(--mix-floor-nudge)), 0) scale(var(--mix-floor-scale));
     transform-origin: center bottom;
@@ -3184,14 +3188,8 @@ main {
 #mixtape {
   padding-top: max(var(--header-clear), clamp(5.75rem, 10vw, 7rem));
   padding-bottom: var(--section-pad-bottom);
-  /* Contain scaled floor art so it never paints over the hero plate. */
-  overflow-x: clip;
-}
-
-@media (max-width: 1023px) {
-  #mixtape {
-    overflow: clip;
-  }
+  /* Always contain scaled floor art on both axes (desktop sticky included). */
+  overflow: clip;
 }
 
 #watch,

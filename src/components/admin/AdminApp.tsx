@@ -19,62 +19,52 @@ import type {
 } from "@/lib/types";
 
 type Tab = "rsvps" | "content" | "tracks" | "videos" | "email" | "reminders";
-type View = Tab | "home";
-type CardAccent = "pink" | "teal" | "gold" | "purple" | "green";
 
 const TABS: {
   id: Tab;
   label: string;
   explainer: string;
-  accent: CardAccent;
 }[] = [
   {
     id: "rsvps",
     label: "RSVPs",
-    accent: "pink",
     explainer:
-      "See who's coming, update guest responses, and resend confirmation emails.",
+      "See who said yes, maybe, or can’t make it. Change someone’s status or resend their confirmation email.",
   },
   {
     id: "content",
     label: "Content",
-    accent: "teal",
     explainer:
-      "Update invitation details, including the date, location, dress code, and headlines.",
+      "Edit the words on the invite — date, place, dress code, headlines. Save when you’re happy.",
   },
   {
     id: "tracks",
     label: "Mixtape",
-    accent: "gold",
     explainer:
-      "Add or update songs, artists, and audio files for the interactive boombox.",
+      "Add or update the songs that play on the invite. Artist, title, and the audio file path.",
   },
   {
     id: "videos",
     label: "Videos",
-    accent: "purple",
     explainer:
-      "Manage the music videos guests can watch, including titles, artists, and video links.",
+      "Manage the music videos guests can watch — titles, artists, and links or posters.",
   },
   {
     id: "email",
     label: "Email",
-    accent: "green",
     explainer:
-      "Write and send messages to all guests, confirmed attendees, or selected recipients.",
+      "Write a friendly note and email guests — everyone, just the ones coming, or people you checked in RSVPs.",
   },
   {
     id: "reminders",
     label: "Reminders",
-    accent: "pink",
     explainer:
-      "Preview and send prepared messages, including party reminders and incomplete RSVP follow-ups.",
+      "Browse the ready-made emails (party reminder, incomplete RSVPs, and more). Preview one, then send when you’re ready.",
   },
 ];
 
 export function AdminApp() {
-  const [view, setView] = useState<View>("home");
-  const tab = view === "home" ? null : view;
+  const [tab, setTab] = useState<Tab>("rsvps");
   const [rsvps, setRsvps] = useState<RsvpRecord[]>([]);
   const [content, setContent] = useState<SiteContent | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -231,62 +221,28 @@ export function AdminApp() {
     void load();
   };
 
-  const activeTab = tab ? TABS.find((t) => t.id === tab) : null;
-  const onHome = view === "home";
+  const activeTab = TABS.find((t) => t.id === tab) ?? TABS[0];
 
   return (
-    <div className="admin-control-room mx-auto max-w-6xl px-4 py-8 sm:py-10">
-      {onHome ? (
-        <header className="admin-dash-header mb-8 sm:mb-10">
-          <div className="admin-dash-intro">
-            <p className="admin-dash-crown" aria-hidden>
-              ♛
-            </p>
-            <h1 className="neon-script-lg admin-dash-hello">Hi Ms. Kathy!</h1>
-            <h2 className="admin-dash-welcome">Welcome to your control room!</h2>
-            <p className="admin-dash-lede">
-              Everything for Landon &amp; Jordan&apos;s party lives here. Use the tools below to
-              manage guests, update the invite, and keep everyone in the loop.
-            </p>
-          </div>
-          <div className="admin-brand-badge" aria-hidden>
-            <p className="admin-brand-kicker">Landon &amp; Jordan&apos;s</p>
-            <p className="admin-brand-pill">
-              <span className="admin-brand-line" />
-              <span className="admin-brand-label">Control Room</span>
-              <span className="admin-brand-line" />
-            </p>
-          </div>
-        </header>
-      ) : (
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <button
-              type="button"
-              className="admin-back-link"
-              onClick={() => setView("home")}
-            >
-              ← Control room
-            </button>
-            <h1 className="mt-2 text-2xl font-bold tracking-wide text-white">
-              {activeTab?.label}
-            </h1>
-            {activeTab && (
-              <p className="mt-1 max-w-2xl text-sm leading-relaxed text-violet-200">
-                {activeTab.explainer}
-              </p>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <a href="/" className="btn-pink-outline text-xs">
-              View invite
-            </a>
-            <button type="button" onClick={logout} className="btn-pink-outline text-xs">
-              Log out
-            </button>
-          </div>
-        </header>
-      )}
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div className="max-w-2xl">
+          <p className="text-neon-gold text-xl">♛</p>
+          <h1 className="neon-script-lg text-4xl sm:text-5xl">Hi Ms. Kathy!</h1>
+          <p className="mt-2 text-sm text-violet-200 leading-relaxed">
+            Everything for Landon &amp; Jordan’s party lives here. Tap a button below to get
+            started.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <a href="/" className="btn-pink-outline text-xs">
+            View invite
+          </a>
+          <button type="button" onClick={logout} className="btn-pink-outline text-xs">
+            Log out
+          </button>
+        </div>
+      </header>
 
       {toast && (
         <div
@@ -300,42 +256,25 @@ export function AdminApp() {
         </div>
       )}
 
-      {onHome && (
-        <>
-          <nav className="admin-card-grid" aria-label="Control room tools">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                className={`admin-tool-card admin-tool-card--${t.accent}`}
-                onClick={() => setView(t.id)}
-              >
-                <span className="admin-tool-card__icon" aria-hidden>
-                  <ToolIcon id={t.id} />
-                </span>
-                <span className="admin-tool-card__body">
-                  <span className="admin-tool-card__title">{t.label}</span>
-                  <span className="admin-tool-card__desc">{t.explainer}</span>
-                </span>
-                <span className="admin-tool-card__arrow" aria-hidden>
-                  →
-                </span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="admin-dash-actions">
-            <a href="/" className="admin-btn-invite">
-              <EyeIcon />
-              View invite
-            </a>
-            <button type="button" onClick={logout} className="admin-btn-logout">
-              <LogoutIcon />
-              Log out
-            </button>
-          </div>
-        </>
-      )}
+      <div className="mb-3 flex flex-wrap gap-2">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={`rounded-full px-4 py-2 text-xs tracking-widest font-bold border transition ${
+              tab === t.id
+                ? "border-neon-pink text-neon-pink shadow-[0_0_14px_#ff2bd650]"
+                : "border-white/15 text-violet-200 hover:border-neon-teal/50"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <p className="mb-6 text-sm text-violet-200 leading-relaxed max-w-3xl">
+        {activeTab.explainer}
+      </p>
 
       {tab === "rsvps" && (
         <section className="admin-panel p-5 overflow-x-auto">
@@ -657,7 +596,9 @@ export function AdminApp() {
 
       {tab === "reminders" && content && (
         <section className="admin-panel p-5 space-y-5">
-          <h2 className="text-lg font-bold">Email templates</h2>
+          <div>
+            <h2 className="text-lg font-bold">Email templates</h2>
+          </div>
 
           <div className="grid gap-3 lg:grid-cols-2">
             {EMAIL_TEMPLATES.map((tpl: EmailTemplate) => {
@@ -739,110 +680,6 @@ export function AdminApp() {
   );
 }
 
-function ToolIcon({ id }: { id: Tab }) {
-  const common = {
-    width: 40,
-    height: 40,
-    viewBox: "0 0 40 40",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    "aria-hidden": true as const,
-  };
-  switch (id) {
-    case "rsvps":
-      return (
-        <svg {...common}>
-          <rect x="9" y="6" width="22" height="28" rx="3" stroke="currentColor" strokeWidth="2" />
-          <path d="M14 14h12M14 20h12M14 26h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M26 25.5l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      );
-    case "content":
-      return (
-        <svg {...common}>
-          <rect x="8" y="9" width="24" height="22" rx="3" stroke="currentColor" strokeWidth="2" />
-          <path d="M8 15h24" stroke="currentColor" strokeWidth="2" />
-          <path d="M14 6v6M26 6v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <path d="M14 21h8M14 26h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      );
-    case "tracks":
-      return (
-        <svg {...common}>
-          <rect x="6" y="12" width="28" height="16" rx="3" stroke="currentColor" strokeWidth="2" />
-          <circle cx="14" cy="20" r="3.5" stroke="currentColor" strokeWidth="2" />
-          <circle cx="26" cy="20" r="3.5" stroke="currentColor" strokeWidth="2" />
-          <path d="M17.5 20h5" stroke="currentColor" strokeWidth="2" />
-          <path d="M10 12V10.5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2V12" stroke="currentColor" strokeWidth="2" />
-        </svg>
-      );
-    case "videos":
-      return (
-        <svg {...common}>
-          <rect x="7" y="12" width="26" height="16" rx="2.5" stroke="currentColor" strokeWidth="2" />
-          <path d="M14 12l-2-5M26 12l2-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <circle cx="14" cy="8" r="1.5" fill="currentColor" />
-          <circle cx="26" cy="8" r="1.5" fill="currentColor" />
-          <rect x="11" y="16" width="18" height="8" rx="1" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      );
-    case "email":
-      return (
-        <svg {...common}>
-          <rect x="6" y="11" width="28" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
-          <path d="M8 13.5L20 22 32 13.5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        </svg>
-      );
-    case "reminders":
-      return (
-        <svg {...common}>
-          <path
-            d="M20 6c-5 0-9 3.6-9 9v4.2l-2.4 3.6A1 1 0 0 0 9.4 25h21.2a1 1 0 0 0 .8-1.6L29 19.2V15c0-5.4-4-9-9-9Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-          <path d="M17 28a3 3 0 0 0 6 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
-
-function EyeIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}
-
-function LogoutIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M14 16l4-4-4-4M10 12h8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 function TapeColorSwatches({
   value,

@@ -5073,7 +5073,7 @@ form[data-step="1"] .rsvp-step-1 {
 .lineup-card-title {
   margin: 0;
   /* Force multi-word titles (incl. LET'S ROLL!) onto two centered lines. */
-  max-width: 7.5ch;
+  max-width: 4.75rem;
   color: #fff;
   font-family: var(--font-condensed), sans-serif;
   font-size: clamp(1.7rem, 1.2rem + 1.4vw, 2.35rem);

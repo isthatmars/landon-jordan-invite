@@ -9,6 +9,12 @@ import { Handwrite } from "./motion/Handwrite";
 import { IntroVeil } from "./motion/IntroVeil";
 import { CalendarIcon, ClockIcon, Crown, GreenSwoosh, PinIcon } from "./icons";
 
+declare global {
+  interface Window {
+    __ljIntroStart?: number;
+  }
+}
+
 function goRsvp(event: MouseEvent<HTMLAnchorElement>) {
   event.preventDefault();
   if (location.hash !== "#rsvp") {
@@ -118,9 +124,15 @@ export function Hero({ content }: { content: SiteContent }) {
   );
 }
 
+/** After last hero reveal beats (~2.08s + duration) — cue enters so attention lands here. */
+const SCROLL_CUE_AFTER_REVEAL_MS = 2450;
+/** Returning visit / intro already done — short beat so brand paints first. */
+const SCROLL_CUE_AFTER_DONE_MS = 900;
+
 /** Far-right scroll cue on #home — fades once past the hero (inverted BackToTop). */
 function HeroScrollCue() {
   const [visible, setVisible] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const hero = document.getElementById("home");
@@ -144,13 +156,58 @@ function HeroScrollCue() {
     };
   }, []);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let timer: number | undefined;
+
+    const arm = (delayMs: number) => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setReady(true), reduce ? 0 : delayMs);
+    };
+
+    const schedule = () => {
+      const intro = root.dataset.intro;
+      if (reduce) {
+        arm(0);
+        return;
+      }
+      if (intro === "reveal") {
+        const start = window.__ljIntroStart ?? Date.now();
+        arm(Math.max(0, SCROLL_CUE_AFTER_REVEAL_MS - (Date.now() - start)));
+        return;
+      }
+      if (intro === "done") {
+        // Full intro: keep the post-reveal beat even after data-intro flips to done.
+        // Returning visits (no __ljIntroStart): short delay so brand paints first.
+        const start = window.__ljIntroStart;
+        if (start) {
+          arm(Math.max(0, SCROLL_CUE_AFTER_REVEAL_MS - (Date.now() - start)));
+        } else {
+          arm(SCROLL_CUE_AFTER_DONE_MS);
+        }
+      }
+      // invite / opening — wait for reveal or done
+    };
+
+    schedule();
+    const observer = new MutationObserver(schedule);
+    observer.observe(root, { attributes: true, attributeFilter: ["data-intro"] });
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+    };
+  }, []);
+
+  const show = visible && ready;
+
   return (
     <a
       href="#mixtape"
-      className={`hero-scroll-cue${visible ? " is-visible" : ""}`}
+      className={`hero-scroll-cue${show ? " is-visible" : ""}`}
       aria-label="Scroll down to the mixtape"
-      tabIndex={visible ? 0 : -1}
-      aria-hidden={!visible}
+      tabIndex={show ? 0 : -1}
+      aria-hidden={!show}
       onClick={goMixtape}
     >
       <svg className="hero-scroll-cue-icon" viewBox="0 0 32 32" aria-hidden>

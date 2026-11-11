@@ -77,19 +77,24 @@ export function Arcade({ headline }: { headline: string }) {
               </button>
             )}
             {!overlay && running && (
-              <button type="button" className="btn-pink-outline arcade-start" onClick={() => setRunning(false)}>
-                <span className="arcade-start-pellets" aria-hidden>
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                CLOSE GAME
-                <span className="arcade-start-pellets arcade-start-pellets-end" aria-hidden>
-                  <i />
-                  <i />
-                  <i />
-                </span>
-              </button>
+              <div className="arcade-play-controls">
+                <p className="arcade-keys-cue" role="status">
+                  Use <span className="arcade-keys-cue-keys">← ↑ → ↓</span> arrow keys to move
+                </p>
+                <button type="button" className="btn-pink-outline arcade-start" onClick={() => setRunning(false)}>
+                  <span className="arcade-start-pellets" aria-hidden>
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  CLOSE GAME
+                  <span className="arcade-start-pellets arcade-start-pellets-end" aria-hidden>
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -108,7 +113,9 @@ export function Arcade({ headline }: { headline: string }) {
                 className="absolute z-[1] overflow-hidden bg-black"
                 style={arcadeScreen}
               >
-                {!overlay && <PacManGame running={running && arcadeLive} embed />}
+                {!overlay && (
+                  <PacManGame key={running ? "play" : "idle"} running={running && arcadeLive} embed />
+                )}
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

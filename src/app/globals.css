@@ -1837,6 +1837,21 @@ body {
   background: transparent;
   cursor: pointer;
   overflow: hidden;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform 0.18s ease;
+}
+
+.mix-tape:hover,
+.mix-tape:focus-visible {
+  outline: none;
+  z-index: 6;
+  transform: scale(1.06);
+}
+
+.mix-tape.is-on:hover,
+.mix-tape.is-on:focus-visible {
+  z-index: 7;
 }
 
 .mix-tape-ink {
@@ -2947,6 +2962,15 @@ body {
 
   .back-to-top {
     transform: none;
+  }
+
+  .mix-tape {
+    transition: none;
+  }
+
+  .mix-tape:hover,
+  .mix-tape:focus-visible {
+    transform: scale(1.03);
   }
 
   .btn-pink-outline:hover,

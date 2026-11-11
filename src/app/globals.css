@@ -3270,6 +3270,7 @@ form[data-step="3"] .rsvp-step-3 {
 .rsvp-ask {
   margin: 0 auto;
   max-width: 26rem;
+  padding-bottom: 0.85rem;
   color: rgba(255, 255, 255, 0.92);
   font-family: var(--font-nav), sans-serif;
   font-size: clamp(1.35rem, 1rem + 1.5vw, 2.05rem);

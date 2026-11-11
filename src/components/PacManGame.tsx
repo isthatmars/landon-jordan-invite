@@ -64,12 +64,15 @@ export function PacManGame({
   running,
   embed = false,
   showPad = false,
+  sessionActive = false,
   startHintDone = false,
   onStartHintDone,
 }: {
   running: boolean;
   embed?: boolean;
   showPad?: boolean;
+  /** Arcade Start Game session (ignores arcadeLive flicker). */
+  sessionActive?: boolean;
   /** Parent-owned: once true, the embed start cue stays gone across remounts. */
   startHintDone?: boolean;
   onStartHintDone?: () => void;
@@ -384,7 +387,7 @@ export function PacManGame({
           RESTART GAME
         </button>
       )}
-      {running && showStartHint && phase === "play" ? (
+      {sessionActive && showStartHint && phase === "play" ? (
         <div className="pac-keys-hint" role="status">
           <p className="pac-keys-hint-title">Press arrow key to start</p>
           <p className="pac-keys-hint-keys" aria-hidden>

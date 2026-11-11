@@ -134,6 +134,7 @@ export function Arcade({ headline }: { headline: string }) {
                   <PacManGame
                     key={running ? "play" : "idle"}
                     running={running && arcadeLive}
+                    sessionActive={running}
                     embed
                     startHintDone={pacStartHintDone}
                     onStartHintDone={() => setPacStartHintDone(true)}

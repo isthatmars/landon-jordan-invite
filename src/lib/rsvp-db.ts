@@ -28,7 +28,7 @@ type DbRsvp = {
   abandoned: boolean;
   created_at: string;
   updated_at: string;
-  rsvp_people?: { first_name: string; last_name: string; sort_order: number }[];
+  rsvp_people?: { first_name: string; last_name: string; age?: string | null; sort_order: number }[];
 };
 
 function supabaseConfig(): { url: string; key: string } | null {
@@ -90,7 +90,11 @@ export function recordToRow(record: RsvpRecord): DbRsvp {
 export function rowToRecord(row: DbRsvp): RsvpRecord {
   const companions: PartyPerson[] = [...(row.rsvp_people || [])]
     .sort((a, b) => a.sort_order - b.sort_order)
-    .map((person) => ({ firstName: person.first_name, lastName: person.last_name }));
+    .map((person) => ({
+      firstName: person.first_name,
+      lastName: person.last_name,
+      age: person.age ? String(person.age) : "",
+    }));
   return {
     id: row.id,
     firstName: row.first_name,
@@ -118,7 +122,7 @@ export function rowToRecord(row: DbRsvp): RsvpRecord {
 
 export async function listRsvps(): Promise<RsvpRecord[]> {
   const rows = await rest<DbRsvp[]>(
-    "rsvps?select=*,rsvp_people(first_name,last_name,sort_order)&order=updated_at.desc",
+    "rsvps?select=*,rsvp_people(first_name,last_name,age,sort_order)&order=updated_at.desc",
   );
   return (rows || []).map(rowToRecord);
 }
@@ -140,6 +144,7 @@ export async function saveRsvp(record: RsvpRecord): Promise<void> {
         rsvp_id: record.id,
         first_name: person.firstName,
         last_name: person.lastName,
+        age: person.age?.trim() || "",
         sort_order: index,
       })),
     ),

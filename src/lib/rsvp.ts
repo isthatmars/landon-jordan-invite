@@ -65,6 +65,8 @@ export function headcountFor(attend: AttendStatus, companions: PartyPerson[]): n
   return 1 + companions.length;
 }
 
+const AGE_MAX = 40;
+
 function readCompanions(
   input: unknown,
   strict: boolean,
@@ -87,18 +89,19 @@ function readCompanions(
       }
       continue;
     }
-    const row = raw as { firstName?: unknown; lastName?: unknown };
+    const row = raw as { firstName?: unknown; lastName?: unknown; age?: unknown };
     const firstName = clip(row.firstName, NAME_MAX);
     const lastName = clip(row.lastName, NAME_MAX);
-    if (!firstName && !lastName) continue;
+    const age = clip(row.age, AGE_MAX);
+    if (!firstName && !lastName && !age) continue;
     if (!firstName || !lastName) {
       if (strict) {
         return { ok: false, error: "Every adult and child needs a first and last name." };
       }
-      companions.push({ firstName, lastName });
+      companions.push({ firstName, lastName, age });
       continue;
     }
-    companions.push({ firstName, lastName });
+    companions.push({ firstName, lastName, age });
   }
   return { ok: true, value: companions };
 }
@@ -137,12 +140,11 @@ export function parseCompletedRsvp(body: unknown): ParseResult<CompletedRsvp> {
   if (coming) {
     if (!email) return { ok: false, error: "Add an email address so we can confirm your RSVP." };
     if (!looksLikeEmail(email)) return { ok: false, error: "That email doesn't look quite right." };
-    // Empty phone is fine. A partial number (anything short of 7 digits) is not.
-    if (phone && phoneDigits(phone) < 7) {
-      return {
-        ok: false,
-        error: "Enter a full phone number, or leave it blank.",
-      };
+    if (!phone) {
+      return { ok: false, error: "Add a phone number so we can reach you about the party." };
+    }
+    if (phoneDigits(phone) < 7) {
+      return { ok: false, error: "Enter a full phone number." };
     }
   } else if (email && !looksLikeEmail(email)) {
     return { ok: false, error: "That email doesn't look quite right." };

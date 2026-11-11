@@ -237,7 +237,12 @@ export function AdminApp() {
                     {r.companions?.length > 0 && (
                       <p className="text-xs text-violet-300">
                         {r.companions
-                          .map((person) => `${person.firstName} ${person.lastName}`.trim())
+                          .map((person) => {
+                            const name = `${person.firstName} ${person.lastName}`.trim();
+                            const age = person.age?.trim();
+                            if (!name) return "";
+                            return age ? `${name} (age ${age})` : name;
+                          })
                           .filter(Boolean)
                           .join(", ")}
                       </p>

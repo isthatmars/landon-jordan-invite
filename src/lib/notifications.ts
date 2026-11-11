@@ -318,22 +318,51 @@ export function neonEmailTemplate(opts: {
   bodyHtml: string;
   ctaLabel?: string;
   ctaUrl?: string;
+  eyebrow?: string;
 }): string {
+  const eyebrow = opts.eyebrow
+    ? `<p style="text-align:center;margin:0 0 10px;color:#c6ff00;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700">${opts.eyebrow}</p>`
+    : "";
   const cta =
     opts.ctaLabel && opts.ctaUrl
-      ? `<p style="text-align:center;margin:28px 0">
-          <a href="${opts.ctaUrl}" style="display:inline-block;padding:14px 28px;border-radius:999px;background:#39FF14;color:#0a0a0a;font-weight:800;text-decoration:none;box-shadow:0 0 18px #39FF14">${opts.ctaLabel}</a>
+      ? `<p style="text-align:center;margin:28px 0 8px">
+          <a href="${opts.ctaUrl}" style="display:inline-block;padding:14px 28px;border-radius:999px;border:2px solid #c6ff00;background:transparent;color:#c6ff00;font-weight:800;text-decoration:none;letter-spacing:0.06em;box-shadow:0 0 8px rgba(198,255,0,0.45),0 0 22px rgba(198,255,0,0.28)">${opts.ctaLabel}</a>
         </p>`
       : "";
-  return `<!DOCTYPE html><html><body style="margin:0;background:#0a0014;color:#fff;font-family:Helvetica,Arial,sans-serif">
-  <div style="max-width:560px;margin:0 auto;padding:32px 20px">
-    <div style="border:2px solid #ff2bd6;border-radius:16px;padding:28px;box-shadow:0 0 24px #ff2bd680;background:linear-gradient(180deg,#1a0530,#0a0014)">
-      <p style="text-align:center;color:#FFD700;font-size:22px;margin:0 0 8px">♛</p>
-      <h1 style="text-align:center;color:#ff2bd6;font-size:28px;margin:0 0 16px;text-shadow:0 0 12px #ff2bd6">${opts.headline}</h1>
-      <div style="color:#f3e8ff;line-height:1.55;font-size:15px">${opts.bodyHtml}</div>
+  return `<!DOCTYPE html><html><body style="margin:0;background:#07010f;color:#fff;font-family:Helvetica,Arial,sans-serif">
+  <div style="max-width:560px;margin:0 auto;padding:32px 20px;background:radial-gradient(ellipse at 50% 0%,rgba(120,40,180,0.35),transparent 55%),#07010f">
+    <div style="border:2px solid #ff2bd6;border-radius:18px;padding:30px 26px;box-shadow:0 0 18px rgba(255,43,214,0.45),0 0 40px rgba(255,43,214,0.18),inset 0 0 40px rgba(255,43,214,0.06);background:linear-gradient(165deg,#1a0530 0%,#120822 48%,#0a0014 100%)">
+      <p style="text-align:center;color:#FFD700;font-size:22px;margin:0 0 6px;text-shadow:0 0 12px rgba(255,215,0,0.55)">♛</p>
+      ${eyebrow}
+      <h1 style="text-align:center;color:#ff2bd6;font-size:26px;line-height:1.2;margin:0 0 18px;text-shadow:0 0 12px #ff2bd6,0 0 28px rgba(255,43,214,0.45)">${opts.headline}</h1>
+      <div style="color:#f3e8ff;line-height:1.6;font-size:15px">${opts.bodyHtml}</div>
       ${cta}
-      <p style="text-align:center;color:#9ca3af;font-size:12px;margin-top:24px">Landon &amp; Jordan's 80s Birthday Party</p>
+      <p style="text-align:center;color:#9ca3af;font-size:12px;margin:24px 0 0;letter-spacing:0.04em">Landon &amp; Jordan · 80s Birthday Party</p>
     </div>
   </div>
 </body></html>`;
+}
+
+/** Pretty door-list block for confirmation / owner emails. */
+export function namedPeopleEmailList(
+  people: { fullName?: string; firstName?: string; lastName?: string; age?: string }[],
+): string {
+  const names = people
+    .map((person) => {
+      const base =
+        (person.fullName || `${person.firstName || ""} ${person.lastName || ""}`.trim()).trim();
+      if (!base) return "";
+      const age = person.age?.trim();
+      return age ? `${base} (age ${age})` : base;
+    })
+    .filter(Boolean);
+  if (names.length === 0) {
+    return `<p style="margin:12px 0;color:#c4b5d8">No names on this RSVP yet.</p>`;
+  }
+  return `<ul style="margin:12px 0 16px;padding:12px 12px 12px 28px;border:1px solid rgba(255,43,214,0.35);border-radius:12px;background:rgba(255,43,214,0.07);list-style:disc">${names
+    .map(
+      (name) =>
+        `<li style="margin:0 0 6px;color:#fff">${escapeHtml(name)}</li>`,
+    )
+    .join("")}</ul>`;
 }

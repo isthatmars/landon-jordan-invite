@@ -8,6 +8,22 @@ import { RsvpTelephone } from "./RsvpTelephone";
 
 type YesNo = "" | "yes" | "no";
 
+/**
+ * Progressive screens after attend:
+ * attending → name → email → phone → dietary → children → (childEntry) → review
+ * declining → name → note → review
+ */
+type Screen =
+  | "attend"
+  | "name"
+  | "email"
+  | "phone"
+  | "dietary"
+  | "children"
+  | "childEntry"
+  | "declineNote"
+  | "review";
+
 interface FormState {
   firstName: string;
   lastName: string;
@@ -19,6 +35,8 @@ interface FormState {
   dietaryNotes: string;
   specialRequests: string;
 }
+
+const emptyPerson = (): PartyPerson => ({ firstName: "", lastName: "", age: "" });
 
 const emptyForm: FormState = {
   firstName: "",
@@ -49,6 +67,7 @@ function completedFrom(form: FormState) {
           .map((person) => ({
             firstName: person.firstName.trim(),
             lastName: person.lastName.trim(),
+            age: (person.age || "").trim(),
           }))
           .filter((person) => person.firstName || person.lastName)
       : [];
@@ -66,35 +85,11 @@ function completedFrom(form: FormState) {
   };
 }
 
-function detailError(form: FormState): string {
-  if (!form.firstName.trim() || !form.lastName.trim()) {
-    return "Add your first and last name.";
-  }
-  if (form.attend === "yes") {
-    if (!EMAIL_RE.test(form.email.trim())) {
-      return "Add an email address so we can confirm your RSVP.";
-    }
-    const digits = phoneDigits(form.phone);
-    if (form.phone.trim() && digits >= 1 && digits <= 6) {
-      return "Enter a full phone number, or leave it blank.";
-    }
-    if (form.phone.trim() && digits < 7) {
-      return "Enter a full phone number, or leave it blank.";
-    }
-    if (form.bringingChildren !== "yes" && form.bringingChildren !== "no") {
-      return "Let us know if you're bringing children.";
-    }
-    if (form.bringingChildren === "yes") {
-      if (form.companions.length === 0) {
-        return "Add each child with a first and last name.";
-      }
-      const incomplete = form.companions.some(
-        (person) => !person.firstName.trim() || !person.lastName.trim(),
-      );
-      if (incomplete) return "Every child needs a first and last name.";
-    }
-  }
-  return "";
+function childLabel(person: PartyPerson): string {
+  const name = `${person.firstName.trim()} ${person.lastName.trim()}`.trim();
+  const age = (person.age || "").trim();
+  if (!name) return "";
+  return age ? `${name} (age ${age})` : name;
 }
 
 export function RsvpForm({ content }: { content: SiteContent }) {
@@ -106,7 +101,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [step, setStep] = useState(1);
+  const [screen, setScreen] = useState<Screen>("attend");
   const [stepError, setStepError] = useState("");
   formRef.current = form;
 
@@ -116,6 +111,8 @@ export function RsvpForm({ content }: { content: SiteContent }) {
       ? form.companions.filter((person) => person.firstName.trim() && person.lastName.trim())
       : [];
   const headcount = attending ? 1 + namedKids.length : 0;
+  /** Keep data-step=1 for attend centering CSS; later screens share step 2+. */
+  const dataStep = screen === "attend" ? 1 : screen === "review" ? 3 : 2;
 
   const markStarted = () => {
     if (!startedAt.current) startedAt.current = new Date().toISOString();
@@ -150,12 +147,17 @@ export function RsvpForm({ content }: { content: SiteContent }) {
     setForm(next);
   };
 
+  const goTo = (next: Screen) => {
+    setStepError("");
+    setScreen(next);
+  };
+
   const chooseAttend = (attend: "yes" | "no") => {
     setStepError("");
     const next: FormState = { ...formRef.current, attend };
     formRef.current = next;
     setForm(next);
-    setStep(2);
+    goTo("name");
     void saveDraft("attend", next);
   };
 
@@ -163,18 +165,102 @@ export function RsvpForm({ content }: { content: SiteContent }) {
     const current = formRef.current;
     const companions =
       bringingChildren === "yes" && current.companions.length === 0
-        ? [{ firstName: "", lastName: "" }]
-        : current.companions;
+        ? [emptyPerson()]
+        : bringingChildren === "no"
+          ? []
+          : current.companions;
     const next = { ...current, bringingChildren, companions };
     formRef.current = next;
     setForm(next);
     void saveDraft("companions", next);
+    if (bringingChildren === "yes") goTo("childEntry");
+    else if (bringingChildren === "no") goTo("review");
+  };
+
+  const validateScreen = (current: FormState, now: Screen): string => {
+    if (now === "name") {
+      if (!current.firstName.trim() || !current.lastName.trim()) {
+        return "Add your first and last name.";
+      }
+    }
+    if (now === "email") {
+      if (!EMAIL_RE.test(current.email.trim())) {
+        return "Add an email address so we can confirm your RSVP.";
+      }
+    }
+    if (now === "phone") {
+      if (!current.phone.trim()) {
+        return "Add a phone number so we can reach you about the party.";
+      }
+      if (phoneDigits(current.phone) < 7) {
+        return "Enter a full phone number.";
+      }
+    }
+    if (now === "children") {
+      if (current.bringingChildren !== "yes" && current.bringingChildren !== "no") {
+        return "Let us know if you're bringing children.";
+      }
+    }
+    if (now === "childEntry") {
+      if (current.companions.length === 0) {
+        return "Add each child with a first and last name.";
+      }
+      const incomplete = current.companions.some(
+        (person) => !person.firstName.trim() || !person.lastName.trim(),
+      );
+      if (incomplete) return "Every child needs a first and last name. Age is optional.";
+    }
+    return "";
+  };
+
+  const nextAfter = (now: Screen, current: FormState): Screen | null => {
+    if (now === "name") return current.attend === "yes" ? "email" : "declineNote";
+    if (now === "email") return "phone";
+    if (now === "phone") return "dietary";
+    if (now === "dietary") return "children";
+    if (now === "children") {
+      return current.bringingChildren === "yes" ? "childEntry" : "review";
+    }
+    if (now === "childEntry") return "review";
+    if (now === "declineNote") return "review";
+    return null;
+  };
+
+  const backFrom = (now: Screen, current: FormState): Screen => {
+    if (now === "name") return "attend";
+    if (now === "email") return "name";
+    if (now === "phone") return "email";
+    if (now === "dietary") return "phone";
+    if (now === "children") return "dietary";
+    if (now === "childEntry") return "children";
+    if (now === "declineNote") return "name";
+    if (now === "review") {
+      if (current.attend !== "yes") return "declineNote";
+      if (current.bringingChildren === "yes") return "childEntry";
+      return "children";
+    }
+    return "attend";
+  };
+
+  const goNext = () => {
+    const current = formRef.current;
+    const problem = validateScreen(current, screen);
+    if (problem) {
+      setStepError(problem);
+      return;
+    }
+    const next = nextAfter(screen, current);
+    if (next) goTo(next);
+  };
+
+  const goBack = () => {
+    goTo(backFrom(screen, formRef.current));
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (savingRef.current || doneRef.current || status === "saving" || status === "done") return;
-    if (step !== 3) {
+    if (screen !== "review") {
       goNext();
       return;
     }
@@ -219,37 +305,11 @@ export function RsvpForm({ content }: { content: SiteContent }) {
     }
   };
 
-  const goNext = () => {
-    const current = formRef.current;
-    setStepError("");
-    if (step === 1) {
-      if (current.attend !== "yes" && current.attend !== "no") {
-        setStepError("Let us know if you are able to attend.");
-        return;
-      }
-      setStep(2);
-      return;
-    }
-    if (step === 2) {
-      const problem = detailError(current);
-      if (problem) {
-        setStepError(problem);
-        return;
-      }
-      setStep(3);
-    }
-  };
-
-  const goBack = () => {
-    setStepError("");
-    setStep((value) => Math.max(1, value - 1));
-  };
-
   const addCompanion = () => {
     if (form.companions.length >= MAX_COMPANIONS) return;
     const next = {
       ...formRef.current,
-      companions: [...formRef.current.companions, { firstName: "", lastName: "" }],
+      companions: [...formRef.current.companions, emptyPerson()],
     };
     formRef.current = next;
     setForm(next);
@@ -257,16 +317,21 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   };
 
   const removeCompanion = (index: number) => {
+    const remaining = formRef.current.companions.filter((_, i) => i !== index);
     const next = {
       ...formRef.current,
-      companions: formRef.current.companions.filter((_, i) => i !== index),
+      companions: remaining.length ? remaining : [emptyPerson()],
     };
     formRef.current = next;
     setForm(next);
     void saveDraft("companions", next);
   };
 
-  const setCompanion = (index: number, key: "firstName" | "lastName", value: string) => {
+  const setCompanion = (
+    index: number,
+    key: "firstName" | "lastName" | "age",
+    value: string,
+  ) => {
     const companions = formRef.current.companions.map((row, i) =>
       i === index ? { ...row, [key]: value } : row,
     );
@@ -283,37 +348,46 @@ export function RsvpForm({ content }: { content: SiteContent }) {
             <RsvpTelephone />
           </div>
 
-          <form id="rsvp-form" data-step={step} onSubmit={onSubmit} noValidate className="rsvp-steps space-y-4">
+          <form
+            id="rsvp-form"
+            data-step={dataStep}
+            data-screen={screen}
+            onSubmit={onSubmit}
+            noValidate
+            className="rsvp-steps space-y-4"
+          >
             <div className="rsvp-step rsvp-step-1 space-y-4">
-              <div className="rsvp-attend-block">
-              <p className="rsvp-ask">Are you able to attend?</p>
-              <div id="rsvp-attend" data-testid="rsvp-attend" className="rsvp-attend">
-                <ChoiceButton
-                  tone="yes"
-                  pressed={form.attend === "yes"}
-                  testId="rsvp-choice-yes"
-                  onClick={() => chooseAttend("yes")}
-                >
-                  Yes, I&apos;ll Be There!
-                </ChoiceButton>
-                <ChoiceButton
-                  tone="no"
-                  pressed={form.attend === "no"}
-                  testId="rsvp-choice-no"
-                  onClick={() => chooseAttend("no")}
-                >
-                  Sorry, I can&apos;t make it this time.
-                </ChoiceButton>
-              </div>
-              </div>
+              {screen === "attend" ? (
+                <div className="rsvp-attend-block">
+                  <p className="rsvp-ask">Are you able to attend?</p>
+                  <div id="rsvp-attend" data-testid="rsvp-attend" className="rsvp-attend">
+                    <ChoiceButton
+                      tone="yes"
+                      pressed={form.attend === "yes"}
+                      testId="rsvp-choice-yes"
+                      onClick={() => chooseAttend("yes")}
+                    >
+                      Yes, I&apos;ll Be There!
+                    </ChoiceButton>
+                    <ChoiceButton
+                      tone="no"
+                      pressed={form.attend === "no"}
+                      testId="rsvp-choice-no"
+                      onClick={() => chooseAttend("no")}
+                    >
+                      Sorry, I can&apos;t make it this time.
+                    </ChoiceButton>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
-            {/* Mount later steps only when active so autofill/focus can't scroll to #rsvp-first on load. */}
             <div className="rsvp-step rsvp-step-2 space-y-4">
-              {step === 2 && attending ? (
-                <div data-testid="rsvp-attending" className="space-y-4">
+              {screen === "name" ? (
+                <div data-testid="rsvp-step-name" className="space-y-4">
+                  <p className="rsvp-ask text-left sm:text-center">What&apos;s your name?</p>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="What's your first name? *">
+                    <Field label="First name *">
                       <input
                         id="rsvp-first"
                         required
@@ -325,7 +399,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                         onBlur={() => void saveDraft("firstName")}
                       />
                     </Field>
-                    <Field label="What's your last name? *">
+                    <Field label="Last name *">
                       <input
                         required
                         autoComplete="family-name"
@@ -337,32 +411,49 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                       />
                     </Field>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Email address *">
-                      <input
-                        required
-                        type="email"
-                        autoComplete="email"
-                        className="input-dark"
-                        value={form.email}
-                        onChange={(e) => update({ email: e.target.value })}
-                        onBlur={() => void saveDraft("email")}
-                        placeholder="you@email.com"
-                      />
-                    </Field>
-                    <Field label="Phone number">
-                      <input
-                        type="tel"
-                        inputMode="tel"
-                        autoComplete="tel"
-                        className="input-dark"
-                        value={form.phone}
-                        onChange={(e) => update({ phone: e.target.value })}
-                        onBlur={() => void saveDraft("phone")}
-                        placeholder="Optional"
-                      />
-                    </Field>
-                  </div>
+                  <StepNav onBack={goBack} onNext={goNext} />
+                </div>
+              ) : null}
+
+              {screen === "email" ? (
+                <div data-testid="rsvp-step-email" className="space-y-4">
+                  <Field label="Email address *">
+                    <input
+                      required
+                      type="email"
+                      autoComplete="email"
+                      className="input-dark"
+                      value={form.email}
+                      onChange={(e) => update({ email: e.target.value })}
+                      onBlur={() => void saveDraft("email")}
+                      placeholder="you@email.com"
+                    />
+                  </Field>
+                  <StepNav onBack={goBack} onNext={goNext} />
+                </div>
+              ) : null}
+
+              {screen === "phone" ? (
+                <div data-testid="rsvp-step-phone" className="space-y-4">
+                  <Field label="Phone number *">
+                    <input
+                      required
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      className="input-dark"
+                      value={form.phone}
+                      onChange={(e) => update({ phone: e.target.value })}
+                      onBlur={() => void saveDraft("phone")}
+                      placeholder="So we can reach you"
+                    />
+                  </Field>
+                  <StepNav onBack={goBack} onNext={goNext} />
+                </div>
+              ) : null}
+
+              {screen === "dietary" ? (
+                <div data-testid="rsvp-step-dietary" className="space-y-4">
                   <Field label="Dietary restrictions or food allergies">
                     <textarea
                       className="input-dark min-h-[88px]"
@@ -372,8 +463,16 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                       placeholder="Optional — allergies, no pork, vegetarian…"
                     />
                   </Field>
+                  <StepNav onBack={goBack} onNext={goNext} nextLabel="Continue" />
+                </div>
+              ) : null}
+
+              {screen === "children" ? (
+                <div data-testid="rsvp-step-children" className="space-y-4">
                   <fieldset className="space-y-3">
-                    <legend className="mb-2 text-[15px] text-white/80">Are you bringing children? *</legend>
+                    <legend className="rsvp-ask mb-2 text-left sm:text-center">
+                      Are you bringing children?
+                    </legend>
                     <div className="grid grid-cols-2 gap-3">
                       <ChoiceButton
                         tone="yes"
@@ -392,88 +491,96 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                         No
                       </ChoiceButton>
                     </div>
-                    {form.bringingChildren === "yes" && (
-                      <div data-testid="rsvp-children" className="space-y-3 pt-2">
-                        <p className="text-sm leading-relaxed text-violet-100">
-                          Add a first and last name for each child.
-                        </p>
-                        {form.companions.map((person, index) => (
-                          <div
-                            key={index}
-                            className="grid gap-3 rounded-xl border border-white/10 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
-                          >
-                            <Field label={`Child ${index + 1} first name *`}>
-                              <input
-                                className="input-dark"
-                                autoComplete="given-name"
-                                value={person.firstName}
-                                onChange={(e) => setCompanion(index, "firstName", e.target.value)}
-                                onBlur={() => void saveDraft("companions")}
-                              />
-                            </Field>
-                            <Field label={`Child ${index + 1} last name *`}>
-                              <input
-                                className="input-dark"
-                                autoComplete="family-name"
-                                value={person.lastName}
-                                onChange={(e) => setCompanion(index, "lastName", e.target.value)}
-                                onBlur={() => void saveDraft("companions")}
-                              />
-                            </Field>
-                            <button
-                              type="button"
-                              className="btn-pink-outline px-3 py-2 text-xs"
-                              onClick={() => removeCompanion(index)}
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          className="btn-pink-outline w-full text-xs tracking-widest sm:w-auto"
-                          onClick={addCompanion}
-                          disabled={form.companions.length >= MAX_COMPANIONS}
-                        >
-                          Add a child
-                        </button>
-                        {form.companions.length >= MAX_COMPANIONS && (
-                          <p className="text-xs text-amber-200">
-                            That&apos;s the limit on this form ({MAX_COMPANIONS} children).
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </fieldset>
+                  <div className="rsvp-next flex gap-3">
+                    <button type="button" className="btn-pink-outline min-h-12 flex-1 text-base" onClick={goBack}>
+                      Back
+                    </button>
+                  </div>
                 </div>
               ) : null}
-              {step === 2 && !attending ? (
-                <div data-testid="rsvp-declining" className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="What's your first name? *">
-                      <input
-                        id="rsvp-first"
-                        required
-                        autoComplete="given-name"
-                        className="input-dark"
-                        value={form.firstName}
-                        onChange={(e) => update({ firstName: e.target.value })}
-                        onFocus={markStarted}
-                        onBlur={() => void saveDraft("firstName")}
-                      />
-                    </Field>
-                    <Field label="What's your last name? *">
-                      <input
-                        required
-                        autoComplete="family-name"
-                        className="input-dark"
-                        value={form.lastName}
-                        onChange={(e) => update({ lastName: e.target.value })}
-                        onFocus={markStarted}
-                        onBlur={() => void saveDraft("lastName")}
-                      />
-                    </Field>
+
+              {screen === "childEntry" ? (
+                <div data-testid="rsvp-children" className="space-y-4">
+                  <p className="rsvp-ask text-left sm:text-center">Who&apos;s coming with you?</p>
+                  <p className="text-sm leading-relaxed text-violet-100">
+                    First and last name required. Age is optional. Add each child, then tap Done when
+                    you&apos;re finished.
+                  </p>
+                  {form.companions.map((person, index) => (
+                    <div
+                      key={index}
+                      className="grid gap-3 rounded-xl border border-white/10 p-3 sm:grid-cols-[1fr_1fr_minmax(4.5rem,5.5rem)_auto] sm:items-end"
+                    >
+                      <Field label={`Child ${index + 1} first *`}>
+                        <input
+                          className="input-dark"
+                          autoComplete="given-name"
+                          value={person.firstName}
+                          onChange={(e) => setCompanion(index, "firstName", e.target.value)}
+                          onBlur={() => void saveDraft("companions")}
+                        />
+                      </Field>
+                      <Field label={`Child ${index + 1} last *`}>
+                        <input
+                          className="input-dark"
+                          autoComplete="family-name"
+                          value={person.lastName}
+                          onChange={(e) => setCompanion(index, "lastName", e.target.value)}
+                          onBlur={() => void saveDraft("companions")}
+                        />
+                      </Field>
+                      <Field label="Age">
+                        <input
+                          className="input-dark"
+                          inputMode="numeric"
+                          value={person.age || ""}
+                          onChange={(e) => setCompanion(index, "age", e.target.value)}
+                          onBlur={() => void saveDraft("companions")}
+                          placeholder="Opt."
+                        />
+                      </Field>
+                      <button
+                        type="button"
+                        className="btn-pink-outline px-3 py-2 text-xs"
+                        onClick={() => removeCompanion(index)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      className="btn-pink-outline min-h-12 flex-1 text-xs tracking-widest"
+                      onClick={addCompanion}
+                      disabled={form.companions.length >= MAX_COMPANIONS}
+                      data-testid="rsvp-add-child"
+                    >
+                      Add another
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-green-solid min-h-12 flex-1 text-center text-base"
+                      onClick={goNext}
+                      data-testid="rsvp-children-done"
+                    >
+                      Done — continue
+                    </button>
                   </div>
+                  {form.companions.length >= MAX_COMPANIONS && (
+                    <p className="text-xs text-amber-200">
+                      That&apos;s the limit on this form ({MAX_COMPANIONS} children).
+                    </p>
+                  )}
+                  <button type="button" className="btn-pink-outline min-h-12 w-full text-base" onClick={goBack}>
+                    Back
+                  </button>
+                </div>
+              ) : null}
+
+              {screen === "declineNote" ? (
+                <div data-testid="rsvp-declining" className="space-y-4">
                   <Field label="A note for Landon and Jordan">
                     <textarea
                       className="input-dark min-h-[88px]"
@@ -483,13 +590,13 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                       placeholder="Optional"
                     />
                   </Field>
+                  <StepNav onBack={goBack} onNext={goNext} nextLabel="Review" />
                 </div>
               ) : null}
-              {step === 2 ? <StepNav onBack={goBack} onNext={goNext} nextLabel="Review" /> : null}
             </div>
 
             <div className="rsvp-step rsvp-step-3 space-y-4">
-              {step === 3 ? (
+              {screen === "review" ? (
                 <>
                   <div
                     className="rsvp-summary space-y-2 rounded-2xl border border-white/15 p-4 text-[15px] leading-relaxed text-white"
@@ -502,7 +609,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                     {attending ? (
                       <>
                         <p>{form.email}</p>
-                        {form.phone.trim() ? <p>{form.phone}</p> : null}
+                        <p>{form.phone}</p>
                         <p>Attending</p>
                         <p>
                           {form.dietaryNotes.trim()
@@ -512,7 +619,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                         <p data-testid="headcount">
                           Headcount: {headcount}.{" "}
                           {namedKids.length
-                            ? `Children: ${namedKids.map((person) => `${person.firstName.trim()} ${person.lastName.trim()}`).join(", ")}.`
+                            ? `Children: ${namedKids.map(childLabel).filter(Boolean).join(", ")}.`
                             : "No children on this RSVP."}
                         </p>
                       </>

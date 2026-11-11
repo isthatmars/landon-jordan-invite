@@ -11,6 +11,8 @@ export type RsvpStatus =
 export interface PartyPerson {
   firstName: string;
   lastName: string;
+  /** Optional — usually for children. Empty string when omitted. */
+  age?: string;
 }
 
 export interface RsvpRecord {

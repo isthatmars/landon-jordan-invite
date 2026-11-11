@@ -50,9 +50,11 @@ html[data-intro="reveal"] .site-header {
   isolation: isolate;
 }
 
+/* Soft zoom: clear the stage so the site can rise through — do not opacity-fade
+   the whole overlay (that would hide OPEN YOUR INVITATION with it). */
 html[data-intro='reveal'] .invite-overlay {
-  animation: invite-fade 1.35s ease 0.35s forwards;
   pointer-events: none;
+  animation: invite-overlay-clear 1.35s ease 0.35s forwards;
 }
 
 /* Soft neon field behind the envelope — cinematic, not busy. */
@@ -150,7 +152,9 @@ html[data-intro='reveal'] .invite-overlay {
   font-family: var(--font-hastron), var(--font-script-fallback), cursive;
   font-size: clamp(2.7rem, 7.4vw, 4.8rem);
   font-weight: 400;
+  font-style: normal;
   font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
   letter-spacing: 0;
   line-height: 1.05;
   text-align: center;
@@ -335,7 +339,8 @@ html[data-intro='reveal'] .envelope-seal {
   color: #fff;
   font-family: var(--font-nav), sans-serif;
   font-size: clamp(0.95rem, 2.2vw, 1.15rem);
-  font-weight: 700;
+  font-weight: 400;
+  font-synthesis: none;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-shadow:
@@ -357,10 +362,19 @@ html[data-intro='reveal'] .envelope-seal {
     filter 0.18s ease;
 }
 
+/* Entrance on invite; stay painted through opening + soft zoom (reveal). */
 html[data-intro="invite"] .invite-open {
   animation:
     invite-button 0.45s ease 1.5s both,
     invite-open-outline 2.8s ease-in-out 1.95s infinite;
+}
+
+html[data-intro="opening"] .invite-open,
+html[data-intro="reveal"] .invite-open {
+  opacity: 1;
+  transform: none;
+  pointer-events: none;
+  animation: invite-open-outline 2.8s ease-in-out infinite;
 }
 
 .invite-open:hover,
@@ -400,12 +414,17 @@ html[data-intro="invite"] .invite-open:active {
     0 0 14px rgba(255, 57, 200, 0.4);
 }
 
-html[data-intro='reveal'] .invite-overlay .invite-open,
+/* Soft-zoom reveal: fade atmosphere/kicker, keep the CTA visible on screen. */
 html[data-intro='reveal'] .invite-overlay .invite-kicker,
 html[data-intro='reveal'] .invite-overlay .invite-glow,
 html[data-intro='reveal'] .invite-overlay .invite-atmosphere {
   opacity: 0;
   transition: opacity 0.35s ease;
+}
+
+html[data-intro='reveal'] .invite-overlay .invite-open {
+  opacity: 1;
+  visibility: visible;
 }
 
 @keyframes invite-pulse {
@@ -467,6 +486,12 @@ html[data-intro='reveal'] .invite-overlay .invite-atmosphere {
   to {
     opacity: 0;
     visibility: hidden;
+  }
+}
+
+@keyframes invite-overlay-clear {
+  to {
+    background: transparent;
   }
 }
 
@@ -578,6 +603,17 @@ html[data-intro='reveal'] .invite-overlay .invite-atmosphere {
 
   html[data-intro="invite"] .invite-open {
     animation: invite-button 0.45s ease 1.5s both;
+    border-color: #c6ff00;
+    box-shadow:
+      0 0 0 1px rgba(198, 255, 0, 0.28),
+      0 0 12px rgba(198, 255, 0, 0.32),
+      0 0 28px rgba(198, 255, 0, 0.16);
+  }
+
+  html[data-intro="opening"] .invite-open,
+  html[data-intro="reveal"] .invite-open {
+    animation: none;
+    opacity: 1;
     border-color: #c6ff00;
     box-shadow:
       0 0 0 1px rgba(198, 255, 0, 0.28),

@@ -2234,6 +2234,11 @@ body {
   padding-bottom: var(--section-pad-bottom);
 }
 
+/* overflow-x:clip + overflow-y:visible computes to clipping both axes — keep Watch open. */
+#watch {
+  overflow: visible;
+}
+
 #lineup,
 #rsvp {
   /* Clear fixed header when section snaps/anchors into view */
@@ -2398,15 +2403,15 @@ body {
   width: 100%;
   text-align: center;
   overflow: visible;
-  padding-top: 0.35rem;
-  padding-inline: 0.5rem;
+  padding-top: 0.55rem;
+  padding-inline: 0.65rem;
 }
 
 .watch-title {
   margin: 0;
   overflow: visible;
-  padding-block: 0.45em 0.35em;
-  padding-inline: 0.35em;
+  padding-block: 0.55em 0.45em;
+  padding-inline: 0.45em;
   filter: none;
 }
 
@@ -2415,16 +2420,16 @@ body {
   white-space: nowrap;
   overflow: visible;
   /* Room for Hastron flourishes — do not shrink to “fix” clipping. */
-  padding-block: 0.22em 0.18em;
-  padding-inline: 0.12em 0.28em;
+  padding-block: 0.42em 0.36em;
+  padding-inline: 0.22em 0.4em;
   filter: none;
 }
 
 .watch-line-lead {
   color: #ffc44d;
   /* Peer neon-header scale (mixtape / arcade), not a subhead. */
-  font-size: clamp(3.85rem, 13.5vw, 5.1rem);
-  line-height: 1.05;
+  font-size: clamp(4.1rem, 14.5vw, 5.45rem);
+  line-height: 1.12;
   text-shadow:
     0 0 1px #fff6d8,
     0 0 10px #ffc44d,
@@ -2433,8 +2438,8 @@ body {
 }
 
 .watch-line-hero {
-  font-size: clamp(5.85rem, 21vw, 7.85rem);
-  line-height: 0.98;
+  font-size: clamp(6.2rem, 22.5vw, 8.4rem);
+  line-height: 1.05;
   text-shadow:
     0 0 1px #fff,
     0 0 10px #ff39c8,
@@ -2444,10 +2449,10 @@ body {
 }
 
 .watch-line-rest {
-  margin-top: 0.02em;
+  margin-top: 0;
   color: #38d9ff;
-  font-size: clamp(3.35rem, 12vw, 4.55rem);
-  line-height: 1.05;
+  font-size: clamp(3.7rem, 13vw, 5rem);
+  line-height: 1.12;
   text-shadow:
     0 0 1px #fff,
     0 0 10px #38d9ff,
@@ -2629,25 +2634,25 @@ body {
   }
 
   #watch .watch-title {
-    padding-block: 0.55em 0.4em;
-    padding-inline: 0.28em 0.45em;
+    padding-block: 0.7em 0.55em;
+    padding-inline: 0.4em 0.55em;
   }
 
   #watch .watch-line {
-    padding-block: 0.26em 0.2em;
-    padding-inline: 0.1em 0.35em;
+    padding-block: 0.48em 0.4em;
+    padding-inline: 0.18em 0.45em;
   }
 
   #watch .watch-line-lead {
-    font-size: clamp(4.2rem, 5.4vw, 6.1rem);
+    font-size: clamp(4.55rem, 5.8vw, 6.55rem);
   }
 
   #watch .watch-line-hero {
-    font-size: clamp(6.6rem, 9vw, 10.4rem);
+    font-size: clamp(7.1rem, 9.6vw, 11.1rem);
   }
 
   #watch .watch-line-rest {
-    font-size: clamp(3.6rem, 4.6vw, 5.35rem);
+    font-size: clamp(4rem, 5.1vw, 5.85rem);
   }
 
   #watch .watch-swoosh {

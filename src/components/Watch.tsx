@@ -30,7 +30,7 @@ export function Watch({ headline }: { headline: string }) {
     <section
       id="watch"
       data-youtube-id={now?.youtubeId ?? ""}
-      className="scene-section watch-scene relative overflow-x-clip overflow-y-visible"
+      className="scene-section watch-scene relative overflow-visible"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/scene-watch-table.jpg" alt="" className="watch-bg" />

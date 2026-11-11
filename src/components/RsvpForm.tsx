@@ -347,9 +347,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
     <section id="rsvp" className="bg-[#07010f] px-3 pt-2 sm:px-5">
       <div className="neon-frame mx-auto flex max-w-[1100px] flex-col bg-[#0b0615ee] p-4 sm:p-8 md:p-10">
         <div
-          className={`rsvp-frame-grid grid flex-1 gap-6 md:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] md:gap-8 lg:gap-12${
-            screen === "attend" ? " rsvp-frame-grid--attend" : ""
-          }`}
+          className="rsvp-frame-grid grid flex-1 gap-6 md:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] md:gap-8 lg:gap-12"
         >
           <div className="rsvp-brand-stack pt-1 text-center md:pt-0">
             <Crown className="icon-shake mx-auto h-10 w-14 drop-shadow-[0_0_12px_#ffc44d] sm:h-12 sm:w-16" />
@@ -394,7 +392,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
             <div className="rsvp-step rsvp-step-2 space-y-4">
               {screen === "name" ? (
                 <div data-testid="rsvp-step-name" className="space-y-4">
-                  <p className="rsvp-ask text-left sm:text-center">What&apos;s your name?</p>
+                  <p className="rsvp-ask">What&apos;s your name?</p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="First name *">
                       <input
@@ -479,7 +477,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
               {screen === "children" ? (
                 <div data-testid="rsvp-step-children" className="space-y-4">
                   <fieldset className="space-y-3">
-                    <legend className="rsvp-ask mb-2 text-left sm:text-center">
+                    <legend className="rsvp-ask mb-2">
                       Are you bringing children?
                     </legend>
                     <div className="grid grid-cols-2 gap-3">
@@ -511,7 +509,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
 
               {screen === "childEntry" ? (
                 <div data-testid="rsvp-children" className="space-y-4">
-                  <p className="rsvp-ask text-left sm:text-center">Who&apos;s coming with you?</p>
+                  <p className="rsvp-ask">Who&apos;s coming with you?</p>
                   <p className="text-sm leading-relaxed text-violet-100">
                     First and last name required. Age is optional. Add each child, then tap Done when
                     you&apos;re finished.

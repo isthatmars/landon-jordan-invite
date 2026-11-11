@@ -3195,6 +3195,26 @@ main {
   overflow: clip;
 }
 
+/* Mobile: cut air above Choose a Tape roughly in half. */
+@media (max-width: 767px) {
+  #mixtape {
+    padding-top: max(3.6rem, calc(var(--header-clear) * 0.55));
+  }
+
+  #mixtape .mix-stage {
+    padding: 22px 16px 28px;
+  }
+
+  #mixtape .mix-script {
+    margin-bottom: 4px;
+    padding: 1.2rem 1rem 0.85rem;
+  }
+
+  #mixtape .mix-script h2 {
+    padding: 0.85rem 0.75rem 0.7rem;
+  }
+}
+
 #watch,
 #arcade {
   /* Clear fixed header so neon titles never sit under the brand lockup */

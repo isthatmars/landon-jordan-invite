@@ -3378,10 +3378,10 @@ body {
   }
 
   .lineup-kicker {
-    font-size: clamp(1.85rem, 1rem + 5.2vw, 2.75rem);
+    font-size: clamp(2.2rem, 1.15rem + 6.1vw, 3.25rem);
     letter-spacing: 0.02em;
     max-width: 100%;
-    padding-inline: 0.4em;
+    padding-inline: 0.45em;
   }
 }
 
@@ -3597,10 +3597,10 @@ form[data-step="1"] .rsvp-step-1 {
   margin: 0;
   color: #fff7fc;
   font-family: var(--font-hastron), var(--font-script-fallback), cursive;
-  font-size: clamp(2.35rem, 1.2rem + 3.8vw, 4.4rem);
+  font-size: clamp(2.75rem, 1.4rem + 4.5vw, 5.2rem);
   font-weight: 400;
   letter-spacing: 0.02em;
-  line-height: 1.28;
+  line-height: 1.32;
   text-align: center;
   text-transform: none;
   text-shadow:
@@ -3609,8 +3609,8 @@ form[data-step="1"] .rsvp-step-1 {
     0 0 18px var(--lineup-kicker-glow),
     0 0 36px color-mix(in srgb, var(--lineup-kicker-glow) 80%, transparent),
     0 0 56px color-mix(in srgb, var(--lineup-kicker-glow) 45%, transparent);
-  padding-block: 0.42em 0.5em;
-  padding-inline: 0.35em;
+  padding-block: 0.48em 0.55em;
+  padding-inline: 0.4em;
   overflow: visible;
   overflow-wrap: normal;
   text-wrap: balance;

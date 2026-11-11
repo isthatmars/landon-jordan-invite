@@ -4973,8 +4973,8 @@ form[data-step="1"] .rsvp-step-1 {
     0 0 18px var(--lineup-kicker-glow),
     0 0 36px color-mix(in srgb, var(--lineup-kicker-glow) 80%, transparent),
     0 0 56px color-mix(in srgb, var(--lineup-kicker-glow) 45%, transparent);
-  /* Glow room above only — zero bottom padding so tagline can tuck under descenders. */
-  padding-block: 0.28em 0;
+  /* Glow room above; tiny bottom pad so descenders don’t crowd the tagline. */
+  padding-block: 0.28em 0.08em;
   padding-inline: 0.4em;
   overflow: visible;
   overflow-wrap: normal;
@@ -4988,8 +4988,8 @@ form[data-step="1"] .rsvp-step-1 {
 }
 
 .lineup-tagline {
-  /* Negative margin eats remaining script line-box slack under Hastron descenders (~4–8px breath). */
-  margin: -0.7rem 0 0;
+  /* Negative margin eats script line-box slack; keep ~3pt more breath under descenders. */
+  margin: -0.45rem 0 0;
   color: #f8f4fa;
   font-family: var(--font-nav), sans-serif;
   font-size: clamp(0.95rem, 0.8rem + 0.5vw, 1.2rem);

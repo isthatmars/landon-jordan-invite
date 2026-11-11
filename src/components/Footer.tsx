@@ -8,17 +8,24 @@ export function Footer({ tagline }: { tagline: string }) {
         <p className="site-footer-tagline">{tagline}</p>
 
         <div className="site-footer-credits">
-          <p className="site-footer-credit">
-            <span className="site-footer-label">Created by</span>
-            <a
-              href={CREATOR_URL}
-              className="site-footer-link site-footer-link--brand"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="creator-link"
-            >
-              Australian Bleu
-            </a>
+          <div className="site-footer-credit-row">
+            <p className="site-footer-credit">
+              <span className="site-footer-label">Created by</span>{" "}
+              <a
+                href={CREATOR_URL}
+                className="site-footer-link site-footer-link--brand"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="creator-link"
+              >
+                Australian Bleu
+              </a>
+            </p>
+
+            <span className="site-footer-sep" aria-hidden="true">
+              ·
+            </span>
+
             <a
               href={CREATOR_URL}
               className="site-footer-url"
@@ -27,28 +34,24 @@ export function Footer({ tagline }: { tagline: string }) {
             >
               www.Australianbleu.com
             </a>
-          </p>
 
-          <span className="site-footer-sep" aria-hidden="true">
-            ·
-          </span>
+            <span className="site-footer-sep" aria-hidden="true">
+              ·
+            </span>
 
-          <p className="site-footer-social">
-            <span className="site-footer-label">Instagram</span>
-            <a
-              href={INSTAGRAM_URL}
-              className="site-footer-link site-footer-link--social"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="instagram-link"
-            >
-              @Australian.Bleu
-            </a>
-          </p>
-
-          <span className="site-footer-sep" aria-hidden="true">
-            ·
-          </span>
+            <p className="site-footer-social">
+              <span className="site-footer-label">Instagram</span>{" "}
+              <a
+                href={INSTAGRAM_URL}
+                className="site-footer-link site-footer-link--social"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="instagram-link"
+              >
+                @Australian.Bleu
+              </a>
+            </p>
+          </div>
 
           <p className="site-footer-copy">
             Copyright © 2026 Australian Bleu Media Group. All rights reserved.

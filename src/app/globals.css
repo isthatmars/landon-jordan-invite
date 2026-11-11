@@ -4833,7 +4833,9 @@ form[data-step="1"] .rsvp-step-1 {
     0 0 18px var(--lineup-kicker-glow),
     0 0 36px color-mix(in srgb, var(--lineup-kicker-glow) 80%, transparent),
     0 0 56px color-mix(in srgb, var(--lineup-kicker-glow) 45%, transparent);
-  padding-block: 0.48em 0.55em;
+  /* Glow room above; keep bottom tight so the tagline sits like a subtitle.
+   * Previous 0.55em bottom padding ≈ 1.5–2.8rem at script sizes — that was the gap. */
+  padding-block: 0.35em 0.06em;
   padding-inline: 0.4em;
   overflow: visible;
   overflow-wrap: normal;
@@ -4847,8 +4849,7 @@ form[data-step="1"] .rsvp-step-1 {
 }
 
 .lineup-tagline {
-  /* ~30% closer to the lineup kicker (was 0.85rem). */
-  margin: 0.6rem 0 0;
+  margin: 0.35rem 0 0;
   color: #f8f4fa;
   font-family: var(--font-nav), sans-serif;
   font-size: clamp(0.95rem, 0.8rem + 0.5vw, 1.2rem);

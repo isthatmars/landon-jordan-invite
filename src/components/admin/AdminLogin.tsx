@@ -33,9 +33,9 @@ export function AdminLogin() {
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4">
       <div className="admin-panel p-8">
         <p className="text-center text-neon-gold text-2xl mb-2">♛</p>
-        <h1 className="neon-script-lg text-center text-4xl mb-2">Party Admin</h1>
+        <h1 className="neon-script-lg text-center text-4xl mb-2">Hi Ms. Kathy!</h1>
         <p className="text-center text-sm text-violet-300 mb-6">
-          Enter the access code to manage RSVPs, content, and messages.
+          Enter your access code to open the control room — RSVPs, invite wording, music, and emails.
         </p>
         <form onSubmit={onSubmit} className="space-y-4">
           <label className="block">
@@ -55,8 +55,7 @@ export function AdminLogin() {
           {error && <p className="text-sm text-red-400">{error}</p>}
         </form>
         <p className="mt-6 text-[11px] text-violet-400 text-center">
-          Stub default: <code className="text-neon-teal">NEON80S</code> · override with{" "}
-          <code className="text-neon-teal">ADMIN_ACCESS_CODE</code>
+          Use the access code you were given for the party.
         </p>
         <p className="mt-3 text-center">
           <a href="/" className="text-xs text-neon-pink hover:underline">

@@ -210,6 +210,24 @@
   }
 }
 
+/* Soft life on the cutout only — feet stay planted via bottom origin. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-intro="reveal"]) .hero-couple {
+    transform-origin: bottom center;
+    animation: hero-boys-breathe 5.4s ease-in-out infinite;
+  }
+}
+
+@keyframes hero-boys-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.025);
+  }
+}
+
 .crt-screen-light {
   position: absolute;
   left: 2%;

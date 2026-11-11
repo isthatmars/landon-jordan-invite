@@ -41,7 +41,7 @@ const condensed = Barlow_Condensed({
 });
 
 const nav = Oswald({
-  weight: ["300", "500"],
+  weight: ["300", "400", "500"],
   subsets: ["latin"],
   variable: "--font-nav",
   display: "swap",

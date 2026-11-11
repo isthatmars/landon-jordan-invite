@@ -269,25 +269,14 @@ body {
   --plate-z: 6;
 }
 
-<<<<<<< HEAD
-/* Full-viewport scenes without sticky plate ghosts (orphan CTAs from prior sections).
-   Soft scroll-snap keeps desktop/mobile feeling like one condensed journey.
-   Do NOT snap #rsvp: last section before a short footer; snap-align:start +
-   min-height:100dvh traps scroll so Host tools never stays reachable. */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-snap-type: y proximity;
-  }
-
-=======
 /*
  * Stacked sticky plates (desktop): short photographic scenes stick while the next
  * plate slides over. Lineup/RSVP stay in normal flow (tall). Reduced-motion: no stick.
  * Ghost CTAs are killed via data-live-* (see cinematic.css) — sticky alone is not enough
  * because stuck plates remain under later ones for the rest of the page.
+ * No scroll-snap on #rsvp so the short footer / host tools stay reachable.
  */
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
->>>>>>> 2b1f296 (Restore sticky scene-plate parallax without ghost CTAs.)
   #home,
   #mixtape,
   #watch,
@@ -306,26 +295,6 @@ body {
     overflow-y: clip;
   }
 
-<<<<<<< HEAD
-  /* Tall text section: soft snap under the header; never force-stop past it. */
-  #lineup {
-    position: relative;
-    z-index: var(--plate-z);
-    scroll-snap-align: start;
-    scroll-snap-stop: normal;
-  }
-
-  #rsvp {
-    position: relative;
-    z-index: var(--plate-z);
-    /* Intentionally no scroll-snap-* — free scroll into the footer. */
-  }
-
-  /* Land on the footer end so the host link stays in view after release. */
-  .site-footer {
-    scroll-snap-align: end;
-    scroll-snap-stop: normal;
-=======
   #lineup,
   #rsvp {
     position: relative;
@@ -372,7 +341,6 @@ body {
   footer {
     position: relative;
     z-index: 7;
->>>>>>> 2b1f296 (Restore sticky scene-plate parallax without ghost CTAs.)
   }
 }
 

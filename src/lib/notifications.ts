@@ -65,6 +65,21 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/** True when guest/admin email can leave the machine via Resend. */
+export function isResendConfigured(): boolean {
+  return Boolean(process.env.RESEND_API_KEY?.trim());
+}
+
+export function resendSetupHint(): string {
+  const missing: string[] = [];
+  if (!process.env.RESEND_API_KEY?.trim()) missing.push("RESEND_API_KEY");
+  if (!process.env.RESEND_FROM_EMAIL?.trim()) missing.push("RESEND_FROM_EMAIL");
+  if (missing.length === 0) {
+    return "Resend is configured — segment email sends go live.";
+  }
+  return `Email not live yet. Set ${missing.join(" + ")} in the host env (Vercel/Cursor secrets), then redeploy. Sends are logged until then.`;
+}
+
 async function sendViaResend(opts: {
   to: string;
   subject: string;
@@ -84,8 +99,7 @@ async function sendViaResend(opts: {
       channel: "email",
       provider: "resend",
       stubbed: true,
-      detail:
-        "RESEND_API_KEY unset — logged only. Set RESEND_API_KEY + RESEND_FROM_EMAIL + OWNER_EMAIL to go live.",
+      detail: resendSetupHint(),
     };
   }
 

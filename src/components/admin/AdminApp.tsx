@@ -40,12 +40,17 @@ export function AdminApp() {
   const [reminders, setReminders] = useState<ReminderLog[]>([]);
   const [abandoned, setAbandoned] = useState<RsvpRecord[]>([]);
   const [smsProvider, setSmsProvider] = useState("none");
+  const [emailLive, setEmailLive] = useState(false);
+  const [emailNote, setEmailNote] = useState("");
   const [toast, setToast] = useState("");
+  const [toastTone, setToastTone] = useState<"ok" | "warn">("ok");
   const [selected, setSelected] = useState<string[]>([]);
+  const [sending, setSending] = useState(false);
 
-  const flash = (msg: string) => {
+  const flash = (msg: string, tone: "ok" | "warn" = "ok") => {
+    setToastTone(tone);
     setToast(msg);
-    setTimeout(() => setToast(""), 3200);
+    setTimeout(() => setToast(""), 5200);
   };
 
   const load = useCallback(async () => {
@@ -63,6 +68,8 @@ export function AdminApp() {
     setVideos(v.videos || []);
     setMessages(m.messages || []);
     setSmsProvider(m.smsProvider || "none");
+    setEmailLive(Boolean(m.emailLive));
+    setEmailNote(typeof m.emailNote === "string" ? m.emailNote : "");
     setReminders(rem.reminders || []);
     setAbandoned(rem.abandoned || []);
   }, []);
@@ -88,12 +95,22 @@ export function AdminApp() {
   };
 
   const resend = async (id: string) => {
-    await fetch("/api/admin/rsvps", {
+    const res = await fetch("/api/admin/rsvps", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, action: "resend" }),
     });
-    flash("Confirmation email stubbed (Resend)");
+    const data = await res.json().catch(() => ({}));
+    const result = data.result as { stubbed?: boolean; detail?: string; ok?: boolean } | undefined;
+    if (!res.ok) {
+      flash(data.error || "Resend failed", "warn");
+    } else if (result?.stubbed) {
+      flash(result.detail || emailNote || "Logged only — set RESEND_API_KEY to go live.", "warn");
+    } else if (result?.ok === false) {
+      flash(result.detail || "Resend failed", "warn");
+    } else {
+      flash(result?.detail || "Confirmation email sent via Resend");
+    }
     void load();
   };
 
@@ -126,14 +143,23 @@ export function AdminApp() {
   };
 
   const sendMessage = async (channel: "email" | "sms", payload: Record<string, unknown>) => {
-    const res = await fetch("/api/admin/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ channel, ...payload }),
-    });
-    const data = await res.json();
-    flash(data.note || "Message stubbed");
-    void load();
+    setSending(true);
+    try {
+      const res = await fetch("/api/admin/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channel, ...payload }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (typeof data.emailLive === "boolean") setEmailLive(data.emailLive);
+      const status = data.message?.status as string | undefined;
+      const warn =
+        !res.ok || data.ok === false || status === "failed" || status === "stubbed" || channel === "sms";
+      flash(data.note || data.error || "Message send finished", warn ? "warn" : "ok");
+      void load();
+    } finally {
+      setSending(false);
+    }
   };
 
   const triggerReminder = async (kind: "party_reminder" | "abandoned_digest") => {
@@ -153,7 +179,9 @@ export function AdminApp() {
           <p className="text-neon-gold text-xl">♛</p>
           <h1 className="neon-script-lg text-4xl">Neon Control Room</h1>
           <p className="text-sm text-violet-300">
-            Resend email live when keys set · SMS deferred (stubs kept) · same 80s vibe
+            {emailLive
+              ? "Resend email live · SMS deferred (stubs kept) · same 80s vibe"
+              : "Email needs RESEND_API_KEY · SMS deferred · same 80s vibe"}
           </p>
         </div>
         <div className="flex gap-2">
@@ -167,7 +195,13 @@ export function AdminApp() {
       </header>
 
       {toast && (
-        <div className="mb-4 rounded-xl border border-neon-green/50 bg-green-500/10 px-4 py-2 text-sm text-neon-green">
+        <div
+          className={`mb-4 rounded-xl border px-4 py-2 text-sm ${
+            toastTone === "warn"
+              ? "border-amber-400/50 bg-amber-500/10 text-amber-200"
+              : "border-neon-green/50 bg-green-500/10 text-neon-green"
+          }`}
+        >
           {toast}
         </div>
       )}
@@ -484,11 +518,18 @@ export function AdminApp() {
       {tab === "email" && (
         <Composer
           title="Email composer"
-          note="Renders into the neon invite template. Sent via Resend stub (primary channel)."
+          note={
+            emailLive
+              ? "Renders into the neon invite template and sends via Resend (primary channel)."
+              : emailNote ||
+                "Renders into the neon invite template. Set RESEND_API_KEY + RESEND_FROM_EMAIL to send for real — until then history logs a clear stub."
+          }
           channel="email"
           selected={selected}
           onSend={(payload) => sendMessage("email", payload)}
           history={messages.filter((m) => m.channel === "email")}
+          emailLive={emailLive}
+          busy={sending}
         />
       )}
 
@@ -514,6 +555,7 @@ export function AdminApp() {
             onSend={(payload) => sendMessage("sms", payload)}
             history={messages.filter((m) => m.channel === "sms")}
             sms
+            busy={sending}
           />
         </section>
       )}
@@ -573,6 +615,8 @@ function Composer({
   onSend,
   history,
   sms,
+  emailLive,
+  busy,
 }: {
   title: string;
   note: string;
@@ -581,6 +625,8 @@ function Composer({
   onSend: (payload: Record<string, unknown>) => void;
   history: MessageLog[];
   sms?: boolean;
+  emailLive?: boolean;
+  busy?: boolean;
 }) {
   const [subject, setSubject] = useState("Party update");
   const [body, setBody] = useState(
@@ -588,10 +634,19 @@ function Composer({
   );
   const [segment, setSegment] = useState("attending");
 
+  const emailButtonLabel = emailLive ? "SEND EMAIL" : "SEND EMAIL (needs Resend key)";
+
   return (
     <section className="admin-panel p-5 space-y-4">
       <h2 className="text-lg font-bold">{title}</h2>
       <p className="text-sm text-violet-300">{note}</p>
+      {!sms && !emailLive && (
+        <p className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+          Not a permanent stub — once <code className="text-neon-teal">RESEND_API_KEY</code> (and
+          preferably <code className="text-neon-teal">RESEND_FROM_EMAIL</code>) are set on the host,
+          this button sends the neon template for real. History still records every attempt.
+        </p>
+      )}
       {!sms && (
         <label className="block">
           <span className="label-muted">Subject</span>
@@ -617,7 +672,8 @@ function Composer({
       </label>
       <button
         type="button"
-        className="btn-green-solid"
+        className="btn-green-solid disabled:opacity-60"
+        disabled={busy}
         onClick={() =>
           onSend({
             subject,
@@ -628,7 +684,7 @@ function Composer({
           })
         }
       >
-        {sms ? "QUEUE SMS (STUB)" : "SEND EMAIL (STUB)"}
+        {busy ? "SENDING…" : sms ? "QUEUE SMS (STUB)" : emailButtonLabel}
       </button>
       <div>
         <h3 className="text-xs tracking-widest text-violet-300 mb-2">HISTORY</h3>

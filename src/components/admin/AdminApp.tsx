@@ -329,9 +329,9 @@ export function AdminApp() {
                 setView("home");
               }}
             >
-              ← Control room
+              ← back
             </button>
-            <h1 className="mt-2 text-2xl font-bold tracking-wide text-white">
+            <h1 className="admin-panel-title text-2xl font-bold tracking-wide text-white">
               {activeTab?.label}
             </h1>
             {activeTab && (

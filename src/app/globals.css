@@ -1266,7 +1266,7 @@ body {
 .admin-back-link {
   border: 0;
   background: transparent;
-  padding: 0;
+  padding: 0 0 0.85rem;
   color: var(--neon-teal);
   font-size: 0.85rem;
   font-weight: 600;
@@ -1280,6 +1280,10 @@ body {
 .admin-back-link:focus-visible {
   color: #fff;
   outline: none;
+}
+
+.admin-panel-title {
+  margin-top: 0.35rem;
 }
 
 

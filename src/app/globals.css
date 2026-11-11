@@ -2252,14 +2252,15 @@ main {
 .mix-scene {
   position: relative;
   isolation: isolate;
-  /* visible on both axes — mixed clip/visible collapses and shears neon bloom. */
-  overflow: visible;
+  /* Clip the scaled floor plate so it cannot bleed over #home or widen the page.
+     Neon titles live in .mix-stage above this crop. */
+  overflow: clip;
   background: #120612;
   /* Raise the photographed floor plane UP to the propped boombox/cassettes
      (do not drop the props). Landscape cover ignores object-position Y, so
      zoom from the bottom, then nudge the plate up so reflective sheen meets feet. */
-  --mix-floor-scale: 1.95;
-  --mix-floor-nudge: 12%;
+  --mix-floor-scale: 1.55;
+  --mix-floor-nudge: 8%;
 }
 
 .mix-plate {
@@ -2839,6 +2840,9 @@ main {
   .mix-scene {
     --mix-floor-scale: 2.45;
     --mix-floor-nudge: 23%;
+    /* Desktop can open Y for mirror contact under props; keep X clipped. */
+    overflow-x: clip;
+    overflow-y: visible;
   }
 
   .mix-plate {
@@ -3180,6 +3184,14 @@ main {
 #mixtape {
   padding-top: max(var(--header-clear), clamp(5.75rem, 10vw, 7rem));
   padding-bottom: var(--section-pad-bottom);
+  /* Contain scaled floor art so it never paints over the hero plate. */
+  overflow-x: clip;
+}
+
+@media (max-width: 1023px) {
+  #mixtape {
+    overflow: clip;
+  }
 }
 
 #watch,

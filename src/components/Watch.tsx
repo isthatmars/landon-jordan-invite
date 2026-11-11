@@ -221,6 +221,28 @@ export function Watch({ headline }: { headline: string }) {
             className="pointer-events-none relative z-10 block h-auto w-full"
             draggable={false}
           />
+          <div className="watch-remote-rail">
+            <motion.div
+              className="watch-remote"
+              style={remoteMotionOn ? { x: remoteX } : undefined}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/prop-tv-remote.png" alt="TV remote" draggable={false} />
+              <div className="watch-remote-hotspots" role="group" aria-label="TV remote controls">
+                {REMOTE_HOTSPOTS.map((spot) => (
+                  <button
+                    key={spot.id}
+                    type="button"
+                    className="watch-remote-btn"
+                    style={spot.style}
+                    aria-label={spot.label}
+                    aria-pressed={spot.action === "mute" ? muted : undefined}
+                    onClick={() => onRemoteAction(spot.action)}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </div>
         </div>
 
         <div className="watch-side">
@@ -260,28 +282,6 @@ export function Watch({ headline }: { headline: string }) {
             </div>
           </div>
 
-          <div className="watch-remote-rail">
-            <motion.div
-              className="watch-remote"
-              style={remoteMotionOn ? { x: remoteX } : undefined}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/prop-tv-remote.png" alt="TV remote" draggable={false} />
-              <div className="watch-remote-hotspots" role="group" aria-label="TV remote controls">
-                {REMOTE_HOTSPOTS.map((spot) => (
-                  <button
-                    key={spot.id}
-                    type="button"
-                    className="watch-remote-btn"
-                    style={spot.style}
-                    aria-label={spot.label}
-                    aria-pressed={spot.action === "mute" ? muted : undefined}
-                    onClick={() => onRemoteAction(spot.action)}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          </div>
         </div>
       </div>
     </section>

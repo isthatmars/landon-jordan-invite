@@ -2882,6 +2882,9 @@ body {
   position: relative;
   order: 2;
   width: min(92%, 34rem);
+  overflow: visible;
+  /* Room for the table remote hanging off the CRT feet. */
+  margin-bottom: 2.4rem;
 }
 
 .watch-side,
@@ -3025,20 +3028,21 @@ body {
 }
 
 .watch-remote-rail {
-  order: 4;
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
+  position: absolute;
+  left: 50%;
+  bottom: 0.15rem;
+  width: min(58%, 14rem);
+  transform: translate(-50%, 48%);
+  display: block;
+  z-index: 14;
   pointer-events: none;
   overflow: visible;
 }
 
 .watch-remote {
   position: relative;
-  /* Mobile: compact horizontal remote on the table plane. */
-  width: min(58%, 14rem);
-  margin-top: 0.2rem;
+  width: 100%;
+  margin: 0;
   line-height: 0;
   pointer-events: auto;
   transform: none;
@@ -3207,6 +3211,8 @@ body {
     /* Content row height follows the CRT; list centers against this box. */
     align-self: start;
     justify-self: start;
+    overflow: visible;
+    margin-bottom: 2.75rem;
   }
 
   #watch .watch-tv .floor-contact {
@@ -3253,22 +3259,18 @@ body {
   }
 
   #watch .watch-remote-rail {
-    /* On the coffee table in front of the CRT — not under the browse list. */
+    /* Anchored to the CRT: sit on the oak table in front of the set. */
     position: absolute;
-    grid-column: unset;
-    grid-row: unset;
-    order: 0;
-    /* Center under the CRT face, slightly left of mid so it reads on the oak. */
-    left: clamp(7.5rem, 16vw, 14rem);
+    left: 18%;
     right: auto;
-    bottom: clamp(0.35rem, 1.2vh, 0.9rem);
-    width: clamp(10.5rem, 13vw, 14rem);
+    bottom: -0.35rem;
+    width: clamp(10.75rem, 14vw, 14.5rem);
     height: auto;
     display: block;
     overflow: visible;
-    /* Above CRT art so the remote sits on the table, not under the bezel. */
-    z-index: 12;
+    z-index: 14;
     pointer-events: none;
+    transform: translateY(42%);
   }
 
   #watch .watch-remote {

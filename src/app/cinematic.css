@@ -939,6 +939,9 @@ html[data-live-mixtape="0"] #mixtape .mix-tape-ink {
 html[data-live-mixtape="0"] #mixtape .mix-tap-cue {
   visibility: hidden;
 }
+html[data-live-mixtape="0"] #mixtape .mix-key::after {
+  visibility: hidden;
+}
 
 html[data-live-watch="0"] #watch {
   pointer-events: none;

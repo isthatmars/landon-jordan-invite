@@ -3261,7 +3261,7 @@ body {
   #watch .watch-remote-rail {
     /* Anchored to the CRT: sit on the oak table in front of the set. */
     position: absolute;
-    left: 18%;
+    left: 26%;
     right: auto;
     bottom: -0.35rem;
     width: clamp(10.75rem, 14vw, 14.5rem);
@@ -3270,7 +3270,7 @@ body {
     overflow: visible;
     z-index: 14;
     pointer-events: none;
-    transform: translateY(42%);
+    transform: translateY(48%);
   }
 
   #watch .watch-remote {

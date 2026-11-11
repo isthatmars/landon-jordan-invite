@@ -320,7 +320,7 @@ export function AdminApp() {
         </header>
       ) : (
         <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
+          <div className="admin-panel-heading">
             <button
               type="button"
               className="admin-back-link"

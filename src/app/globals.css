@@ -1263,11 +1263,18 @@ body {
   filter: brightness(1.02);
 }
 
+.admin-panel-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.75rem;
+}
+
 .admin-back-link {
   display: inline-block;
   border: 0;
   background: transparent;
-  padding: 0 0 2rem;
+  padding: 0;
   color: var(--neon-teal);
   font-size: 0.85rem;
   font-weight: 600;
@@ -1284,7 +1291,7 @@ body {
 }
 
 .admin-panel-title {
-  margin-top: 0.35rem;
+  margin: 0;
 }
 
 

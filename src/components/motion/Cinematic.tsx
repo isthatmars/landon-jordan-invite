@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect } from "react";
+import { scrollToSection } from "@/lib/scrollToSection";
 import { INTRO_KEY } from "./introBoot";
 
 declare global {
@@ -78,8 +79,7 @@ function settleLoadScroll() {
       document.documentElement.style.scrollBehavior = prev;
       return;
     }
-    const el = document.getElementById(hash);
-    if (el) el.scrollIntoView();
+    scrollToSection(hash, { behavior: "auto" });
     return;
   }
   const prev = document.documentElement.style.scrollBehavior;
@@ -168,6 +168,8 @@ export function Cinematic() {
 
     // IntersectionObserver still marks entrance "seen" flags for cinematic reveals.
     // Live flags use scroll-flow positions so sticky-under plates don't stay live.
+    // Do NOT auto scrollIntoView on RSVP intersect — that reintroduces the footer bounce trap.
+    // Nav/hash use block:center; #rsvp flex mid-plate covers natural scroll-in.
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {

@@ -38,7 +38,14 @@ export const INTRO_BOOT = `(function(){
     function goHash() {
       if (!intentionalHash) return;
       var el = document.getElementById(hash);
-      if (el) el.scrollIntoView();
+      if (!el) return;
+      // RSVP centers in the viewport; other plates land under the header.
+      // No scroll-snap on #rsvp — footer / host tools stay reachable after.
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      el.scrollIntoView({
+        behavior: reduce ? "auto" : "smooth",
+        block: hash === "rsvp" ? "center" : "start"
+      });
     }
 
     function afterIntro() {

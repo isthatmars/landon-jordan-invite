@@ -1,11 +1,20 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
+import { scrollToSection } from "@/lib/scrollToSection";
 import type { SiteContent } from "@/lib/types";
 import { HeroAtmosphere } from "./HeroAtmosphere";
 import { Handwrite } from "./motion/Handwrite";
 import { IntroVeil } from "./motion/IntroVeil";
 import { CalendarIcon, ClockIcon, Crown, GreenSwoosh, PinIcon } from "./icons";
+
+function goRsvp(event: MouseEvent<HTMLAnchorElement>) {
+  event.preventDefault();
+  if (location.hash !== "#rsvp") {
+    history.pushState(null, "", "#rsvp");
+  }
+  scrollToSection("rsvp");
+}
 
 export function Hero({ content }: { content: SiteContent }) {
   const dateParts = content.eventDate.trim().split(/\s+/);
@@ -87,7 +96,7 @@ export function Hero({ content }: { content: SiteContent }) {
             </Fact>
           </div>
           <div className="hero-facts-divider" aria-hidden />
-          <a href="#rsvp" className="hero-facts-rsvp">
+          <a href="#rsvp" className="hero-facts-rsvp" onClick={goRsvp}>
             <span className="hero-facts-rsvp-label">
               RSVP <span className="rsvp-arrow" aria-hidden>→</span>
             </span>

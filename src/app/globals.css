@@ -1789,6 +1789,9 @@ body {
 }
 
 .hero-facts {
+  /* Sit above .hero-people (z-index 3) so soles/wheels never cover date/venue/RSVP. */
+  position: relative;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   gap: 0;

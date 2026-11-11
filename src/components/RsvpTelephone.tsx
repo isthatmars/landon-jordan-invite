@@ -1,27 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useLiveFlag } from "@/lib/useLiveFlag";
-import { TapHand } from "./icons";
-
-/** Once-per-session dismiss for the RSVP telephone tap guidance. */
-const RSVP_PHONE_CUES_KEY = "lj-rsvp-phone-cues";
-
-function readPhoneCueDismissed() {
-  try {
-    return sessionStorage.getItem(RSVP_PHONE_CUES_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function writePhoneCueDismissed() {
-  try {
-    sessionStorage.setItem(RSVP_PHONE_CUES_KEY, "1");
-  } catch {
-    /* private mode / blocked storage */
-  }
-}
 
 function playRing(ctx: AudioContext) {
   const start = ctx.currentTime + 0.02;
@@ -53,23 +32,12 @@ export function RsvpTelephone() {
   const [pickedUp, setPickedUp] = useState(false);
   const [buzzing, setBuzzing] = useState(false);
   const [greeting, setGreeting] = useState(false);
-  const rsvpLive = useLiveFlag("liveRsvp");
-  const [rsvpInView, setRsvpInView] = useState(false);
-  /* Start dismissed until sessionStorage hydrates — avoids a first-paint flash. */
-  const [cueDismissed, setCueDismissed] = useState(true);
-  const [cueReady, setCueReady] = useState(false);
-
-  useEffect(() => {
-    setCueDismissed(readPhoneCueDismissed());
-    setCueReady(true);
-  }, []);
 
   useEffect(() => {
     const section = document.getElementById("rsvp");
     if (!section) return;
     const io = new IntersectionObserver(
       ([entry]) => {
-        setRsvpInView(entry.isIntersecting);
         if (!entry.isIntersecting || greeted.current) return;
         greeted.current = true;
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -85,14 +53,6 @@ export function RsvpTelephone() {
       if (helpTimer.current != null) window.clearTimeout(helpTimer.current);
     };
   }, []);
-
-  const showPhoneCue = cueReady && rsvpLive && rsvpInView && !cueDismissed;
-
-  const dismissPhoneCue = () => {
-    if (cueDismissed) return;
-    setCueDismissed(true);
-    writePhoneCueDismissed();
-  };
 
   const cueFirstQuestion = () => {
     const attend = document.getElementById("rsvp-attend");
@@ -118,13 +78,12 @@ export function RsvpTelephone() {
   };
 
   const pickup = () => {
-    dismissPhoneCue();
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setPickedUp(true);
     setBuzzing(!reduce);
     window.setTimeout(() => setBuzzing(false), 1100);
 
-    /* One tap should help: ring, then draw attention to Yes/No. */
+    /* One tap should help: ring, then lightly mark Yes/No in pink. */
     if (helpTimer.current != null) window.clearTimeout(helpTimer.current);
     helpTimer.current = window.setTimeout(
       () => {
@@ -147,31 +106,12 @@ export function RsvpTelephone() {
   };
 
   return (
-    <div
-      className={`mx-auto mt-3 w-full max-w-[12.5rem]${showPhoneCue ? " is-guiding" : ""}`}
-      data-testid="rsvp-phone"
-      data-phone-cues={showPhoneCue ? "1" : "0"}
-    >
-      <button
-        type="button"
-        className={`phone-hit${showPhoneCue ? " is-guiding" : ""}`}
-        onClick={pickup}
-        aria-label="Pick up the telephone"
-      >
+    <div className="mx-auto mt-3 w-full max-w-[12.5rem]" data-testid="rsvp-phone">
+      <button type="button" className="phone-hit" onClick={pickup} aria-label="Pick up the telephone">
         <span className={`phone-prop ${buzzing ? "is-buzzing" : ""} ${greeting ? "is-ring-once" : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="phone-photo" src="/images/prop-rsvp-phone.png" alt="" draggable={false} />
-          {showPhoneCue ? (
-            <span className="phone-tap-cue" aria-hidden>
-              <TapHand className="phone-tap-hand" />
-            </span>
-          ) : null}
         </span>
-        {showPhoneCue ? (
-          <span className="phone-tap-hint" role="status">
-            Tap the phone
-          </span>
-        ) : null}
       </button>
       {pickedUp ? (
         <div className="rsvp-phone-copy mt-3 w-full max-w-full text-center" data-testid="rsvp-phone-message" aria-live="polite">

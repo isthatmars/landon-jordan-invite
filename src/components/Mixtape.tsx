@@ -117,6 +117,17 @@ export function Mixtape({ headline }: { headline: string }) {
     <section id="mixtape" data-track-id={loadedId} className="mix-scene scene-section">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/scene-mixtape-plate.jpg" alt="" className="mix-plate" />
+      <div className="mix-atmosphere" aria-hidden>
+        <div className="mix-palm">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/scene-mixtape-plate.jpg" alt="" />
+        </div>
+        <div className="mix-bokeh-field">
+          <span className="mix-bokeh mix-bokeh-1" />
+          <span className="mix-bokeh mix-bokeh-2" />
+          <span className="mix-bokeh mix-bokeh-3" />
+        </div>
+      </div>
       <div className="mix-neon-throw" aria-hidden />
       <div className="mix-table-pool" aria-hidden />
 
@@ -147,6 +158,14 @@ export function Mixtape({ headline }: { headline: string }) {
               className="mix-grade"
               aria-hidden
               style={{ maskImage: "url(/images/prop-boombox-scene.png)", WebkitMaskImage: "url(/images/prop-boombox-scene.png)" }}
+            />
+            <div
+              className="mix-shine"
+              aria-hidden
+              style={{
+                maskImage: "url(/images/prop-boombox-scene.png)",
+                WebkitMaskImage: "url(/images/prop-boombox-scene.png)",
+              }}
             />
             <div className={`mix-deck${playing ? " is-live" : ""}`} aria-hidden>
               <span className="mix-reel mix-reel-l" />

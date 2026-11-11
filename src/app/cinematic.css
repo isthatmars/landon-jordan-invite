@@ -891,6 +891,13 @@ html[data-live-lineup="0"] .lineup-neon,
 html[data-live-lineup="0"] .lineup-pill {
   animation-play-state: paused;
 }
+html[data-live-mixtape="0"] #mixtape .mix-palm img,
+html[data-live-mixtape="0"] #mixtape .mix-bokeh,
+html[data-live-mixtape="0"] #mixtape .mix-shine,
+html[data-live-mixtape="0"] #mixtape .mix-neon-throw,
+html[data-live-mixtape="0"] #mixtape .mix-table-pool {
+  animation-play-state: paused;
+}
 html[data-live-mixtape="0"] #mixtape .neon-script-lg,
 html[data-live-watch="0"] #watch .neon-script-lg,
 html[data-live-watch="0"] #watch .watch-line,

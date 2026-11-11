@@ -1307,6 +1307,124 @@ body {
   user-select: none;
 }
 
+/* Living atmosphere: palm sway + stationary bokeh breath (hero-like overlays). */
+.mix-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mix-palm {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mask-image:
+    linear-gradient(90deg, #000 16%, rgba(0, 0, 0, 0.72) 26%, transparent 40%),
+    linear-gradient(#000 0%, #000 48%, transparent 78%);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(90deg, #000 16%, rgba(0, 0, 0, 0.72) 26%, transparent 40%),
+    linear-gradient(#000 0%, #000 48%, transparent 78%);
+  -webkit-mask-composite: source-in;
+}
+
+.mix-palm img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 40% 84%;
+  transform-origin: 12% 32%;
+  will-change: transform;
+  animation: mix-palm-sway 9.2s ease-in-out infinite alternate;
+}
+
+@keyframes mix-palm-sway {
+  from {
+    transform: rotate(-0.7deg) translate3d(-0.15%, 0.1%, 0);
+  }
+  to {
+    transform: rotate(0.95deg) translate3d(0.2%, -0.12%, 0);
+  }
+}
+
+.mix-bokeh-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mix-bokeh {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(255, 230, 170, 0.95) 0%,
+    rgba(255, 180, 80, 0.42) 32%,
+    rgba(255, 120, 40, 0.12) 52%,
+    transparent 72%
+  );
+  mix-blend-mode: screen;
+  filter: blur(1.5px);
+  transform: translate3d(0, 0, 0);
+  will-change: opacity, filter;
+  animation: mix-bokeh-breathe 5.6s ease-in-out infinite;
+}
+
+.mix-bokeh-1 {
+  left: 26%;
+  top: 12%;
+  width: clamp(3.2rem, 8vw, 5.6rem);
+  height: clamp(3.2rem, 8vw, 5.6rem);
+  opacity: 0.55;
+}
+
+.mix-bokeh-2 {
+  right: 10%;
+  top: 16%;
+  width: clamp(2.4rem, 6vw, 4.2rem);
+  height: clamp(2.4rem, 6vw, 4.2rem);
+  opacity: 0.42;
+  animation-duration: 6.4s;
+  animation-delay: -1.9s;
+}
+
+.mix-bokeh-3 {
+  right: 16%;
+  top: 34%;
+  width: clamp(3.6rem, 9vw, 6.2rem);
+  height: clamp(3.6rem, 9vw, 6.2rem);
+  opacity: 0.48;
+  animation-duration: 7.1s;
+  animation-delay: -3.4s;
+  background: radial-gradient(
+    circle,
+    rgba(255, 210, 140, 0.9) 0%,
+    rgba(255, 57, 200, 0.28) 38%,
+    transparent 70%
+  );
+}
+
+@keyframes mix-bokeh-breathe {
+  0%,
+  100% {
+    opacity: 0.28;
+    filter: blur(1.5px) brightness(0.92);
+  }
+  45% {
+    opacity: 0.82;
+    filter: blur(1.2px) brightness(1.18);
+  }
+  70% {
+    opacity: 0.4;
+    filter: blur(1.6px) brightness(0.98);
+  }
+}
+
 .mix-neon-throw {
   position: absolute;
   z-index: 1;
@@ -1323,7 +1441,7 @@ body {
   );
   mix-blend-mode: screen;
   filter: blur(2px);
-  animation: none;
+  animation: mix-glow-breathe 5.6s ease-in-out infinite;
 }
 
 .mix-table-pool {
@@ -1337,6 +1455,17 @@ body {
   background: radial-gradient(ellipse at center, rgba(255, 57, 200, 0.28), transparent 68%);
   mix-blend-mode: screen;
   filter: blur(6px);
+  animation: mix-glow-breathe 6.8s ease-in-out -2.2s infinite;
+}
+
+@keyframes mix-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .mix-stage {
@@ -1524,6 +1653,61 @@ body {
   mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+}
+
+/* Chrome catch-lights: breathe with bokeh, soft sweep across the boombox lid. */
+.mix-shine {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      transparent 34%,
+      rgba(255, 255, 255, 0.55) 46%,
+      rgba(255, 210, 140, 0.32) 52%,
+      rgba(255, 57, 200, 0.18) 58%,
+      transparent 70%
+    ),
+    radial-gradient(ellipse 48% 28% at 48% 14%, rgba(255, 220, 160, 0.55), transparent 72%),
+    radial-gradient(ellipse 36% 24% at 74% 20%, rgba(255, 57, 200, 0.32), transparent 70%);
+  background-size: 220% 100%, 100% 100%, 100% 100%;
+  background-position: 0% 40%, 50% 0%, 50% 0%;
+  mix-blend-mode: screen;
+  opacity: 0.38;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  will-change: opacity, background-position;
+  animation:
+    mix-chrome-breathe 5.6s ease-in-out infinite,
+    mix-chrome-sweep 8.8s ease-in-out infinite;
+}
+
+@keyframes mix-chrome-breathe {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  45% {
+    opacity: 0.62;
+  }
+  70% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes mix-chrome-sweep {
+  0%,
+  100% {
+    background-position: 0% 36%, 50% 0%, 50% 0%;
+  }
+  50% {
+    background-position: 100% 48%, 50% 0%, 50% 0%;
+  }
 }
 
 .mix-grade-stack {
@@ -2545,8 +2729,26 @@ body {
   .mix-flyer,
   .mix-deck.is-live .mix-reel,
   .mix-deck.is-live .mix-eq i,
-  .mix-neon-throw {
-    animation: none;
+  .mix-neon-throw,
+  .mix-table-pool,
+  .mix-palm img,
+  .mix-bokeh,
+  .mix-shine {
+    animation: none !important;
+  }
+
+  .mix-palm img {
+    transform: none;
+  }
+
+  .mix-bokeh {
+    opacity: 0.45;
+    filter: blur(1.5px);
+  }
+
+  .mix-shine {
+    opacity: 0.32;
+    background-position: 42% 40%, 50% 0%, 50% 0%;
   }
 
   .btn-pink-outline,

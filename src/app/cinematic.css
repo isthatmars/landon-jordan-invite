@@ -915,11 +915,18 @@ html[data-live-home="0"] #home button {
 html[data-live-mixtape="0"] #mixtape {
   pointer-events: none;
 }
+/* Hide transport CTAs only — NOT .mix-tape buttons. Those carry the
+   cassette spine labels; hiding every button made the titles vanish while
+   the stack photo stayed visible as the next plate claimed "live". */
 html[data-live-mixtape="0"] #mixtape .mix-key,
-html[data-live-mixtape="0"] #mixtape button,
-html[data-live-mixtape="0"] #mixtape a {
+html[data-live-mixtape="0"] #mixtape a,
+html[data-live-mixtape="0"] #mixtape button:not(.mix-tape) {
   visibility: hidden;
   pointer-events: none;
+}
+html[data-live-mixtape="0"] #mixtape .mix-tape,
+html[data-live-mixtape="0"] #mixtape .mix-tape-ink {
+  visibility: visible;
 }
 
 html[data-live-watch="0"] #watch {

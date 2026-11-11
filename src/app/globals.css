@@ -2994,7 +2994,7 @@ main {
    * Caveat's ink sits low in the em-box. Asymmetric padding recenters the
    * visual mass in the photographed spine without a large translate.
    */
-  padding-block: 0.02em 0.2em;
+  padding-block: 0.08em 0.12em;
   box-sizing: border-box;
 }
 
@@ -3007,7 +3007,7 @@ main {
   max-width: 100%;
   overflow: hidden;
   text-overflow: clip;
-  translate: 0 -0.04em;
+  translate: 0 -0.02em;
 }
 
 .mix-tape.is-on .mix-tape-ink {
@@ -3138,12 +3138,12 @@ main {
 
   .mix-tape-ink {
     font-size: clamp(8px, 36cqh, 13px);
-    padding-block: 0.04em 0.22em;
+    padding-block: 0.1em 0.14em;
   }
 
   .mix-tape-ink-text {
     /* Desktop: slight Caveat optical lift only — keep glyphs in the spine. */
-    translate: 0 -0.05em;
+    translate: 0 -0.02em;
   }
 
   .mix-phones {

@@ -25,6 +25,7 @@ const STACK: {
   { id: "t7", label: "Prince – Purple Rain", top: "82.0%", height: "18%", labelTop: "12.8%", labelHeight: "58.3%" },
 ];
 
+/** Once-per-session dismiss for the boombox caption. */
 const MIX_CUES_KEY = "lj-mix-cues";
 
 function TransportIcon({ name }: { name: "back" | "play" | "pause" | "forward" | "stop" }) {
@@ -127,11 +128,7 @@ export function Mixtape({ headline }: { headline: string }) {
   );
 
   return (
-    <section
-      id="mixtape"
-      data-track-id={loadedId}
-      className="mix-scene scene-section"
-    >
+    <section id="mixtape" data-track-id={loadedId} className="mix-scene scene-section">
       {/* Floor plate is clipped here so scale/nudge cannot bleed over #home. */}
       <div className="mix-floor" aria-hidden>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -198,15 +195,12 @@ export function Mixtape({ headline }: { headline: string }) {
               </span>
               <span className="mix-lamp" />
             </div>
-            <div className="mix-keys" role="group" aria-label="Boombox transport">
+            <div className="mix-keys" role="group" aria-label="Boombox transport" onClickCapture={dismissCues}>
               <button
                 type="button"
                 className="mix-key"
                 aria-label="Previous tape"
-                onClick={() => {
-                  dismissCues();
-                  stepTape(-1);
-                }}
+                onClick={() => stepTape(-1)}
               >
                 <TransportIcon name="back" />
               </button>
@@ -216,7 +210,6 @@ export function Mixtape({ headline }: { headline: string }) {
                 aria-label="Play the tape"
                 aria-pressed={playing}
                 onClick={() => {
-                  dismissCues();
                   if (!playing) toggleDeck();
                 }}
               >
@@ -228,7 +221,6 @@ export function Mixtape({ headline }: { headline: string }) {
                 aria-label="Pause the tape"
                 aria-pressed={!playing && engaged}
                 onClick={() => {
-                  dismissCues();
                   if (playing) toggleDeck();
                 }}
               >
@@ -238,22 +230,11 @@ export function Mixtape({ headline }: { headline: string }) {
                 type="button"
                 className="mix-key"
                 aria-label="Next tape"
-                onClick={() => {
-                  dismissCues();
-                  stepTape(1);
-                }}
+                onClick={() => stepTape(1)}
               >
                 <TransportIcon name="forward" />
               </button>
-              <button
-                type="button"
-                className="mix-key"
-                aria-label="Stop the tape"
-                onClick={() => {
-                  dismissCues();
-                  stop();
-                }}
-              >
+              <button type="button" className="mix-key" aria-label="Stop the tape" onClick={stop}>
                 <TransportIcon name="stop" />
               </button>
               <PropCaption show={mixLive && !cuesDismissed} className="mix-keys-caption">

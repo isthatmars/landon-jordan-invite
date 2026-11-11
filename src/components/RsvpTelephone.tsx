@@ -33,7 +33,6 @@ function playRing(ctx: AudioContext) {
 export function RsvpTelephone() {
   const audio = useRef<AudioContext | null>(null);
   const greeted = useRef(false);
-  const cueTimer = useRef<number | null>(null);
   const helpTimer = useRef<number | null>(null);
   const [pickedUp, setPickedUp] = useState(false);
   const [buzzing, setBuzzing] = useState(false);
@@ -57,27 +56,16 @@ export function RsvpTelephone() {
     io.observe(section);
     return () => {
       io.disconnect();
-      if (cueTimer.current != null) window.clearTimeout(cueTimer.current);
       if (helpTimer.current != null) window.clearTimeout(helpTimer.current);
     };
   }, []);
 
-  const cueFirstQuestion = () => {
+  const goToFirstQuestion = () => {
     const attend = document.getElementById("rsvp-attend");
-    const step = document.querySelector<HTMLElement>("#rsvp-form .rsvp-step-1");
     const target = attend ?? document.getElementById("rsvp-form");
     if (!(target instanceof HTMLElement)) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-
-    if (step) {
-      step.classList.add("is-cue-lit");
-      if (cueTimer.current != null) window.clearTimeout(cueTimer.current);
-      cueTimer.current = window.setTimeout(() => {
-        step.classList.remove("is-cue-lit");
-        cueTimer.current = null;
-      }, 1800);
-    }
 
     const focusable =
       attend?.querySelector<HTMLElement>("button") ??
@@ -92,12 +80,12 @@ export function RsvpTelephone() {
     setBuzzing(!reduce);
     window.setTimeout(() => setBuzzing(false), 1100);
 
-    /* One tap should help: ring, then draw attention to Yes/No. */
+    /* One tap should help: ring, then bring the Yes/No question into view. */
     if (helpTimer.current != null) window.clearTimeout(helpTimer.current);
     helpTimer.current = window.setTimeout(
       () => {
         helpTimer.current = null;
-        cueFirstQuestion();
+        goToFirstQuestion();
       },
       reduce ? 0 : 420,
     );
@@ -133,7 +121,7 @@ export function RsvpTelephone() {
               type="button"
               className="rsvp-official-cue"
               data-testid="rsvp-official-cue"
-              onClick={cueFirstQuestion}
+              onClick={goToFirstQuestion}
             >
               Let&apos;s make it official!
             </button>

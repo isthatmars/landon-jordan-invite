@@ -17,13 +17,9 @@ export function useLiveFlag(key: LiveKey, fallback = true) {
   useEffect(() => {
     const root = document.documentElement;
     const sync = () => {
-      if (document.hidden) {
-        setLive(false);
-        return;
-      }
-      const value = root.dataset[key];
-      // Unset means cinematic hasn't stamped flags yet — treat as live.
-      setLive(value !== "0");
+      const next = document.hidden ? false : root.dataset[key] !== "0";
+      // Skip no-op updates so MutationObserver chatter doesn't re-render.
+      setLive((prev) => (prev === next ? prev : next));
     };
     sync();
     const mo = new MutationObserver(sync);

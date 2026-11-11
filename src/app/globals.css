@@ -5273,7 +5273,8 @@ form[data-step="3"] .rsvp-step-3 {
   }
 
   .lineup-ambient-grain {
-    animation: lineup-ambient-grain-shift 12s steps(6) infinite;
+    /* Smooth drift — stepped jumps read as flicker over neon cards. */
+    animation: lineup-ambient-grain-shift 18s ease-in-out infinite alternate;
   }
 }
 
@@ -5306,20 +5307,19 @@ form[data-step="3"] .rsvp-step-3 {
 
 @keyframes lineup-ambient-wash-shift {
   from {
-    opacity: 0.75;
+    opacity: 0.84;
   }
   to {
-    opacity: 1;
+    opacity: 0.96;
   }
 }
 
 @keyframes lineup-ambient-grain-shift {
-  0%,
-  100% {
+  from {
     background-position: 0 0, 0 0;
   }
-  50% {
-    background-position: -40px 28px, 0 0;
+  to {
+    background-position: -28px 20px, 0 0;
   }
 }
 

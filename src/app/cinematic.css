@@ -960,9 +960,13 @@ html[data-live-arcade="0"] #arcade a {
 }
 
 /*
- * Pause ALL CSS loops in plates that are off-screen (or when the tab is hidden).
+ * Pause CSS loops in plates that are off-screen (or when the tab is hidden).
  * Party audio (YouTube / intro song) is intentionally NOT paused here — only
  * paint/compositor work. Disco <video> + canvas games pause via JS separately.
+ *
+ * Photographic plates + RSVP can use a blanket descendant pause. Lineup cannot:
+ * `#lineup *` froze one-shot card-rise / kicker-in mid-flight whenever
+ * data-live-lineup chatter toggled, which read as uncontrollable neon flicker.
  */
 html[data-live-home="0"] #home,
 html[data-live-home="0"] #home *,
@@ -972,8 +976,6 @@ html[data-live-watch="0"] #watch,
 html[data-live-watch="0"] #watch *,
 html[data-live-arcade="0"] #arcade,
 html[data-live-arcade="0"] #arcade *,
-html[data-live-lineup="0"] #lineup,
-html[data-live-lineup="0"] #lineup *,
 html[data-live-rsvp="0"] #rsvp,
 html[data-live-rsvp="0"] #rsvp *,
 html[data-page-hidden="1"] #home,
@@ -984,10 +986,32 @@ html[data-page-hidden="1"] #watch,
 html[data-page-hidden="1"] #watch *,
 html[data-page-hidden="1"] #arcade,
 html[data-page-hidden="1"] #arcade *,
-html[data-page-hidden="1"] #lineup,
-html[data-page-hidden="1"] #lineup *,
 html[data-page-hidden="1"] #rsvp,
 html[data-page-hidden="1"] #rsvp * {
+  animation-play-state: paused !important;
+}
+
+/* Lineup: pause looping atmosphere only — leave entrance animations alone. */
+html[data-live-lineup="0"] .lineup-sweep::before,
+html[data-live-lineup="0"] .lineup-neon,
+html[data-live-lineup="0"] .lineup-pill,
+html[data-live-lineup="0"] #lineup .lineup-kicker,
+html[data-live-lineup="0"] .lineup-ambient-blob,
+html[data-live-lineup="0"] .lineup-ambient-wash,
+html[data-live-lineup="0"] .lineup-ambient-grain,
+html[data-live-lineup="0"] #lineup .icon-shake,
+html[data-live-lineup="0"] .lineup-dress::before,
+html[data-live-lineup="0"] .lineup-private::before,
+html[data-page-hidden="1"] .lineup-sweep::before,
+html[data-page-hidden="1"] .lineup-neon,
+html[data-page-hidden="1"] .lineup-pill,
+html[data-page-hidden="1"] #lineup .lineup-kicker,
+html[data-page-hidden="1"] .lineup-ambient-blob,
+html[data-page-hidden="1"] .lineup-ambient-wash,
+html[data-page-hidden="1"] .lineup-ambient-grain,
+html[data-page-hidden="1"] #lineup .icon-shake,
+html[data-page-hidden="1"] .lineup-dress::before,
+html[data-page-hidden="1"] .lineup-private::before {
   animation-play-state: paused !important;
 }
 

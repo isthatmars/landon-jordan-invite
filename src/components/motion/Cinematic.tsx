@@ -5,6 +5,7 @@ import {
   activePlateId,
   invalidatePlateMargins,
   onScrollFrame,
+  type PlateId,
 } from "@/lib/activePlate";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { INTRO_KEY } from "./introBoot";
@@ -25,15 +26,44 @@ const SECTIONS = [
 
 const HASH_SECTIONS = new Set(["home", "mixtape", "watch", "arcade", "lineup", "rsvp"]);
 
+/**
+ * Stabilized covering plate — ignore single-frame boundary chatter.
+ * null until the first sample so deep-links / hash jumps aren't stuck on home.
+ */
+let livePlate: PlateId | null = null;
+let liveCandidate: PlateId | null = null;
+let liveCandidateHits = 0;
+
 function syncLiveFlags(root: HTMLElement) {
   // Probe lower viewport so a covering sticky plate claims "live" before
   // the previous plate's bottom CTAs (hero RSVP) can ghost over it.
-  const active = activePlateId(0.72);
-  root.dataset.liveHome = active === "home" ? "1" : "0";
+  const raw = activePlateId(0.72);
+  // First sample wins immediately; afterward require two agreeing samples
+  // before flipping (boundary chatter was thrashing Lineup pause/parallax).
+  if (livePlate === null || raw === livePlate) {
+    livePlate = raw;
+    liveCandidate = null;
+    liveCandidateHits = 0;
+  } else if (raw === liveCandidate) {
+    liveCandidateHits += 1;
+    if (liveCandidateHits >= 2) {
+      livePlate = raw;
+      liveCandidate = null;
+      liveCandidateHits = 0;
+    }
+  } else {
+    liveCandidate = raw;
+    liveCandidateHits = 1;
+  }
+  const active = livePlate;
+
+  const nextHome = active === "home" ? "1" : "0";
+  if (root.dataset.liveHome !== nextHome) root.dataset.liveHome = nextHome;
   for (const [id, seenKey, liveKey] of SECTIONS) {
     const isActive = active === id;
-    if (isActive) root.dataset[seenKey] = "1";
-    root.dataset[liveKey] = isActive ? "1" : "0";
+    if (isActive && root.dataset[seenKey] !== "1") root.dataset[seenKey] = "1";
+    const nextLive = isActive ? "1" : "0";
+    if (root.dataset[liveKey] !== nextLive) root.dataset[liveKey] = nextLive;
   }
 }
 

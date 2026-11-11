@@ -41,7 +41,7 @@ export function AdminLogin() {
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4">
       <div className="admin-panel p-8">
         <p className="text-center text-neon-gold text-2xl mb-2">♛</p>
-        <h1 className="neon-script-lg text-center text-4xl mb-2">Hi Ms. Kathy!</h1>
+        <h1 className="neon-script-lg text-center text-4xl mb-2">Host Tools</h1>
         <p className="text-center text-sm text-violet-300 mb-6">
           Enter your access code to open the control room — RSVPs, invite wording, music, and emails.
         </p>

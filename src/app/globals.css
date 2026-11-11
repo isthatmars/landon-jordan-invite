@@ -2581,14 +2581,15 @@ body {
   white-space: nowrap;
   overflow: visible;
   /* Tight stack: flourishes live in title padding, not between lines. */
-  padding-block: 0.02em;
+  padding-block: 0;
   padding-inline: 0.18em 0.35em;
-  line-height: 0.78;
+  line-height: 0.68;
   filter: none;
 }
 
 .watch-line + .watch-line {
-  margin-top: -0.22em;
+  /* Pull line 2 up into flourish overhang of line 1. */
+  margin-top: -0.42em;
 }
 
 .watch-line-lead,
@@ -2609,6 +2610,7 @@ body {
 }
 
 .watch-line-hero {
+  color: #ff39c8;
   font-size: clamp(4.35rem, 15.2vw, 6.1rem);
   text-shadow:
     0 0 1px #fff,
@@ -2790,13 +2792,13 @@ body {
   }
 
   #watch .watch-line {
-    padding-block: 0.02em;
+    padding-block: 0;
     padding-inline: 0.16em 0.4em;
-    line-height: 0.76;
+    line-height: 0.66;
   }
 
   #watch .watch-line + .watch-line {
-    margin-top: -0.28em;
+    margin-top: -0.48em;
   }
 
   #watch .watch-line-lead {

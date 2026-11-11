@@ -5008,10 +5008,13 @@ form[data-step="1"] .rsvp-step-1 {
 .lineup-card {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 0.45rem;
   min-height: 100%;
-  padding: clamp(1.15rem, 2vw, 1.6rem);
+  padding: clamp(1.35rem, 2.4vw, 1.85rem) clamp(1.15rem, 2vw, 1.6rem);
   border-radius: 1.15rem;
+  text-align: center;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 32%),
     linear-gradient(180deg, #2a1244 0%, #140818 100%);
@@ -5055,6 +5058,7 @@ form[data-step="1"] .rsvp-step-1 {
   width: var(--icon-md);
   height: var(--icon-md);
   color: #ff39c8;
+  margin-inline: auto;
 }
 
 .lineup-time {
@@ -5063,24 +5067,33 @@ form[data-step="1"] .rsvp-step-1 {
   font-family: var(--font-nav), sans-serif;
   font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
   letter-spacing: 0.08em;
+  text-align: center;
 }
 
 .lineup-card-title {
   margin: 0;
+  /* Force multi-word titles (incl. LET'S ROLL!) onto two centered lines. */
+  max-width: 7.5ch;
   color: #fff;
   font-family: var(--font-condensed), sans-serif;
   font-size: clamp(1.7rem, 1.2rem + 1.4vw, 2.35rem);
   font-style: italic;
   font-weight: 700;
   letter-spacing: 0.03em;
-  line-height: 1.05;
+  line-height: 1.12;
+  text-align: center;
+  text-wrap: balance;
 }
 
 .lineup-card-copy {
-  margin: 0.2rem 0 0;
+  /* Extra breath under the title; narrow measure so copy wraps to 2+ lines. */
+  margin: 0.95rem 0 0;
+  max-width: min(22ch, 88%);
   color: var(--neon-green);
   font-size: clamp(1.05rem, 0.95rem + 0.3vw, 1.2rem);
-  line-height: 1.45;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: pretty;
   text-shadow: 0 0 10px rgba(198, 255, 0, 0.28);
 }
 

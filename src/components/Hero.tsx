@@ -1,6 +1,7 @@
 "use client";
 
-import type { MouseEvent, ReactNode } from "react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { onScrollFrame } from "@/lib/activePlate";
 import { scrollToSection } from "@/lib/scrollToSection";
 import type { SiteContent } from "@/lib/types";
 import { HeroAtmosphere } from "./HeroAtmosphere";
@@ -14,6 +15,14 @@ function goRsvp(event: MouseEvent<HTMLAnchorElement>) {
     history.pushState(null, "", "#rsvp");
   }
   scrollToSection("rsvp");
+}
+
+function goMixtape(event: MouseEvent<HTMLAnchorElement>) {
+  event.preventDefault();
+  if (location.hash !== "#mixtape") {
+    history.pushState(null, "", "#mixtape");
+  }
+  scrollToSection("mixtape");
 }
 
 export function Hero({ content }: { content: SiteContent }) {
@@ -103,7 +112,58 @@ export function Hero({ content }: { content: SiteContent }) {
           </a>
         </div>
       </div>
+
+      <HeroScrollCue />
     </section>
+  );
+}
+
+/** Soft down-chevron at the bottom of #home — inverted BackToTop visibility. */
+function HeroScrollCue() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const hero = document.getElementById("home");
+    let lastVisible = true;
+
+    const update = () => {
+      const threshold = hero ? hero.offsetHeight * 0.72 : window.innerHeight * 0.85;
+      const next = window.scrollY <= threshold;
+      if (next === lastVisible) return;
+      lastVisible = next;
+      setVisible(next);
+    };
+
+    const onScroll = onScrollFrame(update);
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  return (
+    <a
+      href="#mixtape"
+      className={`hero-scroll-cue${visible ? " is-visible" : ""}`}
+      aria-label="Scroll down to the mixtape"
+      tabIndex={visible ? 0 : -1}
+      aria-hidden={!visible}
+      onClick={goMixtape}
+    >
+      <svg className="hero-scroll-cue-icon" viewBox="0 0 32 32" aria-hidden>
+        <path
+          d="M8 12.5 16 20.5 24 12.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </a>
   );
 }
 

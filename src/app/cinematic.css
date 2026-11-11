@@ -350,6 +350,9 @@ html[data-intro="reveal"] .hero-facts-divider {
 html[data-intro="reveal"] .hero-facts-rsvp {
   animation: cta-ignite 0.4s linear calc(1.58s + var(--intro-shift, 0ms)) both;
 }
+html[data-intro="reveal"] .hero-scroll-cue.is-visible {
+  animation: rise-in 0.4s ease-out calc(1.78s + var(--intro-shift, 0ms)) both;
+}
 html[data-intro="reveal"] .site-header {
   animation: header-bar 0.45s ease-out calc(1.78s + var(--intro-shift, 0ms)) both;
 }

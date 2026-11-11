@@ -2805,7 +2805,7 @@ main {
  */
 .mix-tape-ink-text {
   display: block;
-  translate: 0 -0.45em;
+  translate: 0 -0.9em;
 }
 
 .mix-tape.is-on .mix-tape-ink {
@@ -2940,7 +2940,7 @@ main {
 
   .mix-tape-ink-text {
     /* Desktop spines read bottom-heavy — stronger Caveat optical lift. */
-    translate: 0 -0.55em;
+    translate: 0 -0.94em;
   }
 
   .mix-phones {

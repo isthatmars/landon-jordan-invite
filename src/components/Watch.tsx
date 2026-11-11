@@ -44,10 +44,10 @@ export function Watch({ headline }: { headline: string }) {
     target: sectionRef,
     offset: ["start end", "end start"],
   });
-  /* Hang ~halfway off, then ease a few percent back-and-forth with scroll. */
-  const skateXRaw = useTransform(scrollYProgress, [0, 0.5, 1], ["54%", "46%", "38%"]);
-  const skateX = useSpring(skateXRaw, { stiffness: 38, damping: 26, mass: 0.7 });
-  const skateMotionOn = Boolean(desktopMotion && !reduceMotion);
+  /* Grounded remote: gentle lateral drift while staying on the lounge surface. */
+  const remoteXRaw = useTransform(scrollYProgress, [0, 0.5, 1], ["8%", "0%", "-6%"]);
+  const remoteX = useSpring(remoteXRaw, { stiffness: 42, damping: 28, mass: 0.65 });
+  const remoteMotionOn = Boolean(desktopMotion && !reduceMotion);
 
   const words = headline.trim().split(/\s+/).filter(Boolean);
   const lead = words.length > 1 ? words[0] : "";
@@ -62,9 +62,9 @@ export function Watch({ headline }: { headline: string }) {
       className="scene-section watch-scene relative overflow-visible"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/images/scene-watch-table.jpg" alt="" className="watch-bg" />
+      <img src="/images/scene-watch-lounge.jpg" alt="" className="watch-bg" />
       <div className="watch-shade" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-[#05010f] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-[#1a0f08]/90 to-transparent" />
 
       <div className="watch-stage">
         <div className="watch-tv">
@@ -150,13 +150,17 @@ export function Watch({ headline }: { headline: string }) {
             </div>
           </div>
 
-          <div className="watch-skate-rail" aria-hidden>
+          <div className="watch-remote-rail" aria-hidden>
             <motion.div
-              className="watch-skate"
-              style={skateMotionOn ? { x: skateX } : undefined}
+              className="watch-remote"
+              style={remoteMotionOn ? { x: remoteX } : undefined}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/prop-roller-skate.png" alt="" draggable={false} />
+              <img
+                src="/images/prop-tv-remote.png"
+                alt=""
+                draggable={false}
+              />
             </motion.div>
           </div>
         </div>

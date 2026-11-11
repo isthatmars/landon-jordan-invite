@@ -2886,9 +2886,8 @@ main {
   /* Keep clear of jewel-case plastic edges on the photo. */
   left: 9%;
   right: 10%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   /* Clip to the colored spine band so words cannot float out of the case. */
   overflow: hidden;
   /* Keep labels painted even if a parent ghost-CTA rule toggles visibility. */
@@ -2904,16 +2903,24 @@ main {
   white-space: nowrap;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
   pointer-events: none;
+  /*
+   * Caveat's ink sits low in the em-box. Asymmetric padding recenters the
+   * visual mass in the photographed spine without a large translate.
+   */
+  padding-block: 0.02em 0.2em;
+  box-sizing: border-box;
 }
 
 /*
- * Caveat sits slightly low in its em-box. Tiny lift only — the prior ~0.9em
- * nudge yanked every label out of the photographed spine at most widths.
+ * Tiny optical lift only — prior ~0.9em yanked labels out of the spine.
  * Lives on an inner span so mixtape rise-in transform on .mix-tape-ink is safe.
  */
 .mix-tape-ink-text {
   display: block;
-  translate: 0 -0.08em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: clip;
+  translate: 0 -0.04em;
 }
 
 .mix-tape.is-on .mix-tape-ink {
@@ -3044,11 +3051,12 @@ main {
 
   .mix-tape-ink {
     font-size: clamp(8px, 36cqh, 13px);
+    padding-block: 0.04em 0.22em;
   }
 
   .mix-tape-ink-text {
     /* Desktop: slight Caveat optical lift only — keep glyphs in the spine. */
-    translate: 0 -0.1em;
+    translate: 0 -0.05em;
   }
 
   .mix-phones {
@@ -3236,6 +3244,111 @@ main {
   max-height: 1.15rem;
   pointer-events: none;
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
+}
+
+/* Neon tap/hand cues — once-per-session guidance on pause + a cassette. */
+.mix-tap-cue {
+  position: absolute;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  pointer-events: none;
+  color: #ff39c8;
+  filter:
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.55))
+    drop-shadow(0 0 10px rgba(255, 57, 200, 0.85));
+  opacity: 0;
+  transform: translate3d(0, 4px, 0) scale(0.92);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+#mixtape[data-mix-cues="1"] .mix-tap-cue {
+  opacity: 1;
+  transform: none;
+}
+
+.mix-tap-cue-hand {
+  width: 100%;
+  height: 100%;
+}
+
+.mix-tap-cue-pause {
+  right: -0.15rem;
+  bottom: -0.95rem;
+}
+
+.mix-tap-cue-tape {
+  right: 4%;
+  top: 52%;
+  width: 2.15rem;
+  height: 2.15rem;
+  translate: 0 -50%;
+}
+
+@media (max-width: 767px) {
+  .mix-tap-cue-pause {
+    right: 0.05rem;
+    bottom: -0.55rem;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .mix-tap-cue-tape {
+    width: 2rem;
+    height: 2rem;
+    right: 6%;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #mixtape[data-mix-cues="1"] .mix-tap-cue-hand {
+    animation: mix-tap-bounce 1.7s ease-in-out infinite;
+  }
+
+  #mixtape[data-mix-cues="1"] .mix-tap-cue-pause {
+    animation: mix-tap-glow 1.7s ease-in-out infinite;
+  }
+}
+
+@keyframes mix-tap-bounce {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.78;
+  }
+  45% {
+    transform: translate3d(0, 5px, 0) scale(1.06);
+    opacity: 1;
+  }
+  70% {
+    transform: translate3d(0, 1px, 0) scale(1.02);
+    opacity: 0.92;
+  }
+}
+
+@keyframes mix-tap-glow {
+  0%,
+  100% {
+    filter:
+      drop-shadow(0 0 3px rgba(255, 255, 255, 0.4))
+      drop-shadow(0 0 8px rgba(255, 57, 200, 0.65));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))
+      drop-shadow(0 0 14px rgba(255, 57, 200, 0.95));
+  }
+}
+
+/* Hide cues when the plate is covered / not live (also pauses via cinematic.css). */
+html[data-live-mixtape="0"] #mixtape .mix-tap-cue,
+html[data-page-hidden="1"] #mixtape .mix-tap-cue {
+  opacity: 0 !important;
+  visibility: hidden;
 }
 
 .mix-key:hover,
@@ -4960,8 +5073,20 @@ main {
   .mix-table-pool,
   .mix-palm img,
   .mix-bokeh,
-  .mix-shine {
+  .mix-shine,
+  .mix-tap-cue,
+  .mix-tap-cue-hand,
+  .mix-tap-cue-pause {
     animation: none !important;
+  }
+
+  #mixtape[data-mix-cues="1"] .mix-tap-cue {
+    opacity: 0.92;
+    transform: none;
+  }
+
+  #mixtape[data-mix-cues="1"] .mix-tap-cue-hand {
+    opacity: 0.9;
   }
 
   .mix-palm img {

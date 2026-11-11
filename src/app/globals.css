@@ -2031,13 +2031,13 @@ main {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: max(0.45rem, calc(0.2rem + env(safe-area-inset-bottom)));
+  bottom: max(0.7rem, calc(0.35rem + env(safe-area-inset-bottom)));
   z-index: 5;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.75rem;
+  height: 2.75rem;
   margin-inline: auto;
   padding: 0;
   border: 1px solid rgba(255, 57, 200, 0.35);

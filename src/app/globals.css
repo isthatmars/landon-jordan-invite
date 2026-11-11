@@ -881,10 +881,36 @@ main {
   backdrop-filter: blur(12px);
 }
 
+/* Shared pink frame glow — breathe via --frame-glow (same cadence as neon script). */
+@property --frame-glow {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@keyframes neon-frame-breathe {
+  0%,
+  100% {
+    --frame-glow: 0.78;
+  }
+  50% {
+    --frame-glow: 1.28;
+  }
+}
+
 .neon-frame {
   border: 3px solid var(--neon-pink);
   border-radius: 1.25rem;
-  box-shadow: 0 0 24px #ff39c860, inset 0 0 24px #ff39c815;
+  box-shadow:
+    0 0 calc(24px * var(--frame-glow)) rgba(255, 57, 200, calc(0.38 * var(--frame-glow))),
+    inset 0 0 calc(24px * var(--frame-glow)) rgba(255, 57, 200, calc(0.08 * var(--frame-glow)));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Fallback when cinematic seen-flags are not armed yet. */
+  #rsvp .neon-frame {
+    animation: neon-frame-breathe 5.6s ease-in-out infinite;
+  }
 }
 
 .admin-panel {
@@ -4929,20 +4955,40 @@ main {
     text-shadow 0.16s ease;
 }
 
+/* Soft keycap neon pulse — same 5.6s breathe as RSVP script / frame. */
+@property --keycap-glow {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@keyframes keycap-glow-breathe {
+  0%,
+  100% {
+    --keycap-glow: 0.78;
+  }
+  50% {
+    --keycap-glow: 1.24;
+  }
+}
+
 /* Outline-only attend choices — glow border, no solid fill at rest. */
 .keycap-yes {
+  --keycap-glow: 1;
   color: #c6ff00;
   border-color: #c6ff00;
   background: transparent;
-  text-shadow: 0 0 10px rgba(198, 255, 0, 0.55);
+  text-shadow: 0 0 calc(10px * var(--keycap-glow)) rgba(198, 255, 0, calc(0.55 * var(--keycap-glow)));
   box-shadow:
-    0 0 8px rgba(198, 255, 0, 0.45),
-    0 0 22px rgba(198, 255, 0, 0.28);
+    0 0 calc(8px * var(--keycap-glow)) rgba(198, 255, 0, calc(0.45 * var(--keycap-glow))),
+    0 0 calc(22px * var(--keycap-glow)) rgba(198, 255, 0, calc(0.28 * var(--keycap-glow)));
 }
 
 .keycap-yes:hover,
 .keycap-yes:focus-visible {
   outline: none;
+  animation: none;
+  --keycap-glow: 1;
   color: #e8ff7a;
   border-color: #e8ff7a;
   background: rgba(198, 255, 0, 0.08);
@@ -4955,18 +5001,21 @@ main {
 }
 
 .keycap-no {
+  --keycap-glow: 1;
   color: #e0b0ff;
   border-color: #c080ff;
   background: transparent;
-  text-shadow: 0 0 10px rgba(192, 128, 255, 0.55);
+  text-shadow: 0 0 calc(10px * var(--keycap-glow)) rgba(192, 128, 255, calc(0.55 * var(--keycap-glow)));
   box-shadow:
-    0 0 8px rgba(192, 128, 255, 0.45),
-    0 0 22px rgba(160, 80, 255, 0.28);
+    0 0 calc(8px * var(--keycap-glow)) rgba(192, 128, 255, calc(0.45 * var(--keycap-glow))),
+    0 0 calc(22px * var(--keycap-glow)) rgba(160, 80, 255, calc(0.28 * var(--keycap-glow)));
 }
 
 .keycap-no:hover,
 .keycap-no:focus-visible {
   outline: none;
+  animation: none;
+  --keycap-glow: 1;
   color: #f0d0ff;
   border-color: #e0b0ff;
   background: rgba(192, 128, 255, 0.1);
@@ -4978,9 +5027,23 @@ main {
     0 0 30px rgba(160, 80, 255, 0.45);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  #rsvp .keycap-yes,
+  #rsvp .keycap-no {
+    animation: keycap-glow-breathe 5.6s ease-in-out infinite;
+  }
+
+  /* Offset No so the two keycaps breathe out of phase. */
+  #rsvp .keycap-no {
+    animation-delay: -2.8s;
+  }
+}
+
 /* Selected / pressed: stronger glow + light tint, still outline-led. */
 .keycap-yes.is-down,
 .keycap-yes:active {
+  animation: none;
+  --keycap-glow: 1;
   transform: scale(0.98);
   color: #f0ff9a;
   border-color: #f0ff9a;
@@ -4995,6 +5058,8 @@ main {
 
 .keycap-no.is-down,
 .keycap-no:active {
+  animation: none;
+  --keycap-glow: 1;
   transform: scale(0.98);
   color: #f5e0ff;
   border-color: #f0d0ff;

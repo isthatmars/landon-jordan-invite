@@ -876,7 +876,9 @@ html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-frame {
 }
 html[data-seen-rsvp="1"] #rsvp .neon-frame {
   position: relative;
-  animation: frame-on 0.4s ease 1.15s both;
+  animation:
+    frame-on 0.4s ease 1.15s both,
+    neon-frame-breathe 5.6s ease-in-out 1.55s infinite;
 }
 html[data-seen-rsvp="1"] #rsvp .neon-frame::before {
   content: "";
@@ -899,11 +901,11 @@ html[data-seen-rsvp="1"] #rsvp [data-testid="rsvp-phone"] {
 @keyframes frame-on {
   from {
     border-color: rgba(255, 57, 200, 0.2);
-    box-shadow: none;
+    --frame-glow: 0;
   }
   to {
     border-color: #ff39c8;
-    box-shadow: 0 0 24px #ff39c860, inset 0 0 24px #ff39c815;
+    --frame-glow: 1;
   }
 }
 @keyframes trace-on {
@@ -1003,7 +1005,10 @@ html[data-page-hidden="1"] #rsvp * {
   #arcade .neon-script-lg,
   #lineup .lineup-kicker,
   #rsvp .neon-script-lg,
-  #rsvp .neon-frame::before {
+  #rsvp .neon-frame,
+  #rsvp .neon-frame::before,
+  #rsvp .keycap-yes,
+  #rsvp .keycap-no {
     -webkit-mask-image: none;
     mask-image: none;
     animation: none !important;

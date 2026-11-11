@@ -9,6 +9,7 @@ import {
 } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { crtScreen } from "@/lib/cutouts";
+import { useLiveFlag } from "@/lib/useLiveFlag";
 import { usePlayback } from "./Playback";
 import { YoutubeScreen } from "./YoutubeScreen";
 import { YoutubeThumb } from "./YoutubeThumb";
@@ -77,6 +78,7 @@ export function Watch({ headline }: { headline: string }) {
   const sectionRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const reduceMotion = useReducedMotion();
+  const watchLive = useLiveFlag("liveWatch");
   const [desktopMotion, setDesktopMotion] = useState(false);
 
   /* CRT channel switch: quick snow (≤1s), then clear as the new video plays underneath. */
@@ -133,7 +135,7 @@ export function Watch({ headline }: { headline: string }) {
   /* Grounded remote: gentle lateral drift while staying on the lounge surface. */
   const remoteXRaw = useTransform(scrollYProgress, [0, 0.5, 1], ["4%", "0%", "-3%"]);
   const remoteX = useSpring(remoteXRaw, { stiffness: 42, damping: 28, mass: 0.65 });
-  const remoteMotionOn = Boolean(desktopMotion && !reduceMotion);
+  const remoteMotionOn = Boolean(desktopMotion && !reduceMotion && watchLive);
 
   const words = headline.trim().split(/\s+/).filter(Boolean);
   const lead = words.length > 1 ? words[0] : "";

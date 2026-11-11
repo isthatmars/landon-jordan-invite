@@ -127,6 +127,13 @@ export function Cinematic() {
 
   useEffect(() => {
     const root = document.documentElement;
+    // Pause CSS loops while the tab is backgrounded (audio keeps playing).
+    const syncPageHidden = () => {
+      root.dataset.pageHidden = document.hidden ? "1" : "0";
+    };
+    syncPageHidden();
+    document.addEventListener("visibilitychange", syncPageHidden);
+
     // Re-assert after hydration; browsers may restore scroll after paint.
     settleLoadScroll();
     let guard = true;
@@ -156,6 +163,7 @@ export function Cinematic() {
         for (const id of timers) window.clearTimeout(id);
         window.clearTimeout(release);
         introWatch.disconnect();
+        document.removeEventListener("visibilitychange", syncPageHidden);
       };
     }
     root.dataset.motion = "armed";
@@ -204,6 +212,7 @@ export function Cinematic() {
       io.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", syncPageHidden);
     };
   }, []);
 

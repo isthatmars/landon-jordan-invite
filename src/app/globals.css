@@ -2784,6 +2784,9 @@ main {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  /* Keep labels painted even if a parent ghost-CTA rule toggles visibility. */
+  visibility: visible;
+  opacity: 1;
   color: #1a1020;
   font-family: var(--font-label), cursive;
   font-weight: 600;

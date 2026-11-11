@@ -400,6 +400,11 @@ export function renderEditableEmail(
   const bodyFilled = fillPlain(copy.body, plainMap);
 
   let bodyHtml = escapeHtml(bodyFilled).replace(/\n/g, "<br/>");
+  // Accent short label lines ending in ":" (When & where:, Dress code:, etc.)
+  bodyHtml = bodyHtml.replace(
+    /(^|<br\/>)([^<:]{2,40}:)(?=<br\/>|$)/g,
+    '$1<span style="color:#ff2bd6;font-weight:800;letter-spacing:0.04em">$2</span>',
+  );
   bodyHtml = bodyHtml
     .replace(/%%NAMED_PEOPLE%%/g, vars.namedPeopleHtml || "")
     .replace(/%%DIETARY%%/g, vars.dietaryBlockHtml || "")

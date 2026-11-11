@@ -359,7 +359,7 @@ export function neonEmailTemplate(opts: {
   const inviteHref = opts.ctaUrl || origin;
 
   // Inset ~10% tighter than edge-to-edge (≈28px on 560px shell).
-  const inset = 28;
+  const inset = 32;
   const headlinePx = opts.largeHeadline ? 29 : 24;
   const headlineBottom = opts.largeHeadline ? 28 : 24;
 
@@ -487,11 +487,11 @@ export function neonEmailTemplate(opts: {
               <!-- Pull box up over hero feet (Apple Mail / iOS / Gmail). Outlook uses the MSO top pad (= L/R inset) instead. -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:-24px">
                 <tr>
-                  <td align="center" bgcolor="#1a1028" style="background-color:#1a1028;border-radius:24px">
-                    <!-- Nested rgba overlay — glass when rgba kept; solid #1a1028 fallback otherwise -->
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(10,6,20,0.70);border-radius:24px">
+                  <td align="center" bgcolor="#241033" style="background-color:rgba(12,4,24,0.62);border-radius:28px">
+                    <!-- Nested rgba glass; solid #241033 is a softer email-safe fallback (not near-black opaque) -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;border-spacing:0;background-color:rgba(10,6,20,0.58);border-radius:28px">
                       <tr>
-                        <td align="center" bgcolor="transparent" style="background-color:rgba(7,1,15,0.55);border:1px solid rgba(255,43,214,0.4);border-radius:24px;padding:26px 22px 22px;text-align:center">
+                        <td align="center" bgcolor="transparent" style="background-color:rgba(7,1,15,0.42);border:1px solid rgba(255,43,214,0.45);border-radius:28px;padding:28px 24px 24px;text-align:center">
                           ${eyebrow}
                           <h1 style="Margin:0 0 ${headlineBottom}px;color:#ff2bd6;font-size:${headlinePx}px;line-height:1.2;font-weight:800;font-family:Helvetica,Arial,sans-serif;text-align:center;text-shadow:0 0 12px #ff2bd6,0 0 28px rgba(255,43,214,0.45)">${opts.headline}</h1>
                           <div style="color:#f3e8ff;line-height:1.65;font-size:15px;font-family:Helvetica,Arial,sans-serif;text-align:center">${opts.bodyHtml}</div>

@@ -84,6 +84,7 @@ function settleLoadScroll() {
   }
   const prev = document.documentElement.style.scrollBehavior;
   document.documentElement.style.scrollBehavior = "auto";
+  // Reset both axes — sideways overflow can paint the wrong plate on mobile.
   window.scrollTo(0, 0);
   document.documentElement.style.scrollBehavior = prev;
   const active = document.activeElement;

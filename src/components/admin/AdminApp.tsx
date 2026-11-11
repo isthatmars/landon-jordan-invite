@@ -71,7 +71,7 @@ const TABS: {
     label: "Templates",
     accent: "pink",
     explainer:
-      "All 9 party emails — edit subject, body, and CTA, preview the neon look, then send when you’re ready.",
+      "All 9 party emails — edit subject, body, and CTA, preview the hero look, then send when you’re ready.",
   },
 ];
 
@@ -745,7 +745,7 @@ export function AdminApp() {
             <p className="text-neon-gold text-lg leading-none">♛</p>
             <h2 className="neon-script text-3xl sm:text-4xl mt-1">Email Templates</h2>
             <p className="mt-2 text-sm text-violet-200 max-w-2xl leading-relaxed">
-              Simple buttons — tap one to open it, edit the words, preview the neon look, then
+              Simple buttons — tap one to open it, edit the words, preview the hero look, then
               send. Opening another closes the last.
             </p>
           </div>

@@ -6,6 +6,7 @@ import {
   getSmsProvider,
   isResendConfigured,
   neonEmailTemplate,
+  partySiteUrl,
   resendSetupHint,
   sendGuestEmail,
   sendGuestSmsBlast,
@@ -132,7 +133,7 @@ export async function POST(request: Request) {
       headline: escapeHtml(String(body.subject || "Party Update")),
       bodyHtml: `<div>${safeBody}</div>`,
       ctaLabel: "Open Invite",
-      ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com",
+      ctaUrl: partySiteUrl(),
     });
     const results: NotifyResult[] = [];
     for (const r of recipients) {

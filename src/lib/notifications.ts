@@ -324,9 +324,23 @@ export async function forwardRsvpWebhook(opts: {
 }
 
 export function partySiteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com";
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com").trim();
+  return raw.replace(/\/$/, "") || "https://www.landonandjordan.com";
 }
 
+/** Absolute public asset URL for outbound email HTML (clients need full https URLs). */
+export function partyAssetUrl(path: string): string {
+  const base = partySiteUrl();
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalized}`;
+}
+
+/**
+ * Neon party email shell — matches the invite hero:
+ * Miami terrace bg, couple cutout, script + chrome brand,
+ * darkened details-bar overlay holding editable headline/body/CTA.
+ * Table layout + inline CSS for common email clients.
+ */
 export function neonEmailTemplate(opts: {
   headline: string;
   bodyHtml: string;
@@ -334,27 +348,105 @@ export function neonEmailTemplate(opts: {
   ctaUrl?: string;
   eyebrow?: string;
 }): string {
+  const origin = partySiteUrl();
+  const heroBg = partyAssetUrl("/images/hero-bg-miami.jpg");
+  const couple = partyAssetUrl("/images/hero-couple-cutout-cartoon.png");
+  const chrome = partyAssetUrl("/images/chrome-80s.png");
+  const inviteHref = opts.ctaUrl || origin;
+
   const eyebrow = opts.eyebrow
-    ? `<p style="text-align:center;margin:0 0 10px;color:#c6ff00;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700">${opts.eyebrow}</p>`
+    ? `<p style="Margin:0 0 10px;color:#c6ff00;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700;font-family:Helvetica,Arial,sans-serif">${opts.eyebrow}</p>`
     : "";
   const cta =
-    opts.ctaLabel && opts.ctaUrl
-      ? `<p style="text-align:center;margin:28px 0 8px">
-          <a href="${opts.ctaUrl}" style="display:inline-block;padding:14px 28px;border-radius:999px;border:2px solid #c6ff00;background:transparent;color:#c6ff00;font-weight:800;text-decoration:none;letter-spacing:0.06em;box-shadow:0 0 8px rgba(198,255,0,0.45),0 0 22px rgba(198,255,0,0.28)">${opts.ctaLabel}</a>
-        </p>`
+    opts.ctaLabel && inviteHref
+      ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="Margin:22px auto 6px">
+          <tr>
+            <td align="center" bgcolor="transparent" style="border-radius:999px;border:2px solid #c6ff00;box-shadow:0 0 8px rgba(198,255,0,0.4)">
+              <a href="${inviteHref}" style="display:inline-block;padding:13px 26px;border-radius:999px;color:#c6ff00;font-weight:800;text-decoration:none;letter-spacing:0.06em;font-family:Helvetica,Arial,sans-serif;font-size:14px">${opts.ctaLabel}</a>
+            </td>
+          </tr>
+        </table>`
       : "";
-  return `<!DOCTYPE html><html><body style="margin:0;background:#07010f;color:#fff;font-family:Helvetica,Arial,sans-serif">
-  <div style="max-width:560px;margin:0 auto;padding:32px 20px;background:radial-gradient(ellipse at 50% 0%,rgba(120,40,180,0.35),transparent 55%),#07010f">
-    <div style="border:2px solid #ff2bd6;border-radius:18px;padding:30px 26px;box-shadow:0 0 18px rgba(255,43,214,0.45),0 0 40px rgba(255,43,214,0.18),inset 0 0 40px rgba(255,43,214,0.06);background:linear-gradient(165deg,#1a0530 0%,#120822 48%,#0a0014 100%)">
-      <p style="text-align:center;color:#FFD700;font-size:22px;margin:0 0 6px;text-shadow:0 0 12px rgba(255,215,0,0.55)">♛</p>
-      ${eyebrow}
-      <h1 style="text-align:center;color:#ff2bd6;font-size:26px;line-height:1.2;margin:0 0 18px;text-shadow:0 0 12px #ff2bd6,0 0 28px rgba(255,43,214,0.45)">${opts.headline}</h1>
-      <div style="color:#f3e8ff;line-height:1.6;font-size:15px">${opts.bodyHtml}</div>
-      ${cta}
-      <p style="text-align:center;color:#9ca3af;font-size:12px;margin:24px 0 0;letter-spacing:0.04em">Landon &amp; Jordan · 80s Birthday Party</p>
-    </div>
-  </div>
-</body></html>`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="dark" />
+<title>${opts.headline}</title>
+<!--[if mso]>
+<style type="text/css">
+  body, table, td { font-family: Arial, Helvetica, sans-serif !important; }
+</style>
+<![endif]-->
+</head>
+<body style="Margin:0;padding:0;background:#07010f;color:#ffffff;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">${opts.headline}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#07010f;border-collapse:collapse">
+    <tr>
+      <td align="center" style="padding:20px 12px">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;border-collapse:collapse">
+          <!-- Hero stage: Miami bg + couple + brand -->
+          <tr>
+            <td background="${heroBg}" bgcolor="#1a0a28" style="background-image:url('${heroBg}');background-size:cover;background-position:center top;background-repeat:no-repeat;background-color:#1a0a28;border:2px solid #ff2bd6;border-bottom:0;border-radius:18px 18px 0 0">
+              <!--[if gte mso 9]>
+              <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:560px;">
+              <v:fill type="frame" src="${heroBg}" color="#1a0a28" />
+              <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
+              <![endif]-->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+                <tr>
+                  <td style="padding:22px 16px 10px">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+                      <tr>
+                        <td width="46%" valign="bottom" style="width:46%;vertical-align:bottom;padding:0 4px 0 0">
+                          <img src="${couple}" width="230" alt="Landon and Jordan in 80s windbreakers" style="display:block;width:100%;max-width:230px;height:auto;border:0;outline:none;text-decoration:none" />
+                        </td>
+                        <td width="54%" valign="middle" align="center" style="width:54%;vertical-align:middle;padding:6px 0 10px 4px;text-align:center">
+                          <p style="Margin:0 0 2px;color:#FFD700;font-size:20px;line-height:1;text-shadow:0 0 12px rgba(255,215,0,0.55)">♛</p>
+                          <p style="Margin:0 0 4px;color:#ffffff;font-size:26px;line-height:1.05;font-family:Georgia,'Brush Script MT','Segoe Script',cursive;font-style:italic;font-weight:400;text-shadow:0 2px 10px rgba(0,0,0,0.55)">Landon &amp; Jordan's</p>
+                          <img src="${chrome}" width="150" alt="80s" style="display:block;margin:2px auto 6px auto;width:150px;max-width:72%;height:auto;border:0;outline:none" />
+                          <p style="Margin:0;color:#ffffff;font-size:12px;letter-spacing:0.28em;text-transform:uppercase;font-weight:800;font-family:Helvetica,Arial,sans-serif;text-shadow:0 1px 6px rgba(0,0,0,0.55)">Birthday Party</p>
+                          <p style="Margin:6px 0 0;line-height:0;font-size:0">
+                            <span style="display:inline-block;width:54px;height:3px;background-color:#c6ff00;border-radius:999px;box-shadow:0 0 8px rgba(198,255,0,0.7)"></span>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <!--[if gte mso 9]>
+              </v:textbox>
+              </v:rect>
+              <![endif]-->
+            </td>
+          </tr>
+          <!-- Darkened details-bar overlay: editable email content -->
+          <tr>
+            <td background="${heroBg}" bgcolor="#07010f" style="background-image:url('${heroBg}');background-size:cover;background-position:center bottom;background-repeat:no-repeat;background-color:#07010f;border:2px solid #ff2bd6;border-top:0;border-radius:0 0 18px 18px;padding:0 12px 14px">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+                <tr>
+                  <td bgcolor="#0a0614" style="background-color:rgba(7,1,15,0.88);background-image:linear-gradient(180deg,rgba(10,6,20,0.92),rgba(7,1,15,0.94));border:1px solid rgba(255,43,214,0.35);border-radius:14px;padding:22px 20px 20px;box-shadow:0 0 18px rgba(255,43,214,0.28),inset 0 0 28px rgba(255,43,214,0.06)">
+                    ${eyebrow}
+                    <h1 style="Margin:0 0 14px;color:#ff2bd6;font-size:24px;line-height:1.25;font-weight:800;font-family:Helvetica,Arial,sans-serif;text-shadow:0 0 12px #ff2bd6,0 0 28px rgba(255,43,214,0.45)">${opts.headline}</h1>
+                    <div style="color:#f3e8ff;line-height:1.65;font-size:15px;font-family:Helvetica,Arial,sans-serif">${opts.bodyHtml}</div>
+                    ${cta}
+                    <p style="Margin:20px 0 0;text-align:center;color:#9ca3af;font-size:12px;letter-spacing:0.04em;font-family:Helvetica,Arial,sans-serif">
+                      <a href="${origin}" style="color:#c4b5d8;text-decoration:none">Landon &amp; Jordan · 80s Birthday Party</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 }
 
 /** Pretty door-list block for confirmation / owner emails. */

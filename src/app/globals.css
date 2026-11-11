@@ -3603,7 +3603,8 @@ form[data-step="1"] .rsvp-step-1 {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  /* Half the prior gap above the dress-code box (~36px → ~18px on desktop). */
+  margin-top: clamp(0.75rem, 1.5vw, 1.125rem);
   padding: clamp(1.25rem, 2.5vw, 1.75rem) clamp(1.35rem, 3vw, 2.25rem);
   border-radius: 1.25rem;
   background: #09060f;

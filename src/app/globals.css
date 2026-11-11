@@ -1263,7 +1263,15 @@ body {
   filter: brightness(1.02);
 }
 
+.admin-panel-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.75rem;
+}
+
 .admin-back-link {
+  display: inline-block;
   border: 0;
   background: transparent;
   padding: 0;
@@ -1280,6 +1288,10 @@ body {
 .admin-back-link:focus-visible {
   color: #fff;
   outline: none;
+}
+
+.admin-panel-title {
+  margin: 0;
 }
 
 

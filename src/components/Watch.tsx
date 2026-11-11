@@ -79,10 +79,16 @@ export function Watch({ headline }: { headline: string }) {
       return;
     }
     if (reduceMotion) return;
-    setSwitchKey((key) => key + 1);
-    setChannelSwitching(true);
-    const timer = window.setTimeout(() => setChannelSwitching(false), 420);
-    return () => window.clearTimeout(timer);
+    let clearTimer = 0;
+    const startTimer = window.setTimeout(() => {
+      setSwitchKey((key) => key + 1);
+      setChannelSwitching(true);
+      clearTimer = window.setTimeout(() => setChannelSwitching(false), 420);
+    }, 0);
+    return () => {
+      window.clearTimeout(startTimer);
+      window.clearTimeout(clearTimer);
+    };
   }, [now?.youtubeId, reduceMotion]);
 
   useEffect(() => {

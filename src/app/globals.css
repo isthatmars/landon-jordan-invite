@@ -314,10 +314,19 @@ main {
   padding: 2rem 1.25rem max(4.75rem, calc(3.75rem + env(safe-area-inset-bottom)));
   text-align: center;
   color: rgba(248, 244, 250, 0.88);
+  /*
+   * Radial centers + radii stay inside the footer box so halos read as full
+   * circles under the magenta rule (prior 0%/20% centers flat-clipped the top).
+   */
   background:
-    radial-gradient(ellipse 70% 90% at 12% 0%, rgba(135, 56, 255, 0.45), transparent 55%),
-    radial-gradient(ellipse 60% 80% at 88% 20%, rgba(255, 57, 200, 0.32), transparent 50%),
-    radial-gradient(ellipse 50% 60% at 50% 100%, rgba(56, 217, 255, 0.18), transparent 55%),
+    radial-gradient(ellipse 52% 58% at 16% 48%, rgba(135, 56, 255, 0.42), transparent 58%),
+    radial-gradient(
+      ellipse 44% 52% at 86% 50%,
+      rgba(255, 230, 180, 0.28) 0%,
+      rgba(255, 57, 200, 0.36) 40%,
+      transparent 72%
+    ),
+    radial-gradient(ellipse 50% 55% at 50% 100%, rgba(56, 217, 255, 0.18), transparent 55%),
     linear-gradient(180deg, #1a0730 0%, #120520 42%, #07010f 100%);
   border-top: 1px solid rgba(255, 57, 200, 0.45);
   box-shadow:
@@ -2676,7 +2685,8 @@ main {
   z-index: 1;
   pointer-events: none;
   left: 28%;
-  top: -4%;
+  /* Stay inside #mixtape / .mix-scene overflow:clip (was -4% → flat top cut). */
+  top: 2%;
   width: 58%;
   height: 48%;
   background: radial-gradient(
@@ -4185,14 +4195,16 @@ html[data-page-hidden="1"] #mixtape .mix-tap-cue {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  overflow: hidden;
+  /* Visible so lamp blur/halo is not hard-clipped; #watch still clips the plate. */
+  overflow: visible;
 }
 
 .watch-lamp-glow {
   position: absolute;
   /* Green lamp pool behind the sofa (lounge plate ~70% x / 17% y). */
   left: 58%;
-  top: 2%;
+  /* Inset from the plate top so blur + breathe-scale stay inside overflow:clip. */
+  top: 9%;
   width: min(42vw, 28rem);
   height: min(34vw, 22rem);
   border-radius: 50%;
@@ -4772,7 +4784,8 @@ html[data-page-hidden="1"] #mixtape .mix-tap-cue {
 
   #watch .watch-lamp-glow {
     left: 62%;
-    top: 0%;
+    /* Keep the circular halo fully inside the sticky plate (was top: 0% → flat clip). */
+    top: 7%;
     width: min(34vw, 26rem);
     height: min(26vw, 18rem);
   }

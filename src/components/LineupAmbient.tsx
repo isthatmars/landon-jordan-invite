@@ -8,6 +8,7 @@ import {
   useTransform,
 } from "framer-motion";
 import type { RefObject } from "react";
+import { useLiveFlag } from "@/lib/useLiveFlag";
 
 /** Party color wash + grain behind lineup content; parallax tied to section scroll. */
 export function LineupAmbient({
@@ -15,7 +16,10 @@ export function LineupAmbient({
 }: {
   sectionRef: RefObject<HTMLElement | null>;
 }) {
-  const reduce = useReducedMotion();
+  const reduceMotion = useReducedMotion();
+  const lineupLive = useLiveFlag("liveLineup");
+  // Freeze parallax when the plate is off-screen or the tab is hidden.
+  const reduce = Boolean(reduceMotion || !lineupLive);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLiveFlag } from "@/lib/useLiveFlag";
 
 const SCENE = "/images/scene-arcade-room.jpg";
 const LOOP = "/images/scene-arcade-disco.mp4";
@@ -48,8 +49,25 @@ export function ArcadeBackdrop() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const visibleRef = useRef(false);
+  const arcadeLive = useLiveFlag("liveArcade");
+  const arcadeLiveRef = useRef(arcadeLive);
   const [reduce, setReduce] = useState(false);
   const [mode, setMode] = useState<"video" | "canvas">("video");
+
+  useEffect(() => {
+    arcadeLiveRef.current = arcadeLive;
+    const video = videoRef.current;
+    if (!video || reduce || mode !== "video") return;
+    if (arcadeLive && visibleRef.current) {
+      video.muted = true;
+      void video.play().catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setMode("canvas");
+      });
+    } else {
+      video.pause();
+    }
+  }, [arcadeLive, reduce, mode]);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -67,7 +85,7 @@ export function ArcadeBackdrop() {
         visibleRef.current = entry.isIntersecting;
         const video = videoRef.current;
         if (!video || reduce || mode !== "video") return;
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && arcadeLiveRef.current) {
           video.muted = true;
           void video.play().catch((err: unknown) => {
             if (err instanceof DOMException && err.name === "AbortError") return;
@@ -100,7 +118,15 @@ export function ArcadeBackdrop() {
     const draw = (now: number) => {
       if (stopped) return;
       raf = window.requestAnimationFrame(draw);
-      if (!visibleRef.current || document.hidden || !img.complete || !img.naturalWidth) return;
+      if (
+        !visibleRef.current ||
+        !arcadeLiveRef.current ||
+        document.hidden ||
+        !img.complete ||
+        !img.naturalWidth
+      ) {
+        return;
+      }
       if (now - last < 32) return;
       last = now;
 

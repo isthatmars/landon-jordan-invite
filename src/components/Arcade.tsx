@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { arcadeScreen } from "@/lib/cutouts";
+import { useLiveFlag } from "@/lib/useLiveFlag";
 import { ArcadeBackdrop } from "./ArcadeBackdrop";
 import { GreenSwoosh, NeonArrow, PacManIcon } from "./icons";
 import { PacManGame } from "./PacManGame";
@@ -10,6 +11,7 @@ import { PacManGame } from "./PacManGame";
 export function Arcade({ headline }: { headline: string }) {
   const [running, setRunning] = useState(false);
   const [narrow, setNarrow] = useState(false);
+  const arcadeLive = useLiveFlag("liveArcade");
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 767px)");
@@ -106,7 +108,7 @@ export function Arcade({ headline }: { headline: string }) {
                 className="absolute z-[1] overflow-hidden bg-black"
                 style={arcadeScreen}
               >
-                {!overlay && <PacManGame running={running} embed />}
+                {!overlay && <PacManGame running={running && arcadeLive} embed />}
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -138,7 +140,7 @@ export function Arcade({ headline }: { headline: string }) {
                 <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
               </svg>
             </button>
-            <PacManGame running showPad />
+            <PacManGame running={running && arcadeLive} showPad />
           </div>,
           document.body,
         )}

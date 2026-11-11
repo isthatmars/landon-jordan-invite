@@ -296,7 +296,7 @@ export function Mixtape({ headline }: { headline: string }) {
               </button>
               <button
                 type="button"
-                className={`mix-key${!playing && engaged ? " is-down" : ""}`}
+                className={`mix-key mix-key--guide${!playing && engaged ? " is-down" : ""}`}
                 aria-label="Pause the tape"
                 aria-pressed={!playing && engaged}
                 onClick={() => {
@@ -313,7 +313,7 @@ export function Mixtape({ headline }: { headline: string }) {
               </button>
               <button
                 type="button"
-                className="mix-key"
+                className="mix-key mix-key--guide"
                 aria-label="Next tape"
                 onClick={() => {
                   dismissCues();
@@ -321,6 +321,11 @@ export function Mixtape({ headline }: { headline: string }) {
                 }}
               >
                 <TransportIcon name="forward" />
+                {cuesOn ? (
+                  <span className="mix-tap-cue mix-tap-cue-forward" aria-hidden>
+                    <TapHand className="mix-tap-cue-hand" />
+                  </span>
+                ) : null}
               </button>
               <button
                 type="button"

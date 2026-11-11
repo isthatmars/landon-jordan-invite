@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect } from "react";
+import { scrollToSection } from "@/lib/scrollToSection";
 import { INTRO_KEY } from "./introBoot";
 
 declare global {
@@ -78,8 +79,7 @@ function settleLoadScroll() {
       document.documentElement.style.scrollBehavior = prev;
       return;
     }
-    const el = document.getElementById(hash);
-    if (el) el.scrollIntoView();
+    scrollToSection(hash, { behavior: "auto" });
     return;
   }
   const prev = document.documentElement.style.scrollBehavior;
@@ -168,19 +168,37 @@ export function Cinematic() {
 
     // IntersectionObserver still marks entrance "seen" flags for cinematic reveals.
     // Live flags use scroll-flow positions so sticky-under plates don't stay live.
+    let rsvpCentered = false;
+    let rsvpCenterTimer = 0;
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
+          if (!entry.isIntersecting) {
+            if (entry.target.id === "rsvp") rsvpCentered = false;
+            continue;
+          }
           const id = entry.target.id;
           if (id === "home") continue;
           const spec = SECTIONS.find((row) => row[0] === id);
           if (!spec) continue;
           root.dataset[spec[1]] = "1";
+
+          // Soft-center RSVP when scrolling into it from above. Skip once the
+          // plate top has passed the upper band — guest is free to reach Host tools.
+          if (id === "rsvp" && !rsvpCentered) {
+            const top = entry.boundingClientRect.top;
+            if (top >= window.innerHeight * 0.12 && top <= window.innerHeight * 0.72) {
+              rsvpCentered = true;
+              window.clearTimeout(rsvpCenterTimer);
+              rsvpCenterTimer = window.setTimeout(() => {
+                scrollToSection("rsvp");
+              }, 40);
+            }
+          }
         }
         syncLiveFlags(root);
       },
-      { threshold: 0.18, rootMargin: "0px 0px -6% 0px" },
+      { threshold: [0.22, 0.4], rootMargin: "0px 0px -6% 0px" },
     );
 
     const home = document.getElementById("home");
@@ -199,6 +217,7 @@ export function Cinematic() {
       for (const id of timers) window.clearTimeout(id);
       for (const id of settleTimers) window.clearTimeout(id);
       window.clearTimeout(release);
+      window.clearTimeout(rsvpCenterTimer);
       introWatch.disconnect();
       io.disconnect();
       window.removeEventListener("scroll", markVisible);

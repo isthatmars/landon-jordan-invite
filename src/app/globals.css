@@ -267,6 +267,76 @@ body {
 
 #rsvp {
   --plate-z: 6;
+  /* Content sits mid-plate so nav/scroll centering reads as one scene.
+   * Intentionally no scroll-snap-* — free scroll into the footer / Host tools. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.site-footer {
+  /* Bigger, easier-to-spot host entry — not a full redesign. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.15rem;
+  min-height: 8.75rem;
+  padding-top: 1.75rem;
+  padding-bottom: max(3.25rem, calc(2.25rem + env(safe-area-inset-bottom)));
+}
+
+.site-footer-tagline {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  color: rgba(248, 244, 250, 0.85);
+}
+
+.site-footer-host {
+  margin: 0;
+}
+
+.host-tools-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.9375rem;
+  letter-spacing: 0.14em;
+  color: rgba(248, 244, 250, 0.55);
+  text-decoration: none;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+
+.host-tools-link:hover,
+.host-tools-link:focus-visible {
+  color: #ff4fd8;
+}
+
+.host-tools-link:focus-visible {
+  outline: 2px solid #ff4fd8;
+  outline-offset: 3px;
+}
+
+@media (min-width: 640px) {
+  .site-footer {
+    min-height: 10rem;
+    gap: 1.35rem;
+    padding-top: 2rem;
+    padding-bottom: max(3.75rem, calc(2.5rem + env(safe-area-inset-bottom)));
+  }
+
+  .site-footer-tagline {
+    font-size: 0.875rem;
+  }
+
+  .host-tools-link {
+    min-height: 3.5rem;
+    font-size: 1rem;
+  }
 }
 
 /*

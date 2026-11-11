@@ -206,48 +206,30 @@ export function Watch({ headline }: { headline: string }) {
   const hero = words.length > 1 ? words[1] : words[0] || "";
   const rest = words.length > 2 ? words.slice(2).join(" ") : "";
 
-  /* Display-only: pin the CRT's current video at the top of Browse Videos.
+  /* Sticky now-playing slot above the scrollable list body.
      Channel numbers + next/prev still use the catalog `videos` order. */
-  const browseVideos = (() => {
-    if (!now?.youtubeId) return videos;
-    const playingIndex = videos.findIndex((video) => video.youtubeId === now.youtubeId);
-    if (playingIndex <= 0) return videos;
-    const playing = videos[playingIndex];
-    return [playing, ...videos.slice(0, playingIndex), ...videos.slice(playingIndex + 1)];
-  })();
+  const nowPlaying =
+    now?.youtubeId != null
+      ? (videos.find((video) => video.youtubeId === now.youtubeId) ?? null)
+      : null;
+  const browseVideos = nowPlaying
+    ? videos.filter((video) => video.youtubeId !== nowPlaying.youtubeId)
+    : videos;
 
   const focusBrowse = (dir?: -1 | 1) => {
     const list = listRef.current;
     if (!list) return;
     list.focus({ preventScroll: true });
-    const scroller = list.closest(".watch-list");
     if (!dir) {
-      (scroller ?? list).scrollIntoView({
+      list.scrollIntoView({
         behavior: reduceMotion ? "auto" : "smooth",
         block: "nearest",
       });
       return;
     }
-    const target = scroller instanceof HTMLElement ? scroller : list;
-    const amount = Math.max(48, Math.floor(target.clientHeight * 0.35));
-    target.scrollBy({ top: dir * amount, behavior: reduceMotion ? "auto" : "smooth" });
+    const amount = Math.max(48, Math.floor(list.clientHeight * 0.35));
+    list.scrollBy({ top: dir * amount, behavior: reduceMotion ? "auto" : "smooth" });
   };
-
-  /* Now-playing sits at the top — keep the panel scrolled to show it. */
-  useEffect(() => {
-    const list = listRef.current;
-    if (!list || !now?.youtubeId) return;
-    const scroller = list.closest(".watch-list");
-    const behavior: ScrollBehavior = reduceMotion ? "auto" : "smooth";
-    if (scroller instanceof HTMLElement) {
-      scroller.scrollTo({ top: 0, behavior });
-      return;
-    }
-    const active = list.querySelector(
-      `[data-youtube-id="${CSS.escape(now.youtubeId)}"]`,
-    ) as HTMLElement | null;
-    active?.scrollIntoView({ block: "nearest", behavior });
-  }, [now?.youtubeId, reduceMotion, videos, watchLive]);
 
   const onRemoteAction = (action: RemoteAction) => {
     dismissRemoteCueStore();
@@ -422,40 +404,50 @@ export function Watch({ headline }: { headline: string }) {
 
             <div className="watch-list" role="region" aria-label="Browse videos">
               <p className="watch-browse-label">Browse Videos</p>
+              {nowPlaying ? (
+                <div className="watch-now-playing">
+                  <button
+                    type="button"
+                    data-youtube-id={nowPlaying.youtubeId}
+                    onClick={() => tuneVideo(nowPlaying)}
+                    aria-current="true"
+                    className="watch-list-item is-current w-full border-b px-1 py-2 text-left text-sm text-white"
+                  >
+                    <span className="watch-list-item-main">
+                      <span className="watch-now-icon" aria-hidden>
+                        <svg viewBox="0 0 24 24" className="watch-now-note" fill="none">
+                          <path
+                            d="M9 18.5a2.5 2.5 0 1 1-1.6-2.33V7.2l9-1.7v9.53a2.5 2.5 0 1 1-1.6-2.33V7.85L9 9.2v9.3Z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      </span>
+                      <span className="watch-list-item-copy">
+                        <span className="watch-list-title font-semibold">{nowPlaying.title}</span>
+                        <span className="watch-list-artist block text-xs">{nowPlaying.artist}</span>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              ) : null}
               <ul ref={listRef} className="watch-list-items" tabIndex={-1}>
-                {browseVideos.map((video) => {
-                  const isPlaying = now?.youtubeId === video.youtubeId;
-                  return (
-                    <li key={video.id}>
-                      <button
-                        type="button"
-                        data-youtube-id={video.youtubeId}
-                        onClick={() => tuneVideo(video)}
-                        aria-current={isPlaying ? "true" : undefined}
-                        className={`watch-list-item w-full border-b px-1 py-2 text-left text-sm text-white ${
-                          isPlaying ? "is-current" : ""
-                        }`}
-                      >
-                        <span className="watch-list-item-main">
-                          {isPlaying ? (
-                            <span className="watch-now-icon" aria-hidden>
-                              <svg viewBox="0 0 24 24" className="watch-now-note" fill="none">
-                                <path
-                                  d="M9 18.5a2.5 2.5 0 1 1-1.6-2.33V7.2l9-1.7v9.53a2.5 2.5 0 1 1-1.6-2.33V7.85L9 9.2v9.3Z"
-                                  fill="currentColor"
-                                />
-                              </svg>
-                            </span>
-                          ) : null}
-                          <span className="watch-list-item-copy">
-                            <span className="watch-list-title font-semibold">{video.title}</span>
-                            <span className="watch-list-artist block text-xs">{video.artist}</span>
-                          </span>
+                {browseVideos.map((video) => (
+                  <li key={video.id}>
+                    <button
+                      type="button"
+                      data-youtube-id={video.youtubeId}
+                      onClick={() => tuneVideo(video)}
+                      className="watch-list-item w-full border-b px-1 py-2 text-left text-sm text-white"
+                    >
+                      <span className="watch-list-item-main">
+                        <span className="watch-list-item-copy">
+                          <span className="watch-list-title font-semibold">{video.title}</span>
+                          <span className="watch-list-artist block text-xs">{video.artist}</span>
                         </span>
-                      </button>
-                    </li>
-                  );
-                })}
+                      </span>
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>

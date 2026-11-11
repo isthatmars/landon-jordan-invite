@@ -5955,7 +5955,8 @@ form[data-step="3"] .rsvp-step-3 {
   margin: 0.4rem 0 0;
   max-width: min(22ch, 92%);
   color: var(--neon-green);
-  font-size: clamp(1rem, 0.9rem + 0.28vw, 1.15rem);
+  /* ~3px smaller than prior clamp(1rem, 0.9rem + 0.28vw, 1.15rem) — titles stay put. */
+  font-size: clamp(0.8125rem, 0.7125rem + 0.28vw, 0.9625rem);
   line-height: 1.45;
   text-align: center;
   text-wrap: pretty;

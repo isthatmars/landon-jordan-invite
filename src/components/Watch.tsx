@@ -7,19 +7,67 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { crtScreen } from "@/lib/cutouts";
-import { GreenSwoosh } from "./icons";
 import { usePlayback } from "./Playback";
 import { YoutubeScreen } from "./YoutubeScreen";
 import { YoutubeThumb } from "./YoutubeThumb";
 
+type RemoteAction =
+  | "play"
+  | "prev"
+  | "next"
+  | "mute"
+  | "browse"
+  | "browse-up"
+  | "browse-down"
+  | `channel-${number}`;
+
+const REMOTE_HOTSPOTS: {
+  id: string;
+  action: RemoteAction;
+  label: string;
+  style: CSSProperties;
+}[] = [
+  { id: "power", action: "mute", label: "Mute or unmute", style: { left: "83.2%", top: "9.5%", width: "7.5%", height: "15%" } },
+  { id: "ch-up", action: "next", label: "Next video", style: { left: "81.8%", top: "27.5%", width: "7.2%", height: "17%" } },
+  { id: "ch-down", action: "prev", label: "Previous video", style: { left: "78.8%", top: "67%", width: "7%", height: "17%" } },
+  { id: "pause", action: "play", label: "Play or pause", style: { left: "26.5%", top: "30%", width: "10%", height: "22%" } },
+  { id: "dpad-left", action: "prev", label: "Previous video", style: { left: "36.5%", top: "33%", width: "7.5%", height: "20%" } },
+  { id: "dpad-right", action: "next", label: "Next video", style: { left: "43%", top: "38%", width: "8%", height: "16%" } },
+  { id: "dpad-up", action: "browse-up", label: "Browse previous", style: { left: "38.5%", top: "12%", width: "8%", height: "18%" } },
+  { id: "dpad-down", action: "browse-down", label: "Browse next", style: { left: "34.5%", top: "55%", width: "8%", height: "18%" } },
+  { id: "color-blue", action: "browse", label: "Focus browse list", style: { left: "53%", top: "9%", width: "5%", height: "16%" } },
+  { id: "ch1", action: "channel-1", label: "Play video 1", style: { left: "60%", top: "62%", width: "5.5%", height: "14%" } },
+  { id: "ch2", action: "channel-2", label: "Play video 2", style: { left: "64%", top: "48%", width: "5.5%", height: "14%" } },
+  { id: "ch3", action: "channel-3", label: "Play video 3", style: { left: "68%", top: "34%", width: "5.5%", height: "14%" } },
+  { id: "ch4", action: "channel-4", label: "Play video 4", style: { left: "66%", top: "66%", width: "5.5%", height: "14%" } },
+  { id: "ch5", action: "channel-5", label: "Play video 5", style: { left: "70%", top: "52%", width: "5.5%", height: "14%" } },
+  { id: "ch6", action: "channel-6", label: "Play video 6", style: { left: "74%", top: "38%", width: "5.5%", height: "14%" } },
+  { id: "ch7", action: "channel-7", label: "Play video 7", style: { left: "72%", top: "72%", width: "5.5%", height: "14%" } },
+  { id: "ch8", action: "channel-8", label: "Play video 8", style: { left: "76%", top: "56%", width: "5.5%", height: "14%" } },
+  { id: "ch9", action: "channel-9", label: "Play video 9", style: { left: "80%", top: "42%", width: "5.5%", height: "14%" } },
+  { id: "ch0", action: "channel-0", label: "Play video 10", style: { left: "82%", top: "52%", width: "5.5%", height: "14%" } },
+];
+
 export function Watch({ headline }: { headline: string }) {
-  const { videos, now, playing, toggleCurrent, tuneVideo, onEnded, onPlayingChange, registerPlayer } =
-    usePlayback();
+  const {
+    videos,
+    now,
+    playing,
+    toggleCurrent,
+    tuneVideo,
+    stepVideo,
+    mute,
+    onEnded,
+    onPlayingChange,
+    registerPlayer,
+  } = usePlayback();
   const [staticOn, setStaticOn] = useState(false);
+  const [muted, setMuted] = useState(false);
   const skipStatic = useRef(true);
   const sectionRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const reduceMotion = useReducedMotion();
   const [desktopMotion, setDesktopMotion] = useState(false);
 
@@ -46,7 +94,7 @@ export function Watch({ headline }: { headline: string }) {
     offset: ["start end", "end start"],
   });
   /* Grounded remote: gentle lateral drift while staying on the lounge surface. */
-  const remoteXRaw = useTransform(scrollYProgress, [0, 0.5, 1], ["8%", "0%", "-6%"]);
+  const remoteXRaw = useTransform(scrollYProgress, [0, 0.5, 1], ["4%", "0%", "-3%"]);
   const remoteX = useSpring(remoteXRaw, { stiffness: 42, damping: 28, mass: 0.65 });
   const remoteMotionOn = Boolean(desktopMotion && !reduceMotion);
 
@@ -54,6 +102,57 @@ export function Watch({ headline }: { headline: string }) {
   const lead = words.length > 1 ? words[0] : "";
   const hero = words.length > 1 ? words[1] : words[0] || "";
   const rest = words.length > 2 ? words.slice(2).join(" ") : "";
+
+  const focusBrowse = (dir?: -1 | 1) => {
+    const list = listRef.current;
+    if (!list) return;
+    list.focus({ preventScroll: true });
+    if (!dir) {
+      list.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" });
+      return;
+    }
+    const amount = Math.max(48, Math.floor(list.clientHeight * 0.35));
+    list.scrollBy({ top: dir * amount, behavior: reduceMotion ? "auto" : "smooth" });
+  };
+
+  const onRemoteAction = (action: RemoteAction) => {
+    if (action === "play") {
+      toggleCurrent();
+      return;
+    }
+    if (action === "prev") {
+      stepVideo(-1);
+      return;
+    }
+    if (action === "next") {
+      stepVideo(1);
+      return;
+    }
+    if (action === "mute") {
+      const next = !muted;
+      setMuted(next);
+      mute(next);
+      return;
+    }
+    if (action === "browse") {
+      focusBrowse();
+      return;
+    }
+    if (action === "browse-up") {
+      focusBrowse(-1);
+      return;
+    }
+    if (action === "browse-down") {
+      focusBrowse(1);
+      return;
+    }
+    if (action.startsWith("channel-")) {
+      const n = Number(action.slice("channel-".length));
+      const index = n === 0 ? 9 : n - 1;
+      const video = videos.filter((item) => item.youtubeId)[index];
+      if (video) tuneVideo(video);
+    }
+  };
 
   return (
     <section
@@ -65,6 +164,10 @@ export function Watch({ headline }: { headline: string }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/scene-watch-lounge.jpg" alt="" className="watch-bg" />
       <div className="watch-shade" aria-hidden />
+      <div className="watch-atmosphere" aria-hidden>
+        <span className="watch-lamp-glow" />
+        <span className="watch-room-breath" />
+      </div>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-[#1a0f08]/90 to-transparent" />
 
       <div className="watch-stage">
@@ -131,12 +234,11 @@ export function Watch({ headline }: { headline: string }) {
                 </span>
                 {rest ? <span className="watch-line watch-line-rest">{rest}</span> : null}
               </h2>
-              <GreenSwoosh className="watch-swoosh" stroke="#C6FF00" />
             </div>
 
             <div className="watch-list" role="region" aria-label="Browse videos">
               <p className="watch-browse-label">Browse Videos</p>
-              <ul className="watch-list-items">
+              <ul ref={listRef} className="watch-list-items" tabIndex={-1}>
                 {videos.map((video) => (
                   <li key={video.id}>
                     <button
@@ -158,17 +260,26 @@ export function Watch({ headline }: { headline: string }) {
             </div>
           </div>
 
-          <div className="watch-remote-rail" aria-hidden>
+          <div className="watch-remote-rail">
             <motion.div
               className="watch-remote"
               style={remoteMotionOn ? { x: remoteX } : undefined}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/prop-tv-remote.png"
-                alt=""
-                draggable={false}
-              />
+              <img src="/images/prop-tv-remote.png" alt="TV remote" draggable={false} />
+              <div className="watch-remote-hotspots" role="group" aria-label="TV remote controls">
+                {REMOTE_HOTSPOTS.map((spot) => (
+                  <button
+                    key={spot.id}
+                    type="button"
+                    className="watch-remote-btn"
+                    style={spot.style}
+                    aria-label={spot.label}
+                    aria-pressed={spot.action === "mute" ? muted : undefined}
+                    onClick={() => onRemoteAction(spot.action)}
+                  />
+                ))}
+              </div>
             </motion.div>
           </div>
         </div>

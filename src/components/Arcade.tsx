@@ -11,6 +11,8 @@ import { PacManGame } from "./PacManGame";
 export function Arcade({ headline }: { headline: string }) {
   const [running, setRunning] = useState(false);
   const [narrow, setNarrow] = useState(false);
+  /** Survives PacManGame remounts so the start-key overlay never returns mid-session. */
+  const [pacStartHintDone, setPacStartHintDone] = useState(false);
   const arcadeLive = useLiveFlag("liveArcade");
 
   useEffect(() => {
@@ -65,7 +67,10 @@ export function Arcade({ headline }: { headline: string }) {
               <button
                 type="button"
                 className="btn-pink-outline arcade-start"
-                onClick={() => setRunning(true)}
+                onClick={() => {
+                  setPacStartHintDone(false);
+                  setRunning(true);
+                }}
               >
                 <span className="arcade-start-pellets" aria-hidden>
                   <i />
@@ -86,7 +91,14 @@ export function Arcade({ headline }: { headline: string }) {
                 <p className="arcade-keys-cue" role="status">
                   Use <span className="arcade-keys-cue-keys">← ↑ → ↓</span> arrow keys to move
                 </p>
-                <button type="button" className="btn-pink-outline arcade-start" onClick={() => setRunning(false)}>
+                <button
+                  type="button"
+                  className="btn-pink-outline arcade-start"
+                  onClick={() => {
+                    setRunning(false);
+                    setPacStartHintDone(false);
+                  }}
+                >
                   <span className="arcade-start-pellets" aria-hidden>
                     <i />
                     <i />
@@ -119,7 +131,14 @@ export function Arcade({ headline }: { headline: string }) {
                 style={arcadeScreen}
               >
                 {!overlay && (
-                  <PacManGame key={running ? "play" : "idle"} running={running && arcadeLive} embed />
+                  <PacManGame
+                    key={running ? "play" : "idle"}
+                    running={running && arcadeLive}
+                    sessionActive={running}
+                    embed
+                    startHintDone={pacStartHintDone}
+                    onStartHintDone={() => setPacStartHintDone(true)}
+                  />
                 )}
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -147,7 +166,15 @@ export function Arcade({ headline }: { headline: string }) {
       {overlay &&
         createPortal(
           <div className="game-overlay" role="dialog" aria-modal="true" aria-label="Pac-Man">
-            <button type="button" className="game-close" aria-label="Close game" onClick={() => setRunning(false)}>
+            <button
+              type="button"
+              className="game-close"
+              aria-label="Close game"
+              onClick={() => {
+                setRunning(false);
+                setPacStartHintDone(false);
+              }}
+            >
               <svg viewBox="0 0 24 24" aria-hidden>
                 <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
               </svg>

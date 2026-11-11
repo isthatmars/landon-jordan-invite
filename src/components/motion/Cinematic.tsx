@@ -104,6 +104,8 @@ export function Cinematic() {
     let guard = true;
     const reassert = () => {
       if (!guard || intentionalHash()) return;
+      // Never yank scroll once the guest has left the hero (footer must stay reachable).
+      if (window.scrollY > window.innerHeight * 0.5) return;
       if (window.scrollY > 0) {
         const prev = root.style.scrollBehavior;
         root.style.scrollBehavior = "auto";

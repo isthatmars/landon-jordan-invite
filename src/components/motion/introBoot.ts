@@ -23,6 +23,8 @@ export const INTRO_BOOT = `(function(){
 
     function pinTop() {
       if (!(window.scrollX || window.scrollY)) return;
+      // Don't fight a guest who already scrolled deep (footer / host link).
+      if (window.scrollY > Math.min(480, window.innerHeight * 0.55)) return;
       var prev = root.style.scrollBehavior;
       root.style.scrollBehavior = "auto";
       window.scrollTo(0, 0);

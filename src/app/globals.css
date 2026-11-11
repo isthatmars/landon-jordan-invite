@@ -246,7 +246,9 @@ body {
 }
 
 /* Full-viewport scenes without sticky plate ghosts (orphan CTAs from prior sections).
-   Soft scroll-snap keeps desktop/mobile feeling like one condensed journey. */
+   Soft scroll-snap keeps desktop/mobile feeling like one condensed journey.
+   Do NOT snap #rsvp: last section before a short footer; snap-align:start +
+   min-height:100dvh traps scroll so Host tools never stays reachable. */
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-snap-type: y proximity;
@@ -262,13 +264,24 @@ body {
     scroll-snap-stop: normal;
   }
 
-  /* Tall text sections: snap the title under the header, not mid-bleed of prior scene */
-  #lineup,
-  #rsvp {
+  /* Tall text section: soft snap under the header; never force-stop past it. */
+  #lineup {
     position: relative;
     z-index: var(--plate-z);
     scroll-snap-align: start;
-    scroll-snap-stop: always;
+    scroll-snap-stop: normal;
+  }
+
+  #rsvp {
+    position: relative;
+    z-index: var(--plate-z);
+    /* Intentionally no scroll-snap-* — free scroll into the footer. */
+  }
+
+  /* Land on the footer end so the host link stays in view after release. */
+  .site-footer {
+    scroll-snap-align: end;
+    scroll-snap-stop: normal;
   }
 }
 

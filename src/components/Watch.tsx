@@ -116,8 +116,11 @@ export function Watch({ headline }: { headline: string }) {
           <div className="watch-copy">
             <div className="watch-heading">
               <h2 className="neon-script-lg watch-title">
-                {lead ? <span className="watch-line watch-line-lead">{lead}</span> : null}
-                {hero ? <span className="watch-line watch-line-hero">{hero}</span> : null}
+                <span className="watch-line watch-line-top">
+                  {lead ? <span className="watch-line-lead">{lead}</span> : null}
+                  {lead && hero ? "\u00A0" : null}
+                  {hero ? <span className="watch-line-hero">{hero}</span> : null}
+                </span>
                 {rest ? <span className="watch-line watch-line-rest">{rest}</span> : null}
               </h2>
               <GreenSwoosh className="watch-swoosh" stroke="#C6FF00" />

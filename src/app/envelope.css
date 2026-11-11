@@ -26,6 +26,13 @@ html[data-intro="opening"] .site-header {
   visibility: hidden;
 }
 
+/* After intro, header must stay painted — never leave it stuck invisible. */
+html[data-intro="done"] .site-header,
+html[data-intro="reveal"] .site-header {
+  opacity: 1;
+  visibility: visible;
+}
+
 .invite-overlay {
   position: fixed;
   inset: 0;

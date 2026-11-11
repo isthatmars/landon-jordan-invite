@@ -49,6 +49,9 @@ html {
   /* Fixed header is ~104px tall; keep anchors + section tops clear of it. */
   --header-clear: calc(7.25rem + env(safe-area-inset-top));
   scroll-padding-top: var(--header-clear);
+  /* iOS can still scroll sideways when body alone is clipped. */
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 html.neon-cursor-on,
@@ -59,12 +62,18 @@ html.neon-cursor-on * {
 body {
   margin: 0;
   min-height: 100%;
+  max-width: 100%;
   background: var(--bg-void);
   color: var(--text);
   font-family: var(--font-body), "Segoe UI", sans-serif;
   font-size: var(--type-body);
   line-height: 1.5;
   /* clip keeps sticky plate stacking alive; hidden would break it */
+  overflow-x: clip;
+}
+
+main {
+  max-width: 100%;
   overflow-x: clip;
 }
 
@@ -236,6 +245,7 @@ body {
   --plate-z: 1;
   /* One scene per viewport; grow when content is taller (lineup/RSVP). */
   width: 100%;
+  max-width: 100%;
   min-height: 100svh;
   min-height: 100dvh;
   box-sizing: border-box;
@@ -575,6 +585,7 @@ body {
   #rsvp {
     position: relative;
     z-index: var(--plate-z);
+    overflow-x: clip;
   }
 
   #mixtape,
@@ -589,6 +600,27 @@ body {
   footer {
     position: relative;
     z-index: 7;
+  }
+}
+
+/* Always clip sideways overflow on phones even with reduced motion. */
+@media (max-width: 1023px) {
+  #home,
+  #mixtape,
+  #watch,
+  #arcade,
+  #lineup,
+  #rsvp {
+    overflow-x: clip;
+  }
+
+  .mix-script {
+    padding-inline: 1rem;
+  }
+
+  .mix-script h2 {
+    width: auto;
+    max-width: 100%;
   }
 }
 
@@ -1423,7 +1455,10 @@ body {
   inset: 0 0 auto 0;
   /* Above sticky scene plates (1–7) and back-to-top (60); below envelope/game overlays. */
   z-index: 65;
+  width: 100%;
+  max-width: 100%;
   min-height: 82px;
+  overflow-x: clip;
   background: transparent;
   border-bottom: 1px solid transparent;
   box-shadow: none;
@@ -1447,19 +1482,23 @@ body {
   align-items: center;
   gap: 0.7rem;
   width: min(1280px, 100%);
+  max-width: 100%;
   min-height: 82px;
   margin: 0 auto;
   padding: max(1.15rem, env(safe-area-inset-top)) max(1.35rem, env(safe-area-inset-right)) 0.7rem max(1.35rem, env(safe-area-inset-left));
+  box-sizing: border-box;
 }
 
 .brand-lockup {
   display: flex;
   align-items: center;
   gap: 0.28em;
+  flex: 1 1 auto;
   min-width: 0;
-  overflow: visible;
+  max-width: 100%;
+  overflow: hidden;
   padding: 0.28rem 0 0.18rem;
-  font-size: clamp(1.7rem, 8.2vw, 2.45rem);
+  font-size: clamp(1.35rem, 6.4vw, 2.45rem);
   text-decoration: none;
 }
 
@@ -1472,10 +1511,14 @@ body {
 }
 
 .brand-script {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 1em;
   line-height: 1.2;
   padding-bottom: 0.08em;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   filter: none;
 }
 
@@ -2442,10 +2485,11 @@ body {
 .mix-script h2 {
   margin: 0;
   width: max-content;
-  max-width: calc(100vw - 48px);
+  max-width: min(100%, calc(100vw - 48px));
   flex: none;
   padding: 1.85rem 2rem 1.55rem;
   text-align: center;
+  box-sizing: border-box;
   /* ~50% larger than prior clamp(2.2rem…2.85rem) so glow stays readable. */
   font-size: clamp(3.3rem, 12vw, 4.275rem);
   line-height: 0.95;
@@ -3145,9 +3189,16 @@ body {
   padding-bottom: var(--section-pad-bottom);
 }
 
-/* overflow-x:clip + overflow-y:visible computes to clipping both axes — keep Watch open. */
+/* Prefer open Watch for desktop reflections; phones must clip sideways overflow. */
 #watch {
   overflow: visible;
+}
+
+@media (max-width: 1023px) {
+  #watch {
+    overflow-x: clip;
+    overflow-y: visible;
+  }
 }
 
 #lineup,
@@ -3793,7 +3844,8 @@ body {
   position: absolute;
   left: 50%;
   bottom: 0.15rem;
-  width: min(58%, 14rem);
+  /* Mobile default: ~20% smaller than prior 58%/14rem rail. */
+  width: min(46.4%, 11.2rem);
   transform: translate(-50%, 70%);
   display: block;
   z-index: 14;
@@ -4226,17 +4278,30 @@ body {
   .site-header,
   .site-header-inner {
     min-height: 74px;
-    overflow: visible;
+  }
+
+  .site-header {
+    overflow-x: clip;
   }
 
   .site-header-inner {
-    padding: 0.9rem max(1rem, env(safe-area-inset-right)) 0.55rem max(1rem, env(safe-area-inset-left));
-    gap: 0.4rem;
+    padding: 0.9rem max(0.75rem, env(safe-area-inset-right)) 0.55rem max(0.75rem, env(safe-area-inset-left));
+    gap: 0.35rem;
+  }
+
+  .brand-lockup {
+    font-size: clamp(1.2rem, 5.6vw, 1.7rem);
   }
 
   .btn-header-rsvp {
-    padding: 0.42rem 0.62rem;
+    padding: 0.42rem 0.55rem;
     font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  .site-menu {
+    padding-inline: 0.05rem;
+    font-size: 13px;
     letter-spacing: 0.1em;
   }
 }

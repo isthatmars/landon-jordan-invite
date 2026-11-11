@@ -22,12 +22,13 @@ export const INTRO_BOOT = `(function(){
     }
 
     function pinTop() {
-      if (!(window.scrollX || window.scrollY)) return;
-      // Don't fight a guest who already scrolled deep (footer / host link).
-      if (window.scrollY > Math.min(480, window.innerHeight * 0.55)) return;
+      // Always kill sideways drift; only skip a deep vertical restore fight.
+      var deep = window.scrollY > Math.min(480, window.innerHeight * 0.55);
+      if (!window.scrollX && (deep || !window.scrollY)) return;
       var prev = root.style.scrollBehavior;
       root.style.scrollBehavior = "auto";
-      window.scrollTo(0, 0);
+      if (deep) window.scrollTo(0, window.scrollY);
+      else window.scrollTo(0, 0);
       root.style.scrollBehavior = prev;
       var active = document.activeElement;
       if (active && active.closest && active.closest("#rsvp") && typeof active.blur === "function") {

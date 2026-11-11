@@ -4,6 +4,7 @@ import { Barlow_Condensed, Caveat, Fugaz_One, Inter, Oswald, Yellowtail } from "
 import { Cinematic } from "@/components/motion/Cinematic";
 import { InviteEnvelope } from "@/components/motion/InviteEnvelope";
 import { INTRO_BOOT } from "@/components/motion/introBoot";
+import { PwaRegister } from "@/components/PwaRegister";
 import { SiteEffects } from "@/components/SiteEffects";
 import "./globals.css";
 import "./motion.css";
@@ -64,6 +65,29 @@ export const metadata: Metadata = {
   title: "Landon & Jordan's 80s Birthday Party",
   description:
     "You're invited to Landon & Jordan's 80s Birthday Party — Saturday, December 19th, 6pm to midnight at Xtreme Action Park, Fort Lauderdale.",
+  applicationName: "Landon & Jordan's 80s Birthday Party",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "L&J Party",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#07010f" },
+    { media: "(prefers-color-scheme: light)", color: "#07010f" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -81,6 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <InviteEnvelope />
         <Cinematic />
         <SiteEffects />
+        <PwaRegister />
         {children}
       </body>
     </html>

@@ -1,24 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { onScrollFrame } from "@/lib/activePlate";
 
 export function BackToTop() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const hero = document.getElementById("home");
+    let lastVisible = false;
 
     const update = () => {
       const threshold = hero ? hero.offsetHeight * 0.72 : window.innerHeight * 0.85;
-      setVisible(window.scrollY > threshold);
+      const next = window.scrollY > threshold;
+      if (next === lastVisible) return;
+      lastVisible = next;
+      setVisible(next);
     };
 
+    const onScroll = onScrollFrame(update);
     update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
     };
   }, []);
 

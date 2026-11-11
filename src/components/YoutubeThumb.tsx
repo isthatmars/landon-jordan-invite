@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { youtubeThumbCandidates } from "@/lib/youtube";
 
 /**
@@ -16,13 +16,21 @@ export function YoutubeThumb({
   alt: string;
   className?: string;
 }) {
+  // Remount on id change so tier resets without an effect setState.
+  return <YoutubeThumbInner key={videoId} videoId={videoId} alt={alt} className={className} />;
+}
+
+function YoutubeThumbInner({
+  videoId,
+  alt,
+  className,
+}: {
+  videoId: string;
+  alt: string;
+  className?: string;
+}) {
   const candidates = youtubeThumbCandidates(videoId);
   const [tier, setTier] = useState(0);
-
-  useEffect(() => {
-    setTier(0);
-  }, [videoId]);
-
   const src = candidates[Math.min(tier, candidates.length - 1)] || "";
 
   return (

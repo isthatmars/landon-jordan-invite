@@ -92,15 +92,19 @@ export function Mixtape({ headline }: { headline: string }) {
     const endX = stereo.left + stereo.width * 0.42;
     const endY = stereo.top + stereo.height * 0.46;
     const row = STACK.find((item) => item.id === insertingId);
-    setFlyer({
-      label: row?.label ?? "Tape",
-      left: tape.left,
-      top: tape.top,
-      width: tape.width,
-      height: Math.max(tape.height, 28),
-      x: `${endX - tape.left}px`,
-      y: `${endY - tape.top}px`,
+    // Measure in the effect; apply flyer on the next frame (external→React).
+    const id = window.requestAnimationFrame(() => {
+      setFlyer({
+        label: row?.label ?? "Tape",
+        left: tape.left,
+        top: tape.top,
+        width: tape.width,
+        height: Math.max(tape.height, 28),
+        x: `${endX - tape.left}px`,
+        y: `${endY - tape.top}px`,
+      });
     });
+    return () => window.cancelAnimationFrame(id);
   }, [insertingId]);
   const [lead, ...rest] = headline.split(/ and /i);
   const script = rest.length ? (
@@ -287,7 +291,7 @@ export function Mixtape({ headline }: { headline: string }) {
           </div>
         </div>
       </div>
-      {flyer ? (
+      {insertingId && flyer ? (
         <span
           className="mix-flyer"
           aria-hidden

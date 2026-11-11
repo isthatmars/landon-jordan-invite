@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TAPE_SPINE_PALETTE } from "@/lib/defaults";
 import {
@@ -130,7 +131,11 @@ export function AdminApp() {
   }, []);
 
   useEffect(() => {
-    void load();
+    // Mount fetch for control-room data; defer past paint to avoid cascading render lint.
+    const id = window.setTimeout(() => {
+      void load();
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [load]);
 
   useEffect(() => {
@@ -341,9 +346,9 @@ export function AdminApp() {
             )}
           </div>
           <div className="flex gap-2">
-            <a href="/" className="btn-pink-outline text-xs">
+            <Link href="/" className="btn-pink-outline text-xs">
               View invite
-            </a>
+            </Link>
             <button type="button" onClick={logout} className="btn-pink-outline text-xs">
               Log out
             </button>
@@ -391,10 +396,10 @@ export function AdminApp() {
           </nav>
 
           <div className="admin-dash-actions">
-            <a href="/" className="admin-btn-invite">
+            <Link href="/" className="admin-btn-invite">
               <EyeIcon />
               View invite
-            </a>
+            </Link>
             <button type="button" onClick={logout} className="admin-btn-logout">
               <LogoutIcon />
               Log out
@@ -1158,7 +1163,6 @@ function Composer({
   selected,
   onSend,
   history,
-  emailLive,
   busy,
 }: {
   title: string;

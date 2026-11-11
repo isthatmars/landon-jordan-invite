@@ -821,7 +821,7 @@ html[data-motion="armed"]:not([data-seen-arcade]) #arcade .btn-pink-outline {
 html[data-seen-arcade="1"] #arcade .btn-pink-outline {
   animation: cta-ignite 0.4s linear 0.85s both;
 }
-html[data-live-arcade="0"] #arcade .cab-glint {
+html[data-warm-arcade="0"] #arcade .cab-glint {
   animation-play-state: paused;
 }
 
@@ -957,24 +957,28 @@ html[data-live-arcade="0"] #arcade a {
 }
 
 /*
- * Pause CSS loops in plates that are off-screen (or when the tab is hidden).
+ * Pause CSS loops only when a plate is fully cold (not covering, not a neighbor,
+ * and totally out of view) — or when the tab is hidden.
  * Party audio (YouTube / intro song) is intentionally NOT paused here — only
  * paint/compositor work. Disco <video> + canvas games pause via JS separately.
  *
+ * data-live-* stays exclusive to the covering plate (ghost CTAs). data-warm-*
+ * keeps prev/next + still-visible plates motion-hot so sticky enter isn't glitchy.
+ *
  * Photographic plates + RSVP can use a blanket descendant pause. Lineup cannot:
  * `#lineup *` froze one-shot card-rise / kicker-in mid-flight whenever
- * data-live-lineup chatter toggled, which read as uncontrollable neon flicker.
+ * warm/live chatter toggled, which read as uncontrollable neon flicker.
  */
-html[data-live-home="0"] #home,
-html[data-live-home="0"] #home *,
-html[data-live-mixtape="0"] #mixtape,
-html[data-live-mixtape="0"] #mixtape *,
-html[data-live-watch="0"] #watch,
-html[data-live-watch="0"] #watch *,
-html[data-live-arcade="0"] #arcade,
-html[data-live-arcade="0"] #arcade *,
-html[data-live-rsvp="0"] #rsvp,
-html[data-live-rsvp="0"] #rsvp *,
+html[data-warm-home="0"] #home,
+html[data-warm-home="0"] #home *,
+html[data-warm-mixtape="0"] #mixtape,
+html[data-warm-mixtape="0"] #mixtape *,
+html[data-warm-watch="0"] #watch,
+html[data-warm-watch="0"] #watch *,
+html[data-warm-arcade="0"] #arcade,
+html[data-warm-arcade="0"] #arcade *,
+html[data-warm-rsvp="0"] #rsvp,
+html[data-warm-rsvp="0"] #rsvp *,
 html[data-page-hidden="1"] #home,
 html[data-page-hidden="1"] #home *,
 html[data-page-hidden="1"] #mixtape,
@@ -993,9 +997,9 @@ html[data-page-hidden="1"] #rsvp * {
  * Keep pause hooks only for any residual decorative loops; never pause one-shot
  * card-rise / kicker-in entrances via a blanket `#lineup *` rule.
  */
-html[data-live-lineup="0"] .lineup-sweep::before,
-html[data-live-lineup="0"] .lineup-neon,
-html[data-live-lineup="0"] .lineup-pill,
+html[data-warm-lineup="0"] .lineup-sweep::before,
+html[data-warm-lineup="0"] .lineup-neon,
+html[data-warm-lineup="0"] .lineup-pill,
 html[data-page-hidden="1"] .lineup-sweep::before,
 html[data-page-hidden="1"] .lineup-neon,
 html[data-page-hidden="1"] .lineup-pill {

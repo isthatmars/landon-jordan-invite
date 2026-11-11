@@ -4656,12 +4656,6 @@ main {
   display: none;
 }
 
-form[data-step="1"] .rsvp-step-1,
-form[data-step="2"] .rsvp-step-2,
-form[data-step="3"] .rsvp-step-3 {
-  display: block;
-}
-
 @media (min-width: 768px) {
   #rsvp [data-testid="rsvp-phone"] {
     max-width: 200px;
@@ -4674,9 +4668,9 @@ form[data-step="3"] .rsvp-step-3 {
 }
 
 .rsvp-frame-grid {
-  /* Mobile: size to content so the stack doesn’t leave a huge empty top. */
+  /* Questions sit mid-column beside the phone — never pinned to the top. */
   min-height: 0;
-  align-items: start;
+  align-items: center;
 }
 
 .rsvp-brand-stack {
@@ -4824,21 +4818,24 @@ form[data-step="3"] .rsvp-step-3 {
   text-transform: uppercase;
 }
 
-form[data-step="1"].rsvp-steps {
+/* Every question screen: fill the form column and vertically center content. */
+form.rsvp-steps {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: stretch;
   align-self: stretch;
   height: auto;
   min-height: 0;
 }
 
-form[data-step="1"] .rsvp-step-1 {
+form[data-step="1"] .rsvp-step-1,
+form[data-step="2"] .rsvp-step-2,
+form[data-step="3"] .rsvp-step-3 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   width: 100%;
   margin-block: 0;
   padding-bottom: 0;
@@ -4846,22 +4843,32 @@ form[data-step="1"] .rsvp-step-1 {
 }
 
 @media (min-width: 768px) {
-  /* Attend: mid-align ask + keycaps with crown → RSVP → phone stack. */
-  .rsvp-frame-grid--attend {
+  /* Match phone stack height so ask + fields mid-align with crown → RSVP → phone. */
+  .rsvp-frame-grid {
     min-height: min(36rem, 62svh);
     align-items: center;
   }
 
-  .rsvp-frame-grid--attend form[data-step="1"].rsvp-steps {
-    height: auto;
-    min-height: 0;
+  form.rsvp-steps {
+    height: 100%;
+    min-height: 100%;
     justify-content: center;
-    align-self: center;
+    align-self: stretch;
   }
 
-  .rsvp-frame-grid--attend form[data-step="1"] .rsvp-step-1,
-  .rsvp-frame-grid--attend form[data-step="1"] .rsvp-attend-block {
+  form[data-step="1"] .rsvp-step-1,
+  form[data-step="2"] .rsvp-step-2,
+  form[data-step="3"] .rsvp-step-3,
+  form .rsvp-attend-block {
     margin-block: 0;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Under the phone stack, keep the active question mid in the remaining frame. */
+  form.rsvp-steps {
+    min-height: min(42svh, 18rem);
     justify-content: center;
   }
 }

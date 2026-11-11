@@ -495,12 +495,25 @@ body {
 
   .site-footer-credit-row {
     flex-direction: column;
+    flex-wrap: nowrap;
     align-items: center;
-    row-gap: 0.5rem;
+    row-gap: 0.45rem;
+  }
+
+  .site-footer-credit,
+  .site-footer-social,
+  .site-footer-url {
+    display: block;
+    width: 100%;
+    text-align: center;
   }
 
   .site-footer-sep {
     display: none;
+  }
+
+  .site-footer-host {
+    margin-top: 0.65rem;
   }
 }
 

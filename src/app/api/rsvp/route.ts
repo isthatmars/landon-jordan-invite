@@ -212,6 +212,7 @@ export async function POST(request: Request) {
     coming ? templates.signup_confirm : templates.signup_declined,
     content,
     guestVars,
+    coming ? "signup_confirm" : "signup_declined",
   );
 
   const guestMail = record.email.trim()
@@ -231,7 +232,7 @@ export async function POST(request: Request) {
     ...templates.owner_alert,
     headline: coming ? templates.owner_alert.headline : "RSVP Update",
   };
-  const ownerRendered = renderEditableEmail(ownerCopy, content, guestVars);
+  const ownerRendered = renderEditableEmail(ownerCopy, content, guestVars, "owner_alert");
   const ownerMail = await sendOwnerEmail({
     subject: oneLine(ownerRendered.subject),
     html: ownerRendered.html,

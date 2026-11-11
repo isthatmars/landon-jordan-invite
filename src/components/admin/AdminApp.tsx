@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { TAPE_SPINE_PALETTE } from "@/lib/defaults";
 import { partyHeadcount } from "@/lib/rsvp";
 import type {
   MessageLog,
@@ -125,10 +126,18 @@ export function AdminApp() {
   };
 
   const saveTracks = async () => {
+    const normalized = tracks.map((t) => {
+      const hex = t.color.trim().toLowerCase();
+      const color = TAPE_SPINE_PALETTE.includes(hex)
+        ? hex
+        : TAPE_SPINE_PALETTE[0];
+      return { ...t, color };
+    });
+    setTracks(normalized);
     await fetch("/api/admin/tracks", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tracks }),
+      body: JSON.stringify({ tracks: normalized }),
     });
     flash("Mixtape updated");
   };
@@ -412,6 +421,9 @@ export function AdminApp() {
       {tab === "tracks" && (
         <section className="admin-panel p-5 space-y-3">
           <h2 className="text-lg font-bold">Mixtape tracks</h2>
+          <p className="text-xs text-violet-300">
+            Spine color — pick a swatch from the site palette (no custom hex).
+          </p>
           {tracks.map((t, i) => (
             <div key={t.id} className="grid gap-2 sm:grid-cols-4 border border-white/10 rounded-xl p-3">
               <input
@@ -444,15 +456,13 @@ export function AdminApp() {
                 }}
                 placeholder="/audio/file.mp3"
               />
-              <input
-                className="input-dark"
+              <TapeColorSwatches
                 value={t.color}
-                onChange={(e) => {
+                onChange={(color) => {
                   const next = [...tracks];
-                  next[i] = { ...t, color: e.target.value };
+                  next[i] = { ...t, color };
                   setTracks(next);
                 }}
-                placeholder="#ff2bd6"
               />
             </div>
           ))}
@@ -603,6 +613,51 @@ export function AdminApp() {
           </div>
         </section>
       )}
+    </div>
+  );
+}
+
+function TapeColorSwatches({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (color: string) => void;
+}) {
+  const selected = value.trim().toLowerCase();
+  const inPalette = TAPE_SPINE_PALETTE.includes(selected);
+
+  return (
+    <div className="flex flex-col justify-center gap-1.5 min-w-0">
+      <div
+        role="radiogroup"
+        aria-label="Tape spine color"
+        className="flex flex-wrap items-center gap-1.5"
+      >
+        {TAPE_SPINE_PALETTE.map((hex) => {
+          const isOn = selected === hex;
+          return (
+            <button
+              key={hex}
+              type="button"
+              role="radio"
+              aria-checked={isOn}
+              aria-label={hex}
+              title={hex}
+              onClick={() => onChange(hex)}
+              className={`h-7 w-7 shrink-0 rounded-md border-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neon-teal ${
+                isOn
+                  ? "border-white scale-110 shadow-[0_0_10px_rgba(255,255,255,0.45)]"
+                  : "border-white/25 hover:border-white/70 hover:scale-105"
+              }`}
+              style={{ backgroundColor: hex }}
+            />
+          );
+        })}
+      </div>
+      <span className="text-[10px] tracking-wide text-violet-300 font-mono">
+        {inPalette ? selected : `${selected || "—"} → pick a swatch`}
+      </span>
     </div>
   );
 }

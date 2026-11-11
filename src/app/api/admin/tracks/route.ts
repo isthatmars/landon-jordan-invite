@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { requireAdminFromRequest } from "@/lib/auth";
+import { TAPE_SPINE_PALETTE } from "@/lib/defaults";
 import { uid } from "@/lib/id";
 import { getStore, updateStore } from "@/lib/store";
 import type { Track } from "@/lib/types";
 
+function clampTapeColor(raw: unknown): string {
+  if (typeof raw !== "string") return TAPE_SPINE_PALETTE[0];
+  const hex = raw.trim().toLowerCase();
+  return TAPE_SPINE_PALETTE.includes(hex) ? hex : TAPE_SPINE_PALETTE[0];
+}
 
 export async function GET(request: Request) {
   if (!requireAdminFromRequest(request)) {
@@ -21,7 +27,10 @@ export async function PUT(request: Request) {
 
   if (Array.isArray(body.tracks)) {
     await updateStore((s) => {
-      s.tracks = body.tracks as Track[];
+      s.tracks = (body.tracks as Track[]).map((t) => ({
+        ...t,
+        color: clampTapeColor(t.color),
+      }));
     });
   } else if (body.id) {
     await updateStore((s) => {
@@ -31,7 +40,7 @@ export async function PUT(request: Request) {
       if (typeof body.artist === "string") t.artist = body.artist;
       if (typeof body.audioUrl === "string") t.audioUrl = body.audioUrl;
       if (typeof body.youtubeId === "string") t.youtubeId = body.youtubeId;
-      if (typeof body.color === "string") t.color = body.color;
+      if (typeof body.color === "string") t.color = clampTapeColor(body.color);
       if (typeof body.sortOrder === "number") t.sortOrder = body.sortOrder;
     });
   } else {
@@ -39,7 +48,7 @@ export async function PUT(request: Request) {
       id: uid("track"),
       title: body.title || "New Track",
       artist: body.artist || "Unknown",
-      color: body.color || "#ec4899",
+      color: clampTapeColor(body.color),
       youtubeId: body.youtubeId || "",
       audioUrl: body.audioUrl || "",
       sortOrder: body.sortOrder || 99,

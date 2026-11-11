@@ -65,6 +65,11 @@ export const defaultTracks: Track[] = [
   { id: "t9", title: "I Wanna Dance with Somebody", artist: "Whitney Houston", color: "#22d3ee", youtubeId: "eH3giaIzONA", audioUrl: watch("eH3giaIzONA"), sortOrder: 9 },
 ];
 
+/** Site mixtape spine palette — admin may only pick from these. */
+export const TAPE_SPINE_PALETTE: readonly string[] = Array.from(
+  new Set(defaultTracks.map((t) => t.color.toLowerCase())),
+);
+
 export const defaultVideos: VideoItem[] = [
   ...defaultTracks.map((t, i) => ({
     id: `v${t.id}`,

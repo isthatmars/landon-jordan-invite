@@ -431,9 +431,9 @@ body {
   outline-offset: 3px;
 }
 
-/* Isolated from credit band — text/ghost only, lights up on hover/focus */
+/* Between tagline and credit band — text/ghost only, lights up on hover/focus */
 .site-footer-host {
-  margin: 0.35rem 0 0;
+  margin: 0;
   padding-inline: 3.25rem; /* keep clear of fixed back-to-top on narrow screens */
 }
 
@@ -483,7 +483,6 @@ body {
   }
 
   .site-footer-host {
-    margin-top: 0.55rem;
     padding-inline: 0;
   }
 }
@@ -510,10 +509,6 @@ body {
 
   .site-footer-sep {
     display: none;
-  }
-
-  .site-footer-host {
-    margin-top: 0.65rem;
   }
 }
 

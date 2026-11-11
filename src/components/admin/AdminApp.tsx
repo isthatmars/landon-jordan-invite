@@ -64,14 +64,14 @@ const TABS: {
     label: "Email",
     accent: "green",
     explainer:
-      "Write and send messages to all guests, confirmed attendees, or selected recipients.",
+      "One-off notes to guests. The full editable party email suite (confirmations, reminders, thank-you) lives under Templates.",
   },
   {
     id: "reminders",
-    label: "Reminders",
+    label: "Templates",
     accent: "pink",
     explainer:
-      "Tap a template button, edit the words, preview the neon email, then send when you’re ready.",
+      "All 9 party emails — edit subject, body, and CTA, preview the neon look, then send when you’re ready.",
   },
 ];
 
@@ -706,19 +706,37 @@ export function AdminApp() {
       )}
 
       {tab === "email" && (
-        <Composer
-          title="Write an email"
-          note={
-            emailLive
-              ? "Your note arrives in the same neon party look as the invite."
-              : "Email is ready once the host keys are set — until then, attempts are logged clearly."
-          }
-          selected={selected}
-          onSend={sendMessage}
-          history={messages.filter((m) => m.channel === "email")}
-          emailLive={emailLive}
-          busy={sending}
-        />
+        <div className="space-y-4">
+          <div className="admin-panel border border-neon-pink/40 bg-fuchsia-950/30 p-4 sm:p-5">
+            <p className="text-sm font-bold tracking-wide text-white">
+              Looking for the party email templates?
+            </p>
+            <p className="mt-1 text-sm leading-relaxed text-violet-200">
+              Confirmations, 30-day / tomorrow / today reminders, what-to-bring, thank-you, and
+              host alerts are editable under Templates — not in this freeform composer.
+            </p>
+            <button
+              type="button"
+              className="btn-pink-outline mt-3 text-xs"
+              onClick={() => setView("reminders")}
+            >
+              Edit party email templates → Templates
+            </button>
+          </div>
+          <Composer
+            title="Write an email"
+            note={
+              emailLive
+                ? "Your note arrives in the same neon party look as the invite."
+                : "Email is ready once the host keys are set — until then, attempts are logged clearly."
+            }
+            selected={selected}
+            onSend={sendMessage}
+            history={messages.filter((m) => m.channel === "email")}
+            emailLive={emailLive}
+            busy={sending}
+          />
+        </div>
       )}
 
       {tab === "reminders" && content && (

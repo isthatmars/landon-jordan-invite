@@ -40,6 +40,9 @@ const DIRS: Record<Dir, { x: number; y: number }> = {
   R: { x: 1, y: 0 },
 };
 
+/** Slower than the original arcade tick so guests can aim turns. */
+const TICK_MS = 200;
+
 function pelletsFromMaze() {
   const set = new Set<string>();
   for (let y = 0; y < ROWS; y++) {
@@ -70,6 +73,8 @@ export function PacManGame({
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [phase, setPhase] = useState<"play" | "won" | "lost">("play");
+  /** Desktop: show arrow-key cue until the first move. */
+  const [awaitingMove, setAwaitingMove] = useState(true);
   const phaseRef = useRef(phase);
   const livesRef = useRef(lives);
   useEffect(() => {
@@ -79,7 +84,8 @@ export function PacManGame({
     livesRef.current = lives;
   }, [lives]);
   const state = useRef({
-    pac: { x: 9, y: 15, dir: "L" as Dir, next: "L" as Dir },
+    // next: null → Pac stays put until an arrow / swipe / pad press.
+    pac: { x: 9, y: 15, dir: "R" as Dir, next: null as Dir | null },
     ghosts: [
       { x: 9, y: 9, dir: "U" as Dir, color: "#ff4d6d" },
       { x: 8, y: 9, dir: "L" as Dir, color: "#22d3ee" },
@@ -91,11 +97,13 @@ export function PacManGame({
   });
 
   const resetPac = () => {
-    state.current.pac = { x: 9, y: 15, dir: "L", next: "L" };
+    state.current.pac = { x: 9, y: 15, dir: "R", next: null };
+    setAwaitingMove(true);
   };
 
   const setDir = useCallback((dir: Dir) => {
     state.current.pac.next = dir;
+    setAwaitingMove(false);
   }, []);
   const runningRef = useRef(running);
   useEffect(() => {
@@ -132,25 +140,30 @@ export function PacManGame({
     let raf = 0;
     let last = 0;
 
-    const stepEntity = (
+    const wrapTunnel = (x: number, y: number) => {
+      let nx = x;
+      if (y === 9 && nx < 0) nx = COLS - 1;
+      if (y === 9 && nx >= COLS) nx = 0;
+      return nx;
+    };
+
+    const stepGhost = (
       ent: { x: number; y: number; dir: Dir },
       prefer?: Dir,
     ) => {
       const tryDir = prefer && canMove(ent.x + DIRS[prefer].x, ent.y + DIRS[prefer].y) ? prefer : ent.dir;
-      let nx = ent.x + DIRS[tryDir].x;
       const ny = ent.y + DIRS[tryDir].y;
-      if (ny === 9 && nx < 0) nx = COLS - 1;
-      if (ny === 9 && nx >= COLS) nx = 0;
+      const nx = wrapTunnel(ent.x + DIRS[tryDir].x, ny);
       if (canMove(nx, ny)) {
         ent.x = nx;
         ent.y = ny;
         ent.dir = tryDir;
         return;
       }
-      // bump — try other dirs
+      // Ghosts may bounce into another open corridor.
       const order: Dir[] = ["U", "L", "D", "R"];
       for (const d of order) {
-        const tx = ent.x + DIRS[d].x;
+        const tx = wrapTunnel(ent.x + DIRS[d].x, ent.y + DIRS[d].y);
         const ty = ent.y + DIRS[d].y;
         if (canMove(tx, ty)) {
           ent.x = tx;
@@ -161,14 +174,31 @@ export function PacManGame({
       }
     };
 
+    /** Pac only moves after a player command; stops at walls (no auto-bounce). */
+    const stepPac = (pac: { x: number; y: number; dir: Dir; next: Dir | null }) => {
+      if (!pac.next) return;
+      const tryMove = (dir: Dir) => {
+        const ny = pac.y + DIRS[dir].y;
+        const nx = wrapTunnel(pac.x + DIRS[dir].x, ny);
+        if (!canMove(nx, ny)) return false;
+        pac.x = nx;
+        pac.y = ny;
+        pac.dir = dir;
+        return true;
+      };
+      if (tryMove(pac.next)) return;
+      if (pac.dir !== pac.next && tryMove(pac.dir)) return;
+      // Blocked — hold still until a new arrow opens a path.
+    };
+
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
       const s = state.current;
-      if (running && phaseRef.current === "play" && t - last >= 110) {
-      last = t;
-      s.tick++;
+      if (running && phaseRef.current === "play" && t - last >= TICK_MS) {
+        last = t;
+        s.tick++;
 
-      stepEntity(s.pac, s.pac.next);
+      stepPac(s.pac);
       const key = `${s.pac.x},${s.pac.y}`;
       if (s.pellets.has(key)) {
         s.pellets.delete(key);
@@ -181,7 +211,7 @@ export function PacManGame({
         );
         const pick =
           options[Math.floor(Math.random() * Math.max(options.length, 1))] || g.dir;
-        stepEntity(g, pick);
+        stepGhost(g, pick);
         if (g.x === s.pac.x && g.y === s.pac.y && s.tick - s.hurt > 6) {
           s.hurt = s.tick;
           const nextLives = livesRef.current - 1;
@@ -330,6 +360,20 @@ export function PacManGame({
           RESTART GAME
         </button>
       )}
+      {embed && running && awaitingMove && phase === "play" ? (
+        <div className="pac-keys-hint" role="status">
+          <p className="pac-keys-hint-title">Use arrow keys</p>
+          <p className="pac-keys-hint-keys" aria-hidden>
+            <kbd>↑</kbd>
+            <span>
+              <kbd>←</kbd>
+              <kbd>↓</kbd>
+              <kbd>→</kbd>
+            </span>
+          </p>
+          <p className="pac-keys-hint-sub">to move Pac-Man</p>
+        </div>
+      ) : null}
       {phase !== "play" && (
         <div className="absolute inset-0 z-10 grid place-items-center bg-black/72 px-4 text-center">
           <div>

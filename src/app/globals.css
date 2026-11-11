@@ -3572,6 +3572,101 @@ main {
     0 0 14px rgba(255, 210, 50, 0.55);
 }
 
+.arcade-play-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .arcade-play-controls {
+    align-items: flex-start;
+  }
+}
+
+.arcade-keys-cue {
+  margin: 0;
+  max-width: 16rem;
+  color: rgba(255, 242, 200, 0.92);
+  font-family: var(--font-nav), sans-serif;
+  font-size: clamp(0.78rem, 0.7rem + 0.35vw, 0.95rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px #000, 0 0 10px rgba(255, 210, 50, 0.35);
+}
+
+.arcade-keys-cue-keys {
+  color: #ffe14a;
+  letter-spacing: 0.18em;
+}
+
+/* On-cabinet hint until the first arrow key / swipe. */
+.pac-keys-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  pointer-events: none;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.pac-keys-hint-title {
+  margin: 0;
+  color: #ffe14a;
+  font-family: var(--font-nav), sans-serif;
+  font-size: clamp(0.7rem, 1.8cqw, 0.95rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(255, 225, 74, 0.55);
+}
+
+.pac-keys-hint-keys {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  margin: 0.15rem 0;
+}
+
+.pac-keys-hint-keys span {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.pac-keys-hint kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.28rem;
+  border: 1px solid rgba(255, 225, 74, 0.55);
+  border-radius: 0.28rem;
+  background: rgba(12, 8, 24, 0.85);
+  color: #fff;
+  font-family: var(--font-nav), sans-serif;
+  font-size: 0.72rem;
+  line-height: 1;
+  box-shadow: 0 0 8px rgba(255, 225, 74, 0.25);
+}
+
+.pac-keys-hint-sub {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-nav), sans-serif;
+  font-size: clamp(0.58rem, 1.5cqw, 0.78rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 @keyframes arcade-pac-chomp {
   0%,
   100% {

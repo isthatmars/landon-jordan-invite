@@ -608,9 +608,7 @@ html[data-seen-arcade="1"] #arcade .arcade-title {
 }
 html[data-seen-lineup="1"] #lineup .lineup-kicker {
   opacity: 1;
-  animation:
-    lineup-kicker-in 0.7s cubic-bezier(0.33, 0.04, 0.22, 1),
-    lineup-kicker-glow-cycle 10s ease-in-out infinite;
+  animation: lineup-kicker-in 0.7s cubic-bezier(0.33, 0.04, 0.22, 1);
 }
 @keyframes lineup-kicker-in {
   0% {
@@ -994,27 +992,17 @@ html[data-page-hidden="1"] #rsvp * {
   animation-play-state: paused !important;
 }
 
-/* Lineup: pause looping atmosphere only — leave entrance animations alone. */
+/*
+ * Lineup looping CSS was removed after GPU thrash (beams/ambient/shakes/neon).
+ * Keep pause hooks only for any residual decorative loops; never pause one-shot
+ * card-rise / kicker-in entrances via a blanket `#lineup *` rule.
+ */
 html[data-live-lineup="0"] .lineup-sweep::before,
 html[data-live-lineup="0"] .lineup-neon,
 html[data-live-lineup="0"] .lineup-pill,
-html[data-live-lineup="0"] #lineup .lineup-kicker,
-html[data-live-lineup="0"] .lineup-ambient-blob,
-html[data-live-lineup="0"] .lineup-ambient-wash,
-html[data-live-lineup="0"] .lineup-ambient-grain,
-html[data-live-lineup="0"] #lineup .icon-shake,
-html[data-live-lineup="0"] .lineup-dress::before,
-html[data-live-lineup="0"] .lineup-private::before,
 html[data-page-hidden="1"] .lineup-sweep::before,
 html[data-page-hidden="1"] .lineup-neon,
-html[data-page-hidden="1"] .lineup-pill,
-html[data-page-hidden="1"] #lineup .lineup-kicker,
-html[data-page-hidden="1"] .lineup-ambient-blob,
-html[data-page-hidden="1"] .lineup-ambient-wash,
-html[data-page-hidden="1"] .lineup-ambient-grain,
-html[data-page-hidden="1"] #lineup .icon-shake,
-html[data-page-hidden="1"] .lineup-dress::before,
-html[data-page-hidden="1"] .lineup-private::before {
+html[data-page-hidden="1"] .lineup-pill {
   animation-play-state: paused !important;
 }
 

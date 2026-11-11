@@ -5617,15 +5617,14 @@ form[data-step="3"] .rsvp-step-3 {
 .lineup-ambient-parallax {
   position: absolute;
   inset: 0;
-  will-change: transform;
 }
 
 .lineup-ambient-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(42px);
-  will-change: transform;
-  opacity: 0.72;
+  /* Soft static glow — animated blur layers were thrashing neon cards. */
+  filter: blur(36px);
+  opacity: 0.62;
 }
 
 .lineup-ambient-blob-a {
@@ -5673,116 +5672,39 @@ form[data-step="3"] .rsvp-step-3 {
   background:
     linear-gradient(
       125deg,
-      rgba(255, 57, 200, 0.12) 0%,
+      rgba(255, 57, 200, 0.1) 0%,
       transparent 32%,
-      rgba(56, 217, 255, 0.1) 58%,
+      rgba(56, 217, 255, 0.08) 58%,
       transparent 78%,
-      rgba(198, 255, 0, 0.07) 100%
+      rgba(198, 255, 0, 0.06) 100%
     );
-  mix-blend-mode: screen;
-  opacity: 0.9;
-  will-change: transform;
+  /* Avoid screen-blend over neon — continuous recomp with grain looked like flicker. */
+  opacity: 0.88;
+  pointer-events: none;
 }
 
 .lineup-ambient-grain {
   position: absolute;
   inset: 0;
-  opacity: 0.11;
-  mix-blend-mode: soft-light;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E"),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(255, 255, 255, 0.02) 2px,
-      rgba(255, 255, 255, 0.02) 3px
-    );
-  background-size: 160px 160px, 100% 100%;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .lineup-ambient-blob-a {
-    animation: lineup-ambient-drift-a 18s ease-in-out infinite alternate;
-  }
-
-  .lineup-ambient-blob-b {
-    animation: lineup-ambient-drift-b 22s ease-in-out infinite alternate;
-  }
-
-  .lineup-ambient-blob-c {
-    animation: lineup-ambient-drift-c 16s ease-in-out infinite alternate;
-  }
-
-  .lineup-ambient-wash {
-    animation: lineup-ambient-wash-shift 20s ease-in-out infinite alternate;
-  }
-
-  .lineup-ambient-grain {
-    /* Smooth drift — stepped jumps read as flicker over neon cards. */
-    animation: lineup-ambient-grain-shift 18s ease-in-out infinite alternate;
-  }
-}
-
-@keyframes lineup-ambient-drift-a {
-  from {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  to {
-    transform: translate3d(6%, 4%, 0) scale(1.06);
-  }
-}
-
-@keyframes lineup-ambient-drift-b {
-  from {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  to {
-    transform: translate3d(-5%, 6%, 0) scale(1.08);
-  }
-}
-
-@keyframes lineup-ambient-drift-c {
-  from {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  to {
-    transform: translate3d(4%, -5%, 0) scale(1.04);
-  }
-}
-
-@keyframes lineup-ambient-wash-shift {
-  from {
-    opacity: 0.84;
-  }
-  to {
-    opacity: 0.96;
-  }
-}
-
-@keyframes lineup-ambient-grain-shift {
-  from {
-    background-position: 0 0, 0 0;
-  }
-  to {
-    background-position: -28px 20px, 0 0;
-  }
+  opacity: 0.06;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.025) 2px,
+    rgba(255, 255, 255, 0.025) 3px
+  );
+  background-size: 100% 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lineup-ambient-blob,
-  .lineup-ambient-wash,
-  .lineup-ambient-grain {
-    animation: none !important;
-    will-change: auto;
-  }
-
   .lineup-ambient-blob {
     opacity: 0.48;
   }
 
   .lineup-ambient-grain {
-    opacity: 0.08;
+    opacity: 0.04;
   }
 }
 
@@ -5821,11 +5743,7 @@ form[data-step="3"] .rsvp-step-3 {
   text-wrap: balance;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .lineup-kicker {
-    animation: lineup-kicker-glow-cycle 10s ease-in-out infinite;
-  }
-}
+/* Kicker color-cycle removed — @property text-shadow updates strobed the section. */
 
 .lineup-tagline {
   /* Negative margin eats script line-box slack; keep ~3pt more breath under descenders. */
@@ -5952,18 +5870,6 @@ form[data-step="3"] .rsvp-step-3 {
   text-shadow: 0 0 10px rgba(198, 255, 0, 0.28);
 }
 
-@property --lineup-beam-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes lineup-border-beam {
-  to {
-    --lineup-beam-angle: 360deg;
-  }
-}
-
 .lineup-dress {
   position: relative;
   isolation: isolate;
@@ -5982,9 +5888,11 @@ form[data-step="3"] .rsvp-step-3 {
     inset 0 -4px 0 rgba(0, 0, 0, 0.45),
     0 5px 0 #3a1030,
     0 0 0 2px rgba(255, 57, 200, 0.55),
-    0 0 22px rgba(255, 57, 200, 0.35);
+    0 0 22px rgba(255, 57, 200, 0.35),
+    0 0 40px rgba(255, 57, 200, 0.18);
 }
 
+/* Static rim highlight — rotating masked conic beams caused GPU flicker. */
 .lineup-dress::before {
   content: "";
   position: absolute;
@@ -5993,7 +5901,7 @@ form[data-step="3"] .rsvp-step-3 {
   border-radius: inherit;
   padding: 2px;
   background: conic-gradient(
-    from var(--lineup-beam-angle),
+    from 210deg,
     transparent 0%,
     transparent 62%,
     rgba(255, 57, 200, 0.15) 70%,
@@ -6012,12 +5920,6 @@ form[data-step="3"] .rsvp-step-3 {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .lineup-dress::before {
-    animation: lineup-border-beam 3.2s linear infinite;
-  }
 }
 
 .lineup-dress-main,
@@ -6064,6 +5966,9 @@ form[data-step="3"] .rsvp-step-3 {
   /* ~10px more room so script→divider matches divider→trophy. */
   padding-inline-end: 10px;
   overflow: visible;
+  /* Lock neon bloom — breathing text-shadow sizes strobed over the dress bar. */
+  --neon-glow: 1;
+  animation: none !important;
 }
 
 .lineup-dress-prize {
@@ -6097,7 +6002,7 @@ form[data-step="3"] .rsvp-step-3 {
   border-radius: inherit;
   padding: 1.5px;
   background: conic-gradient(
-    from var(--lineup-beam-angle),
+    from 140deg,
     transparent 0%,
     transparent 58%,
     rgba(255, 255, 255, 0.2) 68%,
@@ -6116,21 +6021,6 @@ form[data-step="3"] .rsvp-step-3 {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .lineup-private::before {
-    animation: lineup-border-beam 3.6s linear infinite reverse;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lineup-dress::before,
-  .lineup-private::before {
-    animation: none;
-    /* Soft static highlight so the border still reads as glowing. */
-    --lineup-beam-angle: 210deg;
-  }
 }
 
 .lineup-private-title {

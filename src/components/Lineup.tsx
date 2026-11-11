@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import type { SiteContent } from "@/lib/types";
 import { LineIcon } from "./icons";
 import { LineupAmbient } from "./LineupAmbient";
@@ -11,15 +10,9 @@ function neonScriptCopy(text: string) {
 }
 
 export function Lineup({ content }: { content: SiteContent }) {
-  const sectionRef = useRef<HTMLElement>(null);
-
   return (
-    <section
-      ref={sectionRef}
-      id="lineup"
-      className="lineup-ambient relative overflow-visible bg-[#07010f]"
-    >
-      <LineupAmbient sectionRef={sectionRef} />
+    <section id="lineup" className="lineup-ambient relative overflow-visible bg-[#07010f]">
+      <LineupAmbient />
       <div className="lineup-sweep" aria-hidden />
       <div className="lineup-wrap">
         <p className="lineup-kicker">{neonScriptCopy(content.lineupTitle)}</p>
@@ -28,7 +21,7 @@ export function Lineup({ content }: { content: SiteContent }) {
         <div className="lineup-grid">
           {content.lineup.map((block) => (
             <article key={block.id} className="lineup-card">
-              <LineIcon name={block.icon} className="lineup-neon lineup-card-icon icon-shake" />
+              <LineIcon name={block.icon} className="lineup-neon lineup-card-icon" />
               <p className="lineup-time">{block.time}</p>
               <h3 className="lineup-card-title">{block.title}</h3>
               <p className="lineup-card-copy">{block.description}</p>
@@ -38,20 +31,20 @@ export function Lineup({ content }: { content: SiteContent }) {
 
         <div className="lineup-dress">
           <div className="lineup-dress-main">
-            <LineIcon name="hanger" className="lineup-dress-icon icon-shake" />
+            <LineIcon name="hanger" className="lineup-dress-icon" />
             <p className="lineup-dress-label">Dress code</p>
             <p className="neon-script lineup-dress-script">{neonScriptCopy(content.dressCode)}</p>
           </div>
           <div className="lineup-dress-divider" aria-hidden />
           <p className="lineup-dress-prize">
-            <LineIcon name="trophy" className="lineup-dress-icon icon-shake" />
+            <LineIcon name="trophy" className="lineup-dress-icon" />
             <span>{content.dressCodePrize}</span>
           </p>
         </div>
 
         <div className="lineup-private">
           <p className="lineup-private-title">
-            <LineIcon name="lock" className="lineup-lock icon-shake" />
+            <LineIcon name="lock" className="lineup-lock" />
             {content.privateNote}
           </p>
           <p className="lineup-private-copy">

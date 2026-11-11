@@ -946,16 +946,6 @@
   animation: icon-shake 3.75s ease-in-out infinite;
 }
 
-.lineup-card:nth-child(2) .icon-shake,
-.lineup-dress-prize .icon-shake {
-  animation-delay: 0.45s;
-}
-
-.lineup-card:nth-child(3) .icon-shake,
-.lineup-lock.icon-shake {
-  animation-delay: 0.9s;
-}
-
 #rsvp .icon-shake {
   animation-delay: 1.2s;
 }

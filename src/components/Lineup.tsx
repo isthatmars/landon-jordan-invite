@@ -4,16 +4,16 @@ import type { SiteContent } from "@/lib/types";
 import { LineIcon } from "./icons";
 
 /** Sentence-case ALL-CAPS words for neon script legibility; leave stored/email copy alone. */
-function dressCodeScript(text: string) {
+function neonScriptCopy(text: string) {
   return text.replace(/[A-Z]{2,}/g, (word) => word[0] + word.slice(1).toLowerCase());
 }
 
 export function Lineup({ content }: { content: SiteContent }) {
   return (
-    <section id="lineup" className="lineup-ambient relative overflow-hidden bg-[#07010f]">
+    <section id="lineup" className="lineup-ambient relative overflow-visible bg-[#07010f]">
       <div className="lineup-sweep" aria-hidden />
       <div className="lineup-wrap">
-        <p className="lineup-kicker">{content.lineupTitle}</p>
+        <p className="lineup-kicker">{neonScriptCopy(content.lineupTitle)}</p>
         <p className="lineup-tagline">{content.lineupTagline}</p>
 
         <div className="lineup-grid">
@@ -31,7 +31,7 @@ export function Lineup({ content }: { content: SiteContent }) {
           <div className="lineup-dress-main">
             <LineIcon name="hanger" className="lineup-dress-icon icon-shake" />
             <p className="lineup-dress-label">Dress code</p>
-            <p className="neon-script lineup-dress-script">{dressCodeScript(content.dressCode)}</p>
+            <p className="neon-script lineup-dress-script">{neonScriptCopy(content.dressCode)}</p>
           </div>
           <div className="lineup-dress-divider" aria-hidden />
           <p className="lineup-dress-prize">

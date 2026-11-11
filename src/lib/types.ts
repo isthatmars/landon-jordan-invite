@@ -93,9 +93,14 @@ export interface VideoItem {
   id: string;
   title: string;
   artist: string;
+  /**
+   * Derived YouTube thumbnail (maxresdefault). Not host-editable —
+   * always rebuilt from youtubeId / videoUrl.
+   */
   posterUrl: string;
   /** Official YouTube video played inside the television. */
   youtubeId: string;
+  /** YouTube watch URL (or bare id). Source of truth for youtubeId + poster. */
   videoUrl: string;
   sortOrder: number;
 }

@@ -3,6 +3,7 @@ import { requireAdminFromRequest } from "@/lib/auth";
 import { uid } from "@/lib/id";
 import { getStore, updateStore } from "@/lib/store";
 import type { VideoItem } from "@/lib/types";
+import { normalizeVideoItem, normalizeVideos } from "@/lib/videos";
 
 
 export async function GET(request: Request) {
@@ -21,29 +22,34 @@ export async function PUT(request: Request) {
 
   if (Array.isArray(body.videos)) {
     await updateStore((s) => {
-      s.videos = body.videos as VideoItem[];
+      s.videos = normalizeVideos(body.videos as VideoItem[]);
     });
   } else if (body.id) {
     await updateStore((s) => {
-      const v = s.videos.find((x) => x.id === body.id);
-      if (!v) return;
-      if (typeof body.title === "string") v.title = body.title;
-      if (typeof body.artist === "string") v.artist = body.artist;
-      if (typeof body.posterUrl === "string") v.posterUrl = body.posterUrl;
-      if (typeof body.videoUrl === "string") v.videoUrl = body.videoUrl;
-      if (typeof body.youtubeId === "string") v.youtubeId = body.youtubeId;
-      if (typeof body.sortOrder === "number") v.sortOrder = body.sortOrder;
+      const index = s.videos.findIndex((x) => x.id === body.id);
+      if (index < 0) return;
+      const current = s.videos[index];
+      const next: VideoItem = {
+        ...current,
+        title: typeof body.title === "string" ? body.title : current.title,
+        artist: typeof body.artist === "string" ? body.artist : current.artist,
+        videoUrl: typeof body.videoUrl === "string" ? body.videoUrl : current.videoUrl,
+        youtubeId: typeof body.youtubeId === "string" ? body.youtubeId : current.youtubeId,
+        sortOrder: typeof body.sortOrder === "number" ? body.sortOrder : current.sortOrder,
+        posterUrl: current.posterUrl,
+      };
+      s.videos[index] = normalizeVideoItem(next);
     });
   } else {
-    const video: VideoItem = {
+    const video = normalizeVideoItem({
       id: uid("video"),
       title: body.title || "New Video",
       artist: body.artist || "Unknown",
-      posterUrl: body.posterUrl || "/images/crt-tv.jpg",
+      posterUrl: "",
       youtubeId: body.youtubeId || "",
       videoUrl: body.videoUrl || "",
       sortOrder: body.sortOrder || 99,
-    };
+    });
     await updateStore((s) => {
       s.videos.push(video);
     });

@@ -1,4 +1,5 @@
 import type { AppStore, SiteContent, Track, VideoItem } from "./types";
+import { watchUrl, youtubePosterUrl } from "./youtube";
 
 export const defaultContent: SiteContent = {
   brandName: "Landon & Jordan's",
@@ -51,18 +52,16 @@ export const defaultContent: SiteContent = {
   updatedAt: new Date().toISOString(),
 };
 
-const watch = (id: string) => `https://www.youtube.com/watch?v=${id}`;
-
 export const defaultTracks: Track[] = [
-  { id: "t1", title: "Beat It", artist: "Michael Jackson", color: "#e11d48", youtubeId: "oRdxUFDoQe0", audioUrl: watch("oRdxUFDoQe0"), sortOrder: 1 },
-  { id: "t2", title: "It's My Cadillac (Got That Bass)", artist: "MC Nas-D & DJ Freaky Fred", color: "#22c55e", youtubeId: "ZXATR-UCNJk", audioUrl: watch("ZXATR-UCNJk"), sortOrder: 2 },
-  { id: "t3", title: "Sucker M.C.'s", artist: "RUN-D.M.C.", color: "#3b82f6", youtubeId: "iOKMWSR2Aio", audioUrl: watch("iOKMWSR2Aio"), sortOrder: 3 },
-  { id: "t4", title: "It's Like That", artist: "RUN-D.M.C.", color: "#60a5fa", youtubeId: "TLGWQfK-6DY", audioUrl: watch("TLGWQfK-6DY"), sortOrder: 4 },
-  { id: "t5", title: "Push It", artist: "Salt-N-Pepa", color: "#ec4899", youtubeId: "vCadcBR95oU", audioUrl: watch("vCadcBR95oU"), sortOrder: 5 },
-  { id: "t6", title: "Conga", artist: "Miami Sound Machine", color: "#eab308", youtubeId: "54ItEmCnP80", audioUrl: watch("54ItEmCnP80"), sortOrder: 6 },
-  { id: "t7", title: "Purple Rain", artist: "Prince", color: "#a855f7", youtubeId: "TvnYmWpD_T8", audioUrl: watch("TvnYmWpD_T8"), sortOrder: 7 },
-  { id: "t8", title: "Banned in the U.S.A.", artist: "2 Live Crew", color: "#f97316", youtubeId: "oNsdMFCXH9M", audioUrl: watch("oNsdMFCXH9M"), sortOrder: 8 },
-  { id: "t9", title: "I Wanna Dance with Somebody", artist: "Whitney Houston", color: "#22d3ee", youtubeId: "eH3giaIzONA", audioUrl: watch("eH3giaIzONA"), sortOrder: 9 },
+  { id: "t1", title: "Beat It", artist: "Michael Jackson", color: "#e11d48", youtubeId: "oRdxUFDoQe0", audioUrl: watchUrl("oRdxUFDoQe0"), sortOrder: 1 },
+  { id: "t2", title: "It's My Cadillac (Got That Bass)", artist: "MC Nas-D & DJ Freaky Fred", color: "#22c55e", youtubeId: "ZXATR-UCNJk", audioUrl: watchUrl("ZXATR-UCNJk"), sortOrder: 2 },
+  { id: "t3", title: "Sucker M.C.'s", artist: "RUN-D.M.C.", color: "#3b82f6", youtubeId: "iOKMWSR2Aio", audioUrl: watchUrl("iOKMWSR2Aio"), sortOrder: 3 },
+  { id: "t4", title: "It's Like That", artist: "RUN-D.M.C.", color: "#60a5fa", youtubeId: "TLGWQfK-6DY", audioUrl: watchUrl("TLGWQfK-6DY"), sortOrder: 4 },
+  { id: "t5", title: "Push It", artist: "Salt-N-Pepa", color: "#ec4899", youtubeId: "vCadcBR95oU", audioUrl: watchUrl("vCadcBR95oU"), sortOrder: 5 },
+  { id: "t6", title: "Conga", artist: "Miami Sound Machine", color: "#eab308", youtubeId: "54ItEmCnP80", audioUrl: watchUrl("54ItEmCnP80"), sortOrder: 6 },
+  { id: "t7", title: "Purple Rain", artist: "Prince", color: "#a855f7", youtubeId: "TvnYmWpD_T8", audioUrl: watchUrl("TvnYmWpD_T8"), sortOrder: 7 },
+  { id: "t8", title: "Banned in the U.S.A.", artist: "2 Live Crew", color: "#f97316", youtubeId: "oNsdMFCXH9M", audioUrl: watchUrl("oNsdMFCXH9M"), sortOrder: 8 },
+  { id: "t9", title: "I Wanna Dance with Somebody", artist: "Whitney Houston", color: "#22d3ee", youtubeId: "eH3giaIzONA", audioUrl: watchUrl("eH3giaIzONA"), sortOrder: 9 },
 ];
 
 /** Site mixtape spine palette — admin may only pick from these. */
@@ -70,21 +69,33 @@ export const TAPE_SPINE_PALETTE: readonly string[] = Array.from(
   new Set(defaultTracks.map((t) => t.color.toLowerCase())),
 );
 
+function videoFrom(
+  id: string,
+  title: string,
+  artist: string,
+  youtubeId: string,
+  sortOrder: number,
+): VideoItem {
+  return {
+    id,
+    title,
+    artist,
+    youtubeId,
+    videoUrl: watchUrl(youtubeId),
+    posterUrl: youtubePosterUrl(youtubeId),
+    sortOrder,
+  };
+}
+
 export const defaultVideos: VideoItem[] = [
-  ...defaultTracks.map((t, i) => ({
-    id: `v${t.id}`,
-    title: t.title,
-    artist: t.artist,
-    posterUrl: "/images/crt-tv.jpg",
-    youtubeId: t.youtubeId,
-    videoUrl: t.audioUrl,
-    sortOrder: i + 1,
-  })),
-  { id: "v-billie", title: "Billie Jean", artist: "Michael Jackson", posterUrl: "/images/crt-tv.jpg", youtubeId: "Zi_XLOBDo_Y", videoUrl: watch("Zi_XLOBDo_Y"), sortOrder: 10 },
-  { id: "v-thriller", title: "Thriller", artist: "Michael Jackson", posterUrl: "/images/crt-tv.jpg", youtubeId: "sOnqjkJTMaA", videoUrl: watch("sOnqjkJTMaA"), sortOrder: 11 },
-  { id: "v-walk", title: "Walk This Way", artist: "RUN-D.M.C. ft. Aerosmith", posterUrl: "/images/crt-tv.jpg", youtubeId: "4B_UYYPb-Gk", videoUrl: watch("4B_UYYPb-Gk"), sortOrder: 12 },
-  { id: "v-girls", title: "Girls Just Want to Have Fun", artist: "Cyndi Lauper", posterUrl: "/images/crt-tv.jpg", youtubeId: "PIb6AZdTr-A", videoUrl: watch("PIb6AZdTr-A"), sortOrder: 13 },
-  { id: "v-take", title: "Take On Me", artist: "a-ha", posterUrl: "/images/crt-tv.jpg", youtubeId: "djV11Xbc914", videoUrl: watch("djV11Xbc914"), sortOrder: 14 },
+  ...defaultTracks.map((t, i) =>
+    videoFrom(`v${t.id}`, t.title, t.artist, t.youtubeId, i + 1),
+  ),
+  videoFrom("v-billie", "Billie Jean", "Michael Jackson", "Zi_XLOBDo_Y", 10),
+  videoFrom("v-thriller", "Thriller", "Michael Jackson", "sOnqjkJTMaA", 11),
+  videoFrom("v-walk", "Walk This Way", "RUN-D.M.C. ft. Aerosmith", "4B_UYYPb-Gk", 12),
+  videoFrom("v-girls", "Girls Just Want to Have Fun", "Cyndi Lauper", "PIb6AZdTr-A", 13),
+  videoFrom("v-take", "Take On Me", "a-ha", "djV11Xbc914", 14),
 ];
 
 export function createDefaultStore(): AppStore {

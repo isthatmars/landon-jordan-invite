@@ -12,6 +12,7 @@ import { crtScreen } from "@/lib/cutouts";
 import { GreenSwoosh } from "./icons";
 import { usePlayback } from "./Playback";
 import { YoutubeScreen } from "./YoutubeScreen";
+import { YoutubeThumb } from "./YoutubeThumb";
 
 export function Watch({ headline }: { headline: string }) {
   const { videos, now, playing, toggleCurrent, tuneVideo, onEnded, onPlayingChange, registerPlayer } =
@@ -82,6 +83,13 @@ export function Watch({ headline }: { headline: string }) {
                 title={`${now.artist} — ${now.title}`}
                 onEnded={onEnded}
                 onPlayingChange={onPlayingChange}
+              />
+            ) : null}
+            {!playing && now?.youtubeId ? (
+              <YoutubeThumb
+                videoId={now.youtubeId}
+                alt={`${now.artist} — ${now.title}`}
+                className="pointer-events-none absolute inset-0 z-[2] h-full w-full object-cover"
               />
             ) : null}
             {!playing && (

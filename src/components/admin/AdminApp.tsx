@@ -11,6 +11,7 @@ import type {
   Track,
   VideoItem,
 } from "@/lib/types";
+import { extractYoutubeId, watchUrl, youtubePosterUrl } from "@/lib/youtube";
 
 type Tab =
   | "rsvps"
@@ -475,6 +476,9 @@ export function AdminApp() {
       {tab === "videos" && (
         <section className="admin-panel p-5 space-y-3">
           <h2 className="text-lg font-bold">Music video placeholders</h2>
+          <p className="text-sm text-violet-300">
+            Thumbnails come from the YouTube URL automatically (maxres → hq → mq).
+          </p>
           {videos.map((v, i) => (
             <div key={v.id} className="grid gap-2 sm:grid-cols-2 border border-white/10 rounded-xl p-3">
               <input
@@ -498,24 +502,31 @@ export function AdminApp() {
                 placeholder="Artist"
               />
               <input
-                className="input-dark"
-                value={v.posterUrl}
-                onChange={(e) => {
-                  const next = [...videos];
-                  next[i] = { ...v, posterUrl: e.target.value };
-                  setVideos(next);
-                }}
-                placeholder="Poster URL"
-              />
-              <input
-                className="input-dark"
+                className="input-dark sm:col-span-2"
                 value={v.videoUrl}
                 onChange={(e) => {
+                  const videoUrl = e.target.value;
+                  const youtubeId = extractYoutubeId(videoUrl) || extractYoutubeId(v.youtubeId);
                   const next = [...videos];
-                  next[i] = { ...v, videoUrl: e.target.value };
+                  next[i] = {
+                    ...v,
+                    videoUrl,
+                    youtubeId,
+                    posterUrl: youtubeId ? youtubePosterUrl(youtubeId) : "",
+                  };
                   setVideos(next);
                 }}
-                placeholder="Video URL (mp4/youtube later)"
+                onBlur={() => {
+                  if (!v.youtubeId) return;
+                  const next = [...videos];
+                  next[i] = {
+                    ...v,
+                    videoUrl: watchUrl(v.youtubeId),
+                    posterUrl: youtubePosterUrl(v.youtubeId),
+                  };
+                  setVideos(next);
+                }}
+                placeholder="https://www.youtube.com/watch?v=…"
               />
             </div>
           ))}

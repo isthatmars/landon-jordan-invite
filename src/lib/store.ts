@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { createDefaultStore } from "./defaults";
 import type { AppStore } from "./types";
+import { normalizeVideos } from "./videos";
 
 /**
  * Local content store. RSVPs move to Supabase when SUPABASE_URL and
@@ -38,11 +39,20 @@ async function writeToDisk(store: AppStore) {
   }
 }
 
+function migrateStore(store: AppStore): { store: AppStore; dirty: boolean } {
+  const videos = normalizeVideos(store.videos || []);
+  const dirty = JSON.stringify(videos) !== JSON.stringify(store.videos || []);
+  if (!dirty) return { store, dirty: false };
+  return { store: { ...store, videos }, dirty: true };
+}
+
 export async function getStore(): Promise<AppStore> {
   if (memory) return memory;
   const disk = await readFromDisk();
-  memory = disk ?? createDefaultStore();
-  if (!disk) {
+  const base = disk ?? createDefaultStore();
+  const { store, dirty } = migrateStore(base);
+  memory = store;
+  if (!disk || dirty) {
     await writeToDisk(memory);
   }
   return memory;

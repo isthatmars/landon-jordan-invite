@@ -367,16 +367,27 @@ export function neonEmailTemplate(opts: {
     ? `<p style="Margin:0 0 8px;color:#c6ff00;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;font-weight:400;font-family:Helvetica,Arial,sans-serif;text-align:center">${opts.eyebrow}</p>`
     : "";
 
-  const pill = (href: string, label: string, solid: boolean) =>
-    `<td align="center" style="padding:6px">
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+  // Bulletproof CTA: border + radius + fill live on the same <a>. Putting the
+  // border on the <td> while radius sits on the <a> makes many clients render a
+  // sharp rectangle around a pill (double shape). bgcolor on the <td> still
+  // helps Outlook paint solid fills when solid=true.
+  const pill = (href: string, label: string, solid: boolean) => {
+    const fill = solid ? "#c6ff00" : "transparent";
+    const ink = solid ? "#14081f" : "#c6ff00";
+    const tdBg = solid ? ' bgcolor="#c6ff00"' : "";
+    const tdStyle = solid
+      ? "border-radius:999px;background-color:#c6ff00"
+      : "border-radius:999px";
+    return `<td align="center" style="padding:6px">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate">
         <tr>
-          <td align="center" bgcolor="${solid ? "#c6ff00" : "transparent"}" style="border-radius:999px;border:2px solid #c6ff00;${solid ? "" : "box-shadow:0 0 8px rgba(198,255,0,0.35);"}">
-            <a href="${href}" style="display:inline-block;padding:12px 22px;border-radius:999px;color:${solid ? "#14081f" : "#c6ff00"};font-weight:800;text-decoration:none;letter-spacing:0.05em;font-family:Helvetica,Arial,sans-serif;font-size:13px">${label}</a>
+          <td align="center"${tdBg} style="${tdStyle}">
+            <a href="${href}" style="display:inline-block;padding:12px 22px;border-radius:999px;border:2px solid #c6ff00;background-color:${fill};color:${ink};font-weight:800;text-decoration:none;letter-spacing:0.05em;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:1.25">${label}</a>
           </td>
         </tr>
       </table>
     </td>`;
+  };
 
   const cta =
     opts.ctaLabel && inviteHref

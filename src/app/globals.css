@@ -2663,16 +2663,16 @@ body {
   display: block;
   white-space: nowrap;
   overflow: visible;
-  /* Tight stack: flourishes live in title padding, not between lines. */
+  /* Compact two-line stack; flourishes live in title padding. */
   padding-block: 0;
   padding-inline: 0.18em 0.35em;
-  line-height: 0.68;
+  line-height: 1.05;
   filter: none;
 }
 
 .watch-line + .watch-line {
-  /* Pull line 2 up into flourish overhang of line 1. */
-  margin-top: -0.42em;
+  /* ~2pt clear ink between script flourishes (mobile). */
+  margin-top: 0.28em;
 }
 
 .watch-line-lead,
@@ -2881,11 +2881,12 @@ body {
   #watch .watch-line {
     padding-block: 0;
     padding-inline: 0.16em 0.4em;
-    line-height: 0.66;
+    line-height: 1.05;
   }
 
   #watch .watch-line + .watch-line {
-    margin-top: -0.48em;
+    /* ~2pt clear ink between script flourishes (desktop). */
+    margin-top: 0.22em;
   }
 
   #watch .watch-line-lead {

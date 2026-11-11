@@ -118,7 +118,7 @@ export function Hero({ content }: { content: SiteContent }) {
   );
 }
 
-/** Soft down-chevron at the bottom of #home — inverted BackToTop visibility. */
+/** Far-right scroll cue on #home — fades once past the hero (inverted BackToTop). */
 function HeroScrollCue() {
   const [visible, setVisible] = useState(true);
 
@@ -163,6 +163,7 @@ function HeroScrollCue() {
           strokeLinejoin="round"
         />
       </svg>
+      <span className="hero-scroll-cue-label">Scroll</span>
     </a>
   );
 }

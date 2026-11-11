@@ -14,20 +14,22 @@ const links = [
 const SECTION_IDS = ["home", "mixtape", "watch", "arcade", "lineup", "rsvp"] as const;
 const SCROLL_BG_THRESHOLD = 16;
 
-function goHash(href: string, event?: MouseEvent<HTMLAnchorElement>) {
-  const id = href.replace(/^#/, "");
-  if (!SECTION_IDS.includes(id as (typeof SECTION_IDS)[number])) return;
-  event?.preventDefault();
-  if (location.hash !== `#${id}`) {
-    history.pushState(null, "", `#${id}`);
-  }
-  scrollToSection(id);
-}
-
 export function Nav({ brandName }: { brandName: string }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("#home");
+
+  const goHash = (href: string, event?: MouseEvent<HTMLAnchorElement>) => {
+    const id = href.replace(/^#/, "");
+    if (!SECTION_IDS.includes(id as (typeof SECTION_IDS)[number])) return;
+    event?.preventDefault();
+    // Optimistic active state so sticky smooth-scroll lag cannot flash the wrong tab.
+    setActive(id === "arcade" ? "#watch" : `#${id}`);
+    if (location.hash !== `#${id}`) {
+      history.pushState(null, "", `#${id}`);
+    }
+    scrollToSection(id);
+  };
 
   useEffect(() => {
     const update = () => {

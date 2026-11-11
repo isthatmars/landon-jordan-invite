@@ -3542,8 +3542,8 @@ body {
   order: 2;
   width: min(92%, 34rem);
   overflow: visible;
-  /* Room for the table remote hanging off the CRT feet. */
-  margin-bottom: 3rem;
+  /* Room for the table remote hanging off the CRT feet (kept in-viewport). */
+  margin-bottom: 1.75rem;
 }
 
 .watch-side,
@@ -3770,10 +3770,11 @@ body {
 
 @media (min-width: 1024px) {
   #watch {
-    /* Title on top; CRT dominates; browse is a slim companion panel. */
-    --watch-tv-w: min(56vw, 780px);
+    /* Title on top; CRT dominates; browse is a slim companion panel.
+       Size the CRT so title + set + table remote share one 900px viewport. */
+    --watch-tv-w: min(46vw, 640px);
     --watch-list-w: min(20vw, 280px);
-    padding-top: clamp(1.6rem, 4.5vh, 3rem);
+    padding-top: clamp(0.85rem, 2.4vh, 1.75rem);
     padding-bottom: var(--section-pad-bottom);
   }
 
@@ -3804,14 +3805,14 @@ body {
     grid-template-columns: var(--watch-tv-w) var(--watch-list-w);
     grid-template-rows: auto auto;
     column-gap: clamp(1rem, 2.2vw, 2.25rem);
-    row-gap: clamp(0.35rem, 1.2vh, 0.9rem);
+    row-gap: clamp(0.25rem, 0.9vh, 0.7rem);
     align-items: stretch;
     justify-content: center;
     width: min(100%, 1360px);
     max-width: 1360px;
-    min-height: clamp(540px, 70vh, 780px);
+    min-height: clamp(500px, 64vh, 720px);
     margin: 0 auto;
-    padding: 0 clamp(0.75rem, 2vw, 1.75rem) clamp(3rem, 6.5vh, 4.25rem);
+    padding: 0 clamp(0.75rem, 2vw, 1.75rem) clamp(2.25rem, 5vh, 3.25rem);
     overflow: visible;
   }
 
@@ -3835,7 +3836,7 @@ body {
   }
 
   #watch .watch-title {
-    padding-block: 0.62em 0.5em;
+    padding-block: 0.42em 0.32em;
     padding-inline: 0.4em 0.55em;
   }
 
@@ -3851,15 +3852,15 @@ body {
   }
 
   #watch .watch-line-lead {
-    font-size: clamp(4.1rem, 5.2vw, 5.85rem);
+    font-size: clamp(3.6rem, 4.6vw, 5.1rem);
   }
 
   #watch .watch-line-hero {
-    font-size: clamp(5.2rem, 6.8vw, 7.85rem);
+    font-size: clamp(4.5rem, 5.9vw, 6.7rem);
   }
 
   #watch .watch-line-rest {
-    font-size: clamp(3.85rem, 4.9vw, 5.55rem);
+    font-size: clamp(3.35rem, 4.3vw, 4.85rem);
   }
 
   #watch .watch-tv {
@@ -3871,7 +3872,8 @@ body {
     align-self: start;
     justify-self: start;
     overflow: visible;
-    margin-bottom: 3.35rem;
+    /* Was 3.35rem — pushed the table remote under the fold at 900px. */
+    margin-bottom: 1.35rem;
   }
 
   #watch .watch-tv .floor-contact {
@@ -3918,18 +3920,19 @@ body {
   }
 
   #watch .watch-remote-rail {
-    /* Anchored to the CRT: sit on the oak table in front of the set. */
+    /* Anchored to the CRT: sit on the oak table in front of the set.
+       Keep the remote body in-frame with the TV (72% fell below the fold). */
     position: absolute;
-    left: 26%;
+    left: 30%;
     right: auto;
-    bottom: -0.35rem;
-    width: clamp(10.75rem, 14vw, 14.5rem);
+    bottom: 0.55rem;
+    width: clamp(10.5rem, 13.5vw, 13.75rem);
     height: auto;
     display: block;
     overflow: visible;
     z-index: 14;
     pointer-events: none;
-    transform: translateY(72%);
+    transform: translateY(22%);
   }
 
   #watch .watch-remote {

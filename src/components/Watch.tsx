@@ -23,6 +23,11 @@ type RemoteAction =
   | "browse-down"
   | `channel-${number}`;
 
+/** Channel-switch snow — quick burst, well under the 1s hard cap. */
+const CHANNEL_STATIC_MS = 500;
+/** Absolute max cover (static + poster) so a slow buffer never leaves a long black gap. */
+const CHANNEL_STATIC_MAX_MS = 1000;
+
 const REMOTE_HOTSPOTS: {
   id: string;
   action: RemoteAction;
@@ -63,7 +68,10 @@ export function Watch({ headline }: { headline: string }) {
     onPlayingChange,
     registerPlayer,
   } = usePlayback();
-  const [staticOn, setStaticOn] = useState(false);
+  const [channelSwitching, setChannelSwitching] = useState(false);
+  const [switchKey, setSwitchKey] = useState(0);
+  /** Keep the poster up after snow so the CRT never flashes black while YouTube buffers. */
+  const [holdPoster, setHoldPoster] = useState(false);
   const [muted, setMuted] = useState(false);
   const skipStatic = useRef(true);
   const sectionRef = useRef<HTMLElement>(null);
@@ -71,15 +79,44 @@ export function Watch({ headline }: { headline: string }) {
   const reduceMotion = useReducedMotion();
   const [desktopMotion, setDesktopMotion] = useState(false);
 
+  /* CRT channel switch: quick snow (≤1s), then clear as the new video plays underneath. */
   useEffect(() => {
     if (skipStatic.current) {
       skipStatic.current = false;
       return;
     }
-    setStaticOn(true);
-    const timer = window.setTimeout(() => setStaticOn(false), 460);
-    return () => window.clearTimeout(timer);
-  }, [now?.youtubeId]);
+    if (reduceMotion) {
+      const clearPoster = window.setTimeout(() => setHoldPoster(false), 0);
+      return () => window.clearTimeout(clearPoster);
+    }
+    let clearTimer = 0;
+    let posterCapTimer = 0;
+    let cancelled = false;
+    const startTimer = window.setTimeout(() => {
+      if (cancelled) return;
+      setSwitchKey((key) => key + 1);
+      setChannelSwitching(true);
+      setHoldPoster(true);
+      clearTimer = window.setTimeout(() => {
+        if (!cancelled) setChannelSwitching(false);
+      }, CHANNEL_STATIC_MS);
+      /* Hard cap: never leave static/poster covering past 1s. */
+      posterCapTimer = window.setTimeout(() => {
+        if (!cancelled) setHoldPoster(false);
+      }, CHANNEL_STATIC_MAX_MS);
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(startTimer);
+      window.clearTimeout(clearTimer);
+      window.clearTimeout(posterCapTimer);
+    };
+  }, [now?.youtubeId, reduceMotion]);
+
+  const handlePlayingChange = (isPlaying: boolean) => {
+    if (isPlaying) setHoldPoster(false);
+    onPlayingChange(isPlaying);
+  };
 
   useEffect(() => {
     const mq = window.matchMedia("(pointer: fine) and (min-width: 1024px)");
@@ -185,10 +222,10 @@ export function Watch({ headline }: { headline: string }) {
                 videoId={now.youtubeId}
                 title={`${now.artist} — ${now.title}`}
                 onEnded={onEnded}
-                onPlayingChange={onPlayingChange}
+                onPlayingChange={handlePlayingChange}
               />
             ) : null}
-            {!playing && now?.youtubeId ? (
+            {(!playing || holdPoster || channelSwitching) && now?.youtubeId ? (
               <YoutubeThumb
                 videoId={now.youtubeId}
                 alt={`${now.artist} — ${now.title}`}
@@ -211,7 +248,14 @@ export function Watch({ headline }: { headline: string }) {
               </button>
             )}
             <div className="crt-scanlines" aria-hidden />
-            <div className={`crt-static${staticOn ? " is-on" : ""}`} aria-hidden />
+            <div className="crt-boot-static" aria-hidden />
+            {channelSwitching ? (
+              <div key={switchKey} className="crt-static is-switching" aria-hidden>
+                <span className="crt-static-snow" />
+                <span className="crt-static-roll" />
+                <span className="crt-static-flash" />
+              </div>
+            ) : null}
           </div>
           <div className="floor-contact" />
           {/* eslint-disable-next-line @next/next/no-img-element */}

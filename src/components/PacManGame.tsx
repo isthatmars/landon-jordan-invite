@@ -64,17 +64,37 @@ export function PacManGame({
   running,
   embed = false,
   showPad = false,
+  startHintDone = false,
+  onStartHintDone,
 }: {
   running: boolean;
   embed?: boolean;
   showPad?: boolean;
+  /** Parent-owned: once true, the embed start cue stays gone across remounts. */
+  startHintDone?: boolean;
+  onStartHintDone?: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [phase, setPhase] = useState<"play" | "won" | "lost">("play");
-  /** Desktop: show arrow-key cue until the first move. */
-  const [awaitingMove, setAwaitingMove] = useState(true);
+  /**
+   * Desktop embed: one-shot start cue. Dismissed on first direction input and
+   * never re-shown for this play session (death / replay / remount stay quiet).
+   */
+  const [localHintDismissed, setLocalHintDismissed] = useState(startHintDone);
+  const hintDismissedRef = useRef(startHintDone);
+  const onStartHintDoneRef = useRef(onStartHintDone);
+  useEffect(() => {
+    onStartHintDoneRef.current = onStartHintDone;
+  }, [onStartHintDone]);
+  useEffect(() => {
+    if (startHintDone) {
+      hintDismissedRef.current = true;
+      setLocalHintDismissed(true);
+    }
+  }, [startHintDone]);
+  const showStartHint = embed && !localHintDismissed && !startHintDone;
   const phaseRef = useRef(phase);
   const livesRef = useRef(lives);
   useEffect(() => {
@@ -96,14 +116,18 @@ export function PacManGame({
     hurt: 0,
   });
 
+  /** Reposition Pac after a hit — does not revive the start-key hint. */
   const resetPac = () => {
     state.current.pac = { x: 9, y: 15, dir: "R", next: null };
-    setAwaitingMove(true);
   };
 
   const setDir = useCallback((dir: Dir) => {
     state.current.pac.next = dir;
-    setAwaitingMove(false);
+    if (!hintDismissedRef.current) {
+      hintDismissedRef.current = true;
+      setLocalHintDismissed(true);
+      onStartHintDoneRef.current?.();
+    }
   }, []);
   const runningRef = useRef(running);
   useEffect(() => {
@@ -360,9 +384,9 @@ export function PacManGame({
           RESTART GAME
         </button>
       )}
-      {embed && running && awaitingMove && phase === "play" ? (
+      {running && showStartHint && phase === "play" ? (
         <div className="pac-keys-hint" role="status">
-          <p className="pac-keys-hint-title">Use arrow keys</p>
+          <p className="pac-keys-hint-title">Press arrow key to start</p>
           <p className="pac-keys-hint-keys" aria-hidden>
             <kbd>↑</kbd>
             <span>
@@ -371,7 +395,7 @@ export function PacManGame({
               <kbd>→</kbd>
             </span>
           </p>
-          <p className="pac-keys-hint-sub">to move Pac-Man</p>
+          <p className="pac-keys-hint-sub">use arrows to move Pac-Man</p>
         </div>
       ) : null}
       {phase !== "play" && (

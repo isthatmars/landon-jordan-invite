@@ -63,6 +63,16 @@ function settleLoadScroll() {
       return;
     }
     scrollToSection(hash, { behavior: "auto" });
+    // Deep-link: mark the target seen so cinematic opacity gates never blank it.
+    const root = document.documentElement;
+    if (hash === "mixtape") root.dataset.seenMixtape = "1";
+    if (hash === "watch") root.dataset.seenWatch = "1";
+    if (hash === "arcade") {
+      root.dataset.seenWatch = "1";
+      root.dataset.seenArcade = "1";
+    }
+    if (hash === "lineup") root.dataset.seenLineup = "1";
+    if (hash === "rsvp") root.dataset.seenRsvp = "1";
     return;
   }
   const prev = document.documentElement.style.scrollBehavior;

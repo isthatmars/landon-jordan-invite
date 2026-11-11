@@ -38,6 +38,15 @@ export function Nav({ brandName }: { brandName: string }) {
     event?.preventDefault();
     // Optimistic active state so sticky smooth-scroll lag cannot flash the wrong tab.
     setActive(navHashForPlate(id as PlateId));
+    // Mark cinematic "seen" immediately so entrance gates never blank the target.
+    const root = document.documentElement;
+    if (id === "mixtape") root.dataset.seenMixtape = "1";
+    if (id === "watch" || id === "arcade") {
+      root.dataset.seenWatch = "1";
+      if (id === "arcade") root.dataset.seenArcade = "1";
+    }
+    if (id === "lineup") root.dataset.seenLineup = "1";
+    if (id === "rsvp") root.dataset.seenRsvp = "1";
     if (location.hash !== `#${id}`) {
       history.pushState(null, "", `#${id}`);
     }

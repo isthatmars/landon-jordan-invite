@@ -569,8 +569,10 @@ html[data-motion="armed"]:not([data-seen-rsvp]) #rsvp .neon-script-lg {
   --pen-b: 130%;
   --pen-c: 130%;
 }
+/* Keep the kicker readable even before the seen flag — blanking it made
+   deep-links / fast nav look like the section never loaded. */
 html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-kicker {
-  opacity: 0;
+  opacity: 1;
 }
 html[data-motion="armed"]:not([data-seen-arcade]) #arcade .arcade-title {
   opacity: 0;
@@ -604,13 +606,14 @@ html[data-seen-arcade="1"] #arcade .arcade-title {
   }
 }
 html[data-seen-lineup="1"] #lineup .lineup-kicker {
+  opacity: 1;
   animation:
-    lineup-kicker-in 0.9s cubic-bezier(0.33, 0.04, 0.22, 1) 0.2s both,
+    lineup-kicker-in 0.7s cubic-bezier(0.33, 0.04, 0.22, 1),
     lineup-kicker-glow-cycle 10s ease-in-out infinite;
 }
 @keyframes lineup-kicker-in {
   0% {
-    opacity: 0;
+    opacity: 0.7;
   }
   100% {
     opacity: 1;
@@ -831,28 +834,38 @@ html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-pill {
   transition: filter 0.45s ease;
 }
 
-/* Schedule cards: stagger fade/rise when the section is first seen. */
+/* Schedule cards: stay visible before seen (no blank gate). Stagger polish only after. */
 html[data-motion="armed"]:not([data-seen-lineup]) #lineup .lineup-card {
-  opacity: 0;
-  transform: translateY(14px);
+  opacity: 1;
+  transform: none;
 }
 html[data-seen-lineup="1"] #lineup .lineup-card {
-  /* backwards keeps pre-delay hidden; after the run, cascade wins so hover lift works. */
   opacity: 1;
-  animation: rise-in 0.52s ease backwards;
+  /* No fill-mode — `both`/`backwards` held opacity:0 during stagger delays. */
+  animation: lineup-card-rise 0.52s ease;
 }
 html[data-seen-lineup="1"] #lineup .lineup-card:hover,
 html[data-seen-lineup="1"] #lineup .lineup-card:active {
   transform: translateY(-5px);
 }
 html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(1) {
-  animation-delay: 0.12s;
+  animation-delay: 0.06s;
 }
 html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(2) {
-  animation-delay: 0.34s;
+  animation-delay: 0.14s;
 }
 html[data-seen-lineup="1"] #lineup .lineup-card:nth-child(3) {
-  animation-delay: 0.56s;
+  animation-delay: 0.22s;
+}
+@keyframes lineup-card-rise {
+  from {
+    opacity: 0.92;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* RSVP: frame traces, script illuminates, phone appears. Fields stay readable. */

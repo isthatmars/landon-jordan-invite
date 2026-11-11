@@ -3108,8 +3108,8 @@ body {
 @media (min-width: 1024px) {
   #watch {
     /* Title on top; CRT dominates; browse is a slim companion panel. */
-    --watch-tv-w: min(52vw, 720px);
-    --watch-list-w: min(22vw, 300px);
+    --watch-tv-w: min(56vw, 780px);
+    --watch-list-w: min(20vw, 280px);
     padding-top: clamp(1.6rem, 4.5vh, 3rem);
     padding-bottom: var(--section-pad-bottom);
   }
@@ -3144,11 +3144,11 @@ body {
     row-gap: clamp(0.35rem, 1.2vh, 0.9rem);
     align-items: stretch;
     justify-content: center;
-    width: min(100%, 1280px);
-    max-width: 1280px;
+    width: min(100%, 1360px);
+    max-width: 1360px;
     min-height: clamp(540px, 70vh, 780px);
     margin: 0 auto;
-    padding: 0 clamp(0.75rem, 2vw, 1.75rem) clamp(2.4rem, 5.5vh, 3.6rem);
+    padding: 0 clamp(0.75rem, 2vw, 1.75rem) clamp(3rem, 6.5vh, 4.25rem);
     overflow: visible;
   }
 
@@ -3258,14 +3258,16 @@ body {
     grid-column: unset;
     grid-row: unset;
     order: 0;
-    left: clamp(4.5rem, 11vw, 9.5rem);
+    /* Center under the CRT face, slightly left of mid so it reads on the oak. */
+    left: clamp(7.5rem, 16vw, 14rem);
     right: auto;
-    bottom: clamp(0.85rem, 2.4vh, 1.85rem);
-    width: clamp(9.75rem, 12vw, 13.25rem);
+    bottom: clamp(0.35rem, 1.2vh, 0.9rem);
+    width: clamp(10.5rem, 13vw, 14rem);
     height: auto;
     display: block;
     overflow: visible;
-    z-index: 4;
+    /* Above CRT art so the remote sits on the table, not under the bezel. */
+    z-index: 12;
     pointer-events: none;
   }
 

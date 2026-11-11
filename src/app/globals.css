@@ -2396,13 +2396,102 @@ body {
 }
 
 #arcade {
+  /* Flex column so .arcade-stage can fill and vertically center the scene. */
+  display: flex;
+  flex-direction: column;
   overflow-x: clip;
   overflow-y: visible;
+}
+
+/*
+ * Raise the arcade composition in the sticky plate: fill remaining height
+ * after header/section pads, then center. Keeps controls/sneakers/CTA clear
+ * of the next plate's overlap band (--section-pad-bottom).
+ */
+.arcade-stage {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 0.75rem 1rem 1.1rem;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .arcade-stage {
+    padding: 0.35rem 1.5rem 1.15rem;
+  }
+}
+
+.arcade-row {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  overflow: visible;
+}
+
+@media (min-width: 768px) {
+  .arcade-row {
+    flex-direction: row;
+    /* Cab + skates share a floor line; copy self-aligns to the screen mid. */
+    align-items: flex-end;
+    gap: 1.35rem;
+  }
+}
+
+.arcade-cab {
+  display: flex;
+  justify-content: center;
+}
+
+/* Shrink-wrap the machine to the scaled art so screen cutout % stay accurate. */
+.arcade-cab .arcade-machine {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.arcade-cab .arcade-machine > img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  /* Cap height so feet/controls stay above the sticky overlap band. */
+  max-height: min(64svh, 620px);
+}
+
+@media (max-width: 767px) {
+  .arcade-cab .arcade-machine > img {
+    max-height: min(52svh, 420px);
+  }
 }
 
 .arcade-copy {
   margin-bottom: 0.2rem;
   overflow: visible;
+}
+
+@media (min-width: 768px) {
+  .arcade-copy {
+    /*
+     * Vertically middle-align title + START GAME with the cabinet SCREEN
+     * (cutout top 28.2% + half of 33.9% ≈ 45% of cab height), not the
+     * control panel / floor. align-self:center hits cab mid (~50%); nudge
+     * up so the block centers on the blue monitor.
+     */
+    align-self: center;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    transform: translateY(-12%);
+  }
 }
 
 .arcade-title {
@@ -2411,6 +2500,24 @@ body {
   padding-top: 0.72em;
   padding-bottom: 0.22em;
   padding-inline: 0.28em;
+}
+
+/* Compact the left stack so title + START GAME sit as one unit on the screen mid. */
+@media (min-width: 768px) {
+  .arcade-title {
+    line-height: 1.12;
+    padding-top: 0.42em;
+    padding-bottom: 0.12em;
+  }
+
+  .arcade-copy .arcade-arrow {
+    margin-top: 0.15rem;
+    height: 1.75rem;
+  }
+
+  .arcade-copy .arcade-start {
+    margin-top: 0.45rem;
+  }
 }
 
 /* Pac-Man arcade CTA — yellow / black / maze-blue chrome (START + CLOSE). */
@@ -2554,37 +2661,37 @@ body {
 }
 
 /* Seat the skate pair on the arcade floor (cutout has empty pixels under wheels).
-   translateY drops the art below the layout box — park the contact under the wheels. */
+   Mild translate keeps wheels grounded without dropping into the sticky clip band. */
 .arcade-skates {
   align-self: flex-end;
   line-height: 0;
-  margin-bottom: -0.35rem;
+  margin-bottom: 0;
 }
 
 .arcade-skates .floor-contact {
   left: 10%;
   right: 10%;
-  bottom: -1.35rem;
+  bottom: -0.55rem;
   height: 1rem;
   background: rgba(0, 0, 0, 0.9);
   filter: blur(7px);
 }
 
 .arcade-skates img {
-  transform: translateY(16%);
+  transform: translateY(6%);
   transform-origin: bottom center;
   filter: drop-shadow(0 10px 6px rgba(0, 0, 0, 0.62));
 }
 
 @media (min-width: 768px) {
   .arcade-skates img {
-    transform: translateY(18%);
+    transform: translateY(8%);
   }
 
   .arcade-skates .floor-contact {
     left: 8%;
     right: 8%;
-    bottom: -2.1rem;
+    bottom: -0.85rem;
     height: 1.25rem;
     background: rgba(0, 0, 0, 0.94);
     filter: blur(8px);
@@ -2593,15 +2700,15 @@ body {
 
 .arcade-machine {
   position: relative;
-  /* Cutout has empty pixels under the cabinet feet — drop onto the floor plane. */
-  transform: translateY(4%);
+  /* Light floor seat — avoid large positive Y that clips under the next plate. */
+  transform: translateY(1.25%);
   transform-origin: bottom center;
 }
 
 .arcade-machine .floor-contact {
   left: 12%;
   right: 12%;
-  bottom: -0.15rem;
+  bottom: 0.05rem;
   height: 1.05rem;
   background: rgba(0, 0, 0, 0.9);
   filter: blur(8px);
@@ -2609,11 +2716,11 @@ body {
 
 @media (min-width: 768px) {
   .arcade-machine {
-    transform: translateY(5.5%);
+    transform: translateY(1.75%);
   }
 
   .arcade-machine .floor-contact {
-    bottom: -0.35rem;
+    bottom: -0.1rem;
     height: 1.2rem;
   }
 }

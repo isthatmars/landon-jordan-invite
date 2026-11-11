@@ -100,9 +100,7 @@ export function RsvpTelephone() {
           <img className="phone-photo" src="/images/prop-rsvp-phone.png" alt="" draggable={false} />
         </span>
       </button>
-      {!pickedUp ? (
-        <p className="mt-2 text-center text-[10px] font-bold tracking-[0.18em] text-[#c6ff00]">TAP THE PHONE</p>
-      ) : (
+      {pickedUp ? (
         <div className="rsvp-phone-copy mt-3 w-full max-w-full text-center" data-testid="rsvp-phone-message" aria-live="polite">
           <p className="text-sm leading-snug text-white">
             You&apos;re on the list?{" "}
@@ -116,7 +114,7 @@ export function RsvpTelephone() {
             </button>
           </p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

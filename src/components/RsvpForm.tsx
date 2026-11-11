@@ -663,7 +663,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
             )}
           </form>
         </div>
-        <p className="font-nav mx-auto mt-6 max-w-[22rem] text-center text-[11px] leading-relaxed text-[#f8f4fa]/85 md:mt-8">
+        <p className="font-nav mx-auto mt-6 w-full px-2 text-center text-[13px] leading-snug tracking-[0.06em] text-[#f8f4fa]/85 md:mt-8 md:px-4">
           {content.rsvpSubhead}
         </p>
       </div>

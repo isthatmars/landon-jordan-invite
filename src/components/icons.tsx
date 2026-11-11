@@ -107,6 +107,17 @@ export function GamepadIcon({ className = "" }: { className?: string }) {
   );
 }
 
+/** Classic Pac-Man wedge — used on the arcade START GAME CTA. */
+export function PacManIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-hidden>
+      <circle cx="16" cy="16" r="12" fill="currentColor" />
+      <path d="M16 16 28 8A12 12 0 0 0 28 24Z" fill="#060912" />
+      <circle cx="13.2" cy="10.8" r="1.7" fill="#060912" />
+    </svg>
+  );
+}
+
 type GlyphName = "skate" | "dinner" | "dj" | "hanger" | "trophy" | "lock";
 
 export function LineIcon({ name, className = "" }: { name: GlyphName; className?: string }) {

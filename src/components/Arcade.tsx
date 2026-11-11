@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { arcadeScreen } from "@/lib/cutouts";
 import { ArcadeBackdrop } from "./ArcadeBackdrop";
-import { GamepadIcon, GreenSwoosh, NeonArrow } from "./icons";
+import { GreenSwoosh, NeonArrow, PacManIcon } from "./icons";
 import { PacManGame } from "./PacManGame";
 
 export function Arcade({ headline }: { headline: string }) {
@@ -58,13 +58,33 @@ export function Arcade({ headline }: { headline: string }) {
                 className="btn-pink-outline arcade-start"
                 onClick={() => setRunning(true)}
               >
-                <GamepadIcon className="h-5 w-6" />
+                <span className="arcade-start-pellets" aria-hidden>
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <PacManIcon className="arcade-start-icon h-5 w-5" />
                 START GAME
+                <span className="arcade-start-pellets arcade-start-pellets-end" aria-hidden>
+                  <i />
+                  <i />
+                  <i />
+                </span>
               </button>
             )}
             {!overlay && running && (
               <button type="button" className="btn-pink-outline arcade-start" onClick={() => setRunning(false)}>
+                <span className="arcade-start-pellets" aria-hidden>
+                  <i />
+                  <i />
+                  <i />
+                </span>
                 CLOSE GAME
+                <span className="arcade-start-pellets arcade-start-pellets-end" aria-hidden>
+                  <i />
+                  <i />
+                  <i />
+                </span>
               </button>
             )}
           </div>

@@ -2264,9 +2264,144 @@ body {
   padding-inline: 0.28em;
 }
 
+/* Pac-Man arcade CTA — yellow / black / maze-blue chrome (START + CLOSE). */
 .arcade-copy .arcade-start {
+  --arcade-pac-yellow: #ffe566;
+  --arcade-pac-yellow-hi: #fff2a8;
+  --arcade-pac-blue: #1b3a9c;
+  --arcade-pac-blue-deep: #0a1438;
+  --arcade-pac-ink: #060912;
   display: inline-flex;
+  position: relative;
   margin-top: 0.85rem;
+  gap: 0.55rem;
+  min-height: 48px;
+  padding: 0.6rem 1.15rem;
+  border: 2px solid var(--arcade-pac-yellow);
+  border-radius: 0.55rem;
+  color: var(--arcade-pac-yellow-hi);
+  background:
+    linear-gradient(180deg, rgba(255, 242, 168, 0.28), rgba(255, 255, 255, 0) 42%),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 10px,
+      rgba(255, 229, 102, 0.07) 10px 11px,
+      transparent 11px 22px
+    ),
+    linear-gradient(180deg, #243a86 0%, var(--arcade-pac-blue-deep) 48%, var(--arcade-pac-ink) 100%);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-shadow:
+    0 1px 0 #000,
+    0 0 10px rgba(255, 229, 102, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 242, 168, 0.5),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(56, 120, 255, 0.35),
+    0 4px 0 #02040a,
+    0 8px 16px rgba(0, 0, 0, 0.45),
+    0 0 12px rgba(255, 210, 50, 0.42),
+    0 0 24px rgba(40, 90, 220, 0.38);
+  image-rendering: auto;
+}
+
+.arcade-copy .arcade-start .arcade-start-icon {
+  flex-shrink: 0;
+  color: var(--arcade-pac-yellow);
+  filter: drop-shadow(0 0 5px rgba(255, 210, 50, 0.75));
+  animation: arcade-pac-chomp 0.55s steps(2, end) infinite;
+}
+
+.arcade-copy .arcade-start-pellets {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  pointer-events: none;
+}
+
+.arcade-copy .arcade-start-pellets i {
+  display: block;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 1px;
+  background: var(--arcade-pac-yellow);
+  box-shadow: 0 0 5px rgba(255, 210, 50, 0.85);
+  animation: arcade-pellet-blink 1.05s steps(2, end) infinite;
+}
+
+.arcade-copy .arcade-start-pellets i:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.arcade-copy .arcade-start-pellets i:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+.arcade-copy .arcade-start-pellets-end i:nth-child(1) {
+  animation-delay: 0.08s;
+}
+
+.arcade-copy .arcade-start-pellets-end i:nth-child(2) {
+  animation-delay: 0.26s;
+}
+
+.arcade-copy .arcade-start-pellets-end i:nth-child(3) {
+  animation-delay: 0.44s;
+}
+
+.arcade-copy .arcade-start:hover,
+.arcade-copy .arcade-start:focus-visible {
+  border-color: var(--arcade-pac-yellow-hi);
+  color: #fff8d0;
+  filter: brightness(1.1);
+  outline: none;
+  transform: scale(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 242, 168, 0.58),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(90, 150, 255, 0.45),
+    0 4px 0 #02040a,
+    0 10px 18px rgba(0, 0, 0, 0.42),
+    0 0 8px #fff6c4,
+    0 0 18px rgba(255, 210, 50, 0.75),
+    0 0 34px rgba(50, 110, 255, 0.5);
+}
+
+.arcade-copy .arcade-start:active {
+  transform: translateY(3px) scale(0.98);
+  filter: brightness(1.02);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 242, 168, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    0 1px 0 #02040a,
+    0 0 14px rgba(255, 210, 50, 0.55);
+}
+
+@keyframes arcade-pac-chomp {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-12deg);
+  }
+}
+
+@keyframes arcade-pellet-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.28;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade-copy .arcade-start .arcade-start-icon,
+  .arcade-copy .arcade-start-pellets i {
+    animation: none;
+  }
 }
 
 /* Seat the skate pair on the arcade floor (cutout has empty pixels under wheels).
@@ -3036,6 +3171,8 @@ body {
 
   .btn-pink-outline:hover,
   .btn-pink-outline:focus-visible,
+  .arcade-copy .arcade-start:hover,
+  .arcade-copy .arcade-start:focus-visible,
   .btn-green:hover,
   .btn-green:focus-visible,
   .btn-rsvp-now:hover,
@@ -3060,6 +3197,7 @@ body {
   }
 
   .btn-pink-outline:active,
+  .arcade-copy .arcade-start:active,
   .btn-green:active,
   .btn-rsvp-now:active,
   .btn-green-solid:active,

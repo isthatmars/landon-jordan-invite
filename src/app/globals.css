@@ -2759,6 +2759,8 @@ main {
   cursor: pointer;
   /* Let each tape pop past its slot on hover/selected scale. */
   overflow: visible;
+  /* Size queries so spine ink scales with the photographed slot height. */
+  container-type: size;
   transform: scale(1);
   transform-origin: center center;
   transition: transform 0.18s ease;
@@ -2782,20 +2784,22 @@ main {
 
 .mix-tape-ink {
   position: absolute;
-  left: 7%;
-  right: 7%;
+  /* Keep clear of jewel-case plastic edges on the photo. */
+  left: 9%;
+  right: 10%;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Visible so the optical lift on .mix-tape-ink-text is not clipped. */
-  overflow: visible;
+  /* Clip to the colored spine band so words cannot float out of the case. */
+  overflow: hidden;
   /* Keep labels painted even if a parent ghost-CTA rule toggles visibility. */
   visibility: visible;
   opacity: 1;
   color: #1a1020;
   font-family: var(--font-label), cursive;
   font-weight: 600;
-  font-size: 12px;
+  /* Track slot height so ink stays inside short spines at mid breakpoints. */
+  font-size: clamp(7px, 38cqh, 12px);
   line-height: 1;
   letter-spacing: 0.01em;
   white-space: nowrap;
@@ -2804,12 +2808,13 @@ main {
 }
 
 /*
- * Caveat sits optically low in its em-box. Lift lives on an inner span so
- * mixtape rise-in (transform on .mix-tape-ink) cannot wipe the centering.
+ * Caveat sits slightly low in its em-box. Tiny lift only — the prior ~0.9em
+ * nudge yanked every label out of the photographed spine at most widths.
+ * Lives on an inner span so mixtape rise-in transform on .mix-tape-ink is safe.
  */
 .mix-tape-ink-text {
   display: block;
-  translate: 0 -0.9em;
+  translate: 0 -0.08em;
 }
 
 .mix-tape.is-on .mix-tape-ink {
@@ -2939,12 +2944,12 @@ main {
   }
 
   .mix-tape-ink {
-    font-size: clamp(11px, 0.9vw, 14px);
+    font-size: clamp(8px, 36cqh, 13px);
   }
 
   .mix-tape-ink-text {
-    /* Desktop spines read bottom-heavy — stronger Caveat optical lift. */
-    translate: 0 -0.94em;
+    /* Desktop: slight Caveat optical lift only — keep glyphs in the spine. */
+    translate: 0 -0.1em;
   }
 
   .mix-phones {

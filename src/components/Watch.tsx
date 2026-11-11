@@ -142,6 +142,16 @@ export function Watch({ headline }: { headline: string }) {
   const hero = words.length > 1 ? words[1] : words[0] || "";
   const rest = words.length > 2 ? words.slice(2).join(" ") : "";
 
+  /* Display-only: pin the CRT's current video at the top of Browse Videos.
+     Channel numbers + next/prev still use the catalog `videos` order. */
+  const browseVideos = (() => {
+    if (!now?.youtubeId) return videos;
+    const playingIndex = videos.findIndex((video) => video.youtubeId === now.youtubeId);
+    if (playingIndex <= 0) return videos;
+    const playing = videos[playingIndex];
+    return [playing, ...videos.slice(0, playingIndex), ...videos.slice(playingIndex + 1)];
+  })();
+
   const focusBrowse = (dir?: -1 | 1) => {
     const list = listRef.current;
     if (!list) return;
@@ -159,35 +169,20 @@ export function Watch({ headline }: { headline: string }) {
     target.scrollBy({ top: dir * amount, behavior: reduceMotion ? "auto" : "smooth" });
   };
 
-  /* Keep the browse list scrolled to whatever is on the CRT. */
+  /* Now-playing sits at the top — keep the panel scrolled to show it. */
   useEffect(() => {
     const list = listRef.current;
     if (!list || !now?.youtubeId) return;
+    const scroller = list.closest(".watch-list");
+    const behavior: ScrollBehavior = reduceMotion ? "auto" : "smooth";
+    if (scroller instanceof HTMLElement) {
+      scroller.scrollTo({ top: 0, behavior });
+      return;
+    }
     const active = list.querySelector(
       `[data-youtube-id="${CSS.escape(now.youtubeId)}"]`,
     ) as HTMLElement | null;
-    if (!active) return;
-
-    const scroller = list.closest(".watch-list");
-    const behavior: ScrollBehavior = reduceMotion ? "auto" : "smooth";
-    if (!(scroller instanceof HTMLElement)) {
-      active.scrollIntoView({ block: "nearest", behavior });
-      return;
-    }
-
-    const label = scroller.querySelector(".watch-browse-label");
-    const labelH = label instanceof HTMLElement ? label.getBoundingClientRect().height : 0;
-    const pad = 6;
-    const btn = active.getBoundingClientRect();
-    const box = scroller.getBoundingClientRect();
-    const viewTop = box.top + labelH + pad;
-    const viewBottom = box.bottom - pad;
-
-    if (btn.top < viewTop) {
-      scroller.scrollBy({ top: btn.top - viewTop, behavior });
-    } else if (btn.bottom > viewBottom) {
-      scroller.scrollBy({ top: btn.bottom - viewBottom, behavior });
-    }
+    active?.scrollIntoView({ block: "nearest", behavior });
   }, [now?.youtubeId, reduceMotion, videos, watchLive]);
 
   const onRemoteAction = (action: RemoteAction) => {
@@ -343,23 +338,39 @@ export function Watch({ headline }: { headline: string }) {
             <div className="watch-list" role="region" aria-label="Browse videos">
               <p className="watch-browse-label">Browse Videos</p>
               <ul ref={listRef} className="watch-list-items" tabIndex={-1}>
-                {videos.map((video) => (
-                  <li key={video.id}>
-                    <button
-                      type="button"
-                      data-youtube-id={video.youtubeId}
-                      onClick={() => tuneVideo(video)}
-                      className={`watch-list-item w-full border-b px-1 py-2 text-left text-sm text-white ${
-                        now?.youtubeId === video.youtubeId
-                          ? "is-current border-white/35"
-                          : "border-white/20"
-                      }`}
-                    >
-                      <span className="font-semibold text-white">{video.title}</span>
-                      <span className="block text-xs text-white">{video.artist}</span>
-                    </button>
-                  </li>
-                ))}
+                {browseVideos.map((video) => {
+                  const isPlaying = now?.youtubeId === video.youtubeId;
+                  return (
+                    <li key={video.id}>
+                      <button
+                        type="button"
+                        data-youtube-id={video.youtubeId}
+                        onClick={() => tuneVideo(video)}
+                        aria-current={isPlaying ? "true" : undefined}
+                        className={`watch-list-item w-full border-b px-1 py-2 text-left text-sm text-white ${
+                          isPlaying ? "is-current" : ""
+                        }`}
+                      >
+                        <span className="watch-list-item-main">
+                          {isPlaying ? (
+                            <span className="watch-now-icon" aria-hidden>
+                              <svg viewBox="0 0 24 24" className="watch-now-note" fill="none">
+                                <path
+                                  d="M9 18.5a2.5 2.5 0 1 1-1.6-2.33V7.2l9-1.7v9.53a2.5 2.5 0 1 1-1.6-2.33V7.85L9 9.2v9.3Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                            </span>
+                          ) : null}
+                          <span className="watch-list-item-copy">
+                            <span className="watch-list-title font-semibold">{video.title}</span>
+                            <span className="watch-list-artist block text-xs">{video.artist}</span>
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>

@@ -4152,6 +4152,65 @@ main {
   color: #fff;
 }
 
+.watch-list-item {
+  display: block;
+  border-color: rgba(255, 255, 255, 0.2);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.watch-list-item-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.watch-list-item-copy {
+  display: block;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.watch-list-item.is-current {
+  background: linear-gradient(
+    90deg,
+    rgba(198, 255, 0, 0.22) 0%,
+    rgba(255, 57, 200, 0.16) 100%
+  );
+  border-color: rgba(198, 255, 0, 0.55);
+  box-shadow: inset 3px 0 0 #c6ff00;
+  color: #f7ffe0;
+}
+
+.watch-list-item.is-current .watch-list-title {
+  color: #c6ff00;
+  text-shadow: 0 0 10px rgba(198, 255, 0, 0.45);
+}
+
+.watch-list-item.is-current .watch-list-artist {
+  color: #ff9de8;
+}
+
+.watch-now-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.05rem;
+  height: 1.35rem;
+  margin-top: 0.05rem;
+  color: #ff39c8;
+  filter: drop-shadow(0 0 6px rgba(255, 57, 200, 0.7));
+}
+
+.watch-now-note {
+  display: block;
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
 .watch-list-items:focus {
   outline: none;
 }

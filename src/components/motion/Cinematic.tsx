@@ -168,37 +168,21 @@ export function Cinematic() {
 
     // IntersectionObserver still marks entrance "seen" flags for cinematic reveals.
     // Live flags use scroll-flow positions so sticky-under plates don't stay live.
-    let rsvpCentered = false;
-    let rsvpCenterTimer = 0;
+    // Do NOT auto scrollIntoView on RSVP intersect — that reintroduces the footer bounce trap.
+    // Nav/hash use block:center; #rsvp flex mid-plate covers natural scroll-in.
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) {
-            if (entry.target.id === "rsvp") rsvpCentered = false;
-            continue;
-          }
+          if (!entry.isIntersecting) continue;
           const id = entry.target.id;
           if (id === "home") continue;
           const spec = SECTIONS.find((row) => row[0] === id);
           if (!spec) continue;
           root.dataset[spec[1]] = "1";
-
-          // Soft-center RSVP when scrolling into it from above. Skip once the
-          // plate top has passed the upper band — guest is free to reach Host tools.
-          if (id === "rsvp" && !rsvpCentered) {
-            const top = entry.boundingClientRect.top;
-            if (top >= window.innerHeight * 0.12 && top <= window.innerHeight * 0.72) {
-              rsvpCentered = true;
-              window.clearTimeout(rsvpCenterTimer);
-              rsvpCenterTimer = window.setTimeout(() => {
-                scrollToSection("rsvp");
-              }, 40);
-            }
-          }
         }
         syncLiveFlags(root);
       },
-      { threshold: [0.22, 0.4], rootMargin: "0px 0px -6% 0px" },
+      { threshold: 0.18, rootMargin: "0px 0px -6% 0px" },
     );
 
     const home = document.getElementById("home");
@@ -217,7 +201,6 @@ export function Cinematic() {
       for (const id of timers) window.clearTimeout(id);
       for (const id of settleTimers) window.clearTimeout(id);
       window.clearTimeout(release);
-      window.clearTimeout(rsvpCenterTimer);
       introWatch.disconnect();
       io.disconnect();
       window.removeEventListener("scroll", markVisible);

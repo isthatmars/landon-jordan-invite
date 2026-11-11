@@ -578,7 +578,9 @@ html[data-motion="armed"]:not([data-seen-watch]) #watch .watch-line {
 }
 
 html[data-seen-mixtape="1"] #mixtape .neon-script-lg {
-  animation: mix-neon-settle 0.7s ease-out both;
+  animation:
+    mix-neon-settle 0.7s ease-out both,
+    neon-script-breathe 5.6s ease-in-out infinite;
 }
 
 @keyframes mix-neon-settle {
@@ -587,7 +589,9 @@ html[data-seen-mixtape="1"] #mixtape .neon-script-lg {
 }
 
 html[data-seen-arcade="1"] #arcade .arcade-title {
-  animation: arcade-title-in 1.05s cubic-bezier(0.33, 0.04, 0.22, 1) both;
+  animation:
+    arcade-title-in 1.05s cubic-bezier(0.33, 0.04, 0.22, 1) both,
+    neon-script-breathe 5.6s ease-in-out infinite;
 }
 @keyframes arcade-title-in {
   0% {
@@ -598,10 +602,14 @@ html[data-seen-arcade="1"] #arcade .arcade-title {
   }
 }
 html[data-seen-lineup="1"] #lineup .lineup-kicker {
-  animation: write-one 0.9s cubic-bezier(0.33, 0.04, 0.22, 1) 0.2s both;
+  animation:
+    write-one 0.9s cubic-bezier(0.33, 0.04, 0.22, 1) 0.2s both,
+    neon-script-breathe 5.6s ease-in-out infinite;
 }
 html[data-seen-rsvp="1"] #rsvp .neon-script-lg {
-  animation: write-one 0.85s cubic-bezier(0.33, 0.04, 0.22, 1) 0.15s both;
+  animation:
+    write-one 0.85s cubic-bezier(0.33, 0.04, 0.22, 1) 0.15s both,
+    neon-script-breathe 5.6s ease-in-out infinite;
 }
 html[data-seen-watch="1"] #watch .watch-line {
   animation: watch-line-in 0.7s cubic-bezier(0.33, 0.04, 0.22, 1) both;
@@ -613,7 +621,7 @@ html[data-seen-watch="1"] #watch .watch-line-rest {
   animation-delay: 0.44s;
 }
 html[data-seen-watch="1"] #watch .neon-script-lg {
-  animation: none;
+  animation: neon-script-breathe 5.6s ease-in-out infinite;
 }
 @keyframes watch-line-in {
   0% {
@@ -897,7 +905,8 @@ html[data-live-watch="0"] .crt-scanlines::after {
 }
 html[data-live-lineup="0"] .lineup-sweep::before,
 html[data-live-lineup="0"] .lineup-neon,
-html[data-live-lineup="0"] .lineup-pill {
+html[data-live-lineup="0"] .lineup-pill,
+html[data-live-lineup="0"] #lineup .lineup-kicker {
   animation-play-state: paused;
 }
 html[data-live-mixtape="0"] #mixtape .mix-palm img,

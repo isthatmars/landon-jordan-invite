@@ -80,6 +80,23 @@ body {
   color: white;
 }
 
+/* Shared neon intensity for title breathe — animate --neon-glow only. */
+@property --neon-glow {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@keyframes neon-script-breathe {
+  0%,
+  100% {
+    --neon-glow: 0.86;
+  }
+  50% {
+    --neon-glow: 1.16;
+  }
+}
+
 .neon-script,
 .neon-script-lg {
   font-family: var(--font-hastron), var(--font-script-fallback), cursive;
@@ -87,9 +104,17 @@ body {
   color: #fff7fc;
   text-shadow:
     0 0 1px #fff,
-    0 0 8px #ff39c8,
-    0 0 18px #ff39c8,
-    0 0 36px #ff39c8cc;
+    0 0 calc(8px * var(--neon-glow)) #ff39c8,
+    0 0 calc(18px * var(--neon-glow)) #ff39c8,
+    0 0 calc(36px * var(--neon-glow)) #ff39c8cc;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .neon-script,
+  .neon-script-lg,
+  .lineup-kicker {
+    animation: neon-script-breathe 5.6s ease-in-out infinite;
+  }
 }
 
 /* Keep RSVP script flourishes + neon glow unclipped. */
@@ -1613,10 +1638,10 @@ body {
   filter: none;
   text-shadow:
     0 0 1px #fff,
-    0 0 8px #ff39c8,
-    0 0 18px #ff39c8,
-    0 0 36px #ff39c8cc,
-    0 0 56px rgba(255, 57, 200, 0.55);
+    0 0 calc(8px * var(--neon-glow)) #ff39c8,
+    0 0 calc(18px * var(--neon-glow)) #ff39c8,
+    0 0 calc(36px * var(--neon-glow)) #ff39c8cc,
+    0 0 calc(56px * var(--neon-glow)) rgba(255, 57, 200, 0.55);
 }
 
 .mix-arrow {
@@ -3470,7 +3495,9 @@ form[data-step="1"] .rsvp-step-1 {
   line-height: 1.18;
   text-align: center;
   text-transform: uppercase;
-  text-shadow: 0 2px 0 #140818, 0 0 16px rgba(255, 57, 200, 0.45);
+  text-shadow:
+    0 2px 0 #140818,
+    0 0 calc(16px * var(--neon-glow)) rgba(255, 57, 200, 0.45);
   padding-inline: 0.15rem;
   overflow-wrap: normal;
   text-wrap: balance;

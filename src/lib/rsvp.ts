@@ -149,17 +149,16 @@ export function parseCompletedRsvp(body: unknown): ParseResult<CompletedRsvp> {
 
   const attend = source.attend;
   const coming = isComing(attend);
+  // Email is collected first so incomplete RSVPs stay remindable (yes and no).
+  if (!email) return { ok: false, error: "Add an email address so we can confirm your RSVP." };
+  if (!looksLikeEmail(email)) return { ok: false, error: "That email doesn't look quite right." };
   if (coming) {
-    if (!email) return { ok: false, error: "Add an email address so we can confirm your RSVP." };
-    if (!looksLikeEmail(email)) return { ok: false, error: "That email doesn't look quite right." };
     if (!phone) {
       return { ok: false, error: "Add a phone number so we can reach you about the party." };
     }
     if (phoneDigits(phone) < 7) {
       return { ok: false, error: "Enter a full phone number." };
     }
-  } else if (email && !looksLikeEmail(email)) {
-    return { ok: false, error: "That email doesn't look quite right." };
   }
 
   const companions = readCompanions(source.companions, true);

@@ -9,14 +9,14 @@ import { RsvpTelephone } from "./RsvpTelephone";
 type YesNo = "" | "yes" | "no";
 
 /**
- * Progressive screens after attend:
- * attending → name → email → phone → dietary → children → (childEntry) → review
- * declining → name → note → review
+ * Progressive screens — email first so partial RSVPs can be reminded:
+ * email → attend → name → (yes: phone → dietary → children → childEntry → review)
+ *                         (no: declineNote → review)
  */
 type Screen =
+  | "email"
   | "attend"
   | "name"
-  | "email"
   | "phone"
   | "dietary"
   | "children"
@@ -56,7 +56,7 @@ function phoneDigits(phone: string): number {
   return phone.replace(/\D/g, "").length;
 }
 
-/** Shape the API expects. Decline never carries contact, diet, or companions. */
+/** Shape the API expects. Decline never carries phone, diet, or companions — email stays for reminders/confirmations. */
 function completedFrom(form: FormState) {
   const attending = form.attend === "yes";
   const notes = form.dietaryNotes.trim();
@@ -74,7 +74,7 @@ function completedFrom(form: FormState) {
   return {
     firstName: form.firstName,
     lastName: form.lastName,
-    email: attending ? form.email.trim() : "",
+    email: form.email.trim(),
     phone: attending ? form.phone.trim() : "",
     attend: attending ? ("yes" as const) : ("no" as const),
     companions: attending ? kids : [],
@@ -104,7 +104,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [screen, setScreen] = useState<Screen>("attend");
+  const [screen, setScreen] = useState<Screen>("email");
   const [stepError, setStepError] = useState("");
   useEffect(() => {
     formRef.current = form;
@@ -116,8 +116,8 @@ export function RsvpForm({ content }: { content: SiteContent }) {
       ? form.companions.filter((person) => person.firstName.trim() && person.lastName.trim())
       : [];
   const headcount = attending ? 1 + namedKids.length : 0;
-  /** Keep data-step=1 for attend centering CSS; later screens share step 2+. */
-  const dataStep = screen === "attend" ? 1 : screen === "review" ? 3 : 2;
+  /** Keep data-step=1 for first-question centering CSS; later screens share step 2+. */
+  const dataStep = screen === "email" ? 1 : screen === "review" ? 3 : 2;
 
   const markStarted = () => {
     if (!startedAt.current) startedAt.current = new Date().toISOString();
@@ -183,14 +183,14 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   };
 
   const validateScreen = (current: FormState, now: Screen): string => {
-    if (now === "name") {
-      if (!current.firstName.trim() || !current.lastName.trim()) {
-        return "Add your first and last name.";
-      }
-    }
     if (now === "email") {
       if (!EMAIL_RE.test(current.email.trim())) {
         return "Add an email address so we can confirm your RSVP.";
+      }
+    }
+    if (now === "name") {
+      if (!current.firstName.trim() || !current.lastName.trim()) {
+        return "Add your first and last name.";
       }
     }
     if (now === "phone") {
@@ -219,8 +219,8 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   };
 
   const nextAfter = (now: Screen, current: FormState): Screen | null => {
-    if (now === "name") return current.attend === "yes" ? "email" : "declineNote";
-    if (now === "email") return "phone";
+    if (now === "email") return "attend";
+    if (now === "name") return current.attend === "yes" ? "phone" : "declineNote";
     if (now === "phone") return "dietary";
     if (now === "dietary") return "children";
     if (now === "children") {
@@ -232,9 +232,9 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   };
 
   const backFrom = (now: Screen, current: FormState): Screen => {
+    if (now === "attend") return "email";
     if (now === "name") return "attend";
-    if (now === "email") return "name";
-    if (now === "phone") return "email";
+    if (now === "phone") return "name";
     if (now === "dietary") return "phone";
     if (now === "children") return "dietary";
     if (now === "childEntry") return "children";
@@ -244,7 +244,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
       if (current.bringingChildren === "yes") return "childEntry";
       return "children";
     }
-    return "attend";
+    return "email";
   };
 
   const goNext = () => {
@@ -253,6 +253,10 @@ export function RsvpForm({ content }: { content: SiteContent }) {
     if (problem) {
       setStepError(problem);
       return;
+    }
+    // Persist email as soon as they leave the first step so abandoned forms are remindable.
+    if (screen === "email") {
+      void saveDraft("email", current);
     }
     const next = nextAfter(screen, current);
     if (next) goTo(next);
@@ -364,6 +368,30 @@ export function RsvpForm({ content }: { content: SiteContent }) {
             className="rsvp-steps space-y-4"
           >
             <div className="rsvp-step rsvp-step-1 space-y-4">
+              {screen === "email" ? (
+                <div data-testid="rsvp-step-email" className="space-y-4">
+                  <p className="rsvp-ask">What&apos;s your email?</p>
+                  <Field label="Email address *">
+                    <input
+                      id="rsvp-email"
+                      required
+                      type="email"
+                      autoComplete="email"
+                      inputMode="email"
+                      className="input-dark"
+                      value={form.email}
+                      onChange={(e) => update({ email: e.target.value })}
+                      onFocus={markStarted}
+                      onBlur={() => void saveDraft("email")}
+                      placeholder="you@email.com"
+                    />
+                  </Field>
+                  <StepNav onNext={goNext} />
+                </div>
+              ) : null}
+            </div>
+
+            <div className="rsvp-step rsvp-step-2 space-y-4">
               {screen === "attend" ? (
                 <div className="rsvp-attend-block">
                   <p className="rsvp-ask">Are you able to attend?</p>
@@ -385,11 +413,14 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                       Sorry, I can&apos;t make it this time.
                     </ChoiceButton>
                   </div>
+                  <div className="rsvp-next mt-4 flex gap-3">
+                    <button type="button" className="btn-pink-outline min-h-12 flex-1 text-base" onClick={goBack}>
+                      Back
+                    </button>
+                  </div>
                 </div>
               ) : null}
-            </div>
 
-            <div className="rsvp-step rsvp-step-2 space-y-4">
               {screen === "name" ? (
                 <div data-testid="rsvp-step-name" className="space-y-4">
                   <p className="rsvp-ask">What&apos;s your name?</p>
@@ -418,24 +449,6 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                       />
                     </Field>
                   </div>
-                  <StepNav onBack={goBack} onNext={goNext} />
-                </div>
-              ) : null}
-
-              {screen === "email" ? (
-                <div data-testid="rsvp-step-email" className="space-y-4">
-                  <Field label="Email address *">
-                    <input
-                      required
-                      type="email"
-                      autoComplete="email"
-                      className="input-dark"
-                      value={form.email}
-                      onChange={(e) => update({ email: e.target.value })}
-                      onBlur={() => void saveDraft("email")}
-                      placeholder="you@email.com"
-                    />
-                  </Field>
                   <StepNav onBack={goBack} onNext={goNext} />
                 </div>
               ) : null}
@@ -613,9 +626,9 @@ export function RsvpForm({ content }: { content: SiteContent }) {
                     <p>
                       {form.firstName} {form.lastName}
                     </p>
+                    <p>{form.email}</p>
                     {attending ? (
                       <>
-                        <p>{form.email}</p>
                         <p>{form.phone}</p>
                         <p>Attending</p>
                         <p>

@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import { requireAdminFromRequest } from "@/lib/auth";
 import { uid } from "@/lib/id";
 import {
-  escapeHtml,
-  neonEmailTemplate,
-  sendGuestEmail,
-} from "@/lib/notifications";
+  dietaryBlockHtml,
+  mergeEmailTemplates,
+  namedPeopleEmailList,
+  renderEditableEmail,
+} from "@/lib/email-templates";
+import { partySiteUrl, sendGuestEmail } from "@/lib/notifications";
 import {
   headcountFor,
   isAttendStatus,
   parseDraftRsvp,
   partyHeadcount,
+  partyPeople,
 } from "@/lib/rsvp";
 import { readRsvps, saveRsvp, supabaseRsvpEnabled } from "@/lib/rsvp-db";
 import { getStore, updateStore } from "@/lib/store";
@@ -57,15 +60,23 @@ export async function PATCH(request: Request) {
   if (action === "resend") {
     const rsvp = (await readRsvps(store.rsvps)).find((r) => r.id === body.id);
     if (!rsvp) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const templates = mergeEmailTemplates(store.emailTemplates);
+    const coming = rsvp.status !== "declined" && rsvp.attend !== "no";
+    const copy = coming ? templates.signup_confirm : templates.signup_declined;
+    const rendered = renderEditableEmail(copy, content, {
+      guestName: rsvp.fullName || "Friend",
+      guestEmail: rsvp.email,
+      guestPhone: rsvp.phone,
+      guestCount: rsvp.guestCount,
+      status: rsvp.status,
+      namedPeopleHtml: namedPeopleEmailList(partyPeople(rsvp)),
+      dietaryBlockHtml: dietaryBlockHtml(rsvp),
+      inviteUrl: partySiteUrl(),
+    });
     const result = await sendGuestEmail({
       to: rsvp.email,
-      subject: `Reminder — ${content.brandName} 80s Party`,
-      html: neonEmailTemplate({
-        headline: "You're still invited!",
-        bodyHtml: `<p>Hey ${escapeHtml(rsvp.fullName)},</p><p>Just a friendly nudge for <strong>${escapeHtml(content.eventDate)}</strong> at <strong>${escapeHtml(content.eventVenue)}</strong> (${escapeHtml(content.eventTime)}).</p><p>${escapeHtml(content.eventAddress)}</p>`,
-        ctaLabel: "Open Invite",
-        ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com",
-      }),
+      subject: rendered.subject,
+      html: rendered.html,
     });
     rsvp.confirmationSentAt = new Date().toISOString();
     await persistRsvp(rsvp);

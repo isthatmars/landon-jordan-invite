@@ -1,12 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  EMAIL_TEMPLATES,
-  type EmailTemplate,
-  type EmailTemplateId,
-} from "@/lib/email";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TAPE_SPINE_PALETTE } from "@/lib/defaults";
+import {
+  EMAIL_TEMPLATE_META,
+  mergeEmailTemplates,
+  renderEditableEmail,
+  type EditableEmailTemplateId,
+  type EmailTemplateCopy,
+  type StoredEmailTemplates,
+} from "@/lib/email-templates";
 import { partyHeadcount } from "@/lib/rsvp";
 import { extractYoutubeId, watchUrl, youtubePosterUrl } from "@/lib/youtube";
 import type {
@@ -59,7 +62,7 @@ const TABS: {
     id: "reminders",
     label: "Reminders",
     explainer:
-      "Browse the ready-made emails (party reminder, incomplete RSVPs, and more). Preview one, then send when you’re ready.",
+      "Tap a template button, edit the words, preview the neon email, then send when you’re ready.",
   },
 ];
 
@@ -72,14 +75,21 @@ export function AdminApp() {
   const [messages, setMessages] = useState<MessageLog[]>([]);
   const [reminders, setReminders] = useState<ReminderLog[]>([]);
   const [abandoned, setAbandoned] = useState<RsvpRecord[]>([]);
+  const [emailTemplates, setEmailTemplates] = useState<StoredEmailTemplates>(
+    () => mergeEmailTemplates(null),
+  );
+  const [openTemplate, setOpenTemplate] = useState<EditableEmailTemplateId | null>(
+    null,
+  );
+  const [draftCopy, setDraftCopy] = useState<EmailTemplateCopy | null>(null);
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const templatePanelRef = useRef<HTMLDivElement | null>(null);
   const [emailLive, setEmailLive] = useState(false);
   const [emailNote, setEmailNote] = useState("");
   const [toast, setToast] = useState("");
   const [toastTone, setToastTone] = useState<"ok" | "warn">("ok");
   const [selected, setSelected] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
-  const [pickedTemplate, setPickedTemplate] =
-    useState<EmailTemplateId>("party_reminder");
 
   const flash = (msg: string, tone: "ok" | "warn" = "ok") => {
     setToastTone(tone);
@@ -88,13 +98,14 @@ export function AdminApp() {
   };
 
   const load = useCallback(async () => {
-    const [r, c, t, v, m, rem] = await Promise.all([
+    const [r, c, t, v, m, rem, tpl] = await Promise.all([
       fetch("/api/admin/rsvps").then((x) => x.json()),
       fetch("/api/admin/content").then((x) => x.json()),
       fetch("/api/admin/tracks").then((x) => x.json()),
       fetch("/api/admin/videos").then((x) => x.json()),
       fetch("/api/admin/messages").then((x) => x.json()),
       fetch("/api/admin/reminders").then((x) => x.json()),
+      fetch("/api/admin/email-templates").then((x) => x.json()),
     ]);
     setRsvps(r.rsvps || []);
     setContent(c.content || null);
@@ -105,16 +116,53 @@ export function AdminApp() {
     setEmailNote(typeof m.emailNote === "string" ? m.emailNote : "");
     setReminders(rem.reminders || []);
     setAbandoned(rem.abandoned || []);
+    setEmailTemplates(mergeEmailTemplates(tpl.templates || rem.templates || null));
   }, []);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const activeTemplate: EmailTemplate = useMemo(
-    () => EMAIL_TEMPLATES.find((t: EmailTemplate) => t.id === pickedTemplate) || EMAIL_TEMPLATES[0],
-    [pickedTemplate],
-  );
+  useEffect(() => {
+    if (!openTemplate) return;
+    const timer = window.setTimeout(() => {
+      templatePanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [openTemplate]);
+
+  const openTemplatePanel = (id: EditableEmailTemplateId) => {
+    setOpenTemplate(id);
+    setDraftCopy({ ...emailTemplates[id] });
+  };
+
+  const closeTemplatePanel = () => {
+    setOpenTemplate(null);
+    setDraftCopy(null);
+  };
+
+  const saveTemplateCopy = async () => {
+    if (!openTemplate || !draftCopy) return;
+    setSavingTemplate(true);
+    try {
+      const res = await fetch("/api/admin/email-templates", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: openTemplate, copy: draftCopy }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        flash(data.error || "Couldn’t save that template", "warn");
+        return;
+      }
+      const merged = mergeEmailTemplates(data.templates);
+      setEmailTemplates(merged);
+      setDraftCopy({ ...merged[openTemplate] });
+      flash("Email wording saved");
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
 
   const logout = async () => {
     await fetch("/api/admin/auth", { method: "DELETE" });
@@ -207,18 +255,30 @@ export function AdminApp() {
     }
   };
 
-  const triggerReminder = async (kind: "party_reminder" | "abandoned_digest") => {
-    await fetch("/api/admin/reminders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind }),
-    });
-    flash(
-      kind === "abandoned_digest"
-        ? "Incomplete-RSVP list emailed to you"
-        : "Party reminders sent to guests who said yes",
-    );
-    void load();
+  const triggerReminder = async (kind: EditableEmailTemplateId) => {
+    setSending(true);
+    try {
+      const res = await fetch("/api/admin/reminders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        flash(data.error || "Couldn’t send that email", "warn");
+      } else if (data.reminder?.status === "stubbed" || data.reminder?.status === "failed") {
+        flash(data.reminder?.note || emailNote || "Send finished with a warning", "warn");
+      } else {
+        flash(
+          kind === "abandoned_digest"
+            ? "Incomplete-RSVP list emailed to you"
+            : data.reminder?.note || "Emails sent to guests who said yes",
+        );
+      }
+      void load();
+    } finally {
+      setSending(false);
+    }
   };
 
   const activeTab = TABS.find((t) => t.id === tab) ?? TABS[0];
@@ -261,7 +321,10 @@ export function AdminApp() {
           <button
             key={t.id}
             type="button"
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              setTab(t.id);
+              if (t.id !== "reminders") closeTemplatePanel();
+            }}
             className={`rounded-full px-4 py-2 text-xs tracking-widest font-bold border transition ${
               tab === t.id
                 ? "border-neon-pink text-neon-pink shadow-[0_0_14px_#ff2bd650]"
@@ -597,52 +660,51 @@ export function AdminApp() {
       {tab === "reminders" && content && (
         <section className="admin-panel p-5 space-y-5">
           <div>
-            <h2 className="text-lg font-bold">Email templates</h2>
+            <p className="text-neon-gold text-lg leading-none">♛</p>
+            <h2 className="neon-script text-3xl sm:text-4xl mt-1">Email Templates</h2>
+            <p className="mt-2 text-sm text-violet-200 max-w-2xl leading-relaxed">
+              Simple buttons — tap one to open it, edit the words, preview the neon look, then
+              send. Opening another closes the last.
+            </p>
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-2">
-            {EMAIL_TEMPLATES.map((tpl: EmailTemplate) => {
-              const active = pickedTemplate === tpl.id;
+          <div className="flex flex-col gap-2 max-w-xl">
+            {EMAIL_TEMPLATE_META.map((tpl) => {
+              const active = openTemplate === tpl.id;
               return (
                 <button
                   key={tpl.id}
                   type="button"
-                  onClick={() => setPickedTemplate(tpl.id)}
-                  className={`text-left rounded-xl border px-4 py-3 transition ${
-                    active
-                      ? "border-neon-pink bg-neon-pink/10 shadow-[0_0_14px_#ff2bd640]"
-                      : "border-white/15 hover:border-neon-teal/40"
-                  }`}
+                  onClick={() =>
+                    active ? closeTemplatePanel() : openTemplatePanel(tpl.id)
+                  }
+                  className={`admin-template-btn text-left ${active ? "is-open" : ""}`}
                 >
-                  <p className="font-semibold text-white">{tpl.label}</p>
-                  <p className="mt-1 text-xs text-violet-300">{tpl.audience}</p>
-                  <p className="mt-2 text-sm text-violet-100 leading-snug">{tpl.blurb}</p>
+                  <span className="block font-bold tracking-wide text-white uppercase text-sm">
+                    {tpl.label}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-violet-300">{tpl.blurb}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className="rounded-xl border border-white/15 bg-black/25 p-4 space-y-3">
-            <h3 className="text-sm tracking-widest text-neon-teal font-bold">PREVIEW</h3>
-            <p className="text-sm text-violet-200">
-              <span className="text-violet-400">Subject: </span>
-              {activeTemplate.subjectExample(content)}
-            </p>
-            <pre className="whitespace-pre-wrap rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm text-violet-50 leading-relaxed font-sans">
-              {activeTemplate.bodyPreview(content)}
-            </pre>
-            {activeTemplate.sendKind ? (
-              <button
-                type="button"
-                className="btn-green-solid"
-                onClick={() => triggerReminder(activeTemplate.sendKind!)}
-              >
-                {activeTemplate.sendKind === "abandoned_digest"
-                  ? "EMAIL ME THE INCOMPLETE LIST"
-                  : "SEND THIS REMINDER"}
-              </button>
-            ) : (
-              <p className="text-sm text-amber-200/90">{activeTemplate.howToSend}</p>
+          <div
+            ref={templatePanelRef}
+            className={`admin-template-panel ${openTemplate && draftCopy ? "is-open" : ""}`}
+          >
+            {openTemplate && draftCopy && (
+              <TemplateEditor
+                id={openTemplate}
+                copy={draftCopy}
+                content={content}
+                saving={savingTemplate}
+                sending={sending}
+                onChange={setDraftCopy}
+                onSave={() => void saveTemplateCopy()}
+                onSend={() => void triggerReminder(openTemplate)}
+                onClose={closeTemplatePanel}
+              />
             )}
           </div>
 
@@ -676,6 +738,181 @@ export function AdminApp() {
           </div>
         </section>
       )}
+    </div>
+  );
+}
+
+function TemplateEditor({
+  id,
+  copy,
+  content,
+  saving,
+  sending,
+  onChange,
+  onSave,
+  onSend,
+  onClose,
+}: {
+  id: EditableEmailTemplateId;
+  copy: EmailTemplateCopy;
+  content: SiteContent;
+  saving: boolean;
+  sending: boolean;
+  onChange: (next: EmailTemplateCopy) => void;
+  onSave: () => void;
+  onSend: () => void;
+  onClose: () => void;
+}) {
+  const meta = EMAIL_TEMPLATE_META.find((t) => t.id === id)!;
+  const preview = renderEditableEmail(copy, content, {
+    guestName: "Sample Guest",
+    guestEmail: "guest@example.com",
+    guestPhone: "305-555-0100",
+    guestCount: 2,
+    status: "confirmed",
+    namedPeopleHtml:
+      "<ul style='margin:8px 0;padding-left:18px;color:#fff'><li>Sample Guest</li><li>Demo Plusone</li></ul>",
+    dietaryBlockHtml: "<p style='margin:8px 0;color:#c4b5d8'>No dietary notes.</p>",
+    abandonedListHtml:
+      "<ul style='margin:8px 0;padding-left:18px'><li>Started Form — almost@example.com</li></ul>",
+    inviteUrl: "https://www.landonandjordan.com",
+    uploadLink: copy.uploadLink || "https://example.com/upload-party-photos",
+  });
+
+  const patch = (key: keyof EmailTemplateCopy, value: string) => {
+    onChange({ ...copy, [key]: value });
+  };
+
+  return (
+    <div className="relative space-y-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs tracking-[0.2em] uppercase text-neon-teal font-bold">
+            {meta.audience}
+          </p>
+          <h3 className="neon-script text-2xl mt-1">{meta.label}</h3>
+        </div>
+        <button
+          type="button"
+          aria-label="Close template"
+          onClick={onClose}
+          className="admin-template-close"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block sm:col-span-2">
+          <span className="label-muted">Subject</span>
+          <input
+            className="input-dark"
+            value={copy.subject}
+            onChange={(e) => patch("subject", e.target.value)}
+          />
+        </label>
+        <label className="block">
+          <span className="label-muted">Eyebrow</span>
+          <input
+            className="input-dark"
+            value={copy.eyebrow}
+            onChange={(e) => patch("eyebrow", e.target.value)}
+          />
+        </label>
+        <label className="block">
+          <span className="label-muted">Headline</span>
+          <input
+            className="input-dark"
+            value={copy.headline}
+            onChange={(e) => patch("headline", e.target.value)}
+          />
+        </label>
+        <label className="block sm:col-span-2">
+          <span className="label-muted">Body (use {"{{guestName}}"}, {"{{eventDate}}"}, etc.)</span>
+          <textarea
+            className="input-dark min-h-[160px] font-sans"
+            value={copy.body}
+            onChange={(e) => patch("body", e.target.value)}
+          />
+        </label>
+        <label className="block">
+          <span className="label-muted">Button label</span>
+          <input
+            className="input-dark"
+            value={copy.ctaLabel}
+            onChange={(e) => patch("ctaLabel", e.target.value)}
+          />
+        </label>
+        <label className="block">
+          <span className="label-muted">Button link</span>
+          <input
+            className="input-dark"
+            value={copy.ctaUrl}
+            onChange={(e) => patch("ctaUrl", e.target.value)}
+          />
+        </label>
+        {id === "thank_you" && (
+          <label className="block sm:col-span-2">
+            <span className="label-muted">Photo upload link ({`{{uploadLink}}`})</span>
+            <input
+              className="input-dark"
+              value={copy.uploadLink}
+              onChange={(e) => patch("uploadLink", e.target.value)}
+              placeholder="https://…"
+            />
+          </label>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="btn-green-solid disabled:opacity-60"
+          disabled={saving}
+          onClick={onSave}
+        >
+          {saving ? "SAVING…" : "SAVE WORDS"}
+        </button>
+        {meta.sendable && (
+          <button
+            type="button"
+            className="btn-pink-outline text-xs disabled:opacity-60"
+            disabled={sending}
+            onClick={onSend}
+          >
+            {sending ? "SENDING…" : "SEND TO GUESTS COMING"}
+          </button>
+        )}
+        {meta.ownerDigest && (
+          <button
+            type="button"
+            className="btn-pink-outline text-xs disabled:opacity-60"
+            disabled={sending}
+            onClick={onSend}
+          >
+            {sending ? "SENDING…" : "EMAIL ME THE INCOMPLETE LIST"}
+          </button>
+        )}
+        {meta.howToSend && (
+          <p className="w-full text-sm text-amber-200/90">{meta.howToSend}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="text-sm tracking-widest text-neon-teal font-bold">PREVIEW</h4>
+        <p className="text-sm text-violet-200">
+          <span className="text-violet-400">Subject: </span>
+          {preview.subject}
+        </p>
+        <div className="admin-email-preview overflow-hidden rounded-xl border border-neon-pink/40 shadow-[0_0_18px_#ff2bd640]">
+          <iframe
+            title={`${meta.label} preview`}
+            className="w-full min-h-[420px] bg-[#07010f]"
+            sandbox=""
+            srcDoc={preview.html}
+          />
+        </div>
+      </div>
     </div>
   );
 }

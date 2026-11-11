@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { createDefaultStore } from "./defaults";
+import { mergeEmailTemplates } from "./email-templates";
 import type { AppStore } from "./types";
 import { normalizeVideos } from "./videos";
 
@@ -41,9 +42,13 @@ async function writeToDisk(store: AppStore) {
 
 function migrateStore(store: AppStore): { store: AppStore; dirty: boolean } {
   const videos = normalizeVideos(store.videos || []);
-  const dirty = JSON.stringify(videos) !== JSON.stringify(store.videos || []);
+  const emailTemplates = mergeEmailTemplates(store.emailTemplates);
+  const videosDirty = JSON.stringify(videos) !== JSON.stringify(store.videos || []);
+  const templatesDirty =
+    JSON.stringify(emailTemplates) !== JSON.stringify(store.emailTemplates || {});
+  const dirty = videosDirty || templatesDirty;
   if (!dirty) return { store, dirty: false };
-  return { store: { ...store, videos }, dirty: true };
+  return { store: { ...store, videos, emailTemplates }, dirty: true };
 }
 
 export async function getStore(): Promise<AppStore> {

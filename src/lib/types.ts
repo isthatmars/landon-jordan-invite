@@ -119,11 +119,45 @@ export interface MessageLog {
 
 export interface ReminderLog {
   id: string;
-  kind: "party_reminder" | "abandoned_digest";
+  kind:
+    | "party_reminder"
+    | "abandoned_digest"
+    | "party_30_days"
+    | "what_to_bring"
+    | "party_tomorrow"
+    | "party_today"
+    | "thank_you"
+    | "signup_confirm"
+    | "signup_declined"
+    | "owner_alert";
   note: string;
-  status: "stubbed" | "queued" | "sent";
+  status: "stubbed" | "queued" | "sent" | "failed";
   createdAt: string;
 }
+
+/** Editable neon email copy (subject/headline/body) — see lib/email-templates. */
+export interface EmailTemplateCopy {
+  subject: string;
+  eyebrow: string;
+  headline: string;
+  body: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  uploadLink: string;
+}
+
+export type EmailTemplateId =
+  | "signup_confirm"
+  | "signup_declined"
+  | "party_30_days"
+  | "what_to_bring"
+  | "party_tomorrow"
+  | "party_today"
+  | "thank_you"
+  | "owner_alert"
+  | "abandoned_digest";
+
+export type StoredEmailTemplates = Record<EmailTemplateId, EmailTemplateCopy>;
 
 export interface AppStore {
   content: SiteContent;
@@ -132,4 +166,5 @@ export interface AppStore {
   rsvps: RsvpRecord[];
   messages: MessageLog[];
   reminders: ReminderLog[];
+  emailTemplates: StoredEmailTemplates;
 }

@@ -65,6 +65,18 @@ export function headcountFor(attend: AttendStatus, companions: PartyPerson[]): n
   return 1 + companions.length;
 }
 
+/** Named people block for neon confirmation / owner emails. */
+export function partyPeople(record: Pick<RsvpRecord, "fullName" | "companions">) {
+  return [
+    { fullName: record.fullName },
+    ...(record.companions || []).map((person) => ({
+      firstName: person.firstName,
+      lastName: person.lastName,
+      age: person.age,
+    })),
+  ];
+}
+
 const AGE_MAX = 40;
 
 function readCompanions(

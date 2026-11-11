@@ -1,3 +1,4 @@
+import { emptyEmailTemplates } from "./email-templates";
 import type { AppStore, SiteContent, Track, VideoItem } from "./types";
 import { watchUrl, youtubePosterUrl } from "./youtube";
 
@@ -151,5 +152,6 @@ export function createDefaultStore(): AppStore {
     ],
     messages: [],
     reminders: [],
+    emailTemplates: emptyEmailTemplates(),
   };
 }

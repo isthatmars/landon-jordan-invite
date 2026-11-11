@@ -1,15 +1,25 @@
 import { NextResponse } from "next/server";
 import { uid } from "@/lib/id";
 import {
-  escapeHtml,
-  forwardRsvpWebhook,
+  dietaryBlockHtml,
+  mergeEmailTemplates,
   namedPeopleEmailList,
-  neonEmailTemplate,
+  renderEditableEmail,
+} from "@/lib/email-templates";
+import {
+  forwardRsvpWebhook,
+  partySiteUrl,
   sendGuestEmail,
   sendOwnerEmail,
   sendOwnerSms,
 } from "@/lib/notifications";
-import { headcountFor, isComing, parseCompletedRsvp, parseDraftRsvp } from "@/lib/rsvp";
+import {
+  headcountFor,
+  isComing,
+  parseCompletedRsvp,
+  parseDraftRsvp,
+  partyPeople,
+} from "@/lib/rsvp";
 import { readRsvps, saveRsvp, supabaseRsvpEnabled } from "@/lib/rsvp-db";
 import { getStore, updateStore } from "@/lib/store";
 import type { AttendStatus, RsvpRecord, RsvpStatus } from "@/lib/types";
@@ -33,17 +43,6 @@ function attendToStatus(attend: AttendStatus): RsvpStatus {
 
 function oneLine(value: string): string {
   return value.replace(/[\r\n]+/g, " ").slice(0, 180);
-}
-
-function partyPeople(record: Pick<RsvpRecord, "fullName" | "companions">) {
-  return [
-    { fullName: record.fullName },
-    ...record.companions.map((person) => ({
-      firstName: person.firstName,
-      lastName: person.lastName,
-      age: person.age,
-    })),
-  ];
 }
 
 export async function GET() {
@@ -192,37 +191,34 @@ export async function POST(request: Request) {
     );
   }
 
-  const content = (await getStore()).content;
+  const storeNow = await getStore();
+  const content = storeNow.content;
+  const templates = mergeEmailTemplates(storeNow.emailTemplates);
   const coming = isComing(record.attend);
-  const safeName = escapeHtml(record.fullName);
   const peopleBlock = namedPeopleEmailList(partyPeople(record));
-  const dietaryLine =
-    record.dietary === "yes" && record.dietaryNotes.trim()
-      ? `<p style="margin:14px 0 0"><span style="color:#c6ff00;letter-spacing:0.12em;font-size:11px;text-transform:uppercase">Dietary</span><br/>${escapeHtml(record.dietaryNotes)}</p>`
-      : `<p style="margin:14px 0 0;color:#c4b5d8">No dietary notes.</p>`;
-  const extraLine =
-    record.anythingElse === "yes" && record.specialRequests.trim()
-      ? `<p style="margin:10px 0 0"><span style="color:#c6ff00;letter-spacing:0.12em;font-size:11px;text-transform:uppercase">Note</span><br/>${escapeHtml(record.specialRequests)}</p>`
-      : "";
-  const partyTitle = `${escapeHtml(content.heroScript)} ${escapeHtml(content.heroChrome)} ${escapeHtml(content.heroSubtitle)}`;
-  const whenWhere = `<div style="margin:16px 0;padding:14px 16px;border-radius:12px;border:1px solid rgba(198,255,0,0.28);background:rgba(198,255,0,0.06)"><p style="margin:0;color:#c6ff00;font-size:11px;letter-spacing:0.16em;text-transform:uppercase">When &amp; where</p><p style="margin:8px 0 0;color:#fff;line-height:1.55"><strong>${escapeHtml(content.eventDate)}</strong><br/>${escapeHtml(content.eventTime)}<br/>${escapeHtml(content.eventVenue)}<br/>${escapeHtml(content.eventAddress)}</p></div>`;
-  const guestHtml = neonEmailTemplate({
-    eyebrow: coming ? "RSVP confirmed" : "Thanks for writing back",
-    headline: coming ? "You're on the list!" : "We'll miss you",
-    bodyHtml: coming
-      ? `<p style="margin:0 0 12px">Hey ${safeName} — this is going to be a night. Landon and Jordan are so glad you're coming to <strong>${partyTitle}</strong>.</p>${whenWhere}<p style="margin:0 0 4px">Here's what you confirmed. Party size from you: <strong style="color:#c6ff00">${record.guestCount}</strong> ${record.guestCount === 1 ? "person" : "people"}.</p>${peopleBlock}${dietaryLine}<p style="margin:18px 0 0;color:#e9d5ff">Every adult and child needs a first and last name on this invite. If someone isn't listed, they won't be able to come in. Lace up, dress 80s, and we'll see you on the floor.</p>`
-      : `<p style="margin:0 0 12px">Hey ${safeName}, thank you for letting us know. We'll miss you at <strong>${partyTitle}</strong>.</p>${whenWhere}<p style="margin:0">This reply is marked as not coming, so the headcount from you is <strong style="color:#c6ff00">0</strong>.</p>${extraLine}`,
-    ctaLabel: "View Invite",
-    ctaUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.landonandjordan.com",
-  });
+  const dietaryLine = dietaryBlockHtml(record);
+  const inviteUrl = partySiteUrl();
+  const guestVars = {
+    guestName: record.fullName || "Friend",
+    guestEmail: record.email || "no email",
+    guestPhone: record.phone || "no phone",
+    guestCount: record.guestCount,
+    status: record.status,
+    namedPeopleHtml: peopleBlock,
+    dietaryBlockHtml: dietaryLine,
+    inviteUrl,
+  };
+  const guestRendered = renderEditableEmail(
+    coming ? templates.signup_confirm : templates.signup_declined,
+    content,
+    guestVars,
+  );
 
   const guestMail = record.email.trim()
     ? await sendGuestEmail({
         to: record.email,
-        subject: coming
-          ? `You're in — ${oneLine(content.brandName)} 80s Party`
-          : `RSVP received — ${oneLine(content.brandName)} 80s Party`,
-        html: guestHtml,
+        subject: oneLine(guestRendered.subject),
+        html: guestRendered.html,
       })
     : {
         ok: true,
@@ -231,14 +227,14 @@ export async function POST(request: Request) {
         stubbed: true,
         detail: "No guest email — confirmation not sent.",
       };
-  const kidsCount = record.companions.length;
+  const ownerCopy = {
+    ...templates.owner_alert,
+    headline: coming ? templates.owner_alert.headline : "RSVP Update",
+  };
+  const ownerRendered = renderEditableEmail(ownerCopy, content, guestVars);
   const ownerMail = await sendOwnerEmail({
-    subject: `New RSVP: ${oneLine(record.fullName)} · ${record.guestCount} ${record.guestCount === 1 ? "guest" : "guests"} (${record.status})`,
-    html: neonEmailTemplate({
-      eyebrow: "Owner alert",
-      headline: coming ? "Someone's coming!" : "RSVP update",
-      bodyHtml: `<p style="margin:0 0 12px"><strong>${safeName}</strong> just sent an RSVP.</p><div style="margin:0 0 14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,43,214,0.3);background:rgba(255,43,214,0.06)"><p style="margin:0;line-height:1.55">${escapeHtml(record.email || "no email")}<br/>${escapeHtml(record.phone || "no phone")}<br/><span style="color:#c6ff00">${escapeHtml(record.status)}</span> · headcount <strong>${record.guestCount}</strong>${kidsCount ? ` · ${kidsCount} ${kidsCount === 1 ? "child" : "children"}` : ""}</p></div><p style="margin:0 0 4px;color:#c6ff00;font-size:11px;letter-spacing:0.14em;text-transform:uppercase">Named people</p>${peopleBlock}${dietaryLine}${extraLine}<p style="margin:18px 0 0;color:#c4b5d8;font-size:13px">Finished replies land here. People who only started the form stay under In progress in admin.</p>`,
-    }),
+    subject: oneLine(ownerRendered.subject),
+    html: ownerRendered.html,
   });
   const ownerSms = await sendOwnerSms(
     `RSVP: ${oneLine(record.fullName)} (${record.status}) · headcount ${record.guestCount} · ${oneLine(record.email)}`,

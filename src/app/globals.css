@@ -802,6 +802,103 @@ body {
   box-shadow: 0 0 20px #ff2bd630;
 }
 
+/* Reminders — simple neon template buttons + accordion panel */
+.admin-template-btn {
+  width: 100%;
+  border-radius: 999px;
+  border: 2px solid #ff2bd6;
+  background: linear-gradient(180deg, rgba(255, 43, 214, 0.22), rgba(18, 4, 36, 0.92));
+  padding: 0.85rem 1.25rem;
+  box-shadow: 0 0 14px rgba(255, 43, 214, 0.28);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
+}
+
+.admin-template-btn:hover,
+.admin-template-btn:focus-visible {
+  transform: translateY(-1px);
+  border-color: #ff6ae4;
+  box-shadow: 0 0 22px rgba(255, 43, 214, 0.45);
+  outline: none;
+}
+
+.admin-template-btn.is-open {
+  border-color: #c6ff00;
+  box-shadow: 0 0 18px rgba(198, 255, 0, 0.35);
+  background: linear-gradient(180deg, rgba(198, 255, 0, 0.12), rgba(18, 4, 36, 0.95));
+}
+
+.admin-template-panel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-6px);
+  transition:
+    max-height 0.45s ease,
+    opacity 0.35s ease,
+    transform 0.35s ease,
+    margin 0.35s ease,
+    padding 0.35s ease,
+    border-color 0.35s ease;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background: linear-gradient(165deg, rgba(26, 5, 48, 0.92), rgba(10, 0, 20, 0.95));
+  margin-top: 0;
+  padding: 0 1.1rem;
+}
+
+.admin-template-panel.is-open {
+  max-height: 2200px;
+  opacity: 1;
+  transform: translateY(0);
+  margin-top: 0.35rem;
+  padding: 1.15rem 1.1rem 1.25rem;
+  border-color: rgba(255, 43, 214, 0.45);
+  box-shadow: 0 0 22px rgba(255, 43, 214, 0.22);
+}
+
+.admin-template-close {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 43, 214, 0.55);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(255, 43, 214, 0.25);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.admin-template-close:hover,
+.admin-template-close:focus-visible {
+  transform: scale(1.06);
+  border-color: #c6ff00;
+  outline: none;
+}
+
+.admin-email-preview iframe {
+  border: 0;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-template-btn,
+  .admin-template-panel,
+  .admin-template-close {
+    transition: none;
+  }
+}
+
 .input-dark {
   width: 100%;
   min-height: 48px;

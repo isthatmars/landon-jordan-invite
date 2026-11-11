@@ -896,6 +896,51 @@ html[data-seen-rsvp="1"] #rsvp [data-testid="rsvp-phone"] {
   to { --trace: 100%; }
 }
 
+/*
+ * Ghost CTA kill-switch for sticky plate stacking.
+ * When a plate is no longer the live covering scene, drop pointer hit-testing
+ * and hide interactive controls so they cannot float over the next plate.
+ */
+html[data-live-home="0"] #home {
+  pointer-events: none;
+}
+html[data-live-home="0"] #home .hero-facts-rsvp,
+html[data-live-home="0"] #home a,
+html[data-live-home="0"] #home button {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html[data-live-mixtape="0"] #mixtape {
+  pointer-events: none;
+}
+html[data-live-mixtape="0"] #mixtape .mix-key,
+html[data-live-mixtape="0"] #mixtape button,
+html[data-live-mixtape="0"] #mixtape a {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html[data-live-watch="0"] #watch {
+  pointer-events: none;
+}
+html[data-live-watch="0"] #watch .watch-list-item,
+html[data-live-watch="0"] #watch button,
+html[data-live-watch="0"] #watch a {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html[data-live-arcade="0"] #arcade {
+  pointer-events: none;
+}
+html[data-live-arcade="0"] #arcade .arcade-start,
+html[data-live-arcade="0"] #arcade button,
+html[data-live-arcade="0"] #arcade a {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* Pause cheap loops once a section has left the viewport. */
 html[data-live-home="0"] .hero-water,
 html[data-live-home="0"] .hero-shimmer,

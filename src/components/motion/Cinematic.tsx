@@ -17,7 +17,41 @@ const SECTIONS = [
   ["rsvp", "seenRsvp", "liveRsvp"],
 ] as const;
 
+const PLATE_IDS = ["home", "mixtape", "watch", "arcade", "lineup", "rsvp"] as const;
+
 const HASH_SECTIONS = new Set(["home", "mixtape", "watch", "arcade", "lineup", "rsvp"]);
+
+/**
+ * Active plate from document-flow positions (not sticky visual rects).
+ * Stuck sticky plates all report top≈0 via getBoundingClientRect; summing
+ * offsetHeight + marginTop keeps live flags on the plate currently covering.
+ */
+function activePlateId(): (typeof PLATE_IDS)[number] {
+  // Probe the lower viewport so a covering sticky plate claims "live" before
+    // the previous plate's bottom CTAs (hero RSVP) can ghost over it.
+    const probe = window.scrollY + window.innerHeight * 0.72;
+  let cursor = 0;
+  let active: (typeof PLATE_IDS)[number] = "home";
+  for (const id of PLATE_IDS) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    const mt = parseFloat(getComputedStyle(el).marginTop) || 0;
+    const start = cursor + mt;
+    if (probe >= start + 4) active = id;
+    cursor = start + el.offsetHeight;
+  }
+  return active;
+}
+
+function syncLiveFlags(root: HTMLElement) {
+  const active = activePlateId();
+  root.dataset.liveHome = active === "home" ? "1" : "0";
+  for (const [id, seenKey, liveKey] of SECTIONS) {
+    const isActive = active === id;
+    if (isActive) root.dataset[seenKey] = "1";
+    root.dataset[liveKey] = isActive ? "1" : "0";
+  }
+}
 
 function intentionalHash(): string | null {
   const id = (location.hash || "").replace(/^#/, "");
@@ -132,24 +166,19 @@ export function Cinematic() {
     }
     root.dataset.motion = "armed";
 
+    // IntersectionObserver still marks entrance "seen" flags for cinematic reveals.
+    // Live flags use scroll-flow positions so sticky-under plates don't stay live.
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
           const id = entry.target.id;
-          if (id === "home") {
-            root.dataset.liveHome = entry.isIntersecting ? "1" : "0";
-            continue;
-          }
+          if (id === "home") continue;
           const spec = SECTIONS.find((row) => row[0] === id);
           if (!spec) continue;
-          const [, seenKey, liveKey] = spec;
-          if (entry.isIntersecting) {
-            root.dataset[seenKey] = "1";
-            root.dataset[liveKey] = "1";
-          } else if (root.dataset[seenKey] === "1") {
-            root.dataset[liveKey] = "0";
-          }
+          root.dataset[spec[1]] = "1";
         }
+        syncLiveFlags(root);
       },
       { threshold: 0.18, rootMargin: "0px 0px -6% 0px" },
     );
@@ -160,24 +189,11 @@ export function Cinematic() {
       const node = document.getElementById(id);
       if (node) io.observe(node);
     }
-    const markVisible = () => {
-      for (const [id, seenKey, liveKey] of SECTIONS) {
-        const node = document.getElementById(id);
-        if (!node) continue;
-        const rect = node.getBoundingClientRect();
-        const visible = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
-        const ratio = rect.height > 0 ? visible / rect.height : 0;
-        if (ratio >= 0.18) {
-          root.dataset[seenKey] = "1";
-          root.dataset[liveKey] = "1";
-        } else if (root.dataset[seenKey] === "1") {
-          root.dataset[liveKey] = "0";
-        }
-      }
-    };
+    const markVisible = () => syncLiveFlags(root);
     markVisible();
     window.addEventListener("scroll", markVisible, { passive: true });
-    // Programmatic scrollIntoView / scroll-snap can skip a scroll event; re-check shortly after.
+    window.addEventListener("resize", markVisible);
+    // Programmatic scrollIntoView can skip a scroll event; re-check shortly after.
     const settleTimers = [120, 400, 900].map((ms) => window.setTimeout(markVisible, ms));
     return () => {
       for (const id of timers) window.clearTimeout(id);
@@ -186,6 +202,7 @@ export function Cinematic() {
       introWatch.disconnect();
       io.disconnect();
       window.removeEventListener("scroll", markVisible);
+      window.removeEventListener("resize", markVisible);
     };
   }, []);
 

@@ -3408,7 +3408,15 @@ form[data-step="3"] .rsvp-step-3 {
 }
 
 .rsvp-frame-grid {
-  min-height: min(32rem, 58svh);
+  /* Mobile: size to content so the stack doesn’t leave a huge empty top. */
+  min-height: 0;
+  align-items: start;
+}
+
+.rsvp-brand-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .rsvp-attend-block {
@@ -3418,8 +3426,7 @@ form[data-step="3"] .rsvp-step-3 {
   justify-content: center;
   gap: 1rem;
   width: 100%;
-  margin-block: auto;
-  /* Keep interaction clearance on the step, not inside the centered cluster. */
+  margin-block: 0;
   padding-bottom: 0;
 }
 
@@ -3554,32 +3561,42 @@ form[data-step="3"] .rsvp-step-3 {
 form[data-step="1"].rsvp-steps {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: stretch;
   align-self: stretch;
-  height: 100%;
-  min-height: 100%;
+  height: auto;
+  min-height: 0;
 }
 
 form[data-step="1"] .rsvp-step-1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
-  margin-block: auto;
-  padding-bottom: clamp(3rem, 7vh, 5.25rem);
+  margin-block: 0;
+  padding-bottom: 0;
   box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
-  .rsvp-frame-grid {
+  /* Attend: mid-align ask + keycaps with crown → RSVP → phone stack. */
+  .rsvp-frame-grid--attend {
     min-height: min(36rem, 62svh);
+    align-items: center;
   }
 
-  form[data-step="1"] .rsvp-step-1,
-  form[data-step="1"] .rsvp-attend-block {
-    margin-block: auto;
+  .rsvp-frame-grid--attend form[data-step="1"].rsvp-steps {
+    height: auto;
+    min-height: 0;
+    justify-content: center;
+    align-self: center;
+  }
+
+  .rsvp-frame-grid--attend form[data-step="1"] .rsvp-step-1,
+  .rsvp-frame-grid--attend form[data-step="1"] .rsvp-attend-block {
+    margin-block: 0;
+    justify-content: center;
   }
 }
 

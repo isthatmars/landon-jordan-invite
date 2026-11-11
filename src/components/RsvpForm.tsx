@@ -341,8 +341,12 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   return (
     <section id="rsvp" className="bg-[#07010f] px-3 pt-2 sm:px-5">
       <div className="neon-frame mx-auto flex max-w-[1100px] flex-col bg-[#0b0615ee] p-4 sm:p-8 md:p-10">
-        <div className="rsvp-frame-grid grid flex-1 items-stretch gap-6 md:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] md:gap-8 lg:gap-12">
-          <div className="pt-2 text-center md:pt-6">
+        <div
+          className={`rsvp-frame-grid grid flex-1 gap-6 md:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] md:gap-8 lg:gap-12${
+            screen === "attend" ? " rsvp-frame-grid--attend" : ""
+          }`}
+        >
+          <div className="rsvp-brand-stack pt-1 text-center md:pt-0">
             <Crown className="icon-shake mx-auto h-10 w-14 drop-shadow-[0_0_12px_#ffc44d] sm:h-12 sm:w-16" />
             <h2 className="neon-script-lg rsvp-title text-6xl sm:text-7xl">{content.rsvpHeadline}</h2>
             <RsvpTelephone />

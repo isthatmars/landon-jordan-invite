@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useLayoutEffect } from "react";
+import {
+  activePlateId,
+  invalidatePlateMargins,
+  onScrollFrame,
+} from "@/lib/activePlate";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { INTRO_KEY } from "./introBoot";
 
@@ -18,34 +23,12 @@ const SECTIONS = [
   ["rsvp", "seenRsvp", "liveRsvp"],
 ] as const;
 
-const PLATE_IDS = ["home", "mixtape", "watch", "arcade", "lineup", "rsvp"] as const;
-
 const HASH_SECTIONS = new Set(["home", "mixtape", "watch", "arcade", "lineup", "rsvp"]);
 
-/**
- * Active plate from document-flow positions (not sticky visual rects).
- * Stuck sticky plates all report top≈0 via getBoundingClientRect; summing
- * offsetHeight + marginTop keeps live flags on the plate currently covering.
- */
-function activePlateId(): (typeof PLATE_IDS)[number] {
-  // Probe the lower viewport so a covering sticky plate claims "live" before
-    // the previous plate's bottom CTAs (hero RSVP) can ghost over it.
-    const probe = window.scrollY + window.innerHeight * 0.72;
-  let cursor = 0;
-  let active: (typeof PLATE_IDS)[number] = "home";
-  for (const id of PLATE_IDS) {
-    const el = document.getElementById(id);
-    if (!el) continue;
-    const mt = parseFloat(getComputedStyle(el).marginTop) || 0;
-    const start = cursor + mt;
-    if (probe >= start + 4) active = id;
-    cursor = start + el.offsetHeight;
-  }
-  return active;
-}
-
 function syncLiveFlags(root: HTMLElement) {
-  const active = activePlateId();
+  // Probe lower viewport so a covering sticky plate claims "live" before
+  // the previous plate's bottom CTAs (hero RSVP) can ghost over it.
+  const active = activePlateId(0.72);
   root.dataset.liveHome = active === "home" ? "1" : "0";
   for (const [id, seenKey, liveKey] of SECTIONS) {
     const isActive = active === id;
@@ -193,9 +176,14 @@ export function Cinematic() {
       if (node) io.observe(node);
     }
     const markVisible = () => syncLiveFlags(root);
+    const onScroll = onScrollFrame(markVisible);
+    const onResize = onScrollFrame(() => {
+      invalidatePlateMargins();
+      markVisible();
+    });
     markVisible();
-    window.addEventListener("scroll", markVisible, { passive: true });
-    window.addEventListener("resize", markVisible);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
     // Programmatic scrollIntoView can skip a scroll event; re-check shortly after.
     const settleTimers = [120, 400, 900].map((ms) => window.setTimeout(markVisible, ms));
     return () => {
@@ -204,8 +192,8 @@ export function Cinematic() {
       window.clearTimeout(release);
       introWatch.disconnect();
       io.disconnect();
-      window.removeEventListener("scroll", markVisible);
-      window.removeEventListener("resize", markVisible);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 

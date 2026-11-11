@@ -955,7 +955,10 @@ html[data-intro="done"][data-live-home="0"] .chrome-art-shine::after {
 }
 html[data-live-watch="0"] .crt-screen-light,
 html[data-live-watch="0"] .crt-bezel-glow,
-html[data-live-watch="0"] .crt-scanlines::after {
+html[data-live-watch="0"] .crt-scanlines::after,
+html[data-live-watch="0"] .watch-lamp-glow,
+html[data-live-watch="0"] .watch-room-breath,
+html[data-live-watch="0"] .watch-shade {
   animation-play-state: paused;
 }
 html[data-live-lineup="0"] .lineup-sweep::before,
@@ -972,6 +975,10 @@ html[data-live-mixtape="0"] #mixtape .mix-bokeh,
 html[data-live-mixtape="0"] #mixtape .mix-shine,
 html[data-live-mixtape="0"] #mixtape .mix-neon-throw,
 html[data-live-mixtape="0"] #mixtape .mix-table-pool {
+  animation-play-state: paused;
+}
+html[data-live-arcade="0"] #arcade .arcade-start-icon,
+html[data-live-arcade="0"] #arcade .arcade-start-pellets i {
   animation-play-state: paused;
 }
 html[data-live-mixtape="0"] #mixtape .neon-script-lg,

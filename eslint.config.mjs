@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Agent scratch worktrees / copies — not part of the invite app.
+    ".agent-isolates/**",
   ]),
 ]);
 

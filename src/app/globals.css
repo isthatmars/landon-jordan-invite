@@ -538,7 +538,10 @@ main {
     position: sticky;
     top: 0;
     z-index: var(--plate-z);
-    box-shadow: 0 28px 56px rgba(0, 0, 0, 0.42);
+    /* Tighter shadow — large soft blurs jank sticky full-viewport composites. */
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38);
+    /* Isolate paint so plate filters/neon don't dirty the whole page on scroll. */
+    isolation: isolate;
   }
 
   /* Clip both plates — mixtape floor scale must never paint over sticky #home. */
@@ -554,7 +557,8 @@ main {
   #rsvp {
     position: relative;
     z-index: var(--plate-z);
-    box-shadow: 0 -20px 48px rgba(0, 0, 0, 0.38);
+    box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.34);
+    isolation: isolate;
   }
 
   /* Next plate pulls up over the previous scene */

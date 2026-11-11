@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 export function AdminLogin() {
+  const router = useRouter();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +25,7 @@ export function AdminLogin() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Invalid code");
       }
-      window.location.assign("/admin");
+      router.replace("/admin");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
       setLoading(false);
@@ -72,9 +75,9 @@ export function AdminLogin() {
           Use the access code you were given for the party.
         </p>
         <p className="mt-3 text-center">
-          <a href="/" className="text-xs text-neon-pink hover:underline">
+          <Link href="/" className="text-xs text-neon-pink hover:underline">
             ← Back to invite
-          </a>
+          </Link>
         </p>
       </div>
     </div>

@@ -72,8 +72,12 @@ export function PacManGame({
   const [phase, setPhase] = useState<"play" | "won" | "lost">("play");
   const phaseRef = useRef(phase);
   const livesRef = useRef(lives);
-  phaseRef.current = phase;
-  livesRef.current = lives;
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
+  useEffect(() => {
+    livesRef.current = lives;
+  }, [lives]);
   const state = useRef({
     pac: { x: 9, y: 15, dir: "L" as Dir, next: "L" as Dir },
     ghosts: [
@@ -94,7 +98,9 @@ export function PacManGame({
     state.current.pac.next = dir;
   }, []);
   const runningRef = useRef(running);
-  runningRef.current = running;
+  useEffect(() => {
+    runningRef.current = running;
+  }, [running]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -132,7 +138,7 @@ export function PacManGame({
     ) => {
       const tryDir = prefer && canMove(ent.x + DIRS[prefer].x, ent.y + DIRS[prefer].y) ? prefer : ent.dir;
       let nx = ent.x + DIRS[tryDir].x;
-      let ny = ent.y + DIRS[tryDir].y;
+      const ny = ent.y + DIRS[tryDir].y;
       if (ny === 9 && nx < 0) nx = COLS - 1;
       if (ny === 9 && nx >= COLS) nx = 0;
       if (canMove(nx, ny)) {

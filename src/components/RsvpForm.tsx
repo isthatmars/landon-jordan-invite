@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useRef, useState, type ReactNode } from "react";
+import { FormEvent, useEffect, useRef, useState, type ReactNode } from "react";
 import { MAX_COMPANIONS, parseCompletedRsvp } from "@/lib/rsvp";
 import type { PartyPerson, SiteContent } from "@/lib/types";
 import { Crown } from "./icons";
@@ -93,7 +93,10 @@ function childLabel(person: PartyPerson): string {
 }
 
 export function RsvpForm({ content }: { content: SiteContent }) {
-  const draftId = useRef(`draft_${Math.random().toString(36).slice(2, 10)}`);
+  const [draftId] = useState(
+    () =>
+      `draft_${typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}`}`,
+  );
   const startedAt = useRef<string | null>(null);
   const doneRef = useRef(false);
   const savingRef = useRef(false);
@@ -103,7 +106,9 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [screen, setScreen] = useState<Screen>("attend");
   const [stepError, setStepError] = useState("");
-  formRef.current = form;
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
 
   const attending = form.attend === "yes";
   const namedKids =
@@ -129,7 +134,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "draft",
-          id: draftId.current,
+          id: draftId,
           ...snapshot,
           attend: next.attend || snapshot.attend,
           lastFieldTouched: field,
@@ -278,7 +283,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: draftId.current,
+          id: draftId,
           ...parsed.value,
           formStartedAt: startedAt.current || new Date().toISOString(),
         }),

@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
+import {
+  activePlateId,
+  invalidatePlateMargins,
+  onScrollFrame,
+  PLATE_IDS,
+  type PlateId,
+} from "@/lib/activePlate";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Crown } from "./icons";
 
@@ -11,8 +18,14 @@ const links = [
   { href: "#lineup", label: "THE LINEUP" },
 ];
 
-const SECTION_IDS = ["home", "mixtape", "watch", "arcade", "lineup", "rsvp"] as const;
+const SECTION_IDS = PLATE_IDS;
 const SCROLL_BG_THRESHOLD = 16;
+
+function navHashForPlate(id: PlateId): string {
+  // Arcade has no nav link — keep Watch active while in arcade.
+  if (id === "arcade") return "#watch";
+  return `#${id}`;
+}
 
 export function Nav({ brandName }: { brandName: string }) {
   const [open, setOpen] = useState(false);
@@ -21,10 +34,10 @@ export function Nav({ brandName }: { brandName: string }) {
 
   const goHash = (href: string, event?: MouseEvent<HTMLAnchorElement>) => {
     const id = href.replace(/^#/, "");
-    if (!SECTION_IDS.includes(id as (typeof SECTION_IDS)[number])) return;
+    if (!SECTION_IDS.includes(id as PlateId)) return;
     event?.preventDefault();
     // Optimistic active state so sticky smooth-scroll lag cannot flash the wrong tab.
-    setActive(id === "arcade" ? "#watch" : `#${id}`);
+    setActive(navHashForPlate(id as PlateId));
     if (location.hash !== `#${id}`) {
       history.pushState(null, "", `#${id}`);
     }
@@ -32,36 +45,45 @@ export function Nav({ brandName }: { brandName: string }) {
   };
 
   useEffect(() => {
-    const update = () => {
-      setScrolled(window.scrollY > SCROLL_BG_THRESHOLD);
+    let lastScrolled = false;
+    let lastActive = "#home";
 
-      // Section owns the active state once its top crosses the upper third.
-      const marker = Math.min(280, window.innerHeight * 0.36);
-      let current = "#home";
-      for (const id of SECTION_IDS) {
-        const el = document.getElementById(id);
-        if (!el) continue;
-        const top = el.getBoundingClientRect().top;
-        if (top <= marker) current = `#${id}`;
+    const update = () => {
+      const nextScrolled = window.scrollY > SCROLL_BG_THRESHOLD;
+      if (nextScrolled !== lastScrolled) {
+        lastScrolled = nextScrolled;
+        setScrolled(nextScrolled);
       }
-      // Arcade has no nav link — keep Watch active while in arcade.
-      if (current === "#arcade") current = "#watch";
-      setActive(current);
+
+      // Flow-based plate id — getBoundingClientRect lies once sticky plates stick.
+      const nextActive = navHashForPlate(activePlateId(0.36));
+      if (nextActive !== lastActive) {
+        lastActive = nextActive;
+        setActive(nextActive);
+      }
     };
+
+    const onScroll = onScrollFrame(update);
+    const onResize = onScrollFrame(() => {
+      invalidatePlateMargins();
+      update();
+    });
 
     const onHash = () => {
       const id = (location.hash || "").replace(/^#/, "");
-      if (SECTION_IDS.includes(id as (typeof SECTION_IDS)[number])) {
+      if (SECTION_IDS.includes(id as PlateId)) {
         scrollToSection(id);
       }
       update();
     };
 
     update();
-    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
     window.addEventListener("hashchange", onHash);
     return () => {
-      window.removeEventListener("scroll", update);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
       window.removeEventListener("hashchange", onHash);
     };
   }, []);

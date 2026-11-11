@@ -9,20 +9,21 @@ type Phase = "hidden" | "glow" | "ready" | "opening" | "zoom" | "gone";
 
 /** Physical envelope. Nothing opens until the guest asks. */
 export function InviteEnvelope() {
-  const [phase, setPhase] = useState<Phase>("glow");
+  const [phase, setPhase] = useState<Phase>(() => {
+    if (typeof document !== "undefined" && document.documentElement.dataset.intro === "done") {
+      return "gone";
+    }
+    return "glow";
+  });
   const timers = useRef<number[]>([]);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
-    if (root.dataset.intro === "done") {
-      setPhase("gone");
-      return;
-    }
+    if (root.dataset.intro === "done") return;
     if (root.dataset.intro === "reveal") return;
     if (root.dataset.intro !== "invite" && root.dataset.intro !== "opening") {
       root.dataset.intro = "invite";
     }
-    setPhase("glow");
     const ready = window.setTimeout(() => {
       setPhase((current) => (current === "glow" ? "ready" : current));
     }, 1500);

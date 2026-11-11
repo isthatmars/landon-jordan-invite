@@ -4010,11 +4010,11 @@ form[data-step="1"] .rsvp-step-1 {
   border-radius: 1.15rem;
   text-align: center;
   background: transparent;
-  border: 1px solid rgba(255, 196, 77, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow:
-    0 0 8px rgba(255, 196, 77, 0.55),
-    0 0 22px rgba(255, 196, 77, 0.35),
-    0 0 40px rgba(255, 196, 77, 0.2);
+    0 0 8px rgba(255, 255, 255, 0.45),
+    0 0 22px rgba(255, 255, 255, 0.28),
+    0 0 40px rgba(255, 255, 255, 0.16);
 }
 
 .lineup-private-title {
@@ -4026,6 +4026,7 @@ form[data-step="1"] .rsvp-step-1 {
   color: #ffc44d;
   font-family: var(--font-nav), sans-serif;
   font-size: clamp(1.15rem, 0.9rem + 0.8vw, 1.55rem);
+  font-weight: 200;
   letter-spacing: 0.12em;
 }
 

@@ -2581,10 +2581,10 @@ body {
   }
 
   #watch .watch-stage {
-    /* Grid: title spans top center; TV + browse share the lower row. */
+    /* Grid: title spans top center; TV + browse share a content row sized by the CRT. */
     display: grid;
     grid-template-columns: var(--watch-tv-w) minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
     column-gap: clamp(1.25rem, 2.6vw, 2.75rem);
     row-gap: clamp(0.35rem, 1.2vh, 0.9rem);
     align-items: stretch;
@@ -2649,7 +2649,8 @@ body {
     grid-row: 2;
     order: 0;
     width: var(--watch-tv-w);
-    align-self: end;
+    /* Content row height follows the CRT; list centers against this box. */
+    align-self: start;
     justify-self: start;
   }
 
@@ -2666,11 +2667,12 @@ body {
     grid-column: 2;
     grid-row: 2;
     order: 0;
-    /* Longer toward the right; taller; mid-aligned with the CRT. */
+    /* Longer toward the right; taller; vertically middle-aligned with the CRT. */
     width: 100%;
     max-width: none;
-    min-height: clamp(16rem, 38vh, 22.5rem);
-    max-height: min(24rem, 58%);
+    /* Tall browse panel; capped so it mid-aligns against the CRT box. */
+    min-height: 18rem;
+    max-height: 22rem;
     margin: 0;
     align-self: center;
     justify-self: stretch;

@@ -4864,8 +4864,9 @@ main {
     padding: var(--header-clear) 16px var(--section-pad-bottom);
   }
 
-  #lineup h3 {
-    font-size: 22px;
+  /* Keep card titles on the fluid/container clamp — do not pin a fixed px size. */
+  #lineup h3.lineup-card-title {
+    font-size: clamp(1.05rem, 0.42rem + 6.8cqi, 1.65rem);
   }
 
   #lineup .grid > div > div > p:last-child {
@@ -5398,13 +5399,15 @@ form[data-step="3"] .rsvp-step-3 {
 }
 
 .lineup-card {
+  container-type: inline-size;
+  container-name: lineup-card;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
+  justify-content: flex-start;
+  gap: 0.28rem;
   min-height: 100%;
-  padding: clamp(1.35rem, 2.4vw, 1.85rem) clamp(1.15rem, 2vw, 1.6rem);
+  padding: clamp(1.05rem, 1.8vw, 1.4rem) clamp(0.9rem, 1.6vw, 1.25rem);
   border-radius: 1.15rem;
   text-align: center;
   background:
@@ -5450,40 +5453,54 @@ form[data-step="3"] .rsvp-step-3 {
   width: var(--icon-md);
   height: var(--icon-md);
   color: #ff39c8;
-  margin-inline: auto;
+  margin: 0 auto 0.05rem;
+  flex-shrink: 0;
 }
 
 .lineup-time {
-  margin: 0.15rem 0 0;
+  margin: 0;
   color: #ffc44d;
   font-family: var(--font-nav), sans-serif;
-  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
+  font-size: clamp(0.95rem, 0.85rem + 0.35vw, 1.15rem);
   letter-spacing: 0.08em;
+  line-height: 1.2;
   text-align: center;
 }
 
 .lineup-card-title {
-  margin: 0;
-  /* Force multi-word titles (incl. LET'S ROLL!) onto two centered lines. */
-  max-width: 4.75rem;
+  margin: 0.12rem 0 0;
+  width: 100%;
+  max-width: 100%;
   color: #fff;
   font-family: var(--font-condensed), sans-serif;
-  font-size: clamp(1.7rem, 1.2rem + 1.4vw, 2.35rem);
+  /* Viewport fallback, then card-width fluid type so titles scale instead of stacking. */
+  font-size: clamp(1.05rem, 0.85rem + 1.1vw, 1.85rem);
+  font-size: clamp(1.05rem, 0.42rem + 6.8cqi, 1.95rem);
   font-style: italic;
   font-weight: 700;
-  letter-spacing: 0.03em;
-  line-height: 1.12;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
   text-align: center;
   text-wrap: balance;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  /* Hard cap: never more than two title lines. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  max-height: 2.1em;
 }
 
 .lineup-card-copy {
-  /* Extra breath under the title; narrow measure so copy wraps to 2+ lines. */
-  margin: 0.95rem 0 0;
-  max-width: min(22ch, 88%);
+  /* Tight breath under the title; narrow measure so copy wraps to 2+ lines. */
+  margin: 0.4rem 0 0;
+  max-width: min(22ch, 92%);
   color: var(--neon-green);
-  font-size: clamp(1.05rem, 0.95rem + 0.3vw, 1.2rem);
-  line-height: 1.5;
+  font-size: clamp(1rem, 0.9rem + 0.28vw, 1.15rem);
+  line-height: 1.45;
   text-align: center;
   text-wrap: pretty;
   text-shadow: 0 0 10px rgba(198, 255, 0, 0.28);

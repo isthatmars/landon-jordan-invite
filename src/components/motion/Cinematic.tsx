@@ -27,7 +27,9 @@ const HASH_SECTIONS = new Set(["home", "mixtape", "watch", "arcade", "lineup", "
  * offsetHeight + marginTop keeps live flags on the plate currently covering.
  */
 function activePlateId(): (typeof PLATE_IDS)[number] {
-  const probe = window.scrollY + Math.min(160, window.innerHeight * 0.3);
+  // Probe the lower viewport so a covering sticky plate claims "live" before
+    // the previous plate's bottom CTAs (hero RSVP) can ghost over it.
+    const probe = window.scrollY + window.innerHeight * 0.72;
   let cursor = 0;
   let active: (typeof PLATE_IDS)[number] = "home";
   for (const id of PLATE_IDS) {

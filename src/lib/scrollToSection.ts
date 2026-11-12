@@ -1,6 +1,8 @@
 /** Smoothly bring a section into view.
  *  Sticky plates make scrollIntoView(#home) a no-op once #home is stuck at top:0 —
- *  always pin home with scrollTo(0). Other plates still use scrollIntoView. */
+ *  always pin home with scrollTo(0). Other plates use scrollIntoView; desktop sticky
+ *  photo plates cancel html scroll-padding via CSS scroll-margin so they land flush
+ *  (no parked hero sky strip above #mixtape / #watch / #arcade). */
 export function scrollToSection(
   id: string,
   opts?: { behavior?: ScrollBehavior },

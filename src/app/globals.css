@@ -569,6 +569,11 @@ main {
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38);
     /* Isolate paint so plate filters/neon don't dirty the whole page on scroll. */
     isolation: isolate;
+    /*
+     * Land flush at top:0 — html scroll-padding otherwise parks these plates
+     * ~header-clear down and leaves a clipped hero sky/palm/crown strip above.
+     */
+    scroll-margin-top: calc(-1 * var(--header-clear));
   }
 
   /* Clip both plates — mixtape floor scale must never paint over sticky #home. */
@@ -3544,7 +3549,9 @@ main {
 }
 
 #mixtape {
-  padding-top: max(var(--header-clear), clamp(5.75rem, 10vw, 7rem));
+  /* Tight under the fixed header — large pad read as a wasted maroon band under
+     the home→mixtape clip. Title still clears the ~104px nav. */
+  padding-top: max(4.85rem, calc(var(--header-clear) - 1.35rem));
   padding-bottom: var(--section-pad-bottom);
   /* Always contain scaled floor art on both axes (desktop sticky included). */
   overflow: clip;
@@ -3553,7 +3560,7 @@ main {
 /* Mobile: cut air above Choose a Tape roughly in half. */
 @media (max-width: 767px) {
   #mixtape {
-    padding-top: max(3.6rem, calc(var(--header-clear) * 0.55));
+    padding-top: max(3.1rem, calc(var(--header-clear) * 0.48));
   }
 
   #mixtape .mix-stage {
@@ -6055,5 +6062,3 @@ form[data-step="3"] .rsvp-step-3 {
     text-align: left;
   }
 }
-
-

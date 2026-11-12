@@ -2638,11 +2638,11 @@ main {
   isolation: isolate;
   /* Scene clips as a safety net; .mix-floor is the hard clip for the scaled plate. */
   overflow: clip;
-  background: #120612;
-  /* Moderate floor zoom — enough reflective sheen under boombox/cassettes
-     without escaping the mixtape container or covering #home. */
-  --mix-floor-scale: 1.22;
-  --mix-floor-nudge: 3%;
+  background: #050308;
+  /* Scale from the bottom only — an upward nudge left a black void under the
+     reflective floor. Slightly higher scale keeps sheen at prop feet. */
+  --mix-floor-scale: 1.3;
+  --mix-floor-nudge: 0%;
 }
 
 /* Hard clip layer for the scaled plate + atmosphere only (neon stage stays above).
@@ -3258,9 +3258,9 @@ main {
 
 @media (min-width: 768px) {
   .mix-scene {
-    /* Contained zoom — boombox feet meet floor sheen inside the scene box. */
-    --mix-floor-scale: 1.32;
-    --mix-floor-nudge: 5%;
+    /* Contained zoom from the plate bottom — no Y nudge (avoids black void). */
+    --mix-floor-scale: 1.46;
+    --mix-floor-nudge: 0%;
     overflow: clip;
   }
 
@@ -3677,7 +3677,9 @@ main {
   /* Tight under the fixed header — large pad read as a wasted maroon band under
      the home→mixtape clip. Title still clears the ~104px nav. */
   padding-top: max(4.85rem, calc(var(--header-clear) - 1.35rem));
-  padding-bottom: var(--section-pad-bottom);
+  /* Sticky photo plates fill edge-to-edge; bottom pad read as a black void under
+     the marble floor. Mobile keeps a little breathing room below the stack. */
+  padding-bottom: 0;
   /* Always contain scaled floor art on both axes (desktop sticky included). */
   overflow: clip;
 }
@@ -3686,6 +3688,7 @@ main {
 @media (max-width: 767px) {
   #mixtape {
     padding-top: max(3.1rem, calc(var(--header-clear) * 0.48));
+    padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
   }
 
   #mixtape .mix-stage {

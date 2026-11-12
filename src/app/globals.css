@@ -257,8 +257,7 @@ main {
  * Layout policy:
  * - Phones (<768): stacked mobile layout.
  * - Tablets + desktop (≥768): same desktop composition (not the phone stack).
- * - Portrait tablets: half-viewport plates (≈50dvh) so the desktop scene reads
- *   smaller; landscape / desktop keep a full 100dvh plate.
+ * - All tablet + desktop orientations: full 100dvh sticky plates.
  */
 @media (min-width: 768px) {
   #home,
@@ -278,23 +277,10 @@ main {
 }
 
 /*
- * iPad / tablet portrait — same desktop composition, shorter plates (~50dvh).
- * Do NOT use CSS zoom: it desyncs cassette spine %/cqh labels from the photo.
+ * iPad / tablet portrait — same desktop composition as landscape/desktop.
+ * Full 100dvh plates (half-height caused the next scene to peek into every shot).
  */
 @media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
-  #home,
-  #mixtape,
-  #watch,
-  #arcade {
-    height: 50svh;
-    height: 50dvh;
-    max-height: 50svh;
-    max-height: 50dvh;
-    min-height: 50svh;
-    min-height: 50dvh;
-    --section-pad-bottom: clamp(0.55rem, 1.4vh, 1rem);
-  }
-
   #home .hero-frame,
   #watch .watch-stage,
   #arcade .arcade-stage {
@@ -1854,72 +1840,7 @@ main {
   order: 2;
 }
 
-@media (max-width: 767px) {
-  /* Phones only: stacked brand → couple → facts (tablets use desktop hero). */
-  .hero-frame {
-    padding-top: calc(4.55rem + env(safe-area-inset-top));
-    padding-bottom: clamp(3.5rem, 10vh, 6rem);
-  }
-
-  .hero-stage {
-    gap: 0;
-  }
-
-  .hero-copy {
-    width: min(100%, 22rem);
-  }
-
-  .hero-script {
-    font-size: clamp(2.35rem, 9.5vw, 3.1rem);
-  }
-
-  .chrome-80s-art {
-    width: min(88vw, 19rem);
-  }
-
-  .hero-birthday {
-    font-size: clamp(1.15rem, 4.2vw, 1.55rem);
-    letter-spacing: 0.22em;
-    text-indent: 0.22em;
-  }
-
-  .hero-people {
-    width: min(78%, 18.5rem);
-    /* Seat soles/wheels on the lifted terrace above the stacked facts. */
-    transform: translateY(clamp(48px, 12vw, 72px));
-    z-index: 3;
-  }
-
-  .hero-people .floor-contact {
-    bottom: 0.15rem;
-    height: 1rem;
-    background: rgba(0, 0, 0, 0.9);
-  }
-
-  .hero-facts {
-    width: min(100%, 22rem);
-    margin-top: 0.55rem;
-  }
-
-  .hero-facts-main {
-    gap: 0.8rem;
-    padding: 0.85rem 0.85rem 1rem 0.7rem;
-  }
-
-  .hero-facts-divider {
-    margin: 0 0.7rem;
-  }
-
-  .hero-facts-rsvp {
-    min-height: 2.85rem;
-    padding: 0.85rem 0.85rem 1.05rem;
-  }
-
-  .hero-facts-rsvp-label {
-    font-size: 1.12rem;
-    letter-spacing: 0.16em;
-  }
-}
+/* Phone hero compress lives after base .hero-* rules (see max-width: 767px below). */
 
 .hero-couple {
   position: relative;
@@ -2341,6 +2262,111 @@ main {
   letter-spacing: 0.02em;
   line-height: 1.35;
   text-shadow: 0 1px 2px #000;
+}
+
+/*
+ * Phones only: stacked brand → couple → facts (tablets use desktop hero).
+ * Placed after base .hero-* rules so these sizes win the cascade.
+ * Compress so the facts card + RSVP clear the first viewport without clipping.
+ */
+@media (max-width: 767px) {
+  .hero-frame {
+    padding-top: calc(3.75rem + env(safe-area-inset-top));
+    padding-bottom: clamp(0.75rem, 2.2vh, 1.25rem);
+  }
+
+  .hero-stage {
+    gap: 0;
+  }
+
+  .hero-copy {
+    width: min(100%, 19.5rem);
+  }
+
+  .hero-crown {
+    width: clamp(2.25rem, 6.5vw, 2.85rem);
+    margin-bottom: 0;
+  }
+
+  .hero-script {
+    font-size: clamp(1.85rem, 7.4vw, 2.35rem);
+  }
+
+  .chrome-80s-art {
+    width: min(68vw, 13.75rem);
+  }
+
+  .hero-birthday {
+    font-size: clamp(0.92rem, 3.2vw, 1.15rem);
+    letter-spacing: 0.18em;
+    text-indent: 0.18em;
+  }
+
+  .hero-swoosh {
+    height: 1.1rem;
+    margin-top: -0.25rem;
+  }
+
+  .hero-people {
+    width: min(58%, 13.25rem);
+    /* Seat soles/wheels on the lifted terrace above the stacked facts. */
+    transform: translateY(clamp(6px, 1.8vw, 14px));
+    z-index: 3;
+  }
+
+  .hero-people .floor-contact {
+    bottom: 0.1rem;
+    height: 0.85rem;
+    background: rgba(0, 0, 0, 0.9);
+  }
+
+  .hero-facts {
+    width: min(100%, 21rem);
+    margin-top: 0.05rem;
+    padding: 0.45rem 0 0;
+  }
+
+  .hero-facts-main {
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem 0.45rem 0.55rem;
+  }
+
+  .hero-facts-divider {
+    margin: 0 0.55rem;
+  }
+
+  .hero-facts-rsvp {
+    min-height: 2.2rem;
+    padding: 0.5rem 0.7rem 0.65rem;
+  }
+
+  .hero-facts-rsvp-label {
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-fact {
+    gap: 0.5rem;
+    grid-template-columns: 2.1rem minmax(0, 1fr);
+  }
+
+  .fact-icon {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+
+  .fact-label {
+    font-size: 0.88rem;
+  }
+
+  .fact-value {
+    font-size: 1.05rem;
+  }
+
+  .fact-address {
+    font-size: 0.92rem;
+    line-height: 1.25;
+  }
 }
 
 @media (min-width: 720px) {
@@ -3366,24 +3392,17 @@ main {
  * photographed bands (no CSS zoom; px sit; stable type size).
  */
 @media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
+  /* Full-height desktop composition, gently scaled to the narrower portrait frame. */
   #mixtape .mix-stage {
     justify-content: center;
-    padding-top: 0.15rem;
-    padding-bottom: 0.15rem;
-  }
-
-  #mixtape .mix-script {
-    transform: scale(0.78);
-    transform-origin: center bottom;
   }
 
   #mixtape .mix-row {
-    margin-top: 0;
-    margin-bottom: 0;
-    /* Transform-scale (not zoom) keeps spine % locked to the stack photo. */
-    transform: scale(0.7);
+    margin-top: -4vh;
+    margin-bottom: 5vh;
+    transform: scale(0.82);
     transform-origin: center center;
-    gap: clamp(1.75rem, 4.5vw, 3rem);
+    gap: clamp(2rem, 5vw, 3.5rem);
   }
 
   #mixtape .mix-boom {
@@ -3391,15 +3410,15 @@ main {
   }
 
   #mixtape .mix-stack {
-    --mix-stack-sit: 0.55rem;
-    width: 19%;
-    min-width: 8.75rem;
+    --mix-stack-sit: 0.75rem;
+    width: 18%;
+    min-width: 9rem;
   }
 
   #mixtape .mix-tape-ink {
     left: 9%;
     right: 9%;
-    font-size: clamp(8px, 0.62rem, 11px);
+    font-size: clamp(8px, 34cqh, 12px);
   }
 
   #mixtape .mix-tape-ink-text {
@@ -3695,6 +3714,60 @@ main {
   #watch {
     overflow-x: clip;
     overflow-y: visible;
+    /* Slightly less header air so TV + remote + browse fit without clipping. */
+    padding-top: max(3.85rem, calc(var(--header-clear) * 0.72));
+  }
+
+  #watch .watch-stage {
+    padding: 0.2rem 0.65rem 0.85rem;
+    gap: 0.2rem;
+  }
+
+  #watch .watch-heading {
+    padding-top: 0.15rem;
+  }
+
+  #watch .watch-title {
+    padding-block: 0.28em 0.22em;
+  }
+
+  #watch .watch-line-lead {
+    font-size: clamp(2.75rem, 10.2vw, 3.55rem);
+  }
+
+  #watch .watch-line-hero {
+    font-size: clamp(3.35rem, 12.4vw, 4.55rem);
+  }
+
+  #watch .watch-line-rest {
+    font-size: clamp(2.65rem, 9.8vw, 3.45rem);
+  }
+
+  #watch .watch-line + .watch-line {
+    margin-top: 0.16em;
+  }
+
+  #watch .watch-tv {
+    width: min(86%, 28rem);
+    /* Reserve room for the table remote hanging under the CRT feet. */
+    margin-bottom: 4.75rem;
+  }
+
+  #watch .watch-remote-rail {
+    bottom: 0.35rem;
+    width: min(40%, 9.5rem);
+    /* Sit on the oak table in front of the set — do not dive into Browse. */
+    transform: translate(-50%, 38%);
+  }
+
+  #watch .watch-list {
+    margin-top: 0.55rem;
+    max-height: 8.75rem;
+  }
+
+  #watch .watch-browse-label {
+    padding: 0.55rem 0.85rem 0.35rem;
+    font-size: clamp(0.95rem, 0.88rem + 0.3vw, 1.1rem);
   }
 }
 

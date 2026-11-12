@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Cassette } from "./Cassette";
 import { NeonArrow } from "./icons";
+import { MixtapeWelcome } from "./MixtapeWelcome";
 import { usePlayback } from "./Playback";
 
 /** Spine ink boxes measured against colored bands in cassette-stack-cut.png. */
@@ -309,6 +310,7 @@ export function Mixtape({ headline }: { headline: string }) {
           {flyer.label}
         </span>
       ) : null}
+      <MixtapeWelcome />
     </section>
   );
 }

@@ -6082,3 +6082,149 @@ form[data-step="3"] .rsvp-step-3 {
     text-align: left;
   }
 }
+
+/* Mixtape once-a-day welcome — quiet neon panel, not a sticker / tap-hint. */
+.mix-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 72;
+  display: grid;
+  place-items: center;
+  padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.mix-welcome-scrim {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  /* ~50% dim with a soft void tint so the mixtape still reads underneath. */
+  background: rgba(7, 2, 18, 0.52);
+  cursor: pointer;
+}
+
+.mix-welcome-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.15rem;
+  width: min(100%, 26.5rem);
+  padding: 1.85rem 1.6rem 1.45rem;
+  border-radius: 1.15rem;
+  border: 1.5px solid rgba(255, 57, 200, 0.72);
+  background:
+    linear-gradient(180deg, rgba(32, 12, 48, 0.94), rgba(10, 3, 20, 0.96));
+  box-shadow:
+    0 0 0 1px rgba(255, 57, 200, 0.12),
+    0 0 28px rgba(255, 57, 200, 0.22),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.mix-welcome-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 57, 200, 0.55);
+  background: rgba(8, 2, 16, 0.85);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 57, 200, 0.2);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.mix-welcome-close svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.mix-welcome-close:hover,
+.mix-welcome-close:focus-visible {
+  outline: none;
+  border-color: rgba(255, 106, 216, 0.9);
+  box-shadow:
+    0 0 4px #fff,
+    0 0 14px rgba(255, 57, 200, 0.45);
+  transform: scale(1.04);
+}
+
+.mix-welcome-title {
+  margin: 0.15rem 1.75rem 0;
+  color: #fff;
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  font-size: clamp(0.95rem, 0.88rem + 0.25vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.mix-welcome-copy {
+  margin: 0;
+  max-width: 34ch;
+  color: rgba(255, 255, 255, 0.92);
+  /* Same measure/scale language as .lineup-card-copy — white instead of lime. */
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  font-size: clamp(0.8125rem, 0.7125rem + 0.28vw, 0.9625rem);
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.mix-welcome-ok {
+  margin-top: 0.35rem;
+  min-width: 7.5rem;
+  padding: 0.65rem 1.75rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--neon-green);
+  background: #0a0a0a;
+  color: #fff;
+  font-family: var(--font-nav), var(--font-body), sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 14px rgba(198, 255, 0, 0.28);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+.mix-welcome-ok:hover,
+.mix-welcome-ok:focus-visible {
+  outline: none;
+  filter: brightness(1.06);
+  transform: scale(1.03);
+  box-shadow:
+    0 0 6px #fff,
+    0 0 16px rgba(198, 255, 0, 0.45);
+}
+
+.mix-welcome-ok:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mix-welcome-close,
+  .mix-welcome-ok {
+    transition: none;
+  }
+
+  .mix-welcome-close:hover,
+  .mix-welcome-close:focus-visible,
+  .mix-welcome-ok:hover,
+  .mix-welcome-ok:focus-visible {
+    transform: none;
+  }
+}

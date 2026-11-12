@@ -5394,7 +5394,8 @@ main {
      * Bottom pad clears the fixed PAUSE/TOP dock (~3rem) + home indicator.
      */
     min-height: 0;
-    padding: var(--header-clear) 16px max(4.25rem, calc(3.25rem + env(safe-area-inset-bottom)));
+    /* 5.25rem clears the 3rem dock + ~1.15rem offset + a little breath. */
+    padding: var(--header-clear) 16px max(5.25rem, calc(4.25rem + env(safe-area-inset-bottom)));
   }
 
   /* Keep card titles on the fluid/container clamp — do not pin a fixed px size. */

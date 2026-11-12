@@ -920,10 +920,12 @@ html[data-seen-rsvp="1"] #rsvp [data-testid="rsvp-phone"] {
  * hydrates) so a sticky/scaled #mixtape cannot steal hero RSVP clicks on
  * first paint. Descendants need an explicit auto when the plate is live —
  * pe:none on a parent alone does not block children with pe:auto.
+ * Scoped to armed motion: reduced motion has no sticky stack and never sets
+ * data-live-*, so these plates would otherwise stay inert forever.
  */
-#mixtape,
-#watch,
-#arcade {
+html[data-motion="armed"] #mixtape,
+html[data-motion="armed"] #watch,
+html[data-motion="armed"] #arcade {
   pointer-events: none;
 }
 
@@ -938,8 +940,8 @@ html[data-live-home="0"] #home button {
 }
 
 /* While #home owns the viewport, force the whole mixtape tree inert. */
-html:not([data-live-home="0"]) #mixtape,
-html:not([data-live-home="0"]) #mixtape *,
+html[data-motion="armed"]:not([data-live-home="0"]) #mixtape,
+html[data-motion="armed"]:not([data-live-home="0"]) #mixtape *,
 html[data-intro="invite"] #mixtape,
 html[data-intro="invite"] #mixtape *,
 html[data-intro="opening"] #mixtape,

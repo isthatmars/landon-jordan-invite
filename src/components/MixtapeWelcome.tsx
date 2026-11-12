@@ -188,11 +188,11 @@ export function MixtapeWelcome() {
           </svg>
         </button>
         <p id={titleId} className="mix-welcome-title">
-          Welcome to the mixtape
+          We&apos;re Glad You&apos;re Here!
         </p>
         <p id={copyId} className="mix-welcome-copy">
-          We put care into this interactive, nostalgic experience for you. Feel free to click
-          around — try the boombox buttons, pick a tape, and explore what responds.
+          This experience has little hidden interactions throughout — tap around and see what
+          responds.
         </p>
         <button ref={okRef} type="button" className="mix-welcome-ok" onClick={dismiss}>
           OK

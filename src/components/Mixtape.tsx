@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSessionDismiss } from "@/lib/useSessionDismiss";
 import { Cassette } from "./Cassette";
 import { NeonArrow } from "./icons";
 import { usePlayback } from "./Playback";
+import { TapVerb, TouchHint } from "./TouchHint";
+
+const KEYS_HINT_KEY = "lj-hint-boombox-keys";
+const TAPES_HINT_KEY = "lj-hint-cassettes";
 
 /** Spine ink boxes measured against colored bands in cassette-stack-cut.png. */
 const STACK: {
@@ -76,6 +81,8 @@ export function Mixtape({ headline }: { headline: string }) {
     x: string;
     y: string;
   } | null>(null);
+  const [keysHintDone, dismissKeysHint] = useSessionDismiss(KEYS_HINT_KEY);
+  const [tapesHintDone, dismissTapesHint] = useSessionDismiss(TAPES_HINT_KEY);
   const byId = new Map(tracks.map((track) => [track.id, track]));
   const stack = STACK.flatMap((row) => {
     const track = byId.get(row.id);
@@ -187,7 +194,7 @@ export function Mixtape({ headline }: { headline: string }) {
               </span>
               <span className="mix-lamp" />
             </div>
-            <div className="mix-keys" role="group" aria-label="Boombox transport">
+            <div className="mix-keys" role="group" aria-label="Boombox transport" onClickCapture={dismissKeysHint}>
               <button
                 type="button"
                 className="mix-key"
@@ -229,6 +236,9 @@ export function Mixtape({ headline }: { headline: string }) {
               <button type="button" className="mix-key" aria-label="Stop the tape" onClick={stop}>
                 <TransportIcon name="stop" />
               </button>
+              <TouchHint show={!keysHintDone} className="mix-keys-hint">
+                <TapVerb /> the buttons to play &amp; pause
+              </TouchHint>
             </div>
             <div className="mix-phones">
               <div className="mix-shadow mix-shadow-phones" aria-hidden />
@@ -287,9 +297,15 @@ export function Mixtape({ headline }: { headline: string }) {
                 labelHeight={row.labelHeight}
                 selected={row.id === loadedId}
                 inserting={insertingId === row.id}
-                onSelect={() => selectTape(row.id)}
+                onSelect={() => {
+                  dismissTapesHint();
+                  selectTape(row.id);
+                }}
               />
             ))}
+            <TouchHint show={!tapesHintDone} className="mix-tapes-hint">
+              <TapVerb /> a tape to change the song
+            </TouchHint>
           </div>
         </div>
       </div>

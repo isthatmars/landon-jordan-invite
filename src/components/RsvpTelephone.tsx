@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSessionDismiss } from "@/lib/useSessionDismiss";
+import { TapVerb, TouchHint } from "./TouchHint";
+
+const PHONE_HINT_KEY = "lj-hint-rsvp-phone";
 
 function playRing(ctx: AudioContext) {
   const start = ctx.currentTime + 0.02;
@@ -31,6 +35,7 @@ export function RsvpTelephone() {
   const [pickedUp, setPickedUp] = useState(false);
   const [buzzing, setBuzzing] = useState(false);
   const [greeting, setGreeting] = useState(false);
+  const [phoneHintDone, dismissPhoneHint] = useSessionDismiss(PHONE_HINT_KEY);
 
   useEffect(() => {
     const section = document.getElementById("rsvp");
@@ -66,6 +71,7 @@ export function RsvpTelephone() {
   };
 
   const pickup = () => {
+    dismissPhoneHint();
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setPickedUp(true);
     setBuzzing(!reduce);
@@ -101,6 +107,9 @@ export function RsvpTelephone() {
           <img className="phone-photo" src="/images/prop-rsvp-phone.png" alt="" draggable={false} />
         </span>
       </button>
+      <TouchHint show={!phoneHintDone && !pickedUp} className="phone-hint">
+        <TapVerb /> the phone to RSVP
+      </TouchHint>
       {pickedUp ? (
         <div className="rsvp-phone-copy mt-3 w-full max-w-full text-center" data-testid="rsvp-phone-message" aria-live="polite">
           <p className="text-sm leading-snug text-white">

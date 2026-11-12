@@ -10,6 +10,7 @@ import {
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { crtScreen, crtScreenFill } from "@/lib/cutouts";
 import { useWarmFlag } from "@/lib/useLiveFlag";
+import { watchUrl } from "@/lib/youtube";
 import { usePlayback } from "./Playback";
 import { YoutubeScreen } from "./YoutubeScreen";
 import { YoutubeThumb } from "./YoutubeThumb";
@@ -28,6 +29,8 @@ type RemoteAction =
 const CHANNEL_STATIC_MS = 500;
 /** Absolute max cover (static + poster) so a slow buffer never leaves a long black gap. */
 const CHANNEL_STATIC_MAX_MS = 1000;
+/** If YouTube never reports PLAYING after a play command, treat the embed as blocked. */
+const EMBED_CONFIRM_MS = 4200;
 
 const REMOTE_HOTSPOTS: {
   id: string;
@@ -73,6 +76,13 @@ export function Watch({ headline }: { headline: string }) {
   const [switchKey, setSwitchKey] = useState(0);
   /** Keep the poster up after snow so the CRT never flashes black while YouTube buffers. */
   const [holdPoster, setHoldPoster] = useState(false);
+  /**
+   * Only lift the poster / reveal the iframe after YouTube confirms PLAYING.
+   * Playback's local `playing` flips on command — that must never uncover a bot wall.
+   */
+  const [glassLive, setGlassLive] = useState(false);
+  /** Embed failed or never confirmed playback (bot check / restricted). */
+  const [embedBlocked, setEmbedBlocked] = useState(false);
   const [muted, setMuted] = useState(false);
   const skipStatic = useRef(true);
   const sectionRef = useRef<HTMLElement>(null);
@@ -81,8 +91,10 @@ export function Watch({ headline }: { headline: string }) {
   const watchWarm = useWarmFlag("warmWatch");
   const [desktopMotion, setDesktopMotion] = useState(false);
 
-  /* CRT channel switch: quick snow (≤1s), then clear as the new video plays underneath. */
+  /* Channel change: cover glass, reset confirmed-play, run snow. */
   useEffect(() => {
+    setGlassLive(false);
+    setEmbedBlocked(false);
     if (skipStatic.current) {
       skipStatic.current = false;
       return;
@@ -102,7 +114,7 @@ export function Watch({ headline }: { headline: string }) {
       clearTimer = window.setTimeout(() => {
         if (!cancelled) setChannelSwitching(false);
       }, CHANNEL_STATIC_MS);
-      /* Hard cap: never leave static/poster covering past 1s. */
+      /* Hard cap on snow only — poster stays until glassLive (or blocked fallback). */
       posterCapTimer = window.setTimeout(() => {
         if (!cancelled) setHoldPoster(false);
       }, CHANNEL_STATIC_MAX_MS);
@@ -115,10 +127,34 @@ export function Watch({ headline }: { headline: string }) {
     };
   }, [now?.youtubeId, reduceMotion]);
 
+  /* If play was commanded but YouTube never confirms, keep poster + offer open-on-YouTube. */
+  useEffect(() => {
+    if (!playing || glassLive || !now?.youtubeId) return;
+    const timer = window.setTimeout(() => setEmbedBlocked(true), EMBED_CONFIRM_MS);
+    return () => window.clearTimeout(timer);
+  }, [playing, glassLive, now?.youtubeId]);
+
   const handlePlayingChange = (isPlaying: boolean) => {
-    if (isPlaying) setHoldPoster(false);
+    if (isPlaying) {
+      setHoldPoster(false);
+      setGlassLive(true);
+      setEmbedBlocked(false);
+    } else {
+      setGlassLive(false);
+    }
     onPlayingChange(isPlaying);
   };
+
+  const handleEmbedIssue = () => {
+    setGlassLive(false);
+    setEmbedBlocked(true);
+    setHoldPoster(false);
+  };
+
+  /** Poster covers the iframe until confirmed playback — never show YouTube chrome/errors. */
+  const showPoster = Boolean(now?.youtubeId) && (!glassLive || holdPoster || channelSwitching);
+  const showPlayCta = Boolean(now?.youtubeId) && (!playing || embedBlocked);
+  const revealIframe = glassLive && !holdPoster && !channelSwitching && !embedBlocked;
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -236,40 +272,73 @@ export function Watch({ headline }: { headline: string }) {
           <div
             data-testid="tv-screen"
             data-screen="crt"
+            data-glass-live={revealIframe ? "1" : "0"}
+            data-embed-blocked={embedBlocked ? "1" : "0"}
             className="crt-bezel-glow absolute z-[2] overflow-hidden bg-black"
             style={crtScreen}
           >
             {now?.youtubeId ? (
-              <YoutubeScreen
-                ref={registerPlayer}
-                videoId={now.youtubeId}
-                title={`${now.artist} — ${now.title}`}
-                onEnded={onEnded}
-                onPlayingChange={handlePlayingChange}
-              />
+              <div
+                className="absolute inset-0 z-[1]"
+                /* Keep the player mounted for mixtape audio, but never paint YouTube chrome
+                   (bot walls / sign-in) onto the CRT glass until PLAYING is confirmed. */
+                style={{
+                  opacity: revealIframe ? 1 : 0,
+                  pointerEvents: revealIframe ? "auto" : "none",
+                }}
+                aria-hidden={!revealIframe}
+              >
+                <YoutubeScreen
+                  ref={registerPlayer}
+                  videoId={now.youtubeId}
+                  title={`${now.artist} — ${now.title}`}
+                  onEnded={onEnded}
+                  onPlayingChange={handlePlayingChange}
+                  onEmbedIssue={handleEmbedIssue}
+                />
+              </div>
             ) : null}
-            {(!playing || holdPoster || channelSwitching) && now?.youtubeId ? (
+            {showPoster && now?.youtubeId ? (
               <YoutubeThumb
                 videoId={now.youtubeId}
                 alt={`${now.artist} — ${now.title}`}
                 className="pointer-events-none absolute inset-0 z-[2] h-full w-full object-cover"
               />
             ) : null}
-            {!playing && (
+            {showPlayCta ? (
               <button
                 type="button"
                 className="absolute inset-0 z-10 grid place-items-center"
-                aria-label={now ? `Play ${now.artist} — ${now.title}` : "Play video"}
-                onClick={toggleCurrent}
+                aria-label={
+                  embedBlocked && now
+                    ? `Open ${now.artist} — ${now.title} on YouTube`
+                    : now
+                      ? `Play ${now.artist} — ${now.title}`
+                      : "Play video"
+                }
+                onClick={() => {
+                  if (embedBlocked && now?.youtubeId) {
+                    window.open(watchUrl(now.youtubeId), "_blank", "noopener,noreferrer");
+                    return;
+                  }
+                  toggleCurrent();
+                }}
               >
-                <span className="grid h-14 w-14 place-items-center rounded-full bg-white/92 shadow-[0_8px_24px_#000a]">
-                  <span
-                    className="ml-1 block h-0 w-0 border-y-[10px] border-l-[16px] border-y-transparent border-l-[#1a1028]"
-                    aria-hidden
-                  />
+                <span className="grid place-items-center gap-2">
+                  <span className="grid h-14 w-14 place-items-center rounded-full bg-white/92 shadow-[0_8px_24px_#000a]">
+                    <span
+                      className="ml-1 block h-0 w-0 border-y-[10px] border-l-[16px] border-y-transparent border-l-[#1a1028]"
+                      aria-hidden
+                    />
+                  </span>
+                  {embedBlocked ? (
+                    <span className="rounded-sm bg-black/70 px-2 py-1 text-[0.65rem] font-semibold tracking-wide text-white/95">
+                      Watch on YouTube
+                    </span>
+                  ) : null}
                 </span>
               </button>
-            )}
+            ) : null}
             <div className="crt-scanlines" aria-hidden />
             <div className="crt-boot-static" aria-hidden />
             {channelSwitching ? (

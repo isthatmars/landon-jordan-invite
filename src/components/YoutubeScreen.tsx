@@ -41,7 +41,13 @@ declare global {
   interface Window {
     YT?: {
       Player: new (el: HTMLElement, opts: Record<string, unknown>) => Player;
-      PlayerState: { ENDED: number; PLAYING: number; PAUSED: number };
+      PlayerState: {
+        ENDED: number;
+        PLAYING: number;
+        PAUSED: number;
+        BUFFERING: number;
+        CUED: number;
+      };
     };
     onYouTubeIframeAPIReady?: () => void;
   }
@@ -76,6 +82,11 @@ function fitIframe(player: Player) {
   iframe.style.width = "100%";
   iframe.style.height = "100%";
   iframe.style.border = "0";
+  iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+  iframe.setAttribute(
+    "allow",
+    "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+  );
   if (document.activeElement === iframe) iframe.blur();
 }
 
@@ -116,8 +127,10 @@ export const YoutubeScreen = forwardRef<
     playToken?: number;
     onEnded?: () => void;
     onPlayingChange?: (playing: boolean) => void;
+    /** Fires when the embed errors or cannot start playback (bot wall / restricted). */
+    onEmbedIssue?: () => void;
   }
->(function YoutubeScreen({ videoId, title, playToken = 0, onEnded, onPlayingChange }, ref) {
+>(function YoutubeScreen({ videoId, title, playToken = 0, onEnded, onPlayingChange, onEmbedIssue }, ref) {
   const mount = useRef<HTMLDivElement>(null);
   const player = useRef<Player | null>(null);
   const ready = useRef(false);
@@ -126,9 +139,11 @@ export const YoutubeScreen = forwardRef<
   const loadedAt = useRef(0);
   const ended = useRef(onEnded);
   const playingChange = useRef(onPlayingChange);
+  const embedIssue = useRef(onEmbedIssue);
   queued.current = videoId;
   ended.current = onEnded;
   playingChange.current = onPlayingChange;
+  embedIssue.current = onEmbedIssue;
 
   const dispatch = (cmd: Command) => {
     if (cmd.op === "load") {
@@ -184,6 +199,7 @@ export const YoutubeScreen = forwardRef<
       if (cancelled || !mount.current || !window.YT || player.current) return;
       player.current = new window.YT.Player(mount.current, {
         videoId: queued.current,
+        host: "https://www.youtube-nocookie.com",
         playerVars: {
           rel: 0,
           modestbranding: 1,
@@ -192,7 +208,9 @@ export const YoutubeScreen = forwardRef<
           fs: 0,
           iv_load_policy: 3,
           disablekb: 1,
+          enablejsapi: 1,
           origin: window.location.origin,
+          widget_referrer: window.location.href,
         },
         events: {
           onReady: () => {
@@ -219,6 +237,9 @@ export const YoutubeScreen = forwardRef<
               playingChange.current?.(false);
             }
           },
+          onError: () => {
+            embedIssue.current?.();
+          },
         },
       });
     });
@@ -236,7 +257,7 @@ export const YoutubeScreen = forwardRef<
   }, [playToken, videoId]);
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden" data-yt-host="nocookie">
       <div ref={mount} className="relative h-full w-full overflow-hidden" aria-label={title} />
     </div>
   );

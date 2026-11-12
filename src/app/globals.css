@@ -4299,6 +4299,12 @@ main {
   border: 0 !important;
 }
 
+/* Never paint YouTube chrome/errors on the CRT until playback is confirmed. */
+[data-screen="crt"][data-glass-live="0"] iframe,
+[data-screen="crt"][data-embed-blocked="1"] iframe {
+  opacity: 0 !important;
+}
+
 /* Watch — portrait stack on small screens, poster lockup on desktop. */
 .watch-bg {
   position: absolute;

@@ -121,7 +121,7 @@ export function Watch({ headline }: { headline: string }) {
   };
 
   useEffect(() => {
-    const mq = window.matchMedia("(pointer: fine) and (min-width: 1024px)");
+    const mq = window.matchMedia("(min-width: 768px)");
     const sync = () => setDesktopMotion(mq.matches);
     sync();
     mq.addEventListener("change", sync);

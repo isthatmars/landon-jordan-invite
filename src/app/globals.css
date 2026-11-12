@@ -253,8 +253,14 @@ main {
   --section-pad-bottom: clamp(1.35rem, 3.5vh, 2.5rem);
 }
 
-/* Desktop: photographic plates lock to exactly one viewport so nothing peeks. */
-@media (min-width: 860px) {
+/*
+ * Layout policy:
+ * - Phones (<768): stacked mobile layout.
+ * - Tablets + desktop (≥768): same desktop composition (not the phone stack).
+ * - Portrait tablets: half-viewport plates (≈50dvh) so the desktop scene reads
+ *   smaller; landscape / desktop keep a full 100dvh plate.
+ */
+@media (min-width: 768px) {
   #home,
   #mixtape,
   #watch,
@@ -268,6 +274,30 @@ main {
     overflow: clip;
     /* Keep stage + facts fully inside the locked plate. */
     --section-pad-bottom: clamp(1rem, 2.5vh, 1.75rem);
+  }
+}
+
+/* iPad / tablet portrait — desktop layout, ~half the viewport tall. */
+@media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
+  #home,
+  #mixtape,
+  #watch,
+  #arcade {
+    height: 50svh;
+    height: 50dvh;
+    max-height: 50svh;
+    max-height: 50dvh;
+    min-height: 50svh;
+    min-height: 50dvh;
+    --section-pad-bottom: clamp(0.55rem, 1.4vh, 1rem);
+  }
+
+  /* Shrink the desktop stage so it fits the shorter plate (WebKit/Chromium). */
+  #home .hero-frame,
+  #mixtape .mix-stage,
+  #watch .watch-stage,
+  #arcade .arcade-stage {
+    zoom: 0.55;
   }
 }
 
@@ -557,7 +587,7 @@ main {
  * because stuck plates remain under later ones for the rest of the page.
  * No scroll-snap on #rsvp so the short footer / host tools stay reachable.
  */
-@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
   #home,
   #mixtape,
   #watch,
@@ -636,8 +666,8 @@ main {
   }
 }
 
-@media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
-  /* Lighter mobile stack: no sticky, no negative overlap (keeps first paint clean) */
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+  /* Phones only: no sticky plate stack (tablets use the desktop sticky path). */
   #home,
   #mixtape,
   #watch,
@@ -685,7 +715,7 @@ main {
 }
 
 /* Always clip sideways overflow on phones even with reduced motion. */
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   #home,
   #mixtape,
   #watch,
@@ -1822,8 +1852,8 @@ main {
   order: 2;
 }
 
-@media (max-width: 859px) {
-  /* Condensed desktop: brand stack → couple → facts + RSVP in one continuous read. */
+@media (max-width: 767px) {
+  /* Phones only: stacked brand → couple → facts (tablets use desktop hero). */
   .hero-frame {
     padding-top: calc(4.55rem + env(safe-area-inset-top));
     padding-bottom: clamp(3.5rem, 10vh, 6rem);
@@ -2173,7 +2203,7 @@ main {
   outline-offset: 4px;
 }
 
-@media (min-width: 860px) {
+@media (min-width: 768px) {
   .hero-scroll-cue {
     /* Far-right but inset; larger cue overlaps time/details, not the page edge. */
     right: max(2.5rem, calc(1.75rem + env(safe-area-inset-right)));
@@ -2194,8 +2224,8 @@ main {
   }
 }
 
-/* Mobile can grow past one screen — pin the cue to the first viewport. */
-@media (max-width: 859px) {
+/* Phones can grow past one screen — pin the cue to the first viewport. */
+@media (max-width: 767px) {
   .hero-scroll-cue {
     position: fixed;
     /* Above sticky plates (1–7); below site-float-dock (60) and overlays. */
@@ -2317,7 +2347,7 @@ main {
   }
 }
 
-@media (min-width: 860px) {
+@media (min-width: 768px) {
   .hero-scene {
     height: 100%;
     min-height: 100%;
@@ -2471,8 +2501,8 @@ main {
   }
 }
 
-/* Short desktop viewports: keep RSVP + facts fully inside one plate. */
-@media (min-width: 1024px) and (max-height: 860px) {
+/* Short desktop/tablet landscape viewports: keep RSVP + facts inside one plate. */
+@media (min-width: 768px) and (max-height: 860px) {
   .hero-frame {
     padding-top: 4.6rem;
   }
@@ -3308,7 +3338,7 @@ main {
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   #mixtape .mix-stage {
     /* Bias the mid-aligned cluster high so table + reflections read below. */
     justify-content: safe center;
@@ -3585,7 +3615,7 @@ main {
 }
 
 /* Prefer open Watch reflections only where the plate can grow (phones). */
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   #watch {
     overflow-x: clip;
     overflow-y: visible;
@@ -4552,7 +4582,7 @@ main {
   outline-offset: 2px;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   #watch {
     /* Title on top; CRT dominates; browse is a slim companion panel.
        Size the CRT so title + set + table remote share one viewport. */
@@ -4756,7 +4786,7 @@ main {
   }
 }
 
-@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
   #watch .watch-remote {
     transform: none;
   }

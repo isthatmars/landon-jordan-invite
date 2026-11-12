@@ -4793,13 +4793,14 @@ main {
   }
 
   #watch .watch-stage {
-    /* Grid: title spans top; CRT owns the left; slim browse on the right. */
+    /* Grid: title spans top; CRT + browse share one middle-aligned pair. */
     display: grid;
     grid-template-columns: var(--watch-tv-w) var(--watch-list-w);
     grid-template-rows: auto minmax(0, 1fr);
     column-gap: clamp(1rem, 2.2vw, 2.25rem);
     row-gap: clamp(0.25rem, 0.9vh, 0.7rem);
-    align-items: stretch;
+    /* Center the CRT/browse pair in the content row (not stretch+pin TV top). */
+    align-items: center;
     justify-content: center;
     width: min(100%, 1360px);
     max-width: 1360px;
@@ -4863,8 +4864,8 @@ main {
     grid-row: 2;
     order: 0;
     width: var(--watch-tv-w);
-    /* Content row height follows the CRT; list centers against this box. */
-    align-self: start;
+    /* Same vertical center as browse — paired middle composition in the stage. */
+    align-self: center;
     justify-self: start;
     overflow: visible;
     /* Was 3.35rem — pushed the table remote under the fold at 900px. */
@@ -4897,6 +4898,7 @@ main {
     height: var(--watch-browse-h);
     max-height: var(--watch-browse-h);
     margin: 0;
+    /* Mid-align with CRT (same stage row center) — not dropped onto the table. */
     align-self: center;
     justify-self: end;
     background: rgba(198, 255, 0, 0.12);

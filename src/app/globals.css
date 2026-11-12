@@ -3774,10 +3774,10 @@ main {
   }
 
   #watch .watch-remote-rail {
-    bottom: 0.35rem;
+    bottom: 0.1rem;
     width: min(40%, 9.5rem);
-    /* Sit on the oak table in front of the set — do not dive into Browse. */
-    transform: translate(-50%, 38%);
+    /* Sit on the oak table in front of the set — clear CRT glass/bezel, stay above Browse. */
+    transform: translate(-50%, 58%);
   }
 
   #watch .watch-list {
@@ -4868,8 +4868,8 @@ main {
     align-self: center;
     justify-self: start;
     overflow: visible;
-    /* Was 3.35rem — pushed the table remote under the fold at 900px. */
-    margin-bottom: 1.35rem;
+    /* Room for the table remote under CRT feet (22% sit sat on the glass). */
+    margin-bottom: 3rem;
   }
 
   #watch .watch-tv .floor-contact {
@@ -4929,18 +4929,19 @@ main {
 
   #watch .watch-remote-rail {
     /* Anchored to the CRT: sit on the oak table in front of the set.
-       Keep the remote body in-frame with the TV (72% fell below the fold). */
+       22% climbed onto the glass; keep ~68% so the body clears the wood bezel onto the table
+       without the 72% fold clip that dropped it under the viewport. */
     position: absolute;
     left: 30%;
     right: auto;
-    bottom: 0.55rem;
+    bottom: 0;
     width: clamp(10.5rem, 13.5vw, 13.75rem);
     height: auto;
     display: block;
     overflow: visible;
     z-index: 14;
     pointer-events: none;
-    transform: translateY(22%);
+    transform: translateY(68%);
   }
 
   #watch .watch-remote {

@@ -4957,19 +4957,19 @@ main {
   }
 }
 
-/* Tablet: grow the neon browse library so it sits even with the CRT (less table void below). */
+/* Tablet: top-align with the CRT and grow the neon library to CRT height (even, not mid-cut). */
 @media (min-width: 768px) and (max-width: 1180px) {
   #watch .watch-list {
-    max-height: min(26rem, 58vh);
     align-self: start;
-    margin-top: clamp(0.35rem, 1.2vh, 0.85rem);
+    margin-top: 0;
+    max-height: min(22rem, 52vh);
   }
 }
 
 @media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
   #watch .watch-list {
-    /* Portrait tablets had a short mid-cut list; stretch toward CRT screen height. */
-    max-height: min(28rem, 52vh);
+    /* Keep panel height near the CRT cabinet — fills the old table void without overshooting. */
+    max-height: min(20rem, 34vh);
   }
 }
 

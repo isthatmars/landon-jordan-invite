@@ -3768,8 +3768,9 @@ main {
 
   #watch .watch-tv {
     width: min(86%, 28rem);
-    /* Reserve room for the table remote hanging under the CRT feet. */
-    margin-bottom: 4.75rem;
+    /* Reserve room for the table remote hanging under the CRT feet.
+       Tighter than 4.75rem so Browse can rise into leftover table air. */
+    margin-bottom: 3.85rem;
   }
 
   #watch .watch-remote-rail {
@@ -3780,8 +3781,9 @@ main {
   }
 
   #watch .watch-list {
-    margin-top: 0.55rem;
-    max-height: 8.75rem;
+    /* Rise into the gap under the remote; taller so ~3 tracks show in-viewport. */
+    margin-top: -0.35rem;
+    max-height: 13.5rem;
   }
 
   #watch .watch-browse-label {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useLiveFlag } from "@/lib/useLiveFlag";
+import { useWarmFlag } from "@/lib/useLiveFlag";
 
 const SCENE = "/images/scene-arcade-room.jpg";
 const LOOP = "/images/scene-arcade-disco.mp4";
@@ -49,16 +49,27 @@ export function ArcadeBackdrop() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const visibleRef = useRef(false);
-  const arcadeLive = useLiveFlag("liveArcade");
-  const arcadeLiveRef = useRef(arcadeLive);
+  const arcadeWarm = useWarmFlag("warmArcade");
+  const arcadeWarmRef = useRef(arcadeWarm);
+  const bufferedRef = useRef(false);
   const [reduce, setReduce] = useState(false);
   const [mode, setMode] = useState<"video" | "canvas">("video");
 
   useEffect(() => {
-    arcadeLiveRef.current = arcadeLive;
+    arcadeWarmRef.current = arcadeWarm;
     const video = videoRef.current;
     if (!video || reduce || mode !== "video") return;
-    if (arcadeLive && visibleRef.current) {
+    // Neighbor warm: buffer the loop once; play only while still on-screen.
+    if (arcadeWarm && !bufferedRef.current) {
+      bufferedRef.current = true;
+      video.preload = "auto";
+      try {
+        video.load();
+      } catch {
+        /* ignore */
+      }
+    }
+    if (arcadeWarm && visibleRef.current) {
       video.muted = true;
       void video.play().catch((err: unknown) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
@@ -67,7 +78,7 @@ export function ArcadeBackdrop() {
     } else {
       video.pause();
     }
-  }, [arcadeLive, reduce, mode]);
+  }, [arcadeWarm, reduce, mode]);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -82,10 +93,12 @@ export function ArcadeBackdrop() {
     if (!root) return;
     const io = new IntersectionObserver(
       ([entry]) => {
-        visibleRef.current = entry.isIntersecting;
+        // Pause only when totally out of view (any-pixel still counts as warm).
+        const visible = entry.isIntersecting && entry.intersectionRatio > 0.001;
+        visibleRef.current = visible;
         const video = videoRef.current;
         if (!video || reduce || mode !== "video") return;
-        if (entry.isIntersecting && arcadeLiveRef.current) {
+        if (visible && arcadeWarmRef.current) {
           video.muted = true;
           void video.play().catch((err: unknown) => {
             if (err instanceof DOMException && err.name === "AbortError") return;
@@ -95,7 +108,7 @@ export function ArcadeBackdrop() {
           video.pause();
         }
       },
-      { threshold: 0.08 },
+      { threshold: [0, 0.01, 0.08, 0.2, 1] },
     );
     io.observe(root);
     return () => io.disconnect();
@@ -120,7 +133,7 @@ export function ArcadeBackdrop() {
       raf = window.requestAnimationFrame(draw);
       if (
         !visibleRef.current ||
-        !arcadeLiveRef.current ||
+        !arcadeWarmRef.current ||
         document.hidden ||
         !img.complete ||
         !img.naturalWidth

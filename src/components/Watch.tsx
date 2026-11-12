@@ -9,7 +9,7 @@ import {
 } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { crtScreen, crtScreenFill } from "@/lib/cutouts";
-import { useLiveFlag } from "@/lib/useLiveFlag";
+import { useWarmFlag } from "@/lib/useLiveFlag";
 import { useSessionDismiss } from "@/lib/useSessionDismiss";
 import { usePlayback } from "./Playback";
 import { TapVerb, TouchHint } from "./TouchHint";
@@ -82,7 +82,7 @@ export function Watch({ headline }: { headline: string }) {
   const sectionRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const reduceMotion = useReducedMotion();
-  const watchLive = useLiveFlag("liveWatch");
+  const watchWarm = useWarmFlag("warmWatch");
   const [desktopMotion, setDesktopMotion] = useState(false);
   const [remoteHintDone, dismissRemoteHint] = useSessionDismiss(REMOTE_HINT_KEY);
 
@@ -140,7 +140,7 @@ export function Watch({ headline }: { headline: string }) {
   /* Grounded remote: gentle lateral drift while staying on the lounge surface. */
   const remoteXRaw = useTransform(scrollYProgress, [0, 0.5, 1], ["4%", "0%", "-3%"]);
   const remoteX = useSpring(remoteXRaw, { stiffness: 42, damping: 28, mass: 0.65 });
-  const remoteMotionOn = Boolean(desktopMotion && !reduceMotion && watchLive);
+  const remoteMotionOn = Boolean(desktopMotion && !reduceMotion && watchWarm);
 
   const words = headline.trim().split(/\s+/).filter(Boolean);
   const lead = words.length > 1 ? words[0] : "";

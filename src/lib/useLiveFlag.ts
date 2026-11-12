@@ -10,8 +10,28 @@ type LiveKey =
   | "liveLineup"
   | "liveRsvp";
 
+type WarmKey =
+  | "warmHome"
+  | "warmMixtape"
+  | "warmWatch"
+  | "warmArcade"
+  | "warmLineup"
+  | "warmRsvp";
+
 /** True when the cinematic plate is the covering scene (and the tab is visible). */
 export function useLiveFlag(key: LiveKey, fallback = true) {
+  return useHtmlDataFlag(key, fallback);
+}
+
+/**
+ * True while a plate should stay motion-hot: covering, a neighbor of covering,
+ * or still intersecting the viewport. Far plates drop to false so CSS/JS can pause.
+ */
+export function useWarmFlag(key: WarmKey, fallback = true) {
+  return useHtmlDataFlag(key, fallback);
+}
+
+function useHtmlDataFlag(key: LiveKey | WarmKey, fallback: boolean) {
   const [live, setLive] = useState(fallback);
 
   useEffect(() => {

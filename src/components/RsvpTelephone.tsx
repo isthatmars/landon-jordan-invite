@@ -58,13 +58,15 @@ export function RsvpTelephone() {
   }, []);
 
   const goToFirstQuestion = () => {
+    const email = document.getElementById("rsvp-email");
     const attend = document.getElementById("rsvp-attend");
-    const target = attend ?? document.getElementById("rsvp-form");
+    const target = email ?? attend ?? document.getElementById("rsvp-form");
     if (!(target instanceof HTMLElement)) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
 
     const focusable =
+      (email instanceof HTMLElement ? email : null) ??
       attend?.querySelector<HTMLElement>("button") ??
       target.querySelector<HTMLElement>("button, input, textarea");
     focusable?.focus({ preventScroll: true });
@@ -77,7 +79,7 @@ export function RsvpTelephone() {
     setBuzzing(!reduce);
     window.setTimeout(() => setBuzzing(false), 1100);
 
-    /* One tap should help: ring, then bring the Yes/No question into view. */
+    /* One tap should help: ring, then bring the first RSVP question into view. */
     if (helpTimer.current != null) window.clearTimeout(helpTimer.current);
     helpTimer.current = window.setTimeout(
       () => {

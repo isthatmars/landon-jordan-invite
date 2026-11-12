@@ -5,8 +5,10 @@ import {
   activePlateId,
   invalidatePlateMargins,
   onScrollFrame,
+  PLATE_IDS,
   type PlateId,
 } from "@/lib/activePlate";
+import { warmPlateAssets } from "@/lib/plateAssets";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { INTRO_KEY } from "./introBoot";
 
@@ -17,11 +19,11 @@ declare global {
 }
 
 const SECTIONS = [
-  ["mixtape", "seenMixtape", "liveMixtape"],
-  ["watch", "seenWatch", "liveWatch"],
-  ["arcade", "seenArcade", "liveArcade"],
-  ["lineup", "seenLineup", "liveLineup"],
-  ["rsvp", "seenRsvp", "liveRsvp"],
+  ["mixtape", "seenMixtape", "liveMixtape", "warmMixtape"],
+  ["watch", "seenWatch", "liveWatch", "warmWatch"],
+  ["arcade", "seenArcade", "liveArcade", "warmArcade"],
+  ["lineup", "seenLineup", "liveLineup", "warmLineup"],
+  ["rsvp", "seenRsvp", "liveRsvp", "warmRsvp"],
 ] as const;
 
 const HASH_SECTIONS = new Set(["home", "mixtape", "watch", "arcade", "lineup", "rsvp"]);
@@ -33,6 +35,9 @@ const HASH_SECTIONS = new Set(["home", "mixtape", "watch", "arcade", "lineup", "
 let livePlate: PlateId | null = null;
 let liveCandidate: PlateId | null = null;
 let liveCandidateHits = 0;
+
+/** Any-pixel intersection — pause motion only when a plate is fully gone. */
+const plateInView = new Map<PlateId, boolean>();
 
 function syncLiveFlags(root: HTMLElement) {
   // Probe lower viewport so a covering sticky plate claims "live" before
@@ -56,14 +61,45 @@ function syncLiveFlags(root: HTMLElement) {
     liveCandidateHits = 1;
   }
   const active = livePlate;
+  const activeIdx = PLATE_IDS.indexOf(active);
 
+  // Covering plate only — ghost CTA / pointer kill-switch.
   const nextHome = active === "home" ? "1" : "0";
   if (root.dataset.liveHome !== nextHome) root.dataset.liveHome = nextHome;
-  for (const [id, seenKey, liveKey] of SECTIONS) {
+
+  for (const id of PLATE_IDS) {
+    const idx = PLATE_IDS.indexOf(id);
+    const isCover = id === active;
+    const isNeighbor = Math.abs(idx - activeIdx) === 1;
+    const isIntersecting = plateInView.get(id) === true;
+    const isWarm = isCover || isNeighbor || isIntersecting;
+    if (isWarm) warmPlateAssets(id);
+  }
+
+  // Home warm flag (not in SECTIONS).
+  {
+    const idx = 0;
+    const isCover = active === "home";
+    const isNeighbor = Math.abs(idx - activeIdx) === 1;
+    const isIntersecting = plateInView.get("home") === true;
+    const nextWarm = isCover || isNeighbor || isIntersecting ? "1" : "0";
+    if (root.dataset.warmHome !== nextWarm) root.dataset.warmHome = nextWarm;
+  }
+
+  for (const [id, seenKey, liveKey, warmKey] of SECTIONS) {
+    const idx = PLATE_IDS.indexOf(id);
     const isActive = active === id;
-    if (isActive && root.dataset[seenKey] !== "1") root.dataset[seenKey] = "1";
+    const isNeighbor = Math.abs(idx - activeIdx) === 1;
+    const isIntersecting = plateInView.get(id) === true;
+    const isWarm = isActive || isNeighbor || isIntersecting;
+    // Warm the next plate's entrance so sticky enter doesn't flash opacity:0.
+    if ((isActive || (isNeighbor && idx === activeIdx + 1)) && root.dataset[seenKey] !== "1") {
+      root.dataset[seenKey] = "1";
+    }
     const nextLive = isActive ? "1" : "0";
     if (root.dataset[liveKey] !== nextLive) root.dataset[liveKey] = nextLive;
+    const nextWarm = isWarm ? "1" : "0";
+    if (root.dataset[warmKey] !== nextWarm) root.dataset[warmKey] = nextWarm;
   }
 }
 
@@ -198,15 +234,20 @@ export function Cinematic() {
     }
     root.dataset.motion = "armed";
 
-    // IntersectionObserver still marks entrance "seen" flags for cinematic reveals.
-    // Live flags use scroll-flow positions so sticky-under plates don't stay live.
+    // IntersectionObserver: any-pixel visibility keeps warm/motion alive; pause
+    // only when a plate is totally gone. Live (cover) flags still use scroll-flow.
     // Do NOT auto scrollIntoView on RSVP intersect — that reintroduces the footer bounce trap.
     // Nav/hash use block:center; #rsvp flex mid-plate covers natural scroll-in.
+    // Expanded rootMargin pre-arms the next/prev plate slightly before enter/leave.
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const id = entry.target.id;
+          const id = entry.target.id as PlateId;
+          if (!PLATE_IDS.includes(id)) continue;
+          // Treat tiny residual ratios as gone so sticky bleed doesn't keep far plates hot.
+          const visible = entry.isIntersecting && entry.intersectionRatio > 0.001;
+          plateInView.set(id, visible);
+          if (!visible) continue;
           if (id === "home") continue;
           const spec = SECTIONS.find((row) => row[0] === id);
           if (!spec) continue;
@@ -214,12 +255,10 @@ export function Cinematic() {
         }
         syncLiveFlags(root);
       },
-      { threshold: 0.18, rootMargin: "0px 0px -6% 0px" },
+      { threshold: [0, 0.01, 0.08, 0.18, 0.5, 1], rootMargin: "12% 0px 18% 0px" },
     );
 
-    const home = document.getElementById("home");
-    if (home) io.observe(home);
-    for (const [id] of SECTIONS) {
+    for (const id of PLATE_IDS) {
       const node = document.getElementById(id);
       if (node) io.observe(node);
     }

@@ -142,6 +142,8 @@ export function Mixtape({ headline }: { headline: string }) {
       <div className="mix-table-pool" aria-hidden />
 
       <div className="mix-stage">
+        {/* Cluster keeps neon title + boombox/tapes as one composition (scaled together on tablet). */}
+        <div className="mix-cluster">
         <div className="mix-script">
           <h2 className="neon-script-lg">{script}</h2>
           <NeonArrow className="mix-arrow" />
@@ -292,6 +294,7 @@ export function Mixtape({ headline }: { headline: string }) {
               />
             ))}
           </div>
+        </div>
         </div>
       </div>
       {insertingId && flyer ? (

@@ -5388,7 +5388,18 @@ main {
   }
 
   #lineup {
-    padding: var(--header-clear) 16px var(--section-pad-bottom);
+    /*
+     * Mobile lineup is content-sized — forcing 100dvh left a barren void under
+     * Private Party when the schedule + dress/private cards ran short.
+     * Bottom pad clears the fixed PAUSE/TOP dock (~3rem) + home indicator.
+     */
+    min-height: 0;
+    padding: var(--header-clear) 16px max(4.25rem, calc(3.25rem + env(safe-area-inset-bottom)));
+  }
+
+  .lineup-wrap {
+    /* Section owns dock clearance; don't stack another --space-section void. */
+    padding-bottom: 0.65rem;
   }
 
   /* Keep card titles on the fluid/container clamp — do not pin a fixed px size. */

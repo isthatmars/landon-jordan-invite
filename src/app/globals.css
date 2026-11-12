@@ -4887,9 +4887,15 @@ main {
     order: 0;
     width: 100%;
     max-width: var(--watch-list-w);
-    /* Slimmer companion panel — CRT remains the hero. */
-    min-height: 0;
-    max-height: min(18rem, 42vh);
+    /* Locked companion height — matches responsive-qa tablet/desktop plates
+       (~24% portrait / ~35% landscape). min-height:0 let the stage grid crush
+       this into a short mid-air stub with mid-row cut-off over empty table. */
+    --watch-browse-h: min(18rem, 42vh);
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    min-height: var(--watch-browse-h);
+    height: var(--watch-browse-h);
+    max-height: var(--watch-browse-h);
     margin: 0;
     align-self: center;
     justify-self: end;
@@ -4910,7 +4916,8 @@ main {
   }
 
   #watch .watch-list-items {
-    padding: 0.15rem 0.7rem 0.45rem;
+    /* Extra bottom pad so the last full row clears the rounded border. */
+    padding: 0.15rem 0.7rem 0.7rem;
   }
 
   #watch .watch-list-item {
@@ -4959,6 +4966,16 @@ main {
 
   #watch .watch-remote-hotspots {
     transform: translateY(2%) rotate(-3deg);
+  }
+}
+
+/* Tablet portrait/landscape: same locked companion as desktop QA plates.
+   Phones (<768) keep their own stacked max-height (may grow separately). */
+@media (min-width: 768px) and (max-width: 1180px) {
+  #watch .watch-list {
+    --watch-browse-h: min(18rem, 42vh);
+    align-self: center;
+    margin-top: 0;
   }
 }
 

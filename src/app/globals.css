@@ -2846,6 +2846,16 @@ main {
   overflow: visible;
 }
 
+/* Title + boombox/tapes share one composition unit (tablet scales this, not the row alone). */
+.mix-cluster {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  overflow: visible;
+}
+
 /* Desktop/tablet: fill the plate and mid-align neon + props so table shows below.
    Phone keeps the default top-flow stack (keys/reflections stay grounded). */
 @media (min-width: 768px) {
@@ -3381,27 +3391,34 @@ main {
     width: 16.75%;
   }
 
+  /*
+   * Neon title sits ON the boombox (overlap the handle / top chassis), not floating
+   * in the maroon air above it. Same pull for every ≥768 layout — tablet overrides
+   * must not weaken this apples-to-apples relationship.
+   */
   #mixtape .mix-row {
-    margin-top: -8vh;
-    margin-bottom: 11vh;
+    margin-top: -11vh;
+    margin-bottom: 10vh;
   }
 }
 
 /*
- * Tablet mixtape — keep desktop side-by-side props, but pin spine names to the
- * photographed bands (no CSS zoom; px sit; stable type size).
+ * Tablet mixtape — same title-on-boombox composition as desktop.
+ * Scale the whole .mix-cluster (not .mix-row alone) so neon + boombox stay locked.
+ * No CSS zoom (desyncs cassette spine %/cqh labels). Floor nudge stays 0%.
  */
 @media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
-  /* Full-height desktop composition, gently scaled to the narrower portrait frame. */
   #mixtape .mix-stage {
     justify-content: center;
   }
 
-  #mixtape .mix-row {
-    margin-top: -4vh;
-    margin-bottom: 5vh;
-    transform: scale(0.82);
+  #mixtape .mix-cluster {
+    transform: scale(0.88);
     transform-origin: center center;
+  }
+
+  #mixtape .mix-row {
+    /* Keep the desktop title↔boombox overlap; only widen the prop gap a touch. */
     gap: clamp(2rem, 5vw, 3.5rem);
   }
 
@@ -3428,8 +3445,7 @@ main {
 
 @media (min-width: 768px) and (max-width: 1180px) and (orientation: landscape) {
   #mixtape .mix-row {
-    margin-top: -3vh;
-    margin-bottom: 4vh;
+    /* Inherit desktop margin-top (-11vh) so the title stays on the boombox. */
     gap: clamp(2.25rem, 5vw, 4rem);
   }
 

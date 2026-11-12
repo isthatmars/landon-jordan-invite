@@ -775,6 +775,24 @@ html[data-seen-mixtape="1"] #mixtape .mix-stack {
   animation: mix-stack-pop 0.58s cubic-bezier(0.22, 1.15, 0.36, 1) 0.12s both;
 }
 
+/*
+ * Tablets: skip the parked scale(0.9) pose — it left spine labels looking
+ * shifted vs the photo when seen/IO timing lagged on iPad.
+ */
+@media (min-width: 768px) and (max-width: 1180px) {
+  html[data-motion="armed"]:not([data-seen-mixtape]) #mixtape .mix-stack,
+  html[data-seen-mixtape="1"] #mixtape .mix-stack {
+    animation: none;
+    transform: translateY(var(--mix-stack-sit, 0));
+  }
+
+  html[data-seen-mixtape="1"] #mixtape .mix-tape-ink {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes mix-stack-pop {
   0% {
     transform: translateY(var(--mix-stack-sit, 0)) scale(0.9);

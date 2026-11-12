@@ -10,9 +10,7 @@ import {
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { crtScreen, crtScreenFill } from "@/lib/cutouts";
 import { useWarmFlag } from "@/lib/useLiveFlag";
-import { useSessionDismiss } from "@/lib/useSessionDismiss";
 import { usePlayback } from "./Playback";
-import { TapVerb, TouchHint } from "./TouchHint";
 import { YoutubeScreen } from "./YoutubeScreen";
 import { YoutubeThumb } from "./YoutubeThumb";
 
@@ -30,8 +28,6 @@ type RemoteAction =
 const CHANNEL_STATIC_MS = 500;
 /** Absolute max cover (static + poster) so a slow buffer never leaves a long black gap. */
 const CHANNEL_STATIC_MAX_MS = 1000;
-
-const REMOTE_HINT_KEY = "lj-hint-tv-remote";
 
 const REMOTE_HOTSPOTS: {
   id: string;
@@ -84,7 +80,6 @@ export function Watch({ headline }: { headline: string }) {
   const reduceMotion = useReducedMotion();
   const watchWarm = useWarmFlag("warmWatch");
   const [desktopMotion, setDesktopMotion] = useState(false);
-  const [remoteHintDone, dismissRemoteHint] = useSessionDismiss(REMOTE_HINT_KEY);
 
   /* CRT channel switch: quick snow (≤1s), then clear as the new video plays underneath. */
   useEffect(() => {
@@ -173,7 +168,6 @@ export function Watch({ headline }: { headline: string }) {
   };
 
   const onRemoteAction = (action: RemoteAction) => {
-    dismissRemoteHint();
     if (action === "play") {
       toggleCurrent();
       return;
@@ -315,9 +309,6 @@ export function Watch({ headline }: { headline: string }) {
                   />
                 ))}
               </div>
-              <TouchHint show={!remoteHintDone} className="watch-remote-hint">
-                <TapVerb /> the remote to change the channel
-              </TouchHint>
             </motion.div>
           </div>
         </div>

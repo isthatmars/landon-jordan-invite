@@ -5397,11 +5397,6 @@ main {
     padding: var(--header-clear) 16px max(4.25rem, calc(3.25rem + env(safe-area-inset-bottom)));
   }
 
-  .lineup-wrap {
-    /* Section owns dock clearance; don't stack another --space-section void. */
-    padding-bottom: 0.65rem;
-  }
-
   /* Keep card titles on the fluid/container clamp — do not pin a fixed px size. */
   #lineup h3.lineup-card-title {
     font-size: clamp(1.05rem, 0.42rem + 6.8cqi, 1.65rem);
@@ -5805,8 +5800,17 @@ form[data-step="3"] .rsvp-step-3 {
   z-index: 1;
   width: min(1120px, calc(100% - 2rem));
   margin: 0 auto;
-  /* Section already clears the fixed header; keep internal spacing tight. */
-  padding: 0.35rem 0 var(--space-section);
+  /*
+   * Tight internal bottom on phones — #lineup padding clears the float dock.
+   * --space-section here used to stack a second void under Private Party.
+   */
+  padding: 0.35rem 0 0.65rem;
+}
+
+@media (min-width: 768px) {
+  .lineup-wrap {
+    padding-bottom: var(--space-section);
+  }
 }
 
 .lineup-kicker {

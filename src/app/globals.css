@@ -3764,9 +3764,9 @@ main {
   }
 
   #watch .watch-list {
-    /* Neon library panel only — modestly taller so ~3 tracks show under the CRT. */
-    margin-top: 0.28rem;
-    max-height: 12.5rem;
+    /* Neon library panel only — modestly taller so ~3 full tracks show under the CRT. */
+    margin-top: 0.2rem;
+    max-height: 13.75rem;
   }
 
   #watch .watch-browse-label {

@@ -3764,8 +3764,9 @@ main {
   }
 
   #watch .watch-list {
-    margin-top: 0.55rem;
-    max-height: 8.75rem;
+    /* Neon library panel only — modestly taller so ~3 tracks show under the CRT. */
+    margin-top: 0.28rem;
+    max-height: 12.5rem;
   }
 
   #watch .watch-browse-label {
@@ -4869,9 +4870,9 @@ main {
     order: 0;
     width: 100%;
     max-width: var(--watch-list-w);
-    /* Slimmer companion panel — CRT remains the hero. */
+    /* Slim companion beside the CRT — taller so tracks end more evenly (not mid-cut). */
     min-height: 0;
-    max-height: min(18rem, 42vh);
+    max-height: min(24rem, 56vh);
     margin: 0;
     align-self: center;
     justify-self: end;
@@ -4953,6 +4954,22 @@ main {
   #watch .watch-room-breath,
   #watch .watch-shade {
     animation: none !important;
+  }
+}
+
+/* Tablet: grow the neon browse library so it sits even with the CRT (less table void below). */
+@media (min-width: 768px) and (max-width: 1180px) {
+  #watch .watch-list {
+    max-height: min(26rem, 58vh);
+    align-self: start;
+    margin-top: clamp(0.35rem, 1.2vh, 0.85rem);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1180px) and (orientation: portrait) {
+  #watch .watch-list {
+    /* Portrait tablets had a short mid-cut list; stretch toward CRT screen height. */
+    max-height: min(28rem, 52vh);
   }
 }
 

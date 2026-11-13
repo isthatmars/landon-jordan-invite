@@ -101,6 +101,11 @@ export function AdminApp() {
   const [toastTone, setToastTone] = useState<"ok" | "warn">("ok");
   const [selected, setSelected] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
+  /** Per-row resend UX until page refresh: idle → sending → sent | failed */
+  const [resendState, setResendState] = useState<
+    Record<string, "sending" | "sent" | "failed">
+  >({});
+  const resendInFlight = useRef<Set<string>>(new Set());
 
   const flash = (msg: string, tone: "ok" | "warn" = "ok") => {
     setToastTone(tone);
@@ -196,23 +201,30 @@ export function AdminApp() {
   };
 
   const resend = async (id: string) => {
-    const res = await fetch("/api/admin/rsvps", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, action: "resend" }),
-    });
-    const data = await res.json().catch(() => ({}));
-    const result = data.result as { stubbed?: boolean; detail?: string; ok?: boolean } | undefined;
-    if (!res.ok) {
-      flash(data.error || "Couldn’t resend that email", "warn");
-    } else if (result?.stubbed) {
-      flash(result.detail || emailNote || "Email was logged only — keys may still be settling.", "warn");
-    } else if (result?.ok === false) {
-      flash(result.detail || "Couldn’t resend that email", "warn");
-    } else {
-      flash(result?.detail || "Confirmation email sent");
+    if (resendInFlight.current.has(id) || resendState[id] === "sent") return;
+    resendInFlight.current.add(id);
+    setResendState((prev) => ({ ...prev, [id]: "sending" }));
+    try {
+      const res = await fetch("/api/admin/rsvps", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action: "resend" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      const result = data.result as
+        | { stubbed?: boolean; detail?: string; ok?: boolean }
+        | undefined;
+      if (!res.ok || result?.ok === false) {
+        resendInFlight.current.delete(id);
+        setResendState((prev) => ({ ...prev, [id]: "failed" }));
+        return;
+      }
+      // Success (live or stubbed): button → Sent; no top banner.
+      setResendState((prev) => ({ ...prev, [id]: "sent" }));
+    } catch {
+      resendInFlight.current.delete(id);
+      setResendState((prev) => ({ ...prev, [id]: "failed" }));
     }
-    void load();
   };
 
   const saveContent = async () => {
@@ -489,14 +501,35 @@ export function AdminApp() {
                   <td className="py-2 pr-2">{r.email || "—"}</td>
                   <td className="py-2 pr-2">{r.phone || "—"}</td>
                   <td className="py-2">
-                    <button
-                      type="button"
-                      className="text-neon-teal text-xs underline"
-                      onClick={() => resend(r.id)}
-                      disabled={!r.email}
-                    >
-                      Resend email
-                    </button>
+                    {(() => {
+                      const state = resendState[r.id];
+                      const busy = state === "sending";
+                      const done = state === "sent";
+                      const failed = state === "failed";
+                      const label = !r.email
+                        ? "Resend email"
+                        : busy
+                          ? "Sending…"
+                          : done
+                            ? "Sent"
+                            : failed
+                              ? "Failed"
+                              : "Resend email";
+                      return (
+                        <button
+                          type="button"
+                          className={`admin-resend-btn${done ? " admin-resend-btn--sent" : ""}${
+                            failed ? " admin-resend-btn--failed" : ""
+                          }${busy ? " admin-resend-btn--busy" : ""}`}
+                          onClick={() => resend(r.id)}
+                          disabled={!r.email || busy || done}
+                          aria-busy={busy || undefined}
+                          aria-live={busy || done || failed ? "polite" : undefined}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })()}
                   </td>
                 </tr>
               ))}

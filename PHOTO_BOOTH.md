@@ -2,7 +2,7 @@
 
 ## 1. Fixed environment (one persistent scene)
 
-The booth stage never swaps backgrounds between steps. One OpenArt environment plate (`/images/booth/environment.jpg`: shag carpet, disco ball, vanity lights, boombox on flight case, CRT stack, neon bars) stays locked; only inner panel content + Polaroid animation change.
+The booth stage never swaps backgrounds between steps. One OpenArt environment plate (`/images/booth/environment.jpg`: shag carpet, disco ball, vanity lights, flight case with Polaroid packs, CRT stack, neon bars) stays locked; only inner panel content + Polaroid animation change.
 
 ## 2. First shot = Polaroid camera before → after
 

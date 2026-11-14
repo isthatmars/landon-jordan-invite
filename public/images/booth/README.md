@@ -4,7 +4,7 @@ Generated with OpenArt from the design references. **One environment plate** is 
 
 | File | Role |
 |------|------|
-| `environment.jpg` | Full-bleed hero room (disco, vanity, boombox/flight case, CRT stack, shag carpet, neon bars) |
+| `environment.jpg` | Full-bleed hero room (disco, vanity, flight case + Polaroid packs, CRT stack, shag carpet, neon bars) |
 | `environment-plate.png` | Source 2K PNG from OpenArt |
 | `polaroid-camera-cut.png` | White Polaroid camera for first-shot / printing steps |
 | `sample-before.jpg` | Modern “before” portrait |

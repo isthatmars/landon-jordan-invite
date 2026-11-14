@@ -4,9 +4,9 @@
 
 The booth stage never swaps backgrounds between steps. One OpenArt environment plate (`/images/booth/environment.jpg`: shag carpet, disco ball, vanity lights, flight case with Polaroid packs, CRT stack, neon bars) stays locked; only inner panel content + Polaroid animation change.
 
-## 2. First shot = Polaroid camera before → after
+## 2. Entry = reference panel + corner Polaroid prop
 
-Entry opens on the physical Polaroid camera composition: modern **before** photo → 80s **after** Polaroid ejecting from the camera (matches printing reference). Upload / creating / ready keep the same room.
+Entry matches the welcome / drag-drop / **UPLOAD PHOTO** panel. A small branded Polaroid sits in the corner as a clickable prop (single brief flash — no strobe, no modern “before” photo). Generate / ready still use the Polaroid camera eject animation in the same fixed room.
 
 ## 3. OpenArt for AI generation + booth art
 
@@ -33,5 +33,5 @@ Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
 
 ## Flow
 
-entry (camera before/after) → auth → upload → confirm → generate (printing camera) → ready → submitted / my photos
+entry (panel + corner Polaroid) → auth → upload → confirm → generate (printing camera) → ready → submitted / my photos
 Throwbacks skip AI and go pending approval.

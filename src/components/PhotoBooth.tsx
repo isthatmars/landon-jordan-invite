@@ -3,7 +3,7 @@
 /**
  * 80s Photo Booth — LOCKS (see PHOTO_BOOTH.md):
  * 1. Fixed OpenArt environment plate (`/images/booth/environment.jpg`) for every step.
- * 2. First shot = Polaroid camera before (modern) → after (80s) composition.
+ * 2. Entry = reference panel (welcome + drag/drop + upload) + small corner Polaroid prop (click → single flash).
  * 3. AI via OpenArt only (`/api/booth/generate` → `src/lib/booth/ai.ts` → OpenArt).
  */
 
@@ -76,13 +76,17 @@ export function PhotoBooth() {
   const [consent, setConsent] = useState(false);
   const [progress, setProgress] = useState(12);
   const [flash, setFlash] = useState(false);
+  const [propFlash, setPropFlash] = useState(false);
   const [polaroidPhase, setPolaroidPhase] = useState<"idle" | "eject" | "develop" | "ready">("idle");
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [resultId, setResultId] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<PhotoItem | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const entryFileRef = useRef<HTMLInputElement>(null);
   const pendingAction = useRef<"ai" | "throwback" | "myphotos" | null>(null);
+  const pendingFile = useRef<File | null>(null);
+  const propFlashTimer = useRef<number | null>(null);
 
   const refreshSession = useCallback(async () => {
     const res = await fetch("/api/booth/session");
@@ -115,6 +119,12 @@ export function PhotoBooth() {
       setStep("auth");
     }
   }, [refreshSession]);
+
+  useEffect(() => {
+    return () => {
+      if (propFlashTimer.current) window.clearTimeout(propFlashTimer.current);
+    };
+  }, []);
 
   const stepIndex = useMemo(() => {
     switch (step) {
@@ -156,17 +166,74 @@ export function PhotoBooth() {
     setStep("auth");
   };
 
+  const flashCornerProp = () => {
+    if (propFlashTimer.current) return;
+    setPropFlash(true);
+    propFlashTimer.current = window.setTimeout(() => {
+      setPropFlash(false);
+      propFlashTimer.current = null;
+    }, 420);
+  };
+
+  const onFile = async (file: File | null, purposeOverride?: "ai" | "throwback") => {
+    if (!file) return;
+    const purpose = purposeOverride ?? (mode === "throwback" ? "throwback" : "ai");
+    if (purposeOverride) setMode(purposeOverride);
+    setBusy(true);
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.set("file", file);
+      fd.set("purpose", purpose === "throwback" ? "throwback" : "ai_source");
+      const res = await fetch("/api/booth/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed.");
+      setUploadId(data.uploadId);
+      setPreviewUrl(data.previewUrl);
+      setConsent(false);
+      setStep("confirm");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const afterAuth = () => {
     const next = pendingAction.current || "ai";
     pendingAction.current = null;
-    if (next === "myphotos") setStep("myphotos");
-    else if (next === "throwback") {
-      setMode("throwback");
-      setStep("upload");
-    } else {
-      setMode("ai");
-      setStep("upload");
+    const queued = pendingFile.current;
+    pendingFile.current = null;
+    if (next === "myphotos") {
+      setStep("myphotos");
+      return;
     }
+    if (next === "throwback") {
+      setMode("throwback");
+      if (queued) void onFile(queued, "throwback");
+      else setStep("upload");
+      return;
+    }
+    setMode("ai");
+    if (queued) void onFile(queued, "ai");
+    else setStep("upload");
+  };
+
+  const startAiFromEntry = async (file?: File | null) => {
+    setError("");
+    setMode("ai");
+    const data = await refreshSession();
+    if (file) {
+      if (data.authenticated) {
+        await onFile(file, "ai");
+        return;
+      }
+      pendingFile.current = file;
+      pendingAction.current = "ai";
+      setStep("auth");
+      return;
+    }
+    await requireAuthThen("ai");
   };
 
   const startAuth = async (e: FormEvent) => {
@@ -206,28 +273,6 @@ export function PhotoBooth() {
       afterAuth();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const onFile = async (file: File | null) => {
-    if (!file) return;
-    setBusy(true);
-    setError("");
-    try {
-      const fd = new FormData();
-      fd.set("file", file);
-      fd.set("purpose", mode === "throwback" ? "throwback" : "ai_source");
-      const res = await fetch("/api/booth/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed.");
-      setUploadId(data.uploadId);
-      setPreviewUrl(data.previewUrl);
-      setConsent(false);
-      setStep("confirm");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed.");
     } finally {
       setBusy(false);
     }
@@ -331,30 +376,35 @@ export function PhotoBooth() {
 
   const welcomeName = firstNameOf(guest);
 
-  // Dev/screenshot helper: ?booth_step= or window.__boothGoto(step)
+  // Dev/screenshot helper: ?booth_step= or window.__boothGoto(step); __boothFlash() for corner prop
   useEffect(() => {
     const apply = (s: string) => {
+      const flashOnly = s === "entry-flash";
+      const stepName = flashOnly ? "entry" : s;
       if (
         !["entry", "auth", "upload", "confirm", "generate", "ready", "submitted", "myphotos"].includes(
-          s
+          stepName
         )
       ) {
         return;
       }
       setLoading(false);
-      setStep(s as Step);
-      if (s === "confirm" || s === "generate" || s === "ready" || s === "submitted") {
-        setPreviewUrl((u) => u || "/images/booth/sample-before.jpg");
-        setResultUrl((u) => u || "/images/booth/sample-after-face.jpg");
+      setStep(stepName as Step);
+      if (flashOnly) {
+        window.setTimeout(() => flashCornerProp(), 80);
+      }
+      if (stepName === "confirm" || stepName === "generate" || stepName === "ready" || stepName === "submitted") {
+        setPreviewUrl((u) => u || "/images/booth/sample-after-face.jpg");
+        setResultUrl((u) => u || "/images/booth/sample-after-branded.jpg");
         setUploadId((id) => id || "demo");
         setResultId((id) => id || "demo");
         setConsent(true);
-        if (s === "generate") {
+        if (stepName === "generate") {
           setPolaroidPhase("eject");
           setProgress(72);
           setFlash(true);
         }
-        if (s === "ready" || s === "submitted") setPolaroidPhase("ready");
+        if (stepName === "ready" || stepName === "submitted") setPolaroidPhase("ready");
       }
     };
     const params = new URLSearchParams(
@@ -362,9 +412,15 @@ export function PhotoBooth() {
     );
     const fromUrl = params.get("booth_step");
     if (fromUrl) apply(fromUrl);
-    (window as unknown as { __boothGoto?: (s: string) => void }).__boothGoto = apply;
+    const w = window as unknown as {
+      __boothGoto?: (s: string) => void;
+      __boothFlash?: () => void;
+    };
+    w.__boothGoto = apply;
+    w.__boothFlash = flashCornerProp;
     return () => {
-      delete (window as unknown as { __boothGoto?: (s: string) => void }).__boothGoto;
+      delete w.__boothGoto;
+      delete w.__boothFlash;
     };
   }, []);
 
@@ -375,6 +431,7 @@ export function PhotoBooth() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="booth-env" src="/images/booth/environment.jpg" alt="" decoding="async" />
         <div className="booth-scene-veil" />
+        <div className={`booth-scene-flash${propFlash ? " is-on" : ""}`} />
       </div>
 
       <div className="booth-wrap">
@@ -406,68 +463,85 @@ export function PhotoBooth() {
           {loading ? <p className="text-center text-white/70">Warming up the booth…</p> : null}
 
           {!loading && step === "entry" ? (
-            <div className="booth-stage">
-              <div className="booth-camera-wrap booth-first-shot" aria-label="Before and after Polaroid demo">
-                <div className="booth-before">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/booth/sample-before.jpg" alt="Modern day photo" />
-                  <span className="booth-before-label">Before</span>
-                </div>
-                <span className="booth-morph-arrow" aria-hidden>
-                  →
-                </span>
-                <div className="booth-camera">
-                  <div className="booth-flash is-on" />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    className="booth-camera-img"
-                    src="/images/booth/polaroid-camera-cut.png"
-                    alt="Polaroid camera"
-                  />
-                  <div className="booth-polaroid is-from-camera is-ejecting is-sample">
-                    <div className="booth-polaroid-img-wrap">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        className="booth-polaroid-img"
-                        src="/images/booth/sample-after-face.jpg"
-                        alt="80s transformed Polaroid"
-                      />
-                      <span className="booth-polaroid-torn" aria-hidden />
-                    </div>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="booth-polaroid-brand" src="/images/booth/polaroid-watermark.png" alt="" />
-                    <span className="booth-after-label">After · 80s</span>
-                  </div>
-                </div>
-              </div>
-              <div className="text-center md:text-left">
+            <div className="booth-entry">
+              <button
+                type="button"
+                className={`booth-corner-polaroid${propFlash ? " is-flashing" : ""}`}
+                onClick={flashCornerProp}
+                aria-label="Polaroid prop — click to flash"
+              >
+                <span className={`booth-corner-flash${propFlash ? " is-on" : ""}`} aria-hidden />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/booth/sample-after-branded.jpg"
+                  alt="Sample 80s Polaroid"
+                  draggable={false}
+                />
+              </button>
+
+              <div className="booth-entry-main">
                 <h3 className="booth-neon-script" style={{ fontSize: "1.65rem" }}>
                   {welcomeName
                     ? `Welcome back, ${welcomeName}!`
                     : "Welcome to the 80's Photo Booth!"}
                 </h3>
                 <p className="booth-subcopy">
-                  Watch a modern photo become an 80s Polaroid — then upload yours for the same
-                  transformation and add it to the Party Gallery.
+                  Upload a photo to get your 80&apos;s transformation and add it to the Party Gallery.
                 </p>
-                <div className="booth-btn-stack mx-auto md:mx-0">
+                <div
+                  className={`booth-drop${dragOver ? " is-drag" : ""}`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOver(true);
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOver(false);
+                    void startAiFromEntry(e.dataTransfer.files?.[0] || null);
+                  }}
+                >
+                  <span className="booth-drop-icon" aria-hidden>
+                    ☁
+                  </span>
+                  <p className="font-nav tracking-[0.12em] text-sm">DRAG &amp; DROP YOUR PHOTO HERE</p>
+                </div>
+                <div className="booth-or" aria-hidden>
+                  <span />
+                  OR
+                  <span />
+                </div>
+                <button
+                  type="button"
+                  className="booth-btn booth-btn-pink booth-btn-upload"
+                  disabled={busy}
+                  onClick={() => entryFileRef.current?.click()}
+                >
+                  {busy ? "Uploading…" : "Upload photo"}
+                </button>
+                <p className="booth-file-specs">JPG, PNG, or HEIC • Up to 10MB</p>
+                <input
+                  ref={entryFileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] || null;
+                    e.target.value = "";
+                    void startAiFromEntry(f);
+                  }}
+                />
+                <div className="booth-entry-links">
                   <button
                     type="button"
-                    className="booth-btn booth-btn-pink"
-                    onClick={() => void requireAuthThen("ai")}
-                  >
-                    Upload photo →
-                  </button>
-                  <button
-                    type="button"
-                    className="booth-btn booth-btn-outline"
+                    className="booth-linkish"
                     onClick={() => void requireAuthThen("throwback")}
                   >
                     Upload a throwback
                   </button>
                   <button
                     type="button"
-                    className="booth-btn booth-btn-outline"
+                    className="booth-linkish"
                     onClick={() => void requireAuthThen("myphotos")}
                   >
                     See my photos
@@ -556,63 +630,58 @@ export function PhotoBooth() {
           ) : null}
 
           {!loading && step === "upload" ? (
-            <div className="booth-stage">
-              <div className="flex justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className="booth-polaroid-sample booth-polaroid-full"
-                  src="/images/booth/sample-after-branded.jpg"
-                  alt="Sample 80s Polaroid"
-                />
+            <div className="booth-entry-main booth-upload-step">
+              <h3 className="booth-neon-script" style={{ fontSize: "1.55rem" }}>
+                {mode === "throwback" ? "Upload a Throwback" : "Welcome to the 80's Photo Booth!"}
+              </h3>
+              <p className="booth-subcopy">
+                {mode === "throwback"
+                  ? "Add an original 80's photo for the party slideshow."
+                  : "Upload a photo to get your 80's transformation and add it to the Party Gallery."}
+              </p>
+              <div
+                className={`booth-drop${dragOver ? " is-drag" : ""}`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragOver(true);
+                }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  void onFile(e.dataTransfer.files?.[0] || null);
+                }}
+              >
+                <span className="booth-drop-icon" aria-hidden>
+                  ☁
+                </span>
+                <p className="font-nav tracking-[0.12em] text-sm">DRAG &amp; DROP YOUR PHOTO HERE</p>
               </div>
-              <div>
-                <h3 className="booth-neon-script" style={{ fontSize: "1.55rem" }}>
-                  {mode === "throwback" ? "Upload a Throwback" : "Welcome to the 80's Photo Booth!"}
-                </h3>
-                <p className="booth-subcopy">
-                  {mode === "throwback"
-                    ? "Add an original 80's photo for the party slideshow."
-                    : "Upload a photo to get your 80's transformation and add it to the Party Gallery."}
-                </p>
-                <div
-                  className={`booth-drop${dragOver ? " is-drag" : ""}`}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDragOver(true);
-                  }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setDragOver(false);
-                    void onFile(e.dataTransfer.files?.[0] || null);
-                  }}
-                >
-                  <span className="booth-drop-icon" aria-hidden>
-                    ☁
-                  </span>
-                  <p className="font-nav tracking-[0.12em] text-sm">DRAG &amp; DROP YOUR PHOTO HERE</p>
-                  <button
-                    type="button"
-                    className="booth-btn booth-btn-pink"
-                    disabled={busy}
-                    onClick={() => fileRef.current?.click()}
-                  >
-                    {busy ? "Uploading…" : "Upload photo"}
-                  </button>
-                  <p className="text-xs text-white/50">JPG, PNG, or HEIC • Up to 10MB</p>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                    className="hidden"
-                    onChange={(e) => void onFile(e.target.files?.[0] || null)}
-                  />
-                </div>
-                <div className="booth-actions-row">
-                  <button type="button" className="booth-btn booth-btn-outline" onClick={() => setStep("entry")}>
-                    Back
-                  </button>
-                </div>
+              <div className="booth-or" aria-hidden>
+                <span />
+                OR
+                <span />
+              </div>
+              <button
+                type="button"
+                className="booth-btn booth-btn-pink booth-btn-upload"
+                disabled={busy}
+                onClick={() => fileRef.current?.click()}
+              >
+                {busy ? "Uploading…" : "Upload photo"}
+              </button>
+              <p className="booth-file-specs">JPG, PNG, or HEIC • Up to 10MB</p>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                className="hidden"
+                onChange={(e) => void onFile(e.target.files?.[0] || null)}
+              />
+              <div className="booth-actions-row">
+                <button type="button" className="booth-btn booth-btn-outline" onClick={() => setStep("entry")}>
+                  Back
+                </button>
               </div>
             </div>
           ) : null}

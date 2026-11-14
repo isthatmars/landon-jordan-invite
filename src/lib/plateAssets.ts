@@ -30,7 +30,7 @@ export const PLATE_ASSETS: Record<PlateId, readonly string[]> = {
     "/images/booth/environment.jpg",
     "/images/booth/polaroid-camera-cut.png",
     "/images/booth/title-photo-booth-sm.png",
-    "/images/booth/sample-before.jpg",
+    "/images/booth/sample-after-branded.jpg",
     "/images/booth/sample-after-face.jpg",
     "/images/chrome-80s.png",
   ],

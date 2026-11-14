@@ -1777,7 +1777,7 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 .brand-crown {
   width: 0.95em;
   height: auto;
-  aspect-ratio: 100 / 76;
+  aspect-ratio: 88 / 68;
   flex: none;
   margin-top: -0.16em;
   filter: none;
@@ -2032,7 +2032,7 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 .hero-crown {
   width: clamp(3.25rem, 6vw, 4.55rem);
   height: auto;
-  aspect-ratio: 100 / 76;
+  aspect-ratio: 88 / 68;
   margin-bottom: 0.05rem;
   filter: none;
 }

@@ -5,15 +5,16 @@
 export function Crown({ className = "" }: { className?: string }) {
   return (
     <svg
-      viewBox="-14 -14 100 76"
+      viewBox="-8 -10 88 68"
       className={`crown-mark ${className}`.trim()}
       aria-hidden
       focusable="false"
       overflow="visible"
+      style={{ background: "transparent" }}
     >
-      <ellipse cx="36" cy="28" rx="40" ry="30" fill="#ffd45a" opacity="0.16" />
-      <ellipse cx="36" cy="26" rx="28" ry="20" fill="#ffe9a0" opacity="0.28" />
-      <ellipse cx="36" cy="22" rx="16" ry="12" fill="#fff6d0" opacity="0.35" />
+      {/* Tight ellipses — oversized fills made the SVG viewBox read as a dark plate. */}
+      <ellipse cx="36" cy="24" rx="22" ry="16" fill="#ffe9a0" opacity="0.22" />
+      <ellipse cx="36" cy="20" rx="12" ry="9" fill="#fff6d0" opacity="0.32" />
       <path
         fill="#ffd45a"
         d="M8 38 14 16l16 12L36 6l6 22 16-12 6 22H8z"

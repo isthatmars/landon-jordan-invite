@@ -324,7 +324,7 @@ html[data-intro='reveal'] .envelope-seal {
 .envelope-crown {
   width: 1.85rem;
   height: auto;
-  aspect-ratio: 100 / 76;
+  aspect-ratio: 88 / 68;
   /* Embossed envelope mark: mute the whole SVG (ellipses + crown). */
   filter: brightness(0.35) contrast(1.6);
 }

@@ -162,6 +162,22 @@ main {
   overflow: visible;
 }
 
+/*
+ * Stable RSVP neon: Blink boxes / grains text-shadow when filter is set OR when
+ * blur radii are animated via --neon-glow. Keep a fixed glow stack (no filter).
+ */
+#rsvp .rsvp-title {
+  filter: none;
+  animation: none;
+  --neon-glow: 1;
+  text-shadow:
+    0 0 1px #fff,
+    0 0 8px #ff39c8,
+    0 0 18px #ff39c8,
+    0 0 36px #ff39c8cc,
+    0 0 56px rgba(255, 57, 200, 0.45);
+}
+
 .font-nav {
   font-family: var(--font-nav), sans-serif;
   font-weight: 500;
@@ -1705,12 +1721,51 @@ main {
   text-decoration: none;
 }
 
+/* Soft gold halo without CSS filter — filter:drop-shadow paints a dark rectangular plate. */
+.crown-mark {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  overflow: visible;
+  flex: none;
+  vertical-align: middle;
+}
+
+.crown-mark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 244, 200, 0.72) 0%,
+    rgba(255, 212, 90, 0.42) 34%,
+    rgba(255, 196, 77, 0.14) 56%,
+    transparent 72%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.crown-mark-svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
 .brand-crown {
   width: 0.95em;
   height: 0.68em;
   flex: none;
   margin-top: -0.16em;
-  filter: drop-shadow(0 0 5px #fff6d0) drop-shadow(0 0 12px #ffd45a);
+  filter: none;
 }
 
 .brand-script {
@@ -1962,8 +2017,13 @@ main {
 .hero-crown {
   width: clamp(3.25rem, 6vw, 4.55rem);
   height: auto;
+  aspect-ratio: 72 / 48;
   margin-bottom: 0.05rem;
-  filter: drop-shadow(0 0 6px #fff4c8) drop-shadow(0 0 14px #ffd45a);
+  filter: none;
+}
+
+.rsvp-crown {
+  filter: none;
 }
 
 .hero-script {

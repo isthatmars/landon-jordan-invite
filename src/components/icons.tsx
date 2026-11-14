@@ -1,13 +1,16 @@
+/** Gold crown — glow is a CSS radial halo on the wrapper, never `filter` (Blink boxes drop-shadow). */
 export function Crown({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 72 48" className={className} aria-hidden>
-      <path
-        fill="#ffd45a"
-        d="M8 38 14 16l16 12L36 6l6 22 16-12 6 22H8z"
-      />
-      <path fill="#ffe9a0" d="M10 36h52v6H10z" />
-      <circle cx="36" cy="10" r="2.2" fill="#fff4c4" />
-    </svg>
+    <span className={`crown-mark ${className}`.trim()} aria-hidden>
+      <svg viewBox="0 0 72 48" className="crown-mark-svg" focusable="false">
+        <path
+          fill="#ffd45a"
+          d="M8 38 14 16l16 12L36 6l6 22 16-12 6 22H8z"
+        />
+        <path fill="#ffe9a0" d="M10 36h52v6H10z" />
+        <circle cx="36" cy="10" r="2.2" fill="#fff4c4" />
+      </svg>
+    </span>
   );
 }
 

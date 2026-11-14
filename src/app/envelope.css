@@ -324,6 +324,16 @@ html[data-intro='reveal'] .envelope-seal {
 .envelope-crown {
   width: 1.85rem;
   height: auto;
+  aspect-ratio: 72 / 48;
+  /* No gold halo on the embossed envelope mark; darken the SVG only. */
+  filter: none;
+}
+
+.envelope-crown::before {
+  display: none;
+}
+
+.envelope-crown .crown-mark-svg {
   filter: brightness(0.35) contrast(1.6);
 }
 

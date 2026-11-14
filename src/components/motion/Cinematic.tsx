@@ -23,10 +23,19 @@ const SECTIONS = [
   ["watch", "seenWatch", "liveWatch", "warmWatch"],
   ["arcade", "seenArcade", "liveArcade", "warmArcade"],
   ["lineup", "seenLineup", "liveLineup", "warmLineup"],
+  ["photobooth", "seenPhotobooth", "livePhotobooth", "warmPhotobooth"],
   ["rsvp", "seenRsvp", "liveRsvp", "warmRsvp"],
 ] as const;
 
-const HASH_SECTIONS = new Set(["home", "mixtape", "watch", "arcade", "lineup", "rsvp"]);
+const HASH_SECTIONS = new Set([
+  "home",
+  "mixtape",
+  "watch",
+  "arcade",
+  "photobooth",
+  "lineup",
+  "rsvp",
+]);
 
 /**
  * Stabilized covering plate — ignore single-frame boundary chatter.
@@ -137,6 +146,7 @@ function settleLoadScroll() {
       root.dataset.seenWatch = "1";
       root.dataset.seenArcade = "1";
     }
+    if (hash === "photobooth") root.dataset.seenPhotobooth = "1";
     if (hash === "lineup") root.dataset.seenLineup = "1";
     if (hash === "rsvp") root.dataset.seenRsvp = "1";
     return;

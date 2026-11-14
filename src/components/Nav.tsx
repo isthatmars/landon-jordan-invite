@@ -16,6 +16,7 @@ const links = [
   { href: "#mixtape", label: "THE MIXTAPE" },
   { href: "#watch", label: "WATCH" },
   { href: "#lineup", label: "THE LINEUP" },
+  { href: "#photobooth", label: "PHOTO BOOTH" },
 ];
 
 const SECTION_IDS = PLATE_IDS;
@@ -45,6 +46,7 @@ export function Nav({ brandName }: { brandName: string }) {
       root.dataset.seenWatch = "1";
       if (id === "arcade") root.dataset.seenArcade = "1";
     }
+    if (id === "photobooth") root.dataset.seenPhotobooth = "1";
     if (id === "lineup") root.dataset.seenLineup = "1";
     if (id === "rsvp") root.dataset.seenRsvp = "1";
     if (location.hash !== `#${id}`) {

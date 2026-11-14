@@ -93,7 +93,7 @@ function childLabel(person: PartyPerson): string {
 }
 
 export function RsvpForm({ content }: { content: SiteContent }) {
-  const [draftId] = useState(
+  const [draftId, setDraftId] = useState(
     () =>
       `draft_${typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}`}`,
   );
@@ -106,9 +106,29 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [screen, setScreen] = useState<Screen>("email");
   const [stepError, setStepError] = useState("");
+  const [boothGuest, setBoothGuest] = useState<{
+    firstName: string;
+    email: string;
+    hasRsvp: boolean;
+  } | null>(null);
+  const [registerAnother, setRegisterAnother] = useState(false);
   useEffect(() => {
     formRef.current = form;
   }, [form]);
+  useEffect(() => {
+    void fetch("/api/booth/session")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.authenticated && data.guest?.hasRsvp) {
+          setBoothGuest({
+            firstName: data.guest.firstName || "",
+            email: data.guest.email || "",
+            hasRsvp: true,
+          });
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   const attending = form.attend === "yes";
   const namedKids =
@@ -360,6 +380,61 @@ export function RsvpForm({ content }: { content: SiteContent }) {
             <RsvpTelephone />
           </div>
 
+          {boothGuest && !registerAnother && status !== "done" ? (
+            <div className="space-y-4 text-center md:text-left" data-testid="rsvp-verified-guest">
+              <p className="neon-script text-3xl text-[#ff4fd8] sm:text-4xl">
+                You&apos;re already on the list, {boothGuest.firstName || "friend"}!
+              </p>
+              <p className="text-sm text-white/75">
+                We recognized your verified Photo Booth email. Edit your RSVP anytime — registering
+                another guest starts a fresh form and won&apos;t overwrite yours.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  className="btn-green-solid w-full text-center"
+                  onClick={() => {
+                    setForm({ ...emptyForm, email: boothGuest.email, firstName: boothGuest.firstName });
+                    formRef.current = {
+                      ...emptyForm,
+                      email: boothGuest.email,
+                      firstName: boothGuest.firstName,
+                    };
+                    setScreen("attend");
+                    setRegisterAnother(true);
+                  }}
+                >
+                  Edit my RSVP
+                </button>
+                <a href="#photobooth" className="btn-pink-outline min-h-12 w-full text-center leading-[3rem]">
+                  See my uploaded photos
+                </a>
+                <a href="#photobooth" className="btn-pink-outline min-h-12 w-full text-center leading-[3rem]">
+                  See my AI photos
+                </a>
+                <button
+                  type="button"
+                  className="btn-pink-outline min-h-12 w-full"
+                  onClick={() => {
+                    // Fresh draft — does not clear booth session or prior RSVP.
+                    const nextId = `draft_${crypto.randomUUID?.() || Date.now()}`;
+                    setDraftId(nextId);
+                    doneRef.current = false;
+                    savingRef.current = false;
+                    startedAt.current = null;
+                    setStatus("idle");
+                    setMessage("");
+                    setForm(emptyForm);
+                    formRef.current = emptyForm;
+                    setScreen("email");
+                    setRegisterAnother(true);
+                  }}
+                >
+                  Register another guest
+                </button>
+              </div>
+            </div>
+          ) : (
           <form
             id="rsvp-form"
             data-step={dataStep}
@@ -683,6 +758,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
               </p>
             )}
           </form>
+          )}
         </div>
         <p className="font-nav mx-auto mt-6 w-full px-2 text-center text-[13px] leading-snug tracking-[0.06em] text-[#f8f4fa]/85 md:mt-8 md:px-4">
           {content.rsvpSubhead}

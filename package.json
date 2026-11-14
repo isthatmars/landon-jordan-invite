@@ -9,13 +9,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/gateway": "^4.0.146",
+    "ai": "^7.0.173",
     "framer-motion": "^14.11.1",
+    "jszip": "^3.10.2",
     "next": "16.4.6",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
+    "@types/jszip": "^3.4.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

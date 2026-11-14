@@ -4,6 +4,7 @@ import { Hero } from "@/components/Hero";
 import { Lineup } from "@/components/Lineup";
 import { Nav } from "@/components/Nav";
 import { PartyPlayback } from "@/components/PartyPlayback";
+import { PhotoBooth } from "@/components/PhotoBooth";
 import { RsvpForm } from "@/components/RsvpForm";
 import { connection } from "next/server";
 import { getStore } from "@/lib/store";
@@ -26,6 +27,7 @@ export default async function HomePage() {
       />
       <Arcade headline={content.arcadeHeadline} />
       <Lineup content={content} />
+      <PhotoBooth />
       <RsvpForm content={content} />
       <Footer tagline={content.footerTagline} />
     </main>

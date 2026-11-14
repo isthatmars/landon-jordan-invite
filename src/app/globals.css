@@ -240,6 +240,7 @@ main {
 #mixtape,
 #watch,
 #arcade,
+#photobooth,
 #lineup,
 #rsvp {
   --plate-z: 1;
@@ -305,14 +306,19 @@ main {
   --plate-z: 4;
 }
 
-#lineup {
+#photobooth {
   --plate-z: 5;
+  overflow: visible;
+}
+
+#lineup {
+  --plate-z: 6;
   /* Neon script kicker glow must not clip on desktop or mobile. */
   overflow: visible;
 }
 
 #rsvp {
-  --plate-z: 6;
+  --plate-z: 7;
   /* Content sits mid-plate so nav/scroll centering reads as one scene.
    * Intentionally no scroll-snap-* — free scroll into the footer / Host tools. */
   display: flex;
@@ -628,6 +634,11 @@ main {
     z-index: 12;
   }
 
+  html[data-live-photobooth="1"] #photobooth {
+    z-index: 12;
+  }
+
+  #photobooth,
   #lineup,
   #rsvp {
     position: relative;
@@ -643,6 +654,7 @@ main {
   #mixtape,
   #watch,
   #arcade,
+  #photobooth,
   #lineup,
   #rsvp {
     margin-top: 0;
@@ -650,7 +662,7 @@ main {
 
   footer {
     position: relative;
-    z-index: 7;
+    z-index: 8;
   }
 }
 
@@ -660,6 +672,7 @@ main {
   #mixtape,
   #watch,
   #arcade,
+  #photobooth,
   #lineup,
   #rsvp {
     position: relative;
@@ -687,9 +700,14 @@ main {
     z-index: 12;
   }
 
+  html[data-live-photobooth="1"] #photobooth {
+    z-index: 12;
+  }
+
   #mixtape,
   #watch,
   #arcade,
+  #photobooth,
   #lineup,
   #rsvp {
     margin-top: 0;
@@ -698,7 +716,7 @@ main {
 
   footer {
     position: relative;
-    z-index: 7;
+    z-index: 8;
   }
 }
 
@@ -708,6 +726,7 @@ main {
   #mixtape,
   #watch,
   #arcade,
+  #photobooth,
   #lineup,
   #rsvp {
     overflow-x: clip;
@@ -3851,6 +3870,7 @@ main {
   }
 }
 
+#photobooth,
 #lineup,
 #rsvp {
   /* Clear fixed header when section snaps/anchors into view */

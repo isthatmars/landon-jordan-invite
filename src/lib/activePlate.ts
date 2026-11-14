@@ -1,5 +1,13 @@
 /** Sticky scene plates — keep in sync with cinematic section order. */
-export const PLATE_IDS = ["home", "mixtape", "watch", "arcade", "lineup", "rsvp"] as const;
+export const PLATE_IDS = [
+  "home",
+  "mixtape",
+  "watch",
+  "arcade",
+  "lineup",
+  "photobooth",
+  "rsvp",
+] as const;
 export type PlateId = (typeof PLATE_IDS)[number];
 
 type MarginCache = { widths: number; margins: number[] };

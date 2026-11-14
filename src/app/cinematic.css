@@ -1014,6 +1014,19 @@ html[data-live-arcade="1"] #arcade {
   pointer-events: auto;
 }
 
+html[data-live-photobooth="0"] #photobooth {
+  pointer-events: none;
+}
+html[data-live-photobooth="0"] #photobooth button,
+html[data-live-photobooth="0"] #photobooth a,
+html[data-live-photobooth="0"] #photobooth input {
+  visibility: hidden;
+  pointer-events: none;
+}
+html[data-live-photobooth="1"] #photobooth {
+  pointer-events: auto;
+}
+
 /*
  * Pause CSS loops only when a plate is fully cold (not covering, not a neighbor,
  * and totally out of view) — or when the tab is hidden.
@@ -1035,6 +1048,8 @@ html[data-warm-watch="0"] #watch,
 html[data-warm-watch="0"] #watch *,
 html[data-warm-arcade="0"] #arcade,
 html[data-warm-arcade="0"] #arcade *,
+html[data-warm-photobooth="0"] #photobooth,
+html[data-warm-photobooth="0"] #photobooth *,
 html[data-warm-rsvp="0"] #rsvp,
 html[data-warm-rsvp="0"] #rsvp *,
 html[data-page-hidden="1"] #home,

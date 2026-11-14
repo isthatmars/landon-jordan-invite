@@ -387,14 +387,17 @@ export function PhotoBooth() {
                     alt="Polaroid camera"
                   />
                   <div className="booth-polaroid is-from-camera is-ejecting is-sample">
+                    <div className="booth-polaroid-img-wrap">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        className="booth-polaroid-img"
+                        src="/images/booth/sample-after-face.jpg"
+                        alt="80s transformed Polaroid"
+                      />
+                      <span className="booth-polaroid-torn" aria-hidden />
+                    </div>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      className="booth-polaroid-img"
-                      src="/images/booth/sample-after-face.jpg"
-                      alt="80s transformed Polaroid"
-                    />
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
+                    <img className="booth-polaroid-brand" src="/images/booth/polaroid-watermark.png" alt="" />
                     <span className="booth-after-label">After · 80s</span>
                   </div>
                 </div>
@@ -670,14 +673,17 @@ export function PhotoBooth() {
                             : ""
                     }`}
                   >
-                    {resultUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img className="booth-polaroid-img" src={resultUrl} alt="" />
-                    ) : (
-                      <div className="booth-polaroid-img" />
-                    )}
+                    <div className="booth-polaroid-img-wrap">
+                      {resultUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img className="booth-polaroid-img" src={resultUrl} alt="" />
+                      ) : (
+                        <div className="booth-polaroid-img" />
+                      )}
+                      <span className="booth-polaroid-torn" aria-hidden />
+                    </div>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
+                    <img className="booth-polaroid-brand" src="/images/booth/polaroid-watermark.png" alt="" />
                   </div>
                 </div>
               </div>
@@ -711,12 +717,15 @@ export function PhotoBooth() {
             <div className="booth-stage">
               <div className="flex justify-center">
                 <div className="booth-polaroid is-ready">
-                  {resultUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img className="booth-polaroid-img" src={resultUrl} alt="Your 80s photo" />
-                  ) : null}
+                  <div className="booth-polaroid-img-wrap">
+                    {resultUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img className="booth-polaroid-img" src={resultUrl} alt="Your 80s photo" />
+                    ) : null}
+                    <span className="booth-polaroid-torn" aria-hidden />
+                  </div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
+                  <img className="booth-polaroid-brand" src="/images/booth/polaroid-watermark.png" alt="" />
                 </div>
               </div>
               <div className="text-center md:text-left">
@@ -754,12 +763,15 @@ export function PhotoBooth() {
             <div className="booth-stage">
               <div className="flex justify-center">
                 <div className="booth-polaroid is-ready">
-                  {resultUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img className="booth-polaroid-img" src={resultUrl} alt="Submitted photo" />
-                  ) : null}
+                  <div className="booth-polaroid-img-wrap">
+                    {resultUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img className="booth-polaroid-img" src={resultUrl} alt="Submitted photo" />
+                    ) : null}
+                    <span className="booth-polaroid-torn" aria-hidden />
+                  </div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
+                  <img className="booth-polaroid-brand" src="/images/booth/polaroid-watermark.png" alt="" />
                 </div>
               </div>
               <div className="text-center md:text-left">

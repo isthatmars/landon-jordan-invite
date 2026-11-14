@@ -1,14 +1,25 @@
-import { promises as fs } from "fs";
-import path from "path";
 import sharp from "sharp";
+import {
+  renderPolaroidWatermark,
+  renderTornPaperEdge,
+} from "./watermark";
 
 const FRAME = {
   /** Inner photo size (square). */
   photo: 900,
   padTop: 48,
   padSide: 48,
-  padBottom: 220,
+  /** Tall bottom border for crown → script → chrome → BIRTHDAY PARTY. */
+  padBottom: 380,
 };
+
+const PAPER = { r: 250, g: 248, b: 242 };
+
+/** Exported Polaroid pixel size after branding. */
+export const POLAROID_SIZE = {
+  width: FRAME.photo + FRAME.padSide * 2,
+  height: FRAME.photo + FRAME.padTop + FRAME.padBottom,
+} as const;
 
 /**
  * Strip EXIF/GPS and normalize to JPEG RGB.
@@ -34,65 +45,58 @@ export async function sanitizeImage(input: Buffer): Promise<{
   };
 }
 
-async function loadLogo(): Promise<Buffer> {
-  const logoPath = path.join(process.cwd(), "public", "images", "chrome-80s.png");
-  return fs.readFile(logoPath);
-}
-
 /**
- * Pixel-composite a branded Polaroid: white frame + photo + party logo bottom-right.
- * Logo is the existing chrome 80s mark — not AI-drawn, not a CSS overlay.
+ * Pixel-composite a branded Polaroid:
+ * white frame + photo + torn-paper seam + centered party watermark.
+ * Watermark is SVG/sharp composite from crown path + chrome-80s.png — not AI text.
  */
 export async function composeBrandedPolaroid(photoJpeg: Buffer): Promise<Buffer> {
   const photoSize = FRAME.photo;
-  const width = photoSize + FRAME.padSide * 2;
-  const height = photoSize + FRAME.padTop + FRAME.padBottom;
+  const width = POLAROID_SIZE.width;
+  const height = POLAROID_SIZE.height;
 
   const photo = await sharp(photoJpeg)
     .resize(photoSize, photoSize, { fit: "cover", position: "attention" })
     .jpeg({ quality: 92 })
     .toBuffer();
 
-  const logoRaw = await loadLogo();
-  const logoW = Math.round(width * 0.28);
-  const logo = await sharp(logoRaw)
-    .resize({ width: logoW, withoutEnlargement: true })
+  const tornH = 38;
+  const torn = await sharp(renderTornPaperEdge(photoSize, tornH)).png().toBuffer();
+  const tornTop = FRAME.padTop + photoSize - Math.round(tornH * 0.55);
+  const tornLeft = FRAME.padSide;
+
+  const markRaw = await renderPolaroidWatermark();
+  const markMaxW = Math.round(width * 0.58);
+  const markMaxH = FRAME.padBottom - 28;
+  const mark = await sharp(markRaw)
+    .resize({
+      width: markMaxW,
+      height: markMaxH,
+      fit: "inside",
+      withoutEnlargement: false,
+    })
     .png()
     .toBuffer();
-  const logoMeta = await sharp(logo).metadata();
-  const logoH = logoMeta.height || Math.round(logoW * 0.55);
-
-  const scriptSvg = Buffer.from(`
-    <svg width="${Math.round(width * 0.42)}" height="44" xmlns="http://www.w3.org/2000/svg">
-      <text x="0" y="32" font-family="Georgia, 'Times New Roman', serif" font-size="28"
-        font-style="italic" fill="#e91e8c">Landon &amp; Jordan's</text>
-    </svg>
-  `);
-  const birthdaySvg = Buffer.from(`
-    <svg width="${Math.round(width * 0.42)}" height="28" xmlns="http://www.w3.org/2000/svg">
-      <text x="0" y="20" font-family="Arial, Helvetica, sans-serif" font-size="16"
-        font-weight="700" letter-spacing="2" fill="#111">BIRTHDAY PARTY</text>
-    </svg>
-  `);
-
-  const brandLeft = FRAME.padSide;
-  const brandBottomY = height - FRAME.padBottom + 36;
-  const logoLeft = width - FRAME.padSide - logoW;
-  const logoTop = height - FRAME.padBottom + Math.max(16, Math.round((FRAME.padBottom - logoH) / 2) - 8);
+  const markMeta = await sharp(mark).metadata();
+  const markW = markMeta.width || markMaxW;
+  const markH = markMeta.height || Math.round(markW * 0.45);
+  const markLeft = Math.round((width - markW) / 2);
+  const borderStart = FRAME.padTop + photoSize;
+  const markTop =
+    borderStart + Math.max(12, Math.round((FRAME.padBottom - markH) / 2));
 
   return sharp({
     create: {
       width,
       height,
       channels: 3,
-      background: { r: 250, g: 248, b: 242 },
+      background: PAPER,
     },
   })
     .composite([
       { input: photo, top: FRAME.padTop, left: FRAME.padSide },
-      { input: scriptSvg, top: brandBottomY, left: brandLeft },
-      { input: birthdaySvg, top: brandBottomY + 40, left: brandLeft },
-      { input: logo, top: logoTop, left: logoLeft },
+      { input: torn, top: tornTop, left: tornLeft },
+      { input: mark, top: markTop, left: markLeft },
     ])
     .jpeg({ quality: 94, mozjpeg: true })
     .toBuffer();

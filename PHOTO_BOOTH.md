@@ -29,7 +29,7 @@ Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
 - Supabase tables + private buckets when `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are set
 - Local `.data/booth*` fallback otherwise
 - AI source uploads deleted ≤30 min; outputs / throwbacks retained
-- Branded Polaroid export: `src/lib/booth/polaroid.ts` composites real chrome logo in pixels
+- Branded Polaroid export: `src/lib/booth/polaroid.ts` + `watermark.ts` pixel-composite crown → purple script → `chrome-80s.png` → BIRTHDAY PARTY with torn-paper seam (also `public/images/booth/polaroid-watermark.png` for on-screen frames)
 
 ## Flow
 

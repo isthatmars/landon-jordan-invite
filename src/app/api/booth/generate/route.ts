@@ -161,7 +161,7 @@ export async function POST(request: Request) {
     brandedPath: makeStoredRef("booth-outputs", brandedPath),
     mime: "image/jpeg",
     width: 996,
-    height: 1168,
+    height: 1328,
     errorMessage: null,
     submittedToGalleryAt: null,
     moderatedAt: null,

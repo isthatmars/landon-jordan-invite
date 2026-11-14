@@ -16,6 +16,9 @@ import { clientIp, readBoothSessionFromRequest } from "@/lib/booth/session";
 import { deleteObject, getObject, makeStoredRef, parseStoredRef, putObject } from "@/lib/booth/storage";
 import { EIGHTYS_STYLE_PROMPT } from "@/lib/booth/types";
 
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
   void cleanupExpiredTempUploads().catch(() => undefined);
 

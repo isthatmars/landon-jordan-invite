@@ -1,35 +1,31 @@
 # 80s Photo Booth — architecture locks
 
-Non-negotiable rules for this feature. Do not regress them.
-
 ## 1. Fixed environment (one persistent scene)
 
-The booth **stage never swaps backgrounds between steps**.
-
-- Match only the *idea and steps* from design references (`public/images/booth/ref-*.jpg`).
-- Do **not** swap full-bleed backgrounds / room art per step the way those reference comps do.
-- One persistent Photo Booth scene for the whole flow: wood, curtains, props, neon panel chrome.
-- Only **inner panel content** and the **Polaroid animation** change across steps.
-
-Implementation:
-- Live UI: `src/components/PhotoBooth.tsx` — persistent `.booth-scene` (wood/curtains/props); panel steps swap inside `.booth-panel` only.
-- Shell reference: `src/components/photo-booth/BoothShell.tsx` (same rule).
-- CSS: `src/app/photo-booth.css` — never key `.booth-scene` art off step id.
-- Design comps in `public/images/booth/ref-*.jpg` are idea/step references only — not live backgrounds.
+The booth stage never swaps backgrounds between steps. One scene (wood / curtains / props / neon panel); only inner panel content + Polaroid animation change. Design refs in `public/images/booth/ref-*.jpg` are mood boards, not per-step backgrounds.
 
 ## 2. OpenArt for AI generation
 
-Identity-preserving 80s transforms go through **OpenArt** only (primary provider).
+Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
 
-- Runtime path: `src/lib/booth/ai.ts` → `src/lib/openart.ts` → OpenArt CLI API (`image2image`)
-- Also: `POST /api/photo-booth/generate` (lightweight) and `POST /api/booth/generate` (session + storage)
-- Default model: `nano-banana-2` (override with `OPENART_IMAGE_MODEL`)
-- Auth: server-only `OPENART_TOKEN` (optional `OPENART_API_BASE`, default `https://openart.ai`)
-- **Do not** use Vercel AI Gateway / Gemini / Replicate / fal / OpenAI Images as the primary booth generator
+- Runtime: `src/lib/booth/ai.ts` → `src/lib/openart.ts` → image2image
+- Routes: `POST /api/booth/generate` (full session + storage) and `POST /api/photo-booth/generate` (lightweight)
+- Model: `nano-banana-2` (override `OPENART_IMAGE_MODEL`)
+- Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
 
-Agent/MCP path for asset work: OpenArt MCP (`openart_model_list` → form → upload + `openart_generate_image` + wait).
+## 3. Guest identity
 
-## Flow (panel content only)
+- Email OTP / magic link → httpOnly `lj_booth_session` cookie
+- Match existing RSVPs by normalized email; Photo Booth never auto-marks attending
+- localStorage email alone is never identity
 
-Typical steps (names may vary in UI): welcome → capture/upload → generating → reveal/Polaroid → share.
-All steps share the same booth shell.
+## 4. Storage
+
+- Supabase tables + private buckets when `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are set
+- Local `.data/booth*` fallback otherwise
+- AI source uploads deleted ≤30 min; outputs / throwbacks retained
+
+## Flow
+
+entry → auth → upload → confirm → generate (Polaroid) → ready → submitted / my photos
+Throwbacks skip AI and go pending approval.

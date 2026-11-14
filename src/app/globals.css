@@ -306,14 +306,14 @@ main {
   --plate-z: 4;
 }
 
-#photobooth {
+#lineup {
   --plate-z: 5;
+  /* Neon script kicker glow must not clip on desktop or mobile. */
   overflow: visible;
 }
 
-#lineup {
+#photobooth {
   --plate-z: 6;
-  /* Neon script kicker glow must not clip on desktop or mobile. */
   overflow: visible;
 }
 

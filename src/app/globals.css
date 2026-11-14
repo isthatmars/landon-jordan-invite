@@ -171,21 +171,54 @@ main {
 html[data-motion="armed"] #rsvp .rsvp-title,
 html[data-seen-rsvp="1"] #rsvp .rsvp-title,
 html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
+  position: relative;
+  z-index: 1;
   filter: none;
   --neon-glow: 1;
+  /* Tight fixed glow — huge blur radii band/grain on translucent parents. */
   text-shadow:
     0 0 1px #fff,
-    0 0 6px #ff39c8,
-    0 0 14px #ff39c8,
-    0 0 28px rgba(255, 57, 200, 0.85),
-    0 0 42px rgba(255, 57, 200, 0.4);
+    0 0 4px #ff7ad8,
+    0 0 10px #ff39c8,
+    0 0 18px rgba(255, 57, 200, 0.75);
   -webkit-font-smoothing: antialiased;
+  transform: none;
+  will-change: auto;
+}
+
+/* Soft pink bloom behind RSVP (no filter / no transform). */
+#rsvp .rsvp-title::after {
+  content: "";
+  position: absolute;
+  left: -12%;
+  right: -12%;
+  top: 8%;
+  bottom: 8%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 57, 200, 0.32) 0%,
+    rgba(255, 57, 200, 0.12) 42%,
+    transparent 72%
+  );
+  pointer-events: none;
+  transform: none;
+  filter: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   #rsvp .rsvp-title {
     animation: none;
   }
+}
+
+/* Opaque plate so neon text-shadow doesn't grain through alpha. */
+#rsvp .neon-frame {
+  background-color: #0b0615;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  isolation: auto;
 }
 
 .font-nav {
@@ -1725,21 +1758,24 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 .crown-mark::before {
   content: "";
   position: absolute;
-  left: 50%;
-  top: 48%;
-  width: 150%;
-  height: 150%;
-  transform: translate(-50%, -50%);
+  /* No transform — Blink compositor layers with translate paint an opaque box. */
+  left: -28%;
+  top: -30%;
+  width: 156%;
+  height: 160%;
   border-radius: 50%;
   background: radial-gradient(
     ellipse at center,
-    rgba(255, 244, 200, 0.72) 0%,
-    rgba(255, 212, 90, 0.42) 34%,
-    rgba(255, 196, 77, 0.14) 56%,
-    transparent 72%
+    rgba(255, 244, 200, 0.55) 0%,
+    rgba(255, 212, 90, 0.28) 38%,
+    rgba(255, 196, 77, 0.1) 58%,
+    transparent 74%
   );
   pointer-events: none;
   z-index: 0;
+  transform: none;
+  will-change: auto;
+  filter: none;
 }
 
 .crown-mark-svg {
@@ -1749,6 +1785,7 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
   width: 100%;
   height: 100%;
   overflow: visible;
+  transform-origin: 50% 60%;
 }
 
 .brand-crown {
@@ -2018,11 +2055,20 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 #rsvp .rsvp-crown {
   filter: none !important;
   background: transparent;
+  /* Keep transform off the halo wrapper — shake the SVG only. */
+  animation: none !important;
+  transform: none !important;
 }
 
-/* Shake transforms the crown; keep halo on the mark without a filtered plate. */
-#rsvp .rsvp-crown.icon-shake {
-  filter: none !important;
+#rsvp .rsvp-crown .crown-mark-svg {
+  animation: icon-shake 3.75s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #rsvp .rsvp-crown .crown-mark-svg {
+    animation: none !important;
+  }
 }
 
 .hero-script {

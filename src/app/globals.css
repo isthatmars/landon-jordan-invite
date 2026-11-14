@@ -1745,52 +1745,20 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
   text-decoration: none;
 }
 
-/* Soft gold halo without CSS filter — filter:drop-shadow paints a dark rectangular plate. */
+/* Crown SVG paints its own ellipse glow — never attach CSS filter/drop-shadow. */
 .crown-mark {
-  position: relative;
   display: inline-block;
-  line-height: 0;
   overflow: visible;
   flex: none;
   vertical-align: middle;
-}
-
-.crown-mark::before {
-  content: "";
-  position: absolute;
-  /* No transform — Blink compositor layers with translate paint an opaque box. */
-  left: -28%;
-  top: -30%;
-  width: 156%;
-  height: 160%;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 244, 200, 0.55) 0%,
-    rgba(255, 212, 90, 0.28) 38%,
-    rgba(255, 196, 77, 0.1) 58%,
-    transparent 74%
-  );
-  pointer-events: none;
-  z-index: 0;
-  transform: none;
-  will-change: auto;
   filter: none;
-}
-
-.crown-mark-svg {
-  position: relative;
-  z-index: 1;
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  transform-origin: 50% 60%;
+  background: transparent;
 }
 
 .brand-crown {
   width: 0.95em;
-  height: 0.68em;
+  height: auto;
+  aspect-ratio: 100 / 76;
   flex: none;
   margin-top: -0.16em;
   filter: none;
@@ -2045,30 +2013,16 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 .hero-crown {
   width: clamp(3.25rem, 6vw, 4.55rem);
   height: auto;
-  aspect-ratio: 72 / 48;
+  aspect-ratio: 100 / 76;
   margin-bottom: 0.05rem;
   filter: none;
 }
 
 .rsvp-crown,
-.rsvp-crown.crown-mark,
 #rsvp .rsvp-crown {
   filter: none !important;
   background: transparent;
-  /* Keep transform off the halo wrapper — shake the SVG only. */
-  animation: none !important;
-  transform: none !important;
-}
-
-#rsvp .rsvp-crown .crown-mark-svg {
-  animation: icon-shake 3.75s ease-in-out infinite;
-  animation-delay: 1.2s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #rsvp .rsvp-crown .crown-mark-svg {
-    animation: none !important;
-  }
+  overflow: visible;
 }
 
 .hero-script {

@@ -1,16 +1,26 @@
-/** Gold crown — glow is a CSS radial halo on the wrapper, never `filter` (Blink boxes drop-shadow). */
+/**
+ * Gold crown with soft glow painted as SVG ellipses (true alpha).
+ * Never use CSS `filter: drop-shadow` here — Blink composites that as a dark rectangular plate.
+ */
 export function Crown({ className = "" }: { className?: string }) {
   return (
-    <span className={`crown-mark ${className}`.trim()} aria-hidden>
-      <svg viewBox="0 0 72 48" className="crown-mark-svg" focusable="false">
-        <path
-          fill="#ffd45a"
-          d="M8 38 14 16l16 12L36 6l6 22 16-12 6 22H8z"
-        />
-        <path fill="#ffe9a0" d="M10 36h52v6H10z" />
-        <circle cx="36" cy="10" r="2.2" fill="#fff4c4" />
-      </svg>
-    </span>
+    <svg
+      viewBox="-14 -14 100 76"
+      className={`crown-mark ${className}`.trim()}
+      aria-hidden
+      focusable="false"
+      overflow="visible"
+    >
+      <ellipse cx="36" cy="28" rx="40" ry="30" fill="#ffd45a" opacity="0.16" />
+      <ellipse cx="36" cy="26" rx="28" ry="20" fill="#ffe9a0" opacity="0.28" />
+      <ellipse cx="36" cy="22" rx="16" ry="12" fill="#fff6d0" opacity="0.35" />
+      <path
+        fill="#ffd45a"
+        d="M8 38 14 16l16 12L36 6l6 22 16-12 6 22H8z"
+      />
+      <path fill="#ffe9a0" d="M10 36h52v6H10z" />
+      <circle cx="36" cy="10" r="2.2" fill="#fff4c4" />
+    </svg>
   );
 }
 

@@ -369,7 +369,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
 
   return (
     <section id="rsvp" className="bg-[#07010f] px-3 pt-2 sm:px-5">
-      <div className="neon-frame mx-auto flex max-w-[1100px] flex-col bg-[#0b0615ee] p-4 sm:p-8 md:p-10">
+      <div className="neon-frame mx-auto flex max-w-[1100px] flex-col bg-[#0b0615] p-4 sm:p-8 md:p-10">
         <div
           className="rsvp-frame-grid grid flex-1 gap-6 md:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] md:gap-8 lg:gap-12"
         >

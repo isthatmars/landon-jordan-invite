@@ -331,6 +331,43 @@ export function PhotoBooth() {
 
   const welcomeName = firstNameOf(guest);
 
+  // Dev/screenshot helper: ?booth_step= or window.__boothGoto(step)
+  useEffect(() => {
+    const apply = (s: string) => {
+      if (
+        !["entry", "auth", "upload", "confirm", "generate", "ready", "submitted", "myphotos"].includes(
+          s
+        )
+      ) {
+        return;
+      }
+      setLoading(false);
+      setStep(s as Step);
+      if (s === "confirm" || s === "generate" || s === "ready" || s === "submitted") {
+        setPreviewUrl((u) => u || "/images/booth/sample-before.jpg");
+        setResultUrl((u) => u || "/images/booth/sample-after-face.jpg");
+        setUploadId((id) => id || "demo");
+        setResultId((id) => id || "demo");
+        setConsent(true);
+        if (s === "generate") {
+          setPolaroidPhase("eject");
+          setProgress(72);
+          setFlash(true);
+        }
+        if (s === "ready" || s === "submitted") setPolaroidPhase("ready");
+      }
+    };
+    const params = new URLSearchParams(
+      location.hash.includes("?") ? location.hash.split("?")[1] : location.search
+    );
+    const fromUrl = params.get("booth_step");
+    if (fromUrl) apply(fromUrl);
+    (window as unknown as { __boothGoto?: (s: string) => void }).__boothGoto = apply;
+    return () => {
+      delete (window as unknown as { __boothGoto?: (s: string) => void }).__boothGoto;
+    };
+  }, []);
+
   return (
     <section id="photobooth" className="scene-section" aria-label="80s Photo Booth">
       {/* ONE fixed OpenArt environment plate for every step */}
@@ -349,6 +386,7 @@ export function PhotoBooth() {
             src="/images/booth/title-photo-booth-sm.png"
             alt="PHOTO BOOTH"
           />
+          <h2 className="booth-chrome-fallback" aria-hidden="true">PHOTO BOOTH</h2>
         </header>
 
         <div className="booth-panel">

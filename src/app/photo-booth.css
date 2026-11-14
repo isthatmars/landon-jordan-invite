@@ -69,9 +69,26 @@
   display: block;
   width: min(720px, 92%);
   height: auto;
-  margin: -0.15rem auto 0;
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 0 18px rgba(255, 79, 216, 0.35));
+  margin: -0.35rem auto 0.15rem;
+  filter: drop-shadow(0 0 18px rgba(255, 79, 216, 0.45));
+}
+.booth-chrome-fallback {
+  font-family: var(--font-chrome), Impact, sans-serif;
+  font-size: clamp(1.8rem, 5.5vw, 3.6rem);
+  letter-spacing: 0.06em;
+  line-height: 0.92;
+  margin: -0.85rem 0 0.35rem;
+  background: linear-gradient(180deg, #fff 0%, #c5d0e8 35%, #7a8bb0 55%, #eef3ff 70%, #9aa8c4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 #2a1040) drop-shadow(0 0 18px rgba(255, 79, 216, 0.4));
+  text-transform: uppercase;
+}
+.booth-title-chrome {
+  margin-bottom: -2.2rem;
+  position: relative;
+  z-index: 2;
 }
 .booth-neon-script {
   font-family: var(--font-hastron), var(--font-script-fallback), cursive;

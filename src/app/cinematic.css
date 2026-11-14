@@ -429,15 +429,14 @@ html[data-intro="reveal"] .site-menu {
 @keyframes crown-on {
   0% {
     opacity: 0;
-    filter: brightness(0.25);
   }
   46% {
     opacity: 1;
-    filter: brightness(1.65) drop-shadow(0 0 10px #ffd45a);
   }
   100% {
     opacity: 1;
-    filter: drop-shadow(0 0 6px #fff4c8) drop-shadow(0 0 14px #ffd45a);
+    /* Never leave filter on crowns — Blink paints an opaque box around drop-shadow. */
+    filter: none;
   }
 }
 @keyframes chrome-in {
@@ -618,10 +617,28 @@ html[data-seen-lineup="1"] #lineup .lineup-kicker {
     opacity: 1;
   }
 }
-html[data-seen-rsvp="1"] #rsvp .neon-script-lg {
+/* RSVP title: no write-one / breathe — both leave filter or animate blur radii and grain the neon. */
+html[data-seen-rsvp="1"] #rsvp .rsvp-title,
+html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
+  animation: rsvp-title-in 0.7s cubic-bezier(0.33, 0.04, 0.22, 1) both;
+  filter: none;
+}
+
+html[data-seen-rsvp="1"] #rsvp .neon-script-lg:not(.rsvp-title) {
   animation:
     write-one 0.85s cubic-bezier(0.33, 0.04, 0.22, 1) 0.15s both,
     neon-script-breathe 5.6s ease-in-out infinite;
+}
+
+@keyframes rsvp-title-in {
+  from {
+    opacity: 0.35;
+    filter: none;
+  }
+  to {
+    opacity: 1;
+    filter: none;
+  }
 }
 html[data-seen-watch="1"] #watch .watch-line {
   animation: watch-line-in 0.7s cubic-bezier(0.33, 0.04, 0.22, 1) both;
@@ -645,21 +662,17 @@ html[data-seen-watch="1"] #watch .neon-script-lg {
   0% {
     --pen-a: -18%;
     --pen-b: 130%;
+    filter: none;
   }
   78% {
     --pen-a: 122%;
-    filter: brightness(1);
-  }
-  88% {
-    filter: brightness(1.55);
-  }
-  94% {
-    filter: brightness(0.7);
+    filter: none;
   }
   100% {
     --pen-a: 122%;
     --pen-b: 130%;
-    filter: brightness(1);
+    /* fill-mode:both must not leave a filter — grains neon text-shadow into a box. */
+    filter: none;
   }
 }
 @keyframes write-two {

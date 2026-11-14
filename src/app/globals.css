@@ -165,17 +165,27 @@ main {
 /*
  * Stable RSVP neon: Blink boxes / grains text-shadow when filter is set OR when
  * blur radii are animated via --neon-glow. Keep a fixed glow stack (no filter).
+ * Beat cinematic `html[data-seen-rsvp] #rsvp .neon-script-lg` specificity.
  */
-#rsvp .rsvp-title {
+#rsvp .rsvp-title,
+html[data-motion="armed"] #rsvp .rsvp-title,
+html[data-seen-rsvp="1"] #rsvp .rsvp-title,
+html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
   filter: none;
-  animation: none;
   --neon-glow: 1;
   text-shadow:
     0 0 1px #fff,
-    0 0 8px #ff39c8,
-    0 0 18px #ff39c8,
-    0 0 36px #ff39c8cc,
-    0 0 56px rgba(255, 57, 200, 0.45);
+    0 0 6px #ff39c8,
+    0 0 14px #ff39c8,
+    0 0 28px rgba(255, 57, 200, 0.85),
+    0 0 42px rgba(255, 57, 200, 0.4);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #rsvp .rsvp-title {
+    animation: none;
+  }
 }
 
 .font-nav {
@@ -2003,8 +2013,16 @@ main {
   filter: none;
 }
 
-.rsvp-crown {
-  filter: none;
+.rsvp-crown,
+.rsvp-crown.crown-mark,
+#rsvp .rsvp-crown {
+  filter: none !important;
+  background: transparent;
+}
+
+/* Shake transforms the crown; keep halo on the mark without a filtered plate. */
+#rsvp .rsvp-crown.icon-shake {
+  filter: none !important;
 }
 
 .hero-script {

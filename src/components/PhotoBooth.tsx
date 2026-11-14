@@ -339,10 +339,15 @@ export function PhotoBooth() {
         <div className="booth-floor" />
         <div className="booth-curtain booth-curtain-left" />
         <div className="booth-curtain booth-curtain-right" />
+        <div className="booth-prop booth-prop-disco" aria-hidden>
+          <span className="booth-disco-ball" />
+        </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="booth-prop booth-prop-boombox" src="/images/prop-boombox-scene.png" alt="" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="booth-prop booth-prop-disco" src="/images/prop-headphones-80s.png" alt="" />
+        <img
+          className="booth-prop booth-prop-crt"
+          src="/images/prop-crt-front.png"
+          alt=""
+        />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="booth-prop booth-prop-polaroid-wall"

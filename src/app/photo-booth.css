@@ -42,13 +42,19 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 28%;
+  height: 30%;
   background:
-    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55)),
-    repeating-conic-gradient(#111 0% 25%, #f2f2f2 0% 50%) 0 0 / 48px 48px;
-  opacity: 0.35;
-  transform: perspective(420px) rotateX(52deg);
-  transform-origin: bottom center;
+    linear-gradient(180deg, transparent 0%, rgba(40, 8, 18, 0.35) 35%, rgba(20, 4, 10, 0.75) 100%),
+    radial-gradient(ellipse 90% 60% at 50% 80%, rgba(160, 40, 70, 0.45), transparent 70%),
+    repeating-linear-gradient(
+      95deg,
+      #4a1524 0px,
+      #6a1e32 3px,
+      #3a101c 6px,
+      #5c1a2c 9px
+    );
+  opacity: 0.72;
+  filter: contrast(1.05) saturate(1.1);
 }
 
 .booth-curtain {
@@ -76,18 +82,40 @@
   object-fit: contain;
   filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.55));
 }
-.booth-prop-boombox {
-  left: 2%;
-  bottom: 6%;
-  width: min(18vw, 200px);
-  opacity: 0.92;
-}
+/* No boombox / ghettoblaster in Photo Booth — mixtape keeps that prop. */
 .booth-prop-disco {
-  right: 6%;
-  top: 4%;
-  width: min(12vw, 120px);
-  animation: booth-disco 8s linear infinite;
-  opacity: 0.85;
+  right: 7%;
+  top: 3%;
+  width: min(11vw, 112px);
+  height: min(11vw, 112px);
+  opacity: 0.9;
+  filter: none;
+}
+.booth-disco-ball {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), transparent 28%),
+    repeating-conic-gradient(
+      from 12deg,
+      #dfe7f5 0deg 10deg,
+      #9eb0d0 10deg 20deg,
+      #f4f7ff 20deg 30deg,
+      #c9a0ff 30deg 40deg
+    );
+  box-shadow:
+    0 0 18px rgba(255, 79, 216, 0.35),
+    0 0 40px rgba(56, 189, 248, 0.25),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.35);
+  animation: booth-disco 10s linear infinite;
+}
+.booth-prop-crt {
+  right: 2%;
+  bottom: 5%;
+  width: min(16vw, 180px);
+  opacity: 0.92;
 }
 .booth-prop-polaroid-wall {
   left: 4%;
@@ -249,8 +277,8 @@
 @media (max-width: 720px) {
   .booth-grid-2 { grid-template-columns: 1fr; }
   .booth-curtain { width: 10vw; opacity: 0.7; }
-  .booth-prop-boombox { width: 22vw; opacity: 0.55; }
-  .booth-prop-disco { width: 16vw; opacity: 0.5; }
+  .booth-prop-disco { width: 14vw; height: 14vw; opacity: 0.55; }
+  .booth-prop-crt { width: 20vw; opacity: 0.55; }
   .booth-prop-polaroid-wall { display: none; }
   .booth-floor { opacity: 0.22; }
 }

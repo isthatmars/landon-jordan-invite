@@ -354,7 +354,7 @@ export function RsvpForm({ content }: { content: SiteContent }) {
           className="rsvp-frame-grid grid flex-1 gap-6 md:grid-cols-[minmax(0,17.5rem)_minmax(0,1fr)] md:gap-8 lg:gap-12"
         >
           <div className="rsvp-brand-stack pt-1 text-center md:pt-0">
-            <Crown className="icon-shake mx-auto h-10 w-14 drop-shadow-[0_0_12px_#ffc44d] sm:h-12 sm:w-16" />
+            <Crown className="icon-shake rsvp-crown mx-auto h-10 w-14 sm:h-12 sm:w-16" />
             <h2 className="neon-script-lg rsvp-title text-6xl sm:text-7xl">{content.rsvpHeadline}</h2>
             <RsvpTelephone />
           </div>

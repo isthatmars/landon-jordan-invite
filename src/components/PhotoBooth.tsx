@@ -2,9 +2,9 @@
 
 /**
  * 80s Photo Booth — LOCKS (see PHOTO_BOOTH.md):
- * 1. Fixed scene: `.booth-scene` (wood/curtains/props) is persistent; only panel
- *    content + Polaroid animation change. Do NOT swap ref-*.jpg as step backgrounds.
- * 2. AI via OpenArt only (`/api/booth/generate` → `src/lib/booth/ai.ts` → OpenArt).
+ * 1. Fixed OpenArt environment plate (`/images/booth/environment.jpg`) for every step.
+ * 2. First shot = Polaroid camera before (modern) → after (80s) composition.
+ * 3. AI via OpenArt only (`/api/booth/generate` → `src/lib/booth/ai.ts` → OpenArt).
  */
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -333,104 +333,96 @@ export function PhotoBooth() {
 
   return (
     <section id="photobooth" className="scene-section" aria-label="80s Photo Booth">
-      {/* Fixed stage for every step — never swap backgrounds from public/images/booth/ref-*.jpg */}
+      {/* ONE fixed OpenArt environment plate for every step */}
       <div className="booth-scene" aria-hidden>
-        <div className="booth-wood" />
-        <div className="booth-floor" />
-        <div className="booth-curtain booth-curtain-left" />
-        <div className="booth-curtain booth-curtain-right" />
-        <div className="booth-prop booth-prop-disco" aria-hidden>
-          <span className="booth-disco-ball" />
-        </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="booth-prop booth-prop-crt"
-          src="/images/prop-crt-front.png"
-          alt=""
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="booth-prop booth-prop-polaroid-wall"
-          src="/images/chrome-80s.png"
-          alt=""
-        />
+        <img className="booth-env" src="/images/booth/environment.jpg" alt="" decoding="async" />
+        <div className="booth-scene-veil" />
       </div>
 
       <div className="booth-wrap">
         <header className="booth-header">
-          <p className="booth-brand-script">Landon &amp; Jordan&apos;s</p>
-          <h2 className="booth-chrome-title">The 80s Photo Booth</h2>
-          <p className="booth-neon-script">
-            {step === "ready"
-              ? "Your 80's Photo is Ready!"
-              : step === "submitted"
-                ? "Submitted to Party Gallery!"
-                : step === "generate"
-                  ? "Hold Tight!"
-                  : "Step In, Snap, and Add to the Party!"}
-          </p>
+          <p className="booth-neon-80s">The 80&apos;s</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="booth-title-chrome"
+            src="/images/booth/title-photo-booth-sm.png"
+            alt="PHOTO BOOTH"
+          />
         </header>
 
-        <div className="booth-marquee">
-          <div className="booth-bulbs" aria-hidden>
-            {Array.from({ length: 14 }).map((_, i) => (
-              <span key={i} className="booth-bulb" />
-            ))}
-          </div>
+        <div className="booth-panel">
+          {step !== "entry" && step !== "auth" && step !== "myphotos" ? (
+            <div className="booth-steps" aria-label="Progress">
+              {STEPS_AI.map((label, i) => (
+                <span
+                  key={label}
+                  className={`booth-step-dot${i < stepIndex ? " is-done" : ""}${i === stepIndex ? " is-active" : ""}`}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          ) : null}
 
-          <div className="booth-panel">
-            {step !== "entry" && step !== "auth" && step !== "myphotos" ? (
-              <div className="booth-steps" aria-label="Progress">
-                {STEPS_AI.map((label, i) => (
-                  <span
-                    key={label}
-                    className={`booth-step-dot${i < stepIndex ? " is-done" : ""}${i === stepIndex ? " is-active" : ""}`}
-                  >
-                    {label}
-                  </span>
-                ))}
+          {loading ? <p className="text-center text-white/70">Warming up the booth…</p> : null}
+
+          {!loading && step === "entry" ? (
+            <div className="booth-stage">
+              <div className="booth-camera-wrap booth-first-shot" aria-label="Before and after Polaroid demo">
+                <div className="booth-before">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/images/booth/sample-before.jpg" alt="Modern day photo" />
+                  <span className="booth-before-label">Before</span>
+                </div>
+                <span className="booth-morph-arrow" aria-hidden>
+                  →
+                </span>
+                <div className="booth-camera">
+                  <div className="booth-flash is-on" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className="booth-camera-img"
+                    src="/images/booth/polaroid-camera-cut.png"
+                    alt="Polaroid camera"
+                  />
+                  <div className="booth-polaroid is-from-camera is-ejecting is-sample">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      className="booth-polaroid-img"
+                      src="/images/booth/sample-after-face.jpg"
+                      alt="80s transformed Polaroid"
+                    />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
+                    <span className="booth-after-label">After · 80s</span>
+                  </div>
+                </div>
               </div>
-            ) : null}
-
-            {loading ? (
-              <p className="text-center text-white/70">Warming up the booth…</p>
-            ) : null}
-
-            {!loading && step === "entry" ? (
-              <div className="space-y-5 text-center">
-                <h3 className="booth-neon-script" style={{ fontSize: "1.7rem" }}>
+              <div className="text-center md:text-left">
+                <h3 className="booth-neon-script" style={{ fontSize: "1.65rem" }}>
                   {welcomeName
                     ? `Welcome back, ${welcomeName}!`
-                    : "Welcome to the 80s Photo Booth!"}
+                    : "Welcome to the 80's Photo Booth!"}
                 </h3>
-                <p className="mx-auto max-w-xl text-[0.95rem] leading-relaxed text-white/75">
-                  Upload a current photo and we&apos;ll turn it into a cinematic 80s party Polaroid —
-                  or share an original throwback for the slideshow. Verify once with your email; we
-                  won&apos;t change your RSVP.
+                <p className="booth-subcopy">
+                  Watch a modern photo become an 80s Polaroid — then upload yours for the same
+                  transformation and add it to the Party Gallery.
                 </p>
-                <div className="booth-grid-2">
-                  <button type="button" className="booth-card" onClick={() => void requireAuthThen("ai")}>
-                    <span aria-hidden>✦</span>
-                    <h3>Create my 80s photo</h3>
-                    <p>Upload a current photo and turn it into a retro 80&apos;s look.</p>
-                  </button>
-                  <button
-                    type="button"
-                    className="booth-card"
-                    onClick={() => void requireAuthThen("throwback")}
-                  >
-                    <span aria-hidden>▣</span>
-                    <h3>Upload a throwback photo</h3>
-                    <p>Add your original 80&apos;s photos to the party slideshow.</p>
-                  </button>
-                </div>
-                <div className="booth-actions-row">
+                <div className="booth-btn-stack mx-auto md:mx-0">
                   <button
                     type="button"
                     className="booth-btn booth-btn-pink"
                     onClick={() => void requireAuthThen("ai")}
                   >
-                    Create 80s style photos →
+                    Upload photo →
+                  </button>
+                  <button
+                    type="button"
+                    className="booth-btn booth-btn-outline"
+                    onClick={() => void requireAuthThen("throwback")}
+                  >
+                    Upload a throwback
                   </button>
                   <button
                     type="button"
@@ -441,7 +433,7 @@ export function PhotoBooth() {
                   </button>
                 </div>
                 {rate ? (
-                  <p className="booth-rate">
+                  <p className="booth-rate mt-3">
                     AI photos left this hour: {rate.remaining}/{rate.limit}
                     {rate.resetAt && rate.remaining === 0
                       ? ` · next at ${new Date(rate.resetAt).toLocaleTimeString()}`
@@ -449,87 +441,97 @@ export function PhotoBooth() {
                   </p>
                 ) : null}
               </div>
-            ) : null}
+            </div>
+          ) : null}
 
-            {!loading && step === "auth" ? (
-              <div className="mx-auto max-w-md space-y-4 text-center">
-                <h3 className="booth-neon-script" style={{ fontSize: "1.5rem" }}>
-                  Unlock the booth
-                </h3>
-                <p className="text-sm text-white/70">
-                  We email a one-time code. Same flow whether you&apos;ve RSVP&apos;d or not — Photo
-                  Booth never marks you as attending.
-                </p>
-                {!otpSent ? (
-                  <form onSubmit={startAuth} className="space-y-3 text-left">
-                    <label className="block text-sm">
-                      First name
-                      <input
-                        className="input-dark mt-1 w-full"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        required
-                        autoComplete="given-name"
-                      />
-                    </label>
-                    <label className="block text-sm">
-                      Email
-                      <input
-                        className="input-dark mt-1 w-full"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        autoComplete="email"
-                      />
-                    </label>
-                    <button type="submit" className="booth-btn booth-btn-pink w-full" disabled={busy}>
-                      {busy ? "Sending…" : "Send code"}
-                    </button>
-                  </form>
-                ) : (
-                  <form onSubmit={verifyAuth} className="space-y-3 text-left">
-                    <label className="block text-sm">
-                      6-digit code
-                      <input
-                        className="input-dark mt-1 w-full tracking-[0.3em]"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        inputMode="numeric"
-                        pattern="\d{6}"
-                        required
-                      />
-                    </label>
-                    {devCode ? (
-                      <p className="text-xs text-[#c6ff00]">Dev code (email stubbed): {devCode}</p>
-                    ) : null}
-                    <button type="submit" className="booth-btn booth-btn-pink w-full" disabled={busy}>
-                      {busy ? "Checking…" : "Verify & continue"}
-                    </button>
-                    <button
-                      type="button"
-                      className="booth-btn booth-btn-outline w-full"
-                      onClick={() => setOtpSent(false)}
-                    >
-                      Use a different email
-                    </button>
-                  </form>
-                )}
-                <button type="button" className="text-sm text-white/50 underline" onClick={() => setStep("entry")}>
-                  Back
-                </button>
+          {!loading && step === "auth" ? (
+            <div className="mx-auto max-w-md space-y-4 text-center">
+              <h3 className="booth-neon-script" style={{ fontSize: "1.5rem" }}>
+                Unlock the booth
+              </h3>
+              <p className="text-sm text-white/70">
+                We email a one-time code. Same flow whether you&apos;ve RSVP&apos;d or not — Photo
+                Booth never marks you as attending.
+              </p>
+              {!otpSent ? (
+                <form onSubmit={startAuth} className="space-y-3 text-left">
+                  <label className="block text-sm">
+                    First name
+                    <input
+                      className="input-dark mt-1 w-full"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                      autoComplete="given-name"
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    Email
+                    <input
+                      className="input-dark mt-1 w-full"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                    />
+                  </label>
+                  <button type="submit" className="booth-btn booth-btn-pink w-full" disabled={busy}>
+                    {busy ? "Sending…" : "Send code"}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={verifyAuth} className="space-y-3 text-left">
+                  <label className="block text-sm">
+                    6-digit code
+                    <input
+                      className="input-dark mt-1 w-full tracking-[0.3em]"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      inputMode="numeric"
+                      pattern="\d{6}"
+                      required
+                    />
+                  </label>
+                  {devCode ? (
+                    <p className="text-xs text-[#c6ff00]">Dev code (email stubbed): {devCode}</p>
+                  ) : null}
+                  <button type="submit" className="booth-btn booth-btn-pink w-full" disabled={busy}>
+                    {busy ? "Checking…" : "Verify & continue"}
+                  </button>
+                  <button
+                    type="button"
+                    className="booth-btn booth-btn-outline w-full"
+                    onClick={() => setOtpSent(false)}
+                  >
+                    Use a different email
+                  </button>
+                </form>
+              )}
+              <button type="button" className="text-sm text-white/50 underline" onClick={() => setStep("entry")}>
+                Back
+              </button>
+            </div>
+          ) : null}
+
+          {!loading && step === "upload" ? (
+            <div className="booth-stage">
+              <div className="flex justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  className="booth-polaroid-sample booth-polaroid-full"
+                  src="/images/booth/sample-after-branded.jpg"
+                  alt="Sample 80s Polaroid"
+                />
               </div>
-            ) : null}
-
-            {!loading && step === "upload" ? (
-              <div className="space-y-4">
-                <h3 className="booth-neon-script text-center" style={{ fontSize: "1.55rem" }}>
-                  Upload Your Photo
+              <div>
+                <h3 className="booth-neon-script" style={{ fontSize: "1.55rem" }}>
+                  {mode === "throwback" ? "Upload a Throwback" : "Welcome to the 80's Photo Booth!"}
                 </h3>
-                <p className="text-center text-sm text-white/75">
+                <p className="booth-subcopy">
                   {mode === "throwback"
                     ? "Add an original 80's photo for the party slideshow."
-                    : "Add a current photo to create an 80's style look."}
+                    : "Upload a photo to get your 80's transformation and add it to the Party Gallery."}
                 </p>
                 <div
                   className={`booth-drop${dragOver ? " is-drag" : ""}`}
@@ -544,16 +546,19 @@ export function PhotoBooth() {
                     void onFile(e.dataTransfer.files?.[0] || null);
                   }}
                 >
-                  <p className="font-nav tracking-[0.12em] text-sm">Drag &amp; drop your photo here or</p>
+                  <span className="booth-drop-icon" aria-hidden>
+                    ☁
+                  </span>
+                  <p className="font-nav tracking-[0.12em] text-sm">DRAG &amp; DROP YOUR PHOTO HERE</p>
                   <button
                     type="button"
                     className="booth-btn booth-btn-pink"
                     disabled={busy}
                     onClick={() => fileRef.current?.click()}
                   >
-                    {busy ? "Uploading…" : "Choose a photo"}
+                    {busy ? "Uploading…" : "Upload photo"}
                   </button>
-                  <p className="text-xs text-white/50">JPG, PNG, HEIC (up to 10MB)</p>
+                  <p className="text-xs text-white/50">JPG, PNG, or HEIC • Up to 10MB</p>
                   <input
                     ref={fileRef}
                     type="file"
@@ -568,86 +573,94 @@ export function PhotoBooth() {
                   </button>
                 </div>
               </div>
-            ) : null}
+            </div>
+          ) : null}
 
-            {!loading && step === "confirm" ? (
-              <div className="booth-stage">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="booth-preview-frame">
-                    {previewUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={previewUrl} alt="Selected photo" />
-                    ) : null}
-                    <span className="booth-check" aria-hidden>
-                      ✓
-                    </span>
-                  </div>
-                  <p className="font-nav text-xs tracking-[0.14em] text-white/50">Selected photo</p>
+          {!loading && step === "confirm" ? (
+            <div className="booth-stage">
+              <div className="flex flex-col items-center gap-3">
+                <div className="booth-preview-frame">
+                  {previewUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={previewUrl} alt="Selected photo" />
+                  ) : null}
+                  <span className="booth-check" aria-hidden>
+                    ✓
+                  </span>
                 </div>
-                <div>
-                  <h3 className="booth-neon-script" style={{ fontSize: "1.6rem" }}>
-                    Your Photo
-                  </h3>
-                  <p className="mt-2 text-sm text-white/75">
-                    {mode === "throwback"
-                      ? "Ready to add this throwback to the party gallery?"
-                      : "This is the photo you selected. Ready to turn it into an 80's masterpiece?"}
+                <p className="font-nav text-xs tracking-[0.14em] text-white/50">Selected photo</p>
+              </div>
+              <div>
+                <h3 className="booth-neon-script" style={{ fontSize: "1.6rem" }}>
+                  Your Photo
+                </h3>
+                <p className="mt-2 text-sm text-white/75">
+                  {mode === "throwback"
+                    ? "Ready to add this throwback to the party gallery?"
+                    : "This is the photo you selected. Ready to turn it into an 80's masterpiece?"}
+                </p>
+                {!aiConfigured && mode === "ai" ? (
+                  <p className="booth-error">
+                    AI generation needs OPENART_TOKEN on the server (or BOOTH_MOCK_AI=1 for local
+                    smoke tests). OpenArt image2image only — no alternate image providers.
                   </p>
-                  {!aiConfigured && mode === "ai" ? (
-                    <p className="booth-error">
-                      AI generation needs OPENART_TOKEN on the server (or BOOTH_MOCK_AI=1 for local
-                      smoke tests). OpenArt image2image only — no alternate image providers.
-                    </p>
-                  ) : null}
-                  <div className="booth-consent">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={consent}
-                        onChange={(e) => setConsent(e.target.checked)}
-                      />
-                      <span>{CONSENT}</span>
-                    </label>
-                  </div>
-                  {rate && mode === "ai" ? (
-                    <p className="booth-rate mb-3">
-                      Remaining AI gens: {rate.remaining}/{rate.limit}
-                      {rate.resetAt && !rate.allowed
-                        ? ` · available ${new Date(rate.resetAt).toLocaleString()}`
-                        : ""}
-                    </p>
-                  ) : null}
-                  <div className="booth-btn-stack">
-                    <button
-                      type="button"
-                      className="booth-btn booth-btn-pink"
-                      disabled={busy || !consent || (mode === "ai" && rate !== null && !rate.allowed)}
-                      onClick={() => void runGenerate()}
-                    >
-                      {mode === "throwback" ? "Add to party gallery →" : "Create my 80s photo →"}
-                    </button>
-                    <button
-                      type="button"
-                      className="booth-btn booth-btn-outline"
-                      onClick={() => {
-                        setUploadId(null);
-                        setPreviewUrl(null);
-                        setStep("upload");
-                      }}
-                    >
-                      Choose a different photo
-                    </button>
-                  </div>
+                ) : null}
+                <div className="booth-consent">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={consent}
+                      onChange={(e) => setConsent(e.target.checked)}
+                    />
+                    <span>{CONSENT}</span>
+                  </label>
+                </div>
+                {rate && mode === "ai" ? (
+                  <p className="booth-rate mb-3">
+                    Remaining AI gens: {rate.remaining}/{rate.limit}
+                    {rate.resetAt && !rate.allowed
+                      ? ` · available ${new Date(rate.resetAt).toLocaleString()}`
+                      : ""}
+                  </p>
+                ) : null}
+                <div className="booth-btn-stack">
+                  <button
+                    type="button"
+                    className="booth-btn booth-btn-pink"
+                    disabled={busy || !consent || (mode === "ai" && rate !== null && !rate.allowed)}
+                    onClick={() => void runGenerate()}
+                  >
+                    {mode === "throwback" ? "Add to party gallery →" : "Create my 80s photo →"}
+                  </button>
+                  <button
+                    type="button"
+                    className="booth-btn booth-btn-outline"
+                    onClick={() => {
+                      setUploadId(null);
+                      setPreviewUrl(null);
+                      setStep("upload");
+                    }}
+                  >
+                    Choose a different photo
+                  </button>
                 </div>
               </div>
-            ) : null}
+            </div>
+          ) : null}
 
-            {!loading && step === "generate" ? (
-              <div className="booth-stage">
-                <div className="booth-camera-wrap">
-                  <div className={`booth-flash${flash ? " is-on" : ""}`} />
+          {!loading && step === "generate" ? (
+            <div className="booth-stage">
+              <div className="booth-camera-wrap">
+                <div className={`booth-flash${flash ? " is-on" : ""}`} />
+                <div className="booth-camera">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className="booth-camera-img"
+                    src="/images/booth/polaroid-camera-cut.png"
+                    alt=""
+                  />
                   <div
-                    className={`booth-polaroid${
+                    className={`booth-polaroid is-from-camera${
                       polaroidPhase === "eject"
                         ? " is-ejecting"
                         : polaroidPhase === "develop"
@@ -667,174 +680,198 @@ export function PhotoBooth() {
                     <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
                   </div>
                 </div>
-                <div>
-                  <h3 className="booth-neon-script">Hold Tight!</h3>
-                  <p className="mt-2 font-nav text-sm tracking-[0.12em]">Creating your 80&apos;s photo…</p>
-                  <div className="booth-progress" aria-hidden>
-                    <span style={{ width: `${progress}%` }} />
-                  </div>
-                  <p className="booth-rate">Generating your 80&apos;s look.</p>
+              </div>
+              <div className="text-center md:text-left">
+                <div className="booth-status-icon" aria-hidden>
+                  ⎙
+                </div>
+                <h3 className="booth-neon-script">Printing your photo...</h3>
+                <div className="booth-progress" aria-hidden>
+                  <span style={{ width: `${progress}%` }} />
+                </div>
+                <p className="booth-rate">CREATING YOUR 80&apos;S TRANSFORM</p>
+                <ul className="booth-checklist">
+                  <li>
+                    <span className="dot is-done" /> Photo Uploaded
+                  </li>
+                  <li>
+                    <span className={`dot${progress < 90 ? " is-active" : " is-done"}`} /> Applying
+                    80s Style
+                  </li>
+                  <li>
+                    <span className={`dot${progress >= 95 ? " is-done" : ""}`} /> Finalizing Your
+                    Photo
+                  </li>
+                </ul>
+              </div>
+            </div>
+          ) : null}
+
+          {!loading && step === "ready" ? (
+            <div className="booth-stage">
+              <div className="flex justify-center">
+                <div className="booth-polaroid is-ready">
+                  {resultUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img className="booth-polaroid-img" src={resultUrl} alt="Your 80s photo" />
+                  ) : null}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
                 </div>
               </div>
-            ) : null}
-
-            {!loading && step === "ready" ? (
-              <div className="booth-stage">
-                <div className="flex justify-center">
-                  <div className="booth-polaroid is-ready">
-                    {resultUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img className="booth-polaroid-img" src={resultUrl} alt="Your 80s photo" />
-                    ) : null}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
-                  </div>
+              <div className="text-center md:text-left">
+                <div className="booth-status-icon is-ok" aria-hidden>
+                  ✓
                 </div>
-                <div className="booth-btn-stack mx-auto">
-                  <a
-                    className="booth-btn booth-btn-pink"
-                    href={resultId ? `/api/booth/photos/${resultId}/download` : resultUrl || "#"}
-                  >
-                    Download
-                  </a>
+                <h3 className="booth-neon-script">Your 80&apos;s Photo is Ready!</h3>
+                <p className="booth-subcopy">
+                  Your photo is ready and can be added to the Party Gallery for the event slideshow!
+                </p>
+                <div className="booth-btn-stack mx-auto md:mx-0">
                   <button
                     type="button"
-                    className="booth-btn booth-btn-green"
+                    className="booth-btn booth-btn-pink"
                     disabled={busy}
                     onClick={() => void submitToGallery()}
                   >
-                    Add to party gallery
+                    Submit to gallery
                   </button>
+                  <a
+                    className="booth-btn booth-btn-outline"
+                    href={resultId ? `/api/booth/photos/${resultId}/download` : resultUrl || "#"}
+                  >
+                    Download photo
+                  </a>
                   <button type="button" className="booth-btn booth-btn-outline" onClick={resetCreate}>
-                    Try another
+                    Create another
                   </button>
                 </div>
               </div>
-            ) : null}
+            </div>
+          ) : null}
 
-            {!loading && step === "submitted" ? (
-              <div className="booth-stage">
-                <div className="flex justify-center">
-                  <div className="booth-polaroid is-ready">
-                    {resultUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img className="booth-polaroid-img" src={resultUrl} alt="Submitted photo" />
-                    ) : null}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
-                  </div>
-                </div>
-                <div className="text-center md:text-left">
-                  <p className="text-4xl text-green-400" aria-hidden>
-                    ✓
-                  </p>
-                  <h3 className="booth-neon-script">Submitted to Party Gallery!</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/75">
-                    Your photo has been received and is awaiting approval. Once approved, it will be
-                    added to the event slideshow and Party Gallery.
-                  </p>
-                  <div className="booth-btn-stack mx-auto mt-4 md:mx-0">
-                    <a
-                      className="booth-btn booth-btn-pink"
-                      href={resultId ? `/api/booth/photos/${resultId}/download` : "#"}
-                    >
-                      Download photo
-                    </a>
-                    <button
-                      type="button"
-                      className="booth-btn booth-btn-outline"
-                      onClick={() => {
-                        setStep("entry");
-                        resetCreate();
-                      }}
-                    >
-                      Back to photo booth
-                    </button>
-                  </div>
+          {!loading && step === "submitted" ? (
+            <div className="booth-stage">
+              <div className="flex justify-center">
+                <div className="booth-polaroid is-ready">
+                  {resultUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img className="booth-polaroid-img" src={resultUrl} alt="Submitted photo" />
+                  ) : null}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="booth-polaroid-brand" src="/images/chrome-80s.png" alt="" />
                 </div>
               </div>
-            ) : null}
-
-            {!loading && step === "myphotos" ? (
-              <div className="space-y-5">
-                <h3 className="booth-neon-script text-center" style={{ fontSize: "1.5rem" }}>
-                  My Photos
-                </h3>
-                <div>
-                  <p className="font-nav mb-2 text-xs tracking-[0.14em] text-[#c6ff00]">
-                    My 80s AI photos
-                  </p>
-                  <div className="booth-thumbs">
-                    {photos.filter((p) => p.kind === "ai").length === 0 ? (
-                      <p className="text-sm text-white/50">No AI photos yet.</p>
-                    ) : (
-                      photos
-                        .filter((p) => p.kind === "ai")
-                        .map((p) => (
-                          <button
-                            key={p.id}
-                            type="button"
-                            className="booth-thumb"
-                            onClick={() => setLightbox(p)}
-                          >
-                            {p.url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={p.url} alt="" />
-                            ) : (
-                              <div className="aspect-square bg-white/10" />
-                            )}
-                            <span className="booth-thumb-meta">{p.status}</span>
-                          </button>
-                        ))
-                    )}
-                  </div>
+              <div className="text-center md:text-left">
+                <div className="booth-status-icon is-ok" aria-hidden>
+                  ✓
                 </div>
-                <div>
-                  <p className="font-nav mb-2 text-xs tracking-[0.14em] text-[#c6ff00]">
-                    My throwback uploads
-                  </p>
-                  <div className="booth-thumbs">
-                    {photos.filter((p) => p.kind === "throwback").length === 0 ? (
-                      <p className="text-sm text-white/50">No throwbacks yet.</p>
-                    ) : (
-                      photos
-                        .filter((p) => p.kind === "throwback")
-                        .map((p) => (
-                          <button
-                            key={p.id}
-                            type="button"
-                            className="booth-thumb"
-                            onClick={() => setLightbox(p)}
-                          >
-                            {p.url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={p.url} alt="" />
-                            ) : (
-                              <div className="aspect-square bg-white/10" />
-                            )}
-                            <span className="booth-thumb-meta">{p.status}</span>
-                          </button>
-                        ))
-                    )}
-                  </div>
-                </div>
-                <div className="booth-actions-row">
-                  <button type="button" className="booth-btn booth-btn-pink" onClick={resetCreate}>
-                    Create another 80s photo
-                  </button>
-                  <button type="button" className="booth-btn booth-btn-outline" onClick={() => setStep("entry")}>
-                    Back
+                <h3 className="booth-neon-script">Submitted to Party Gallery!</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/75">
+                  Your photo has been received and is awaiting approval. Once approved, it will be
+                  added to the event slideshow and Party Gallery.
+                </p>
+                <div className="booth-btn-stack mx-auto mt-4 md:mx-0">
+                  <a
+                    className="booth-btn booth-btn-pink"
+                    href={resultId ? `/api/booth/photos/${resultId}/download` : "#"}
+                  >
+                    Download photo
+                  </a>
+                  <button
+                    type="button"
+                    className="booth-btn booth-btn-outline"
+                    onClick={() => {
+                      setStep("entry");
+                      resetCreate();
+                    }}
+                  >
+                    Back to photo booth
                   </button>
                 </div>
               </div>
-            ) : null}
+            </div>
+          ) : null}
 
-            {error ? (
-              <p className="booth-error text-center" role="alert">
-                {error}
-              </p>
-            ) : null}
-          </div>
+          {!loading && step === "myphotos" ? (
+            <div className="space-y-5">
+              <h3 className="booth-neon-script text-center" style={{ fontSize: "1.5rem" }}>
+                My Photos
+              </h3>
+              <div>
+                <p className="font-nav mb-2 text-xs tracking-[0.14em] text-[#c6ff00]">
+                  My 80s AI photos
+                </p>
+                <div className="booth-thumbs">
+                  {photos.filter((p) => p.kind === "ai").length === 0 ? (
+                    <p className="text-sm text-white/50">No AI photos yet.</p>
+                  ) : (
+                    photos
+                      .filter((p) => p.kind === "ai")
+                      .map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          className="booth-thumb"
+                          onClick={() => setLightbox(p)}
+                        >
+                          {p.url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={p.url} alt="" />
+                          ) : (
+                            <div className="aspect-square bg-white/10" />
+                          )}
+                          <span className="booth-thumb-meta">{p.status}</span>
+                        </button>
+                      ))
+                  )}
+                </div>
+              </div>
+              <div>
+                <p className="font-nav mb-2 text-xs tracking-[0.14em] text-[#c6ff00]">
+                  My throwback uploads
+                </p>
+                <div className="booth-thumbs">
+                  {photos.filter((p) => p.kind === "throwback").length === 0 ? (
+                    <p className="text-sm text-white/50">No throwbacks yet.</p>
+                  ) : (
+                    photos
+                      .filter((p) => p.kind === "throwback")
+                      .map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          className="booth-thumb"
+                          onClick={() => setLightbox(p)}
+                        >
+                          {p.url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={p.url} alt="" />
+                          ) : (
+                            <div className="aspect-square bg-white/10" />
+                          )}
+                          <span className="booth-thumb-meta">{p.status}</span>
+                        </button>
+                      ))
+                  )}
+                </div>
+              </div>
+              <div className="booth-actions-row">
+                <button type="button" className="booth-btn booth-btn-pink" onClick={resetCreate}>
+                  Create another 80s photo
+                </button>
+                <button type="button" className="booth-btn booth-btn-outline" onClick={() => setStep("entry")}>
+                  Back
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {error ? (
+            <p className="booth-error text-center" role="alert">
+              {error}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -876,3 +913,4 @@ export function PhotoBooth() {
     </section>
   );
 }
+

@@ -1,9 +1,15 @@
-# Design references only
+# 80s Photo Booth environment assets
 
-These `ref-*.jpg` frames illustrate the *idea and steps* of the Photo Booth flow.
+Generated with OpenArt from the design references. **One environment plate** is reused for every flow step.
 
-**Do not** wire them as swapped full-bleed backgrounds per step.
-The live UI uses one persistent booth scene (`BoothShell` / fixed wood·curtains·props·neon chrome).
-Only inner panel content and the Polaroid animation change across steps.
+| File | Role |
+|------|------|
+| `environment.jpg` | Full-bleed hero room (disco, vanity, boombox/flight case, CRT stack, shag carpet, neon bars) |
+| `environment-plate.png` | Source 2K PNG from OpenArt |
+| `polaroid-camera-cut.png` | White Polaroid camera for first-shot / printing steps |
+| `sample-before.jpg` | Modern “before” portrait |
+| `sample-after-branded.jpg` | 80s “after” Polaroid with Landon & Jordan branding |
+| `sample-after-face.jpg` | After photo crop for CSS Polaroid frame |
+| `title-photo-booth-sm.png` | Chrome **PHOTO BOOTH** title (screen-blend over scene) |
 
-See `/PHOTO_BOOTH.md`.
+Do not swap backgrounds per step. Panel content only changes.

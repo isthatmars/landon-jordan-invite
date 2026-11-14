@@ -3,7 +3,8 @@
 /**
  * 80s Photo Booth — LOCKS (see PHOTO_BOOTH.md):
  * 1. Fixed OpenArt environment plate (`/images/booth/environment.jpg`) for every step.
- * 2. Entry = reference panel (welcome + drag/drop + upload) + small corner Polaroid prop (click → single flash).
+ * 2. Entry = large two-column panel: left branded 80s Polaroid (~45%), right welcome + drag/drop + upload (~55%).
+ *    Polaroid may flash once on click; never a modern “before” photo.
  * 3. AI via OpenArt only (`/api/booth/generate` → `src/lib/booth/ai.ts` → OpenArt).
  */
 
@@ -376,7 +377,7 @@ export function PhotoBooth() {
 
   const welcomeName = firstNameOf(guest);
 
-  // Dev/screenshot helper: ?booth_step= or window.__boothGoto(step); __boothFlash() for corner prop
+  // Dev/screenshot helper: ?booth_step= or window.__boothGoto(step); __boothFlash() for sample Polaroid
   useEffect(() => {
     const apply = (s: string) => {
       const flashOnly = s === "entry-flash";
@@ -464,32 +465,34 @@ export function PhotoBooth() {
 
           {!loading && step === "entry" ? (
             <div className="booth-entry">
-              <button
-                type="button"
-                className={`booth-corner-polaroid${propFlash ? " is-flashing" : ""}`}
-                onClick={flashCornerProp}
-                aria-label="Polaroid prop — click to flash"
-              >
-                <span className={`booth-corner-flash${propFlash ? " is-on" : ""}`} aria-hidden />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/images/booth/sample-after-branded.jpg"
-                  alt="Sample 80s Polaroid"
-                  draggable={false}
-                />
-              </button>
+              <div className="booth-entry-visual">
+                <button
+                  type="button"
+                  className={`booth-entry-polaroid${propFlash ? " is-flashing" : ""}`}
+                  onClick={flashCornerProp}
+                  aria-label="Sample 80s Polaroid — click to flash"
+                >
+                  <span className={`booth-corner-flash${propFlash ? " is-on" : ""}`} aria-hidden />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/images/booth/sample-after-polaroid-cut.png"
+                    alt="Sample 80s Polaroid — Landon & Jordan's birthday party"
+                    draggable={false}
+                  />
+                </button>
+              </div>
 
               <div className="booth-entry-main">
-                <h3 className="booth-neon-script" style={{ fontSize: "1.65rem" }}>
+                <h3 className="booth-neon-script booth-entry-welcome">
                   {welcomeName
                     ? `Welcome back, ${welcomeName}!`
                     : "Welcome to the 80's Photo Booth!"}
                 </h3>
-                <p className="booth-subcopy">
+                <p className="booth-subcopy booth-entry-subcopy">
                   Upload a photo to get your 80&apos;s transformation and add it to the Party Gallery.
                 </p>
                 <div
-                  className={`booth-drop${dragOver ? " is-drag" : ""}`}
+                  className={`booth-drop booth-entry-drop${dragOver ? " is-drag" : ""}`}
                   onDragOver={(e) => {
                     e.preventDefault();
                     setDragOver(true);
@@ -504,7 +507,7 @@ export function PhotoBooth() {
                   <span className="booth-drop-icon" aria-hidden>
                     ☁
                   </span>
-                  <p className="font-nav tracking-[0.12em] text-sm">DRAG &amp; DROP YOUR PHOTO HERE</p>
+                  <p className="booth-drop-label">DRAG &amp; DROP YOUR PHOTO HERE</p>
                 </div>
                 <div className="booth-or" aria-hidden>
                   <span />
@@ -517,6 +520,9 @@ export function PhotoBooth() {
                   disabled={busy}
                   onClick={() => entryFileRef.current?.click()}
                 >
+                  <span className="booth-btn-upload-icon" aria-hidden>
+                    ▣
+                  </span>
                   {busy ? "Uploading…" : "Upload photo"}
                 </button>
                 <p className="booth-file-specs">JPG, PNG, or HEIC • Up to 10MB</p>
@@ -548,7 +554,7 @@ export function PhotoBooth() {
                   </button>
                 </div>
                 {rate ? (
-                  <p className="booth-rate mt-3">
+                  <p className="booth-rate booth-entry-rate">
                     AI photos left this hour: {rate.remaining}/{rate.limit}
                     {rate.resetAt && rate.remaining === 0
                       ? ` · next at ${new Date(rate.resetAt).toLocaleTimeString()}`

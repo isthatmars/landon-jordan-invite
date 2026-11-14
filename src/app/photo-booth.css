@@ -459,6 +459,7 @@
   animation: booth-develop 5s ease-out forwards;
 }
 .booth-polaroid.is-ready {
+  opacity: 1;
   animation: booth-lift 0.9s ease-out forwards;
 }
 @keyframes booth-eject {
@@ -471,8 +472,8 @@
   100% { filter: none; opacity: 1; }
 }
 @keyframes booth-lift {
-  0% { transform: rotate(-4deg) translateY(8px) scale(0.92); }
-  100% { transform: rotate(-2deg) translateY(0) scale(1.05); }
+  0% { opacity: 1; transform: rotate(-4deg) translateY(8px) scale(0.92); }
+  100% { opacity: 1; transform: rotate(-2deg) translateY(0) scale(1.05); }
 }
 .booth-polaroid-img {
   width: 100%;

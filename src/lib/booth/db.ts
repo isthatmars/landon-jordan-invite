@@ -206,21 +206,27 @@ export async function createOtpChallenge(input: {
     createdAt: new Date().toISOString(),
   };
   if (boothDbEnabled()) {
-    await rest("booth_otp_challenges", {
-      method: "POST",
-      headers: { Prefer: "return=minimal" },
-      body: JSON.stringify({
-        id: row.id,
-        email: row.email,
-        first_name: row.firstName,
-        code_hash: row.codeHash,
-        purpose: row.purpose,
-        attempts: 0,
-        max_attempts: 5,
-        expires_at: row.expiresAt,
-      }),
-    });
-    return row;
+    try {
+      await rest("booth_otp_challenges", {
+        method: "POST",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({
+          id: row.id,
+          email: row.email,
+          first_name: row.firstName,
+          code_hash: row.codeHash,
+          purpose: row.purpose,
+          attempts: 0,
+          max_attempts: 5,
+          expires_at: row.expiresAt,
+        }),
+      });
+      return row;
+    } catch (err) {
+      // Fall back to local store so SEND CODE still returns JSON when remote
+      // booth tables/env are misconfigured.
+      console.warn("[booth:otp:local-fallback]", err);
+    }
   }
   await writeLocal((s) => {
     s.otps.unshift(row);
@@ -231,21 +237,26 @@ export async function createOtpChallenge(input: {
 export async function getLatestOtp(email: string) {
   const normalized = normalizeEmail(email);
   if (boothDbEnabled()) {
-    const rows = await rest<Record<string, unknown>[]>(
-      `booth_otp_challenges?email=eq.${encodeURIComponent(normalized)}&consumed_at=is.null&order=created_at.desc&limit=1`,
-    );
-    const row = rows?.[0];
-    if (!row) return null;
-    return {
-      id: String(row.id),
-      email: String(row.email),
-      firstName: String(row.first_name || ""),
-      codeHash: String(row.code_hash),
-      attempts: Number(row.attempts || 0),
-      maxAttempts: Number(row.max_attempts || 5),
-      expiresAt: String(row.expires_at),
-      consumedAt: (row.consumed_at as string) || null,
-    };
+    try {
+      const rows = await rest<Record<string, unknown>[]>(
+        `booth_otp_challenges?email=eq.${encodeURIComponent(normalized)}&consumed_at=is.null&order=created_at.desc&limit=1`,
+      );
+      const row = rows?.[0];
+      if (row) {
+        return {
+          id: String(row.id),
+          email: String(row.email),
+          firstName: String(row.first_name || ""),
+          codeHash: String(row.code_hash),
+          attempts: Number(row.attempts || 0),
+          maxAttempts: Number(row.max_attempts || 5),
+          expiresAt: String(row.expires_at),
+          consumedAt: (row.consumed_at as string) || null,
+        };
+      }
+    } catch (err) {
+      console.warn("[booth:otp:read-fallback]", err);
+    }
   }
   const s = await readLocal();
   return (
@@ -255,15 +266,19 @@ export async function getLatestOtp(email: string) {
 
 export async function bumpOtpAttempt(id: string, attempts: number, consume = false) {
   if (boothDbEnabled()) {
-    await rest(`booth_otp_challenges?id=eq.${encodeURIComponent(id)}`, {
-      method: "PATCH",
-      headers: { Prefer: "return=minimal" },
-      body: JSON.stringify({
-        attempts,
-        ...(consume ? { consumed_at: new Date().toISOString() } : {}),
-      }),
-    });
-    return;
+    try {
+      await rest(`booth_otp_challenges?id=eq.${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({
+          attempts,
+          ...(consume ? { consumed_at: new Date().toISOString() } : {}),
+        }),
+      });
+      return;
+    } catch (err) {
+      console.warn("[booth:otp:bump-fallback]", err);
+    }
   }
   await writeLocal((s) => {
     const o = s.otps.find((x) => x.id === id);

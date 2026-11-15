@@ -1,6 +1,13 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState, type ReactNode } from "react";
+import { readBoothJson } from "@/lib/booth/http";
+import {
+  BOOTH_RSVP_HANDOFF_EVENT,
+  clearBoothRsvpHandoff,
+  readBoothRsvpHandoff,
+  type BoothRsvpHandoffDetail,
+} from "@/lib/booth/rsvpBridge";
 import { MAX_COMPANIONS, parseCompletedRsvp } from "@/lib/rsvp";
 import type { PartyPerson, SiteContent } from "@/lib/types";
 import { Crown } from "./icons";
@@ -115,19 +122,84 @@ export function RsvpForm({ content }: { content: SiteContent }) {
   useEffect(() => {
     formRef.current = form;
   }, [form]);
+
+  const applyBoothHandoff = (detail: BoothRsvpHandoffDetail) => {
+    if (!detail.email) return;
+    if (detail.hasRsvp) {
+      setBoothGuest({
+        firstName: detail.firstName || "",
+        email: detail.email,
+        hasRsvp: true,
+      });
+      setRegisterAnother(false);
+      return;
+    }
+    // Verified booth session, not yet RSVP'd — prefill form, never mark attending.
+    setBoothGuest(null);
+    const next = {
+      ...formRef.current,
+      email: detail.email,
+      firstName: detail.firstName || formRef.current.firstName,
+    };
+    formRef.current = next;
+    setForm(next);
+    if (detail.prefill) {
+      setRegisterAnother(true);
+      setScreen(detail.firstName ? "attend" : "email");
+      setStepError("");
+    }
+  };
+
   useEffect(() => {
-    void fetch("/api/booth/session")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data?.authenticated && data.guest?.hasRsvp) {
-          setBoothGuest({
-            firstName: data.guest.firstName || "",
-            email: data.guest.email || "",
-            hasRsvp: true,
-          });
+    const loadSession = async () => {
+      try {
+        const res = await fetch("/api/booth/session");
+        const data = await readBoothJson<{
+          authenticated?: boolean;
+          guest?: {
+            firstName?: string;
+            email?: string;
+            hasRsvp?: boolean;
+          } | null;
+        }>(res);
+        if (data?.authenticated && data.guest?.email) {
+          if (data.guest.hasRsvp) {
+            setBoothGuest({
+              firstName: data.guest.firstName || "",
+              email: data.guest.email || "",
+              hasRsvp: true,
+            });
+          } else {
+            // Prefill from verified booth cookie when handoff asks for it.
+            const pending = readBoothRsvpHandoff();
+            if (pending?.prefill && pending.email === data.guest.email) {
+              applyBoothHandoff({
+                firstName: data.guest.firstName || pending.firstName || "",
+                email: data.guest.email,
+                hasRsvp: false,
+                prefill: true,
+                source: "session",
+              });
+              clearBoothRsvpHandoff();
+            }
+          }
         }
-      })
-      .catch(() => undefined);
+      } catch {
+        /* ignore */
+      }
+    };
+    void loadSession();
+
+    const onHandoff = (event: Event) => {
+      const detail = (event as CustomEvent<BoothRsvpHandoffDetail>).detail;
+      if (!detail) return;
+      applyBoothHandoff(detail);
+      if (detail.prefill && !detail.hasRsvp) clearBoothRsvpHandoff();
+    };
+    window.addEventListener(BOOTH_RSVP_HANDOFF_EVENT, onHandoff);
+    const pending = readBoothRsvpHandoff();
+    if (pending) applyBoothHandoff(pending);
+    return () => window.removeEventListener(BOOTH_RSVP_HANDOFF_EVENT, onHandoff);
   }, []);
 
   const attending = form.attend === "yes";

@@ -375,7 +375,13 @@ export function PhotoBooth() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uploadId, consent: true }),
       });
-      const data = await res.json();
+      const data = await readBoothJson<{
+        error?: string;
+        rate?: Rate;
+        photoId?: string;
+        rawUrl?: string;
+        brandedUrl?: string;
+      }>(res);
       window.clearInterval(tick);
       if (!res.ok) {
         setPolaroidPhase("idle");
@@ -386,17 +392,18 @@ export function PhotoBooth() {
       }
 
       setProgress(100);
-      setResultId(data.photoId);
+      setResultId(data.photoId || null);
       // Hold blank eject, then develop once AI image is ready (never reveal early)
       setPolaroidPhase("eject");
       await new Promise((r) => setTimeout(r, 700));
-      setResultUrl(data.rawUrl || data.brandedUrl);
+      setResultUrl(data.rawUrl || data.brandedUrl || null);
       setPolaroidPhase("develop");
       await new Promise((r) => setTimeout(r, 5200));
       setPolaroidPhase("ready");
-      await refreshSession();
+      const session = await refreshSession();
       if (mode === "throwback") {
         setStep("submitted");
+        offerRsvpHandoff((session.guest as Guest | null) || guest, { forcePopup: true });
       } else {
         setStep("ready");
       }
@@ -479,15 +486,41 @@ export function PhotoBooth() {
     );
     const fromUrl = params.get("booth_step");
     if (fromUrl) apply(fromUrl);
+    if (params.get("booth_rsvp_prompt") === "1") {
+      setGuest((g) =>
+        g || {
+          email: "guest@example.com",
+          firstName: "Guest",
+          rsvpId: null,
+          hasRsvp: false,
+          attend: null,
+        },
+      );
+      setRsvpPrompt(true);
+    }
     const w = window as unknown as {
       __boothGoto?: (s: string) => void;
       __boothFlash?: () => void;
+      __boothRsvpPrompt?: () => void;
     };
     w.__boothGoto = apply;
     w.__boothFlash = flashCornerProp;
+    w.__boothRsvpPrompt = () => {
+      setGuest((g) =>
+        g || {
+          email: "guest@example.com",
+          firstName: "Guest",
+          rsvpId: null,
+          hasRsvp: false,
+          attend: null,
+        },
+      );
+      setRsvpPrompt(true);
+    };
     return () => {
       delete w.__boothGoto;
       delete w.__boothFlash;
+      delete w.__boothRsvpPrompt;
     };
   }, []);
 
@@ -1003,10 +1036,29 @@ export function PhotoBooth() {
                   >
                     Download photo
                   </a>
+                  {guest?.hasRsvp ? (
+                    <button
+                      type="button"
+                      className="booth-btn booth-btn-outline"
+                      onClick={() => {
+                        offerRsvpHandoff(guest);
+                        document.documentElement.dataset.seenRsvp = "1";
+                        history.replaceState(null, "", "#rsvp");
+                        scrollToSection("rsvp");
+                      }}
+                    >
+                      View my RSVP
+                    </button>
+                  ) : (
+                    <button type="button" className="booth-btn booth-btn-outline" onClick={goRsvpNow}>
+                      RSVP now
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="booth-btn booth-btn-outline"
                     onClick={() => {
+                      offerRsvpHandoff(guest, { forcePopup: !guest?.hasRsvp });
                       setStep("entry");
                       resetCreate();
                     }}
@@ -1130,6 +1182,38 @@ export function PhotoBooth() {
               ) : null}
               <button type="button" className="booth-btn booth-btn-outline" onClick={() => setLightbox(null)}>
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {rsvpPrompt && !guest?.hasRsvp ? (
+        <div
+          className="booth-rsvp-popup"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="booth-rsvp-popup-title"
+        >
+          <div className="booth-rsvp-popup-card">
+            <p className="booth-rsvp-popup-eyebrow">You&apos;re in the booth</p>
+            <h3 id="booth-rsvp-popup-title" className="booth-neon-script booth-rsvp-popup-title">
+              RSVP now
+            </h3>
+            <p className="booth-rsvp-popup-copy">
+              Your photo is saved. Jump to RSVP and we&apos;ll pre-fill your name and email from this
+              booth session — Photo Booth never marks you as attending.
+            </p>
+            <div className="booth-rsvp-popup-actions">
+              <button type="button" className="booth-btn booth-btn-pink" onClick={goRsvpNow}>
+                RSVP now
+              </button>
+              <button
+                type="button"
+                className="booth-btn booth-btn-outline"
+                onClick={() => setRsvpPrompt(false)}
+              >
+                Maybe later
               </button>
             </div>
           </div>

@@ -379,6 +379,9 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Solid plate — sticky #arcade (Pac-Man) must never show through alpha. */
+  background-color: #07010f;
+  isolation: isolate;
 }
 
 /*
@@ -388,7 +391,8 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
  */
 .site-footer {
   position: relative;
-  z-index: 7;
+  /* Above flow plates (#lineup/#rsvp at 13) when the credit band scrolls in. */
+  z-index: 14;
   overflow: hidden;
   padding: 2rem 1.25rem max(4.75rem, calc(3.75rem + env(safe-area-inset-bottom)));
   text-align: center;
@@ -689,12 +693,35 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
     z-index: 12;
   }
 
+  /*
+   * Flow plates after the sticky stack must ALWAYS sit above live sticky
+   * promotion (z=12). Using --plate-z (5/6) lost to data-live-arcade=1 during
+   * hysteresis / play-zoom, so Pac-Man painted through or over RSVP.
+   */
   #lineup,
   #rsvp {
     position: relative;
-    z-index: var(--plate-z);
+    z-index: 13;
     box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.34);
     isolation: isolate;
+    background-color: #07010f;
+  }
+
+  /*
+   * Covered arcade: clip play-zoom overflow + kill machine filter layers so the
+   * sticky Pac-Man cabinet cannot composite through later opaque plates.
+   */
+  html[data-live-arcade="0"] #arcade {
+    overflow: clip;
+  }
+
+  html[data-live-arcade="0"] #arcade.is-play-zoom,
+  html[data-live-arcade="0"] #arcade .arcade-stage.is-zoomed {
+    overflow: clip;
+  }
+
+  html[data-live-arcade="0"] #arcade .arcade-stage.is-zoomed .arcade-machine {
+    filter: none;
   }
 
   /*
@@ -711,7 +738,7 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 
   footer {
     position: relative;
-    z-index: 7;
+    z-index: 14;
   }
 }
 
@@ -748,6 +775,14 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
     z-index: 12;
   }
 
+  /* Keep flow plates above any live sticky promotion leftovers. */
+  #lineup,
+  #rsvp {
+    z-index: 13;
+    background-color: #07010f;
+    isolation: isolate;
+  }
+
   #mixtape,
   #watch,
   #arcade,
@@ -759,7 +794,7 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 
   footer {
     position: relative;
-    z-index: 7;
+    z-index: 14;
   }
 }
 

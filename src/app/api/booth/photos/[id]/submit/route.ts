@@ -15,7 +15,7 @@ export async function POST(
   if (!photo || photo.guestEmail !== auth.guest.email) {
     return NextResponse.json({ error: "Photo not found." }, { status: 404 });
   }
-  if (photo.status === "failed" || !photo.brandedPath) {
+  if (photo.status === "failed" || (!photo.rawPath && !photo.brandedPath)) {
     return NextResponse.json({ error: "This photo isn’t ready to submit." }, { status: 400 });
   }
   if (photo.status === "approved" || photo.status === "pending") {

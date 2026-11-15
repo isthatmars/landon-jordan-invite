@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     photos.map(async (p) => {
       const branded = parseStoredRef(p.brandedPath);
       const raw = parseStoredRef(p.rawPath);
-      const thumbRef = branded || raw;
+      const thumbRef = raw || branded;
       let url: string | null = null;
       if (thumbRef) {
         try {

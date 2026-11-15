@@ -20,7 +20,8 @@ export async function GET(
     return NextResponse.json({ error: "Not authorized" }, { status: 403 });
   }
 
-  const ref = parseStoredRef(photo.brandedPath) || parseStoredRef(photo.rawPath);
+  // Prefer raw AI/throwback image — never force branded Polaroid composites for download.
+  const ref = parseStoredRef(photo.rawPath) || parseStoredRef(photo.brandedPath);
   if (!ref) return NextResponse.json({ error: "File missing" }, { status: 404 });
 
   const bytes = await getObject(ref.bucket, ref.path);

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   for (const id of ids) {
     const photo = await getPhoto(id);
     if (!photo) continue;
-    const ref = parseStoredRef(photo.brandedPath) || parseStoredRef(photo.rawPath);
+    const ref = parseStoredRef(photo.rawPath) || parseStoredRef(photo.brandedPath);
     if (!ref) continue;
     try {
       const bytes = await getObject(ref.bucket, ref.path);

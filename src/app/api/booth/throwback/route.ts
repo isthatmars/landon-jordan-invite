@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { uid } from "@/lib/id";
 import { getTemp, markTempDeleted, upsertPhoto } from "@/lib/booth/db";
-import { composeBrandedPolaroid, sanitizeImage } from "@/lib/booth/polaroid";
+import { sanitizeImage } from "@/lib/booth/polaroid";
 import { readBoothSessionFromRequest } from "@/lib/booth/session";
 import { deleteObject, getObject, makeStoredRef, parseStoredRef, putObject } from "@/lib/booth/storage";
 
@@ -33,14 +33,12 @@ export async function POST(request: Request) {
 
   const source = await getObject(ref.bucket, ref.path);
   const cleaned = await sanitizeImage(source);
-  const branded = await composeBrandedPolaroid(cleaned.buffer);
 
   const photoId = uid("bphoto");
   const emailKey = auth.guest.email.replace(/[^a-z0-9@._-]/gi, "_");
   const rawPath = `${emailKey}/${photoId}-throwback.jpg`;
-  const brandedPath = `${emailKey}/${photoId}-polaroid.jpg`;
+  // Raw throwback only — no Polaroid/logo composite for storage or download.
   await putObject("booth-throwbacks", rawPath, cleaned.buffer, "image/jpeg");
-  await putObject("booth-throwbacks", brandedPath, branded, "image/jpeg");
 
   const now = new Date().toISOString();
   await upsertPhoto({
@@ -53,10 +51,10 @@ export async function POST(request: Request) {
     consentAt: now,
     sourcePath: null,
     rawPath: makeStoredRef("booth-throwbacks", rawPath),
-    brandedPath: makeStoredRef("booth-throwbacks", brandedPath),
+    brandedPath: null,
     mime: "image/jpeg",
-    width: 996,
-    height: 1328,
+    width: cleaned.width || null,
+    height: cleaned.height || null,
     errorMessage: null,
     submittedToGalleryAt: now,
     moderatedAt: null,
@@ -73,11 +71,14 @@ export async function POST(request: Request) {
     /* ok */
   }
 
+  const rawUrl = `/api/booth/file?bucket=booth-throwbacks&path=${encodeURIComponent(rawPath)}`;
   return NextResponse.json({
     ok: true,
     photoId,
     status: "pending",
-    brandedUrl: `/api/booth/file?bucket=booth-throwbacks&path=${encodeURIComponent(brandedPath)}`,
+    rawUrl,
+    /** @deprecated Prefer rawUrl — downloads are unframed photos. */
+    brandedUrl: rawUrl,
     message:
       "Your photo has been received and is awaiting approval. Once approved, it will be added to the event slideshow and Party Gallery.",
   });

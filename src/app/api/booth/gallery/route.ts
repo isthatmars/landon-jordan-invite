@@ -7,7 +7,7 @@ export async function GET() {
   const photos = await listApprovedGallery();
   const items = await Promise.all(
     photos.map(async (p) => {
-      const ref = parseStoredRef(p.brandedPath) || parseStoredRef(p.rawPath);
+      const ref = parseStoredRef(p.rawPath) || parseStoredRef(p.brandedPath);
       let url: string | null = null;
       if (ref) {
         try {

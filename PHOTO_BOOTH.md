@@ -6,7 +6,7 @@ The booth stage never swaps backgrounds between steps. One OpenArt environment p
 
 ## 2. Entry = large two-column reference panel
 
-Entry matches the reference: a large pink neon panel (~80–90% × ~70–75% of the stage) with a **left branded 80s Polaroid** (~45%) and **right controls** (~55%: welcome script, huge drag-drop, chunky upload). The Polaroid may flash once on click — no strobe, no modern “before” photo. Generate / ready still use the Polaroid camera eject animation in the same fixed room.
+Entry matches the reference: a large pink neon panel (~80–90% × ~70–75% of the stage) with a **left Polaroid + camera prop** (~45%) and **right controls** (~55%: welcome script, huge drag-drop, chunky upload). On-screen Polaroid frames are blank (no logo). The Polaroid may flash once on click — no strobe, no modern “before” photo. Generate / ready still use the Polaroid camera eject animation in the same fixed room.
 
 ## 3. OpenArt for AI generation + booth art
 
@@ -29,7 +29,7 @@ Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
 - Supabase tables + private buckets when `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are set
 - Local `.data/booth*` fallback otherwise
 - AI source uploads deleted ≤30 min; outputs / throwbacks retained
-- Branded Polaroid export: `src/lib/booth/polaroid.ts` + `watermark.ts` pixel-composite crown → purple script → `chrome-80s.png` → BIRTHDAY PARTY with torn-paper seam (also `public/images/booth/polaroid-watermark.png` for on-screen frames)
+- Downloads + gallery/admin storage serve the **raw** AI/throwback image (no Polaroid frame, no logo). On-screen CSS Polaroid is display-only. `composeBrandedPolaroid` remains available but is not used for guest downloads.
 
 ## Flow
 

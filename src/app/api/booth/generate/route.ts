@@ -11,7 +11,6 @@ import {
   upsertPhoto,
 } from "@/lib/booth/db";
 import { hashIp } from "@/lib/booth/crypto";
-import { composeBrandedPolaroid } from "@/lib/booth/polaroid";
 import { clientIp, readBoothSessionFromRequest } from "@/lib/booth/session";
 import { deleteObject, getObject, makeStoredRef, parseStoredRef, putObject } from "@/lib/booth/storage";
 import { EIGHTYS_STYLE_PROMPT } from "@/lib/booth/types";
@@ -134,18 +133,8 @@ export async function POST(request: Request) {
 
   const emailKey = auth.guest.email.replace(/[^a-z0-9@._-]/gi, "_");
   const rawPath = `${emailKey}/${photoId}-raw.jpg`;
-  const brandedPath = `${emailKey}/${photoId}-polaroid.jpg`;
-  let branded: Buffer;
-  try {
-    branded = await composeBrandedPolaroid(ai.buffer);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Could not brand Polaroid.";
-    await fail(generationId, photoId, msg);
-    return NextResponse.json({ error: msg, photoId, generationId }, { status: 500 });
-  }
-
+  // Store/serve raw AI image only — Polaroid frame + logo are on-screen CSS, never baked into downloads.
   await putObject("booth-outputs", rawPath, ai.buffer, "image/jpeg");
-  await putObject("booth-outputs", brandedPath, branded, "image/jpeg");
 
   const finished = new Date().toISOString();
   await upsertPhoto({
@@ -158,10 +147,10 @@ export async function POST(request: Request) {
     consentAt: now,
     sourcePath: temp.path,
     rawPath: makeStoredRef("booth-outputs", rawPath),
-    brandedPath: makeStoredRef("booth-outputs", brandedPath),
+    brandedPath: null,
     mime: "image/jpeg",
-    width: 996,
-    height: 1328,
+    width: null,
+    height: null,
     errorMessage: null,
     submittedToGalleryAt: null,
     moderatedAt: null,
@@ -195,6 +184,7 @@ export async function POST(request: Request) {
   }
 
   const nextRate = await getRateLimitStatus(auth.guest.email, ip);
+  const rawUrl = `/api/booth/file?bucket=booth-outputs&path=${encodeURIComponent(rawPath)}`;
   return NextResponse.json({
     ok: true,
     photoId,
@@ -202,8 +192,9 @@ export async function POST(request: Request) {
     status: "ready",
     mock: ai.mock,
     rate: nextRate,
-    brandedUrl: `/api/booth/file?bucket=booth-outputs&path=${encodeURIComponent(brandedPath)}`,
-    rawUrl: `/api/booth/file?bucket=booth-outputs&path=${encodeURIComponent(rawPath)}`,
+    rawUrl,
+    /** @deprecated Prefer rawUrl — downloads are unframed raw AI photos. */
+    brandedUrl: rawUrl,
   });
 }
 

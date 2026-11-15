@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const photos = await listPhotosAdmin({ status, kind, q });
   const items = await Promise.all(
     photos.map(async (p) => {
-      const ref = parseStoredRef(p.brandedPath) || parseStoredRef(p.rawPath);
+      const ref = parseStoredRef(p.rawPath) || parseStoredRef(p.brandedPath);
       let urlStr: string | null = null;
       if (ref) {
         try {

@@ -345,35 +345,71 @@
   min-height: 0;
   padding: 0.15rem 0;
 }
-.booth-entry-polaroid {
+/* Polaroid + corner camera prop (matches red placeholder placement) */
+.booth-print-scene {
   position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
   width: min(100%, 380px);
   max-height: 100%;
-  padding: 0;
-  border: none;
-  background: transparent;
+  padding: 0 0 6% 18%;
+  isolation: isolate;
+}
+.booth-camera-prop {
+  position: absolute;
+  left: -2%;
+  bottom: -4%;
+  width: 62%;
+  max-width: 220px;
+  height: auto;
+  z-index: 5;
+  pointer-events: none;
+  transform: rotate(-12deg);
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55));
+}
+.booth-entry-polaroid.booth-polaroid {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 0;
   cursor: pointer;
   z-index: 4;
-  transform: rotate(-7deg);
+  left: auto;
+  bottom: auto;
+  transform: rotate(8deg);
   transition: transform 0.2s ease;
   filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.55));
   align-self: center;
+  animation: none;
 }
-.booth-entry-polaroid:hover,
-.booth-entry-polaroid:focus-visible {
-  transform: rotate(-5deg) scale(1.02);
+.booth-entry-polaroid.booth-polaroid:hover,
+.booth-entry-polaroid.booth-polaroid:focus-visible {
+  transform: rotate(6deg) scale(1.02);
   outline: none;
 }
-.booth-entry-polaroid img {
+.booth-entry-polaroid.booth-polaroid.is-flashing {
+  transform: rotate(6deg) scale(1.03);
+}
+.booth-print-scene .booth-polaroid.is-ready {
+  width: min(260px, 70vw);
+}
+.booth-entry-polaroid .booth-polaroid-img,
+.booth-entry-polaroid img.booth-polaroid-img {
   width: 100%;
   height: auto;
-  max-height: min(58vh, 520px);
-  object-fit: contain;
+  aspect-ratio: 1;
+  object-fit: cover;
   display: block;
   pointer-events: none;
+  filter: none;
+  opacity: 1;
 }
-.booth-entry-polaroid.is-flashing {
-  transform: rotate(-5deg) scale(1.03);
+.booth-download-note {
+  margin: 0.35rem 0 0.75rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
 }
 .booth-corner-flash {
   position: absolute;
@@ -576,11 +612,13 @@
 .booth-polaroid {
   width: min(220px, 58vw);
   background: #f7f4ec;
-  padding: 10px 10px 72px;
+  /* Classic blank Polaroid border — no logo/watermark in the bottom strip */
+  padding: 10px 10px 52px;
   border-radius: 3px;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
   position: relative;
   z-index: 3;
+  border: none;
 }
 .booth-polaroid-sample,
 .booth-polaroid-full {
@@ -663,15 +701,9 @@
     radial-gradient(circle at 30% 40%, transparent 50%, #f7f4ec 51%) 4px 1px / 16px 14px repeat-x;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
 }
+/* Brand watermark intentionally unused on-screen; downloads stay raw (no frame/logo). */
 .booth-polaroid-brand {
-  position: absolute;
-  left: 50%;
-  bottom: 6px;
-  transform: translateX(-50%);
-  width: min(72%, 168px);
-  height: auto;
-  opacity: 0.98;
-  pointer-events: none;
+  display: none;
 }
 
 .booth-status-icon {
@@ -816,11 +848,11 @@
     width: min(1080px, 96%);
     margin-bottom: -2.85rem;
   }
-  .booth-entry-polaroid {
+  .booth-print-scene {
     width: min(100%, 420px);
   }
-  .booth-entry-polaroid img {
-    max-height: min(62vh, 560px);
+  .booth-entry-polaroid {
+    max-width: 340px;
   }
   .booth-entry-drop {
     min-height: clamp(180px, 26vh, 260px);
@@ -855,12 +887,17 @@
     max-height: none;
     padding: 0;
   }
-  .booth-entry-polaroid {
-    width: min(200px, 48vw);
-    transform: rotate(-5deg);
+  .booth-print-scene {
+    width: min(240px, 62vw);
+    padding: 0 0 4% 14%;
   }
-  .booth-entry-polaroid img {
-    max-height: min(28vh, 240px);
+  .booth-camera-prop {
+    width: 58%;
+    max-width: 140px;
+  }
+  .booth-entry-polaroid.booth-polaroid {
+    max-width: min(180px, 48vw);
+    transform: rotate(6deg);
   }
   .booth-entry > .booth-entry-main {
     order: 1;
@@ -911,11 +948,11 @@
   .booth-entry {
     gap: 0.3rem;
   }
-  .booth-entry-polaroid {
-    width: min(168px, 46vw);
+  .booth-print-scene {
+    width: min(200px, 58vw);
   }
-  .booth-entry-polaroid img {
-    max-height: min(24vh, 200px);
+  .booth-entry-polaroid {
+    max-width: min(150px, 44vw);
   }
   .booth-entry-drop {
     min-height: clamp(118px, 18vh, 150px);

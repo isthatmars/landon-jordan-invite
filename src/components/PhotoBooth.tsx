@@ -3,12 +3,15 @@
 /**
  * 80s Photo Booth — LOCKS (see PHOTO_BOOTH.md):
  * 1. Fixed OpenArt environment plate (`/images/booth/environment.jpg`) for every step.
- * 2. Entry = large two-column panel: left branded 80s Polaroid (~45%), right welcome + drag/drop + upload (~55%).
- *    Polaroid may flash once on click; never a modern “before” photo.
+ * 2. Entry = large two-column panel: left Polaroid + camera prop (~45%), right welcome + drag/drop + upload (~55%).
+ *    On-screen Polaroid frame has no logo; downloads are raw AI photos only.
  * 3. AI via OpenArt only (`/api/booth/generate` → `src/lib/booth/ai.ts` → OpenArt).
  */
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { readBoothJson } from "@/lib/booth/http";
+import { emitBoothRsvpHandoff } from "@/lib/booth/rsvpBridge";
+import { scrollToSection } from "@/lib/scrollToSection";
 
 type Step =
   | "entry"
@@ -83,15 +86,24 @@ export function PhotoBooth() {
   const [resultId, setResultId] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<PhotoItem | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [rsvpPrompt, setRsvpPrompt] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const entryFileRef = useRef<HTMLInputElement>(null);
   const pendingAction = useRef<"ai" | "throwback" | "myphotos" | null>(null);
   const pendingFile = useRef<File | null>(null);
   const propFlashTimer = useRef<number | null>(null);
+  const rsvpPromptedFor = useRef<string | null>(null);
 
   const refreshSession = useCallback(async () => {
     const res = await fetch("/api/booth/session");
-    const data = await res.json();
+    const data = await readBoothJson<{
+      authenticated?: boolean;
+      guest?: Guest | null;
+      photos?: PhotoItem[];
+      rate?: Rate | null;
+      ai?: { configured?: boolean };
+      error?: string;
+    }>(res);
     setAiConfigured(Boolean(data.ai?.configured));
     if (data.authenticated && data.guest) {
       setGuest(data.guest);
@@ -107,6 +119,52 @@ export function PhotoBooth() {
     setLoading(false);
     return data;
   }, []);
+
+  const offerRsvpHandoff = useCallback(
+    (current: Guest | null, opts?: { forcePopup?: boolean }) => {
+      if (!current?.email) return;
+      if (current.hasRsvp) {
+        emitBoothRsvpHandoff({
+          firstName: current.firstName || "",
+          email: current.email,
+          hasRsvp: true,
+          prefill: false,
+          source: "submitted",
+        });
+        setRsvpPrompt(false);
+        return;
+      }
+      emitBoothRsvpHandoff({
+        firstName: current.firstName || firstName,
+        email: current.email || email,
+        hasRsvp: false,
+        prefill: true,
+        source: "submitted",
+      });
+      const key = `${current.email}:${resultId || "done"}`;
+      if (opts?.forcePopup || rsvpPromptedFor.current !== key) {
+        rsvpPromptedFor.current = key;
+        setRsvpPrompt(true);
+      }
+    },
+    [email, firstName, resultId],
+  );
+
+  const goRsvpNow = useCallback(() => {
+    const name = guest?.firstName || firstName;
+    const mail = guest?.email || email;
+    emitBoothRsvpHandoff({
+      firstName: name,
+      email: mail,
+      hasRsvp: Boolean(guest?.hasRsvp),
+      prefill: !guest?.hasRsvp,
+      source: "popup",
+    });
+    setRsvpPrompt(false);
+    document.documentElement.dataset.seenRsvp = "1";
+    history.replaceState(null, "", "#rsvp");
+    scrollToSection("rsvp");
+  }, [guest, firstName, email]);
 
   useEffect(() => {
     void refreshSession();
@@ -187,7 +245,7 @@ export function PhotoBooth() {
       fd.set("file", file);
       fd.set("purpose", purpose === "throwback" ? "throwback" : "ai_source");
       const res = await fetch("/api/booth/upload", { method: "POST", body: fd });
-      const data = await res.json();
+      const data = await readBoothJson<{ error?: string; uploadId?: string; previewUrl?: string }>(res);
       if (!res.ok) throw new Error(data.error || "Upload failed.");
       setUploadId(data.uploadId);
       setPreviewUrl(data.previewUrl);
@@ -247,8 +305,15 @@ export function PhotoBooth() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, firstName }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not send code.");
+      const data = await readBoothJson<{
+        ok?: boolean;
+        error?: string;
+        devCode?: string;
+        message?: string;
+      }>(res);
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || data.message || "Could not send code.");
+      }
       setOtpSent(true);
       setDevCode(data.devCode || null);
     } catch (err) {
@@ -268,8 +333,8 @@ export function PhotoBooth() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code: otp }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Code failed.");
+      const data = await readBoothJson<{ ok?: boolean; error?: string }>(res);
+      if (!res.ok || data.ok === false) throw new Error(data.error || "Code failed.");
       await refreshSession();
       afterAuth();
     } catch (err) {
@@ -325,7 +390,7 @@ export function PhotoBooth() {
       // Hold blank eject, then develop once AI image is ready (never reveal early)
       setPolaroidPhase("eject");
       await new Promise((r) => setTimeout(r, 700));
-      setResultUrl(data.brandedUrl);
+      setResultUrl(data.rawUrl || data.brandedUrl);
       setPolaroidPhase("develop");
       await new Promise((r) => setTimeout(r, 5200));
       setPolaroidPhase("ready");
@@ -351,10 +416,11 @@ export function PhotoBooth() {
     setError("");
     try {
       const res = await fetch(`/api/booth/photos/${resultId}/submit`, { method: "POST" });
-      const data = await res.json();
+      const data = await readBoothJson<{ error?: string }>(res);
       if (!res.ok) throw new Error(data.error || "Submit failed.");
-      await refreshSession();
+      const session = await refreshSession();
       setStep("submitted");
+      offerRsvpHandoff((session.guest as Guest | null) || guest, { forcePopup: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submit failed.");
     } finally {
@@ -396,7 +462,7 @@ export function PhotoBooth() {
       }
       if (stepName === "confirm" || stepName === "generate" || stepName === "ready" || stepName === "submitted") {
         setPreviewUrl((u) => u || "/images/booth/sample-after-face.jpg");
-        setResultUrl((u) => u || "/images/booth/sample-after-branded.jpg");
+        setResultUrl((u) => u || "/images/booth/sample-after-face.jpg");
         setUploadId((id) => id || "demo");
         setResultId((id) => id || "demo");
         setConsent(true);
@@ -466,20 +532,33 @@ export function PhotoBooth() {
           {!loading && step === "entry" ? (
             <div className="booth-entry">
               <div className="booth-entry-visual">
-                <button
-                  type="button"
-                  className={`booth-entry-polaroid${propFlash ? " is-flashing" : ""}`}
-                  onClick={flashCornerProp}
-                  aria-label="Sample 80s Polaroid — click to flash"
-                >
-                  <span className={`booth-corner-flash${propFlash ? " is-on" : ""}`} aria-hidden />
+                <div className="booth-print-scene">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/images/booth/sample-after-polaroid-cut.png"
-                    alt="Sample 80s Polaroid — Landon & Jordan's birthday party"
+                    className="booth-camera-prop"
+                    src="/images/booth/polaroid-camera-cut.png"
+                    alt=""
                     draggable={false}
                   />
-                </button>
+                  <button
+                    type="button"
+                    className={`booth-entry-polaroid booth-polaroid is-sample is-ready${propFlash ? " is-flashing" : ""}`}
+                    onClick={flashCornerProp}
+                    aria-label="Sample 80s Polaroid — click to flash"
+                  >
+                    <span className={`booth-corner-flash${propFlash ? " is-on" : ""}`} aria-hidden />
+                    <div className="booth-polaroid-img-wrap">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        className="booth-polaroid-img"
+                        src="/images/booth/sample-after-face.jpg"
+                        alt="Sample 80s Polaroid"
+                        draggable={false}
+                      />
+                      <span className="booth-polaroid-torn" aria-hidden />
+                    </div>
+                  </button>
+                </div>
               </div>
 
               <div className="booth-entry-main">
@@ -795,8 +874,6 @@ export function PhotoBooth() {
                       )}
                       <span className="booth-polaroid-torn" aria-hidden />
                     </div>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="booth-polaroid-brand" src="/images/booth/polaroid-watermark.png" alt="" />
                   </div>
                 </div>
               </div>
@@ -829,16 +906,23 @@ export function PhotoBooth() {
           {!loading && step === "ready" ? (
             <div className="booth-stage">
               <div className="flex justify-center">
-                <div className="booth-polaroid is-ready">
-                  <div className="booth-polaroid-img-wrap">
-                    {resultUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img className="booth-polaroid-img" src={resultUrl} alt="Your 80s photo" />
-                    ) : null}
-                    <span className="booth-polaroid-torn" aria-hidden />
-                  </div>
+                <div className="booth-print-scene">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="booth-polaroid-brand" src="/images/booth/polaroid-watermark.png" alt="" />
+                  <img
+                    className="booth-camera-prop"
+                    src="/images/booth/polaroid-camera-cut.png"
+                    alt=""
+                    draggable={false}
+                  />
+                  <div className="booth-polaroid is-ready">
+                    <div className="booth-polaroid-img-wrap">
+                      {resultUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img className="booth-polaroid-img" src={resultUrl} alt="Your 80s photo" />
+                      ) : null}
+                      <span className="booth-polaroid-torn" aria-hidden />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="text-center md:text-left">
@@ -848,6 +932,9 @@ export function PhotoBooth() {
                 <h3 className="booth-neon-script">Your 80&apos;s Photo is Ready!</h3>
                 <p className="booth-subcopy">
                   Your photo is ready and can be added to the Party Gallery for the event slideshow!
+                </p>
+                <p className="booth-download-note" data-download-type="raw">
+                  Download is the raw 80s photo only — no Polaroid frame or logo.
                 </p>
                 <div className="booth-btn-stack mx-auto md:mx-0">
                   <button
@@ -861,6 +948,8 @@ export function PhotoBooth() {
                   <a
                     className="booth-btn booth-btn-outline"
                     href={resultId ? `/api/booth/photos/${resultId}/download` : resultUrl || "#"}
+                    download={resultId ? undefined : "landon-jordan-80s-photo.jpg"}
+                    data-download-type="raw"
                   >
                     Download photo
                   </a>
@@ -875,16 +964,23 @@ export function PhotoBooth() {
           {!loading && step === "submitted" ? (
             <div className="booth-stage">
               <div className="flex justify-center">
-                <div className="booth-polaroid is-ready">
-                  <div className="booth-polaroid-img-wrap">
-                    {resultUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img className="booth-polaroid-img" src={resultUrl} alt="Submitted photo" />
-                    ) : null}
-                    <span className="booth-polaroid-torn" aria-hidden />
-                  </div>
+                <div className="booth-print-scene">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="booth-polaroid-brand" src="/images/booth/polaroid-watermark.png" alt="" />
+                  <img
+                    className="booth-camera-prop"
+                    src="/images/booth/polaroid-camera-cut.png"
+                    alt=""
+                    draggable={false}
+                  />
+                  <div className="booth-polaroid is-ready">
+                    <div className="booth-polaroid-img-wrap">
+                      {resultUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img className="booth-polaroid-img" src={resultUrl} alt="Submitted photo" />
+                      ) : null}
+                      <span className="booth-polaroid-torn" aria-hidden />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="text-center md:text-left">
@@ -896,10 +992,14 @@ export function PhotoBooth() {
                   Your photo has been received and is awaiting approval. Once approved, it will be
                   added to the event slideshow and Party Gallery.
                 </p>
+                <p className="booth-download-note" data-download-type="raw">
+                  Download is the raw 80s photo only — no Polaroid frame or logo.
+                </p>
                 <div className="booth-btn-stack mx-auto mt-4 md:mx-0">
                   <a
                     className="booth-btn booth-btn-pink"
                     href={resultId ? `/api/booth/photos/${resultId}/download` : "#"}
+                    data-download-type="raw"
                   >
                     Download photo
                   </a>

@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { uid } from "@/lib/id";
+import {
+  attachAnonCookie,
+  resolveAnonIdentity,
+  storageKeyForEmail,
+} from "@/lib/booth/anon";
 import { generateEightiesPhoto } from "@/lib/booth/ai";
 import { cleanupExpiredTempUploads } from "@/lib/booth/cleanup";
 import {
@@ -22,9 +27,10 @@ export async function POST(request: Request) {
   void cleanupExpiredTempUploads().catch(() => undefined);
 
   const auth = await readBoothSessionFromRequest(request);
-  if (!auth) {
-    return NextResponse.json({ error: "Verify your email to create an 80s photo." }, { status: 401 });
-  }
+  const anon = auth ? null : resolveAnonIdentity(request);
+  const guestEmail = auth?.guest.email || anon!.email;
+  const guestFirstName = auth?.guest.firstName || "";
+  const rsvpId = auth?.guest.rsvpId || null;
 
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") {
@@ -47,7 +53,7 @@ export async function POST(request: Request) {
   if (!temp || temp.deletedAt) {
     return NextResponse.json({ error: "That upload expired. Please choose your photo again." }, { status: 410 });
   }
-  if (temp.guestEmail && temp.guestEmail !== auth.guest.email) {
+  if (temp.guestEmail && temp.guestEmail !== guestEmail) {
     return NextResponse.json({ error: "Upload does not belong to this guest." }, { status: 403 });
   }
   if (new Date(temp.expiresAt).getTime() < Date.now()) {
@@ -55,7 +61,7 @@ export async function POST(request: Request) {
   }
 
   const ip = hashIp(clientIp(request));
-  const rate = await getRateLimitStatus(auth.guest.email, ip);
+  const rate = await getRateLimitStatus(guestEmail, ip);
   if (!rate.allowed) {
     return NextResponse.json(
       {
@@ -73,8 +79,8 @@ export async function POST(request: Request) {
   await upsertGeneration({
     id: generationId,
     photoId,
-    guestEmail: auth.guest.email,
-    rsvpId: auth.guest.rsvpId,
+    guestEmail,
+    rsvpId,
     ipHash: ip,
     status: "running",
     model: null,
@@ -88,9 +94,9 @@ export async function POST(request: Request) {
   await upsertPhoto({
     id: photoId,
     kind: "ai",
-    guestEmail: auth.guest.email,
-    guestFirstName: auth.guest.firstName,
-    rsvpId: auth.guest.rsvpId,
+    guestEmail,
+    guestFirstName,
+    rsvpId,
     status: "private",
     consentAt: now,
     sourcePath: temp.path,
@@ -109,7 +115,7 @@ export async function POST(request: Request) {
   });
 
   // Atomic-ish: record rate event before calling the model so concurrent requests can't burst.
-  await recordRateEvent(auth.guest.email, ip, "ai_gen");
+  await recordRateEvent(guestEmail, ip, "ai_gen");
 
   const ref = parseStoredRef(temp.path);
   if (!ref) {
@@ -128,10 +134,10 @@ export async function POST(request: Request) {
   const ai = await generateEightiesPhoto(sourceBytes);
   if (!ai.ok) {
     await fail(generationId, photoId, ai.error);
-    return NextResponse.json({ error: ai.error, photoId, generationId, rate: await getRateLimitStatus(auth.guest.email, ip) }, { status: 502 });
+    return NextResponse.json({ error: ai.error, photoId, generationId, rate: await getRateLimitStatus(guestEmail, ip) }, { status: 502 });
   }
 
-  const emailKey = auth.guest.email.replace(/[^a-z0-9@._-]/gi, "_");
+  const emailKey = storageKeyForEmail(guestEmail);
   const rawPath = `${emailKey}/${photoId}-raw.jpg`;
   // Store/serve raw AI image only — Polaroid frame + logo are on-screen CSS, never baked into downloads.
   await putObject("booth-outputs", rawPath, ai.buffer, "image/jpeg");
@@ -140,9 +146,9 @@ export async function POST(request: Request) {
   await upsertPhoto({
     id: photoId,
     kind: "ai",
-    guestEmail: auth.guest.email,
-    guestFirstName: auth.guest.firstName,
-    rsvpId: auth.guest.rsvpId,
+    guestEmail,
+    guestFirstName,
+    rsvpId,
     status: "private",
     consentAt: now,
     sourcePath: temp.path,
@@ -163,8 +169,8 @@ export async function POST(request: Request) {
   await upsertGeneration({
     id: generationId,
     photoId,
-    guestEmail: auth.guest.email,
-    rsvpId: auth.guest.rsvpId,
+    guestEmail,
+    rsvpId,
     ipHash: ip,
     status: "ready",
     model: ai.model,
@@ -183,9 +189,9 @@ export async function POST(request: Request) {
     /* cleanup job will retry */
   }
 
-  const nextRate = await getRateLimitStatus(auth.guest.email, ip);
+  const nextRate = await getRateLimitStatus(guestEmail, ip);
   const rawUrl = `/api/booth/file?bucket=booth-outputs&path=${encodeURIComponent(rawPath)}`;
-  return NextResponse.json({
+  const res = NextResponse.json({
     ok: true,
     photoId,
     generationId,
@@ -193,9 +199,12 @@ export async function POST(request: Request) {
     mock: ai.mock,
     rate: nextRate,
     rawUrl,
+    anonymous: !auth,
     /** @deprecated Prefer rawUrl — downloads are unframed raw AI photos. */
     brandedUrl: rawUrl,
   });
+  if (anon?.created) attachAnonCookie(res, anon.token);
+  return res;
 }
 
 async function fail(generationId: string, photoId: string, error: string) {

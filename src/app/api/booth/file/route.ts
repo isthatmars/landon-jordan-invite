@@ -1,4 +1,10 @@
 import { NextResponse } from "next/server";
+import {
+  anonOwnsEmail,
+  readAnonTokenFromRequest,
+  resolveAnonIdentity,
+  storageKeyForEmail,
+} from "@/lib/booth/anon";
 import { requireAdminFromRequest } from "@/lib/auth";
 import { getPhoto, listPhotosForEmail } from "@/lib/booth/db";
 import { readBoothSessionFromRequest } from "@/lib/booth/session";
@@ -17,11 +23,11 @@ export async function GET(request: Request) {
 
   const isAdmin = requireAdminFromRequest(request);
   const auth = await readBoothSessionFromRequest(request);
+  const anonToken = readAnonTokenFromRequest(request);
 
-  // Authorize: admin, or guest who owns a photo referencing this path, or own temp path prefix.
   let allowed = isAdmin;
   if (!allowed && auth) {
-    const emailKey = auth.guest.email.replace(/[^a-z0-9@._-]/gi, "_");
+    const emailKey = storageKeyForEmail(auth.guest.email);
     if (objectPath.startsWith(`${emailKey}/`) || objectPath.includes(`/${emailKey}/`)) {
       allowed = true;
     } else {
@@ -35,15 +41,27 @@ export async function GET(request: Request) {
     }
   }
 
-  // Public approved gallery files
+  if (!allowed && anonToken) {
+    const anonEmail = resolveAnonIdentity(request).email;
+    const emailKey = storageKeyForEmail(anonEmail);
+    if (objectPath.startsWith(`${emailKey}/`) || objectPath.includes(`/${emailKey}/`)) {
+      allowed = true;
+    }
+  }
+
   if (!allowed) {
-    // Check if this object belongs to an approved photo (gallery slideshow)
     const photoId = url.searchParams.get("photoId");
     if (photoId) {
       const photo = await getPhoto(photoId);
       if (photo?.status === "approved") {
         const hit =
           photo.brandedPath?.includes(objectPath) || photo.rawPath?.includes(objectPath);
+        if (hit) allowed = true;
+      } else if (photo && anonOwnsEmail(request, photo.guestEmail)) {
+        const hit =
+          photo.brandedPath?.includes(objectPath) ||
+          photo.rawPath?.includes(objectPath) ||
+          photo.sourcePath?.includes(objectPath);
         if (hit) allowed = true;
       }
     }

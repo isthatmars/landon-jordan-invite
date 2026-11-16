@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { uid } from "@/lib/id";
+import {
+  attachAnonCookie,
+  resolveAnonIdentity,
+  storageKeyForEmail,
+} from "@/lib/booth/anon";
 import { getTemp, markTempDeleted, upsertPhoto } from "@/lib/booth/db";
 import { sanitizeImage } from "@/lib/booth/polaroid";
 import { readBoothSessionFromRequest } from "@/lib/booth/session";
@@ -7,9 +12,10 @@ import { deleteObject, getObject, makeStoredRef, parseStoredRef, putObject } fro
 
 export async function POST(request: Request) {
   const auth = await readBoothSessionFromRequest(request);
-  if (!auth) {
-    return NextResponse.json({ error: "Verify your email to upload a throwback." }, { status: 401 });
-  }
+  const anon = auth ? null : resolveAnonIdentity(request);
+  const guestEmail = auth?.guest.email || anon!.email;
+  const guestFirstName = auth?.guest.firstName || "";
+  const rsvpId = auth?.guest.rsvpId || null;
 
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") {
@@ -24,7 +30,7 @@ export async function POST(request: Request) {
   if (!temp || temp.deletedAt) {
     return NextResponse.json({ error: "That upload expired. Please choose again." }, { status: 410 });
   }
-  if (temp.guestEmail && temp.guestEmail !== auth.guest.email) {
+  if (temp.guestEmail && temp.guestEmail !== guestEmail) {
     return NextResponse.json({ error: "Upload does not belong to this guest." }, { status: 403 });
   }
 
@@ -35,7 +41,7 @@ export async function POST(request: Request) {
   const cleaned = await sanitizeImage(source);
 
   const photoId = uid("bphoto");
-  const emailKey = auth.guest.email.replace(/[^a-z0-9@._-]/gi, "_");
+  const emailKey = storageKeyForEmail(guestEmail);
   const rawPath = `${emailKey}/${photoId}-throwback.jpg`;
   // Raw throwback only — no Polaroid/logo composite for storage or download.
   await putObject("booth-throwbacks", rawPath, cleaned.buffer, "image/jpeg");
@@ -44,10 +50,10 @@ export async function POST(request: Request) {
   await upsertPhoto({
     id: photoId,
     kind: "throwback",
-    guestEmail: auth.guest.email,
-    guestFirstName: auth.guest.firstName,
-    rsvpId: auth.guest.rsvpId,
-    status: "pending",
+    guestEmail,
+    guestFirstName,
+    rsvpId,
+    status: "private",
     consentAt: now,
     sourcePath: null,
     rawPath: makeStoredRef("booth-throwbacks", rawPath),
@@ -56,7 +62,7 @@ export async function POST(request: Request) {
     width: cleaned.width || null,
     height: cleaned.height || null,
     errorMessage: null,
-    submittedToGalleryAt: now,
+    submittedToGalleryAt: null,
     moderatedAt: null,
     moderatedBy: null,
     generationId: null,
@@ -72,14 +78,16 @@ export async function POST(request: Request) {
   }
 
   const rawUrl = `/api/booth/file?bucket=booth-throwbacks&path=${encodeURIComponent(rawPath)}`;
-  return NextResponse.json({
+  const res = NextResponse.json({
     ok: true,
     photoId,
-    status: "pending",
+    status: "private",
     rawUrl,
+    anonymous: !auth,
     /** @deprecated Prefer rawUrl — downloads are unframed photos. */
     brandedUrl: rawUrl,
-    message:
-      "Your photo has been received and is awaiting approval. Once approved, it will be added to the event slideshow and Party Gallery.",
+    message: "Throwback ready. Verify your email to add it to the Party Gallery.",
   });
+  if (anon?.created) attachAnonCookie(res, anon.token);
+  return res;
 }

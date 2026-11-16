@@ -55,21 +55,27 @@ async function readLocal(): Promise<LocalBoothStore> {
 }
 
 async function writeLocal(mutator: (s: LocalBoothStore) => void): Promise<LocalBoothStore> {
-  return new Promise((resolve, reject) => {
-    writeChain = writeChain
-      .then(async () => {
-        const current = await readLocal();
-        const clone = structuredClone(current) as LocalBoothStore;
-        mutator(clone);
-        memory = clone;
-        await fs.mkdir(path.dirname(LOCAL_PATH), { recursive: true });
-        const tmp = `${LOCAL_PATH}.tmp`;
-        await fs.writeFile(tmp, JSON.stringify(clone, null, 2), "utf8");
-        await fs.rename(tmp, LOCAL_PATH);
-        resolve(clone);
-      })
-      .catch(reject);
-  });
+  const run = async () => {
+    const current = await readLocal();
+    const clone = structuredClone(current) as LocalBoothStore;
+    mutator(clone);
+    memory = clone;
+    try {
+      await fs.mkdir(path.dirname(LOCAL_PATH), { recursive: true });
+      const tmp = `${LOCAL_PATH}.tmp`;
+      await fs.writeFile(tmp, JSON.stringify(clone, null, 2), "utf8");
+      await fs.rename(tmp, LOCAL_PATH);
+    } catch (err) {
+      console.warn("[booth:local-persist]", err);
+    }
+    return clone;
+  };
+  const next = writeChain.then(run, run);
+  writeChain = next.then(
+    () => undefined,
+    () => undefined,
+  );
+  return next;
 }
 
 /* ---------- row mappers ---------- */
@@ -223,14 +229,20 @@ export async function createOtpChallenge(input: {
       });
       return row;
     } catch (err) {
-      // Fall back to local store so SEND CODE still returns JSON when remote
+      // Fall back to local/memory store so SEND CODE still returns JSON when remote
       // booth tables/env are misconfigured.
       console.warn("[booth:otp:local-fallback]", err);
     }
   }
-  await writeLocal((s) => {
-    s.otps.unshift(row);
-  });
+  try {
+    await writeLocal((s) => {
+      s.otps.unshift(row);
+    });
+  } catch (err) {
+    console.warn("[booth:otp:memory-only]", err);
+    if (!memory) memory = emptyStore();
+    memory.otps.unshift(row);
+  }
   return row;
 }
 
@@ -372,13 +384,33 @@ export async function upsertPhoto(photo: BoothPhotoRecord) {
 
 export async function getPhoto(id: string): Promise<BoothPhotoRecord | null> {
   if (boothDbEnabled()) {
-    const rows = await rest<Record<string, unknown>[]>(
-      `booth_photos?id=eq.${encodeURIComponent(id)}&limit=1`,
-    );
-    return rows?.[0] ? photoFromRow(rows[0]) : null;
+    try {
+      const rows = await rest<Record<string, unknown>[]>(
+        `booth_photos?id=eq.${encodeURIComponent(id)}&limit=1`,
+      );
+      return rows?.[0] ? photoFromRow(rows[0]) : null;
+    } catch (err) {
+      console.warn("[booth:photo:read-fallback]", err);
+    }
   }
   const s = await readLocal();
   return s.photos.find((x) => x.id === id) || null;
+}
+
+export async function claimPhotoToGuest(
+  photo: BoothPhotoRecord,
+  guest: { email: string; firstName: string; rsvpId: string | null },
+): Promise<BoothPhotoRecord> {
+  const now = new Date().toISOString();
+  const next: BoothPhotoRecord = {
+    ...photo,
+    guestEmail: normalizeEmail(guest.email),
+    guestFirstName: guest.firstName || photo.guestFirstName || "",
+    rsvpId: guest.rsvpId,
+    updatedAt: now,
+  };
+  await upsertPhoto(next);
+  return next;
 }
 
 export async function listPhotosForEmail(email: string): Promise<BoothPhotoRecord[]> {

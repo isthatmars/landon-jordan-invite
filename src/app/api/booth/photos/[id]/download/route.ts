@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anonOwnsEmail } from "@/lib/booth/anon";
 import { requireAdminFromRequest } from "@/lib/auth";
 import { getPhoto } from "@/lib/booth/db";
 import { readBoothSessionFromRequest } from "@/lib/booth/session";
@@ -14,13 +15,13 @@ export async function GET(
 
   const isAdmin = requireAdminFromRequest(request);
   const auth = await readBoothSessionFromRequest(request);
-  const isOwner = auth && auth.guest.email === photo.guestEmail;
+  const isOwner = Boolean(auth && auth.guest.email === photo.guestEmail);
+  const isAnonOwner = anonOwnsEmail(request, photo.guestEmail);
   const isPublicApproved = photo.status === "approved";
-  if (!isAdmin && !isOwner && !isPublicApproved) {
+  if (!isAdmin && !isOwner && !isAnonOwner && !isPublicApproved) {
     return NextResponse.json({ error: "Not authorized" }, { status: 403 });
   }
 
-  // Prefer raw AI/throwback image — never force branded Polaroid composites for download.
   const ref = parseStoredRef(photo.rawPath) || parseStoredRef(photo.brandedPath);
   if (!ref) return NextResponse.json({ error: "File missing" }, { status: 404 });
 

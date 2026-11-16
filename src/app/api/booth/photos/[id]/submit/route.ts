@@ -1,20 +1,48 @@
 import { NextResponse } from "next/server";
-import { getPhoto, upsertPhoto } from "@/lib/booth/db";
+import { anonOwnsEmail, isAnonBoothEmail } from "@/lib/booth/anon";
+import { claimPhotoToGuest, getPhoto, upsertPhoto } from "@/lib/booth/db";
 import { readBoothSessionFromRequest } from "@/lib/booth/session";
 
+/**
+ * Permanent gallery association requires a verified booth session.
+ * Anonymous drafts created in this browser can be claimed on submit.
+ */
 export async function POST(
   request: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
   const auth = await readBoothSessionFromRequest(request);
   if (!auth) {
-    return NextResponse.json({ error: "Verify your email first." }, { status: 401 });
+    return NextResponse.json(
+      {
+        error: "Verify your email to save this photo to the Party Gallery.",
+        needsAuth: true,
+      },
+      { status: 401 },
+    );
   }
   const { id } = await ctx.params;
-  const photo = await getPhoto(id);
-  if (!photo || photo.guestEmail !== auth.guest.email) {
+  let photo = await getPhoto(id);
+  if (!photo) {
     return NextResponse.json({ error: "Photo not found." }, { status: 404 });
   }
+
+  const ownsVerified = photo.guestEmail === auth.guest.email;
+  const ownsAnonDraft =
+    isAnonBoothEmail(photo.guestEmail) && anonOwnsEmail(request, photo.guestEmail);
+
+  if (!ownsVerified && !ownsAnonDraft) {
+    return NextResponse.json({ error: "Photo not found." }, { status: 404 });
+  }
+
+  if (ownsAnonDraft && !ownsVerified) {
+    photo = await claimPhotoToGuest(photo, {
+      email: auth.guest.email,
+      firstName: auth.guest.firstName,
+      rsvpId: auth.guest.rsvpId,
+    });
+  }
+
   if (photo.status === "failed" || (!photo.rawPath && !photo.brandedPath)) {
     return NextResponse.json({ error: "This photo isn’t ready to submit." }, { status: 400 });
   }

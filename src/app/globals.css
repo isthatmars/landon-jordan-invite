@@ -367,13 +367,20 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 
 #lineup {
   --plate-z: 5;
-  /* Neon script kicker glow must not clip on desktop or mobile. */
-  overflow: visible;
+  /* Clip x so sticky arcade cannot paint sideways through neon glow. */
+  overflow-x: clip;
+  overflow-y: visible;
+  background-color: #07010f;
+  isolation: isolate;
 }
 
+/* Forward-compat when Photo Booth lands between lineup and RSVP. */
 #photobooth {
   --plate-z: 6;
-  overflow: visible;
+  overflow-x: clip;
+  overflow-y: visible;
+  background-color: #07010f;
+  isolation: isolate;
 }
 
 #rsvp {
@@ -384,8 +391,11 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
   flex-direction: column;
   justify-content: center;
   /* Solid plate — sticky #arcade (Pac-Man) must never show through alpha. */
-  background-color: #07010f;
+  background-color: #07010f !important;
+  background-image: none !important;
   isolation: isolate;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 /*
@@ -395,8 +405,8 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
  */
 .site-footer {
   position: relative;
-  /* Above flow plates (#lineup/#photobooth/#rsvp at 13) when the credit band scrolls in. */
-  z-index: 14;
+  /* Above flow plates (#lineup/#photobooth/#rsvp at 20) when the credit band scrolls in. */
+  z-index: 24;
   overflow: hidden;
   padding: 2rem 1.25rem max(4.75rem, calc(3.75rem + env(safe-area-inset-bottom)));
   text-align: center;
@@ -701,32 +711,72 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
    * Flow plates after the sticky stack must ALWAYS sit above live sticky
    * promotion (z=12). Using --plate-z lost to data-live-arcade=1 during
    * hysteresis / play-zoom, so Pac-Man painted through or over RSVP.
+   * Keep a hard gap (20 >> 12) so filter/transform on #arcade cannot win.
    */
   #photobooth,
   #lineup,
   #rsvp {
     position: relative;
-    z-index: 13;
+    z-index: 20;
     box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.34);
     isolation: isolate;
-    background-color: #07010f;
+    background-color: #07010f !important;
+    background-image: none !important;
+  }
+
+  /* Opaque underlay so neon/filter children cannot open alpha holes. */
+  #photobooth::before,
+  #lineup::before,
+  #rsvp::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #07010f;
+    pointer-events: none;
   }
 
   /*
-   * Covered arcade: clip play-zoom overflow + kill machine filter layers so the
-   * sticky Pac-Man cabinet cannot composite through later opaque plates.
+   * Nuclear cover: once any later plate owns the viewport, kill arcade paint
+   * entirely — even if hysteresis still has data-live-arcade=1 for a frame,
+   * and even if play-zoom left overflow:visible + drop-shadow filters hot.
    */
+  html[data-live-lineup="1"] #arcade,
+  html[data-live-photobooth="1"] #arcade,
+  html[data-live-rsvp="1"] #arcade,
   html[data-live-arcade="0"] #arcade {
-    overflow: clip;
+    z-index: 1 !important;
+    overflow: clip !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    filter: none !important;
+    transform: none;
+    will-change: auto;
   }
 
+  html[data-live-lineup="1"] #arcade.is-play-zoom,
+  html[data-live-photobooth="1"] #arcade.is-play-zoom,
+  html[data-live-rsvp="1"] #arcade.is-play-zoom,
   html[data-live-arcade="0"] #arcade.is-play-zoom,
+  html[data-live-lineup="1"] #arcade .arcade-stage.is-zoomed,
+  html[data-live-photobooth="1"] #arcade .arcade-stage.is-zoomed,
+  html[data-live-rsvp="1"] #arcade .arcade-stage.is-zoomed,
   html[data-live-arcade="0"] #arcade .arcade-stage.is-zoomed {
-    overflow: clip;
+    overflow: clip !important;
   }
 
-  html[data-live-arcade="0"] #arcade .arcade-stage.is-zoomed .arcade-machine {
-    filter: none;
+  html[data-live-lineup="1"] #arcade .arcade-stage.is-zoomed .arcade-machine,
+  html[data-live-photobooth="1"] #arcade .arcade-stage.is-zoomed .arcade-machine,
+  html[data-live-rsvp="1"] #arcade .arcade-stage.is-zoomed .arcade-machine,
+  html[data-live-arcade="0"] #arcade .arcade-stage.is-zoomed .arcade-machine,
+  html[data-live-lineup="1"] #arcade .arcade-machine,
+  html[data-live-photobooth="1"] #arcade .arcade-machine,
+  html[data-live-rsvp="1"] #arcade .arcade-machine,
+  html[data-live-arcade="0"] #arcade .arcade-machine {
+    filter: none !important;
+    transform: none !important;
+    will-change: auto !important;
   }
 
   /*
@@ -744,7 +794,7 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 
   footer {
     position: relative;
-    z-index: 14;
+    z-index: 24;
   }
 }
 
@@ -786,9 +836,20 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
   #photobooth,
   #lineup,
   #rsvp {
-    z-index: 13;
-    background-color: #07010f;
+    z-index: 20;
+    background-color: #07010f !important;
     isolation: isolate;
+  }
+
+  html[data-live-lineup="1"] #arcade,
+  html[data-live-photobooth="1"] #arcade,
+  html[data-live-rsvp="1"] #arcade,
+  html[data-live-arcade="0"] #arcade {
+    z-index: 1 !important;
+    overflow: clip !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   #mixtape,
@@ -803,7 +864,7 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 
   footer {
     position: relative;
-    z-index: 14;
+    z-index: 24;
   }
 }
 
@@ -1761,10 +1822,11 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
 }
 
 .site-header.is-scrolled {
-  background: rgba(7, 2, 18, 0.62);
+  /* Opaque — translucent header let sticky arcade wood bleed as a brown strip. */
+  background: #07010f;
   border-bottom-color: rgba(255, 57, 200, 0.28);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
 }
 
 .site-header-inner {
@@ -4066,11 +4128,14 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
  * Origin sits on the blue monitor; copy stays readable for CLOSE / key cues.
  */
 @media (min-width: 768px) {
-  #arcade.is-play-zoom {
+  /* Play-zoom may unclip ONLY while arcade itself is the covering plate. */
+  html[data-live-arcade="1"]:not([data-live-lineup="1"]):not([data-live-photobooth="1"]):not([data-live-rsvp="1"])
+    #arcade.is-play-zoom {
     overflow: visible;
   }
 
-  .arcade-stage.is-zoomed {
+  html[data-live-arcade="1"]:not([data-live-lineup="1"]):not([data-live-photobooth="1"]):not([data-live-rsvp="1"])
+    .arcade-stage.is-zoomed {
     overflow: visible;
   }
 

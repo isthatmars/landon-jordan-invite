@@ -52,9 +52,17 @@ function syncLiveFlags(root: HTMLElement) {
   // Probe lower viewport so a covering sticky plate claims "live" before
   // the previous plate's bottom CTAs (hero RSVP) can ghost over it.
   const raw = activePlateId(0.72);
-  // First sample wins immediately; afterward require two agreeing samples
-  // before flipping (boundary chatter was thrashing Lineup pause/parallax).
+  // Monotonic hysteresis: promote to a LATER plate immediately so sticky
+  // arcade cannot linger above lineup/RSVP. Require two agreeing samples
+  // only when scrolling BACK to an earlier plate (boundary chatter).
+  const rawIdx = PLATE_IDS.indexOf(raw);
+  const liveIdx = livePlate === null ? -1 : PLATE_IDS.indexOf(livePlate);
   if (livePlate === null || raw === livePlate) {
+    livePlate = raw;
+    liveCandidate = null;
+    liveCandidateHits = 0;
+  } else if (rawIdx > liveIdx) {
+    // Scrolling forward — claim the covering plate on the first sample.
     livePlate = raw;
     liveCandidate = null;
     liveCandidateHits = 0;

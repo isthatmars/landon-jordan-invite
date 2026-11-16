@@ -50,7 +50,7 @@ export function Arcade({ headline }: { headline: string }) {
   return (
     <section
       id="arcade"
-      className={`scene-section relative overflow-x-clip overflow-y-visible${playZoom ? " is-play-zoom" : ""}`}
+      className={`scene-section relative overflow-x-clip overflow-y-clip${playZoom ? " is-play-zoom" : ""}`}
     >
       <ArcadeBackdrop />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#05010f] to-transparent" />

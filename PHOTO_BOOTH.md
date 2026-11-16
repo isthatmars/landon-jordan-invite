@@ -18,20 +18,37 @@ Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
 - Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
 - Booth art (environment, camera, samples, chrome title) also generated via OpenArt and checked into `public/images/booth/`
 
-## 4. Guest identity
+## 4. Guest identity (verify only at save)
 
-- Email OTP / magic link → httpOnly `lj_booth_session` cookie
+- Guests can **enter, upload, generate AI photos, preview Polaroids, and download the current raw draft without email**.
+- Email OTP / magic link → httpOnly `lj_booth_session` cookie is required only to:
+  - **Add to Party Gallery** / permanent library association
+  - **See my photos**
+- Anonymous drafts use httpOnly `lj_booth_anon` and a synthetic `anon.*.@booth.local` owner until claimed on verify + submit
 - Match existing RSVPs by normalized email; Photo Booth never auto-marks attending
 - localStorage email alone is never identity
+- Post-booth RSVP handoff still works once they have a verified email
+
+### Dev / preview OTP (testing)
+
+`POST /api/booth/auth/start` always returns JSON. When Resend is missing/fails **or** when any of these are true, the response includes `devCode` so QA can finish verify without inbox access:
+
+- `NODE_ENV !== "production"`
+- `VERCEL_ENV=preview`
+- `BOOTH_DEV_OTP=1`
+- `BOOTH_EXPOSE_OTP=1`
+
+OTP rows prefer Supabase `booth_otp_challenges`; on remote failure the server falls back to local/memory store so SEND CODE does not 503 during testing.
 
 ## 5. Storage
 
 - Supabase tables + private buckets when `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are set
-- Local `.data/booth*` fallback otherwise
+- Local `.data/booth*` fallback otherwise (memory-only if the filesystem is read-only)
 - AI source uploads deleted ≤30 min; outputs / throwbacks retained
 - Downloads + gallery/admin storage serve the **raw** AI/throwback image (no Polaroid frame, no logo). On-screen CSS Polaroid is display-only. `composeBrandedPolaroid` remains available but is not used for guest downloads.
 
 ## Flow
 
-entry (two-column panel + sample Polaroid) → auth → upload → confirm → generate (printing camera) → ready → submitted / my photos
-Throwbacks skip AI and go pending approval.
+entry (two-column panel + sample Polaroid) → upload → confirm → generate (printing camera) → ready (download OK) → **verify at save** → submitted / my photos
+
+Throwbacks follow the same private-until-save rule (no auto-pending gallery submit without verified email).

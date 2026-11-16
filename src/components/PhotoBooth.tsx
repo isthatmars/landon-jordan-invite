@@ -89,7 +89,7 @@ export function PhotoBooth() {
   const [rsvpPrompt, setRsvpPrompt] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const entryFileRef = useRef<HTMLInputElement>(null);
-  const pendingAction = useRef<"ai" | "throwback" | "myphotos" | null>(null);
+  const pendingAction = useRef<"ai" | "throwback" | "myphotos" | "submit" | null>(null);
   const pendingFile = useRef<File | null>(null);
   const propFlashTimer = useRef<number | null>(null);
   const rsvpPromptedFor = useRef<string | null>(null);
@@ -207,22 +207,33 @@ export function PhotoBooth() {
     }
   }, [step]);
 
-  const requireAuthThen = async (action: "ai" | "throwback" | "myphotos") => {
+  const requireAuthThen = async (action: "ai" | "throwback" | "myphotos" | "submit") => {
     setError("");
     const data = await refreshSession();
     if (data.authenticated) {
       if (action === "myphotos") setStep("myphotos");
-      else if (action === "throwback") {
+      else if (action === "submit") {
+        return true;
+      } else if (action === "throwback") {
         setMode("throwback");
         setStep("upload");
       } else {
         setMode("ai");
         setStep("upload");
       }
-      return;
+      return true;
     }
     pendingAction.current = action;
+    setOtpSent(false);
+    setDevCode(null);
     setStep("auth");
+    return false;
+  };
+
+  const startCreate = (action: "ai" | "throwback") => {
+    setError("");
+    setMode(action);
+    setStep("upload");
   };
 
   const flashCornerProp = () => {
@@ -264,6 +275,10 @@ export function PhotoBooth() {
     pendingAction.current = null;
     const queued = pendingFile.current;
     pendingFile.current = null;
+    if (next === "submit") {
+      void submitToGallery({ skipAuthCheck: true });
+      return;
+    }
     if (next === "myphotos") {
       setStep("myphotos");
       return;
@@ -282,18 +297,11 @@ export function PhotoBooth() {
   const startAiFromEntry = async (file?: File | null) => {
     setError("");
     setMode("ai");
-    const data = await refreshSession();
     if (file) {
-      if (data.authenticated) {
-        await onFile(file, "ai");
-        return;
-      }
-      pendingFile.current = file;
-      pendingAction.current = "ai";
-      setStep("auth");
+      await onFile(file, "ai");
       return;
     }
-    await requireAuthThen("ai");
+    startCreate("ai");
   };
 
   const startAuth = async (e: FormEvent) => {
@@ -401,13 +409,8 @@ export function PhotoBooth() {
       setPolaroidPhase("develop");
       await new Promise((r) => setTimeout(r, 5200));
       setPolaroidPhase("ready");
-      const session = await refreshSession();
-      if (mode === "throwback") {
-        setStep("submitted");
-        offerRsvpHandoff((session.guest as Guest | null) || guest, { forcePopup: true });
-      } else {
-        setStep("ready");
-      }
+      await refreshSession();
+      setStep("ready");
     } catch (err) {
       window.clearInterval(tick);
       setPolaroidPhase("idle");
@@ -418,13 +421,25 @@ export function PhotoBooth() {
     }
   };
 
-  const submitToGallery = async () => {
+  const submitToGallery = async (opts?: { skipAuthCheck?: boolean }) => {
     if (!resultId) return;
+    if (!opts?.skipAuthCheck) {
+      const ok = await requireAuthThen("submit");
+      if (!ok) return;
+    }
     setBusy(true);
     setError("");
     try {
       const res = await fetch(`/api/booth/photos/${resultId}/submit`, { method: "POST" });
-      const data = await readBoothJson<{ error?: string }>(res);
+      const data = await readBoothJson<{ error?: string; needsAuth?: boolean }>(res);
+      if (res.status === 401 || data.needsAuth) {
+        pendingAction.current = "submit";
+        setOtpSent(false);
+        setDevCode(null);
+        setStep("auth");
+        setError(data.error || "Verify your email to save this photo.");
+        return;
+      }
       if (!res.ok) throw new Error(data.error || "Submit failed.");
       const session = await refreshSession();
       setStep("submitted");
@@ -654,7 +669,7 @@ export function PhotoBooth() {
                   <button
                     type="button"
                     className="booth-linkish"
-                    onClick={() => void requireAuthThen("throwback")}
+                    onClick={() => startCreate("throwback")}
                   >
                     Upload a throwback
                   </button>
@@ -679,13 +694,18 @@ export function PhotoBooth() {
           ) : null}
 
           {!loading && step === "auth" ? (
-            <div className="mx-auto max-w-md space-y-4 text-center">
+            <div className="mx-auto max-w-md space-y-4 text-center" data-booth-auth="verify-at-save">
               <h3 className="booth-neon-script" style={{ fontSize: "1.5rem" }}>
-                Unlock the booth
+                {pendingAction.current === "submit" || resultId
+                  ? "Verify to save"
+                  : pendingAction.current === "myphotos"
+                    ? "See my photos"
+                    : "Verify your email"}
               </h3>
               <p className="text-sm text-white/70">
-                We email a one-time code. Same flow whether you&apos;ve RSVP&apos;d or not — Photo
-                Booth never marks you as attending.
+                {pendingAction.current === "submit" || resultId
+                  ? "Verify once to add this photo to the Party Gallery and your library. Creating and downloading drafts does not need email."
+                  : "We email a one-time code. Same flow whether you've RSVP'd or not — Photo Booth never marks you as attending."}
               </p>
               {!otpSent ? (
                 <form onSubmit={startAuth} className="space-y-3 text-left">
@@ -728,10 +748,16 @@ export function PhotoBooth() {
                     />
                   </label>
                   {devCode ? (
-                    <p className="text-xs text-[#c6ff00]">Dev code (email stubbed): {devCode}</p>
+                    <p className="text-xs text-[#c6ff00]" data-booth-dev-otp>
+                      Dev / preview code: {devCode}
+                    </p>
                   ) : null}
                   <button type="submit" className="booth-btn booth-btn-pink w-full" disabled={busy}>
-                    {busy ? "Checking…" : "Verify & continue"}
+                    {busy
+                      ? "Checking…"
+                      : pendingAction.current === "submit" || resultId
+                        ? "Verify & save to gallery"
+                        : "Verify & continue"}
                   </button>
                   <button
                     type="button"
@@ -742,7 +768,11 @@ export function PhotoBooth() {
                   </button>
                 </form>
               )}
-              <button type="button" className="text-sm text-white/50 underline" onClick={() => setStep("entry")}>
+              <button
+                type="button"
+                className="text-sm text-white/50 underline"
+                onClick={() => setStep(resultId ? "ready" : "entry")}
+              >
                 Back
               </button>
             </div>
@@ -825,7 +855,7 @@ export function PhotoBooth() {
                 </h3>
                 <p className="mt-2 text-sm text-white/75">
                   {mode === "throwback"
-                    ? "Ready to add this throwback to the party gallery?"
+                    ? "We'll keep this private until you verify email to add it to the Party Gallery."
                     : "This is the photo you selected. Ready to turn it into an 80's masterpiece?"}
                 </p>
                 {!aiConfigured && mode === "ai" ? (
@@ -859,7 +889,7 @@ export function PhotoBooth() {
                     disabled={busy || !consent || (mode === "ai" && rate !== null && !rate.allowed)}
                     onClick={() => void runGenerate()}
                   >
-                    {mode === "throwback" ? "Add to party gallery →" : "Create my 80s photo →"}
+                    {mode === "throwback" ? "Continue with throwback →" : "Create my 80s photo →"}
                   </button>
                   <button
                     type="button"
@@ -963,9 +993,11 @@ export function PhotoBooth() {
                 <div className="booth-status-icon is-ok" aria-hidden>
                   ✓
                 </div>
-                <h3 className="booth-neon-script">Your 80&apos;s Photo is Ready!</h3>
+                <h3 className="booth-neon-script">
+                  {mode === "throwback" ? "Throwback ready!" : "Your 80's Photo is Ready!"}
+                </h3>
                 <p className="booth-subcopy">
-                  Your photo is ready and can be added to the Party Gallery for the event slideshow!
+                  Download anytime. Verify your email only when you add it to the Party Gallery.
                 </p>
                 <p className="booth-download-note" data-download-type="raw">
                   Download is the raw 80s photo only — no Polaroid frame or logo.
@@ -976,8 +1008,9 @@ export function PhotoBooth() {
                     className="booth-btn booth-btn-pink"
                     disabled={busy}
                     onClick={() => void submitToGallery()}
+                    data-booth-save="gallery"
                   >
-                    Submit to gallery
+                    Add to Party Gallery
                   </button>
                   <a
                     className="booth-btn booth-btn-outline"

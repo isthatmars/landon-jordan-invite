@@ -552,7 +552,6 @@ export function PhotoBooth() {
 
       <div className="booth-wrap">
         <header className="booth-header">
-          <p className="booth-neon-80s">The 80&apos;s</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="booth-title-chrome"
@@ -611,13 +610,10 @@ export function PhotoBooth() {
               </div>
 
               <div className="booth-entry-main">
-                <h3 className="booth-neon-script booth-entry-welcome">
-                  {welcomeName
-                    ? `Welcome back, ${welcomeName}!`
-                    : "Welcome to the 80's Photo Booth!"}
-                </h3>
                 <p className="booth-subcopy booth-entry-subcopy">
-                  Upload a photo to get your 80&apos;s transformation and add it to the Party Gallery.
+                  {welcomeName
+                    ? `Welcome back, ${welcomeName}. Upload a photo to get your 80's transformation and add it to the Party Gallery.`
+                    : "Upload a photo to get your 80's transformation and add it to the Party Gallery."}
                 </p>
                 <div
                   className={`booth-drop booth-entry-drop${dragOver ? " is-drag" : ""}`}
@@ -695,7 +691,7 @@ export function PhotoBooth() {
 
           {!loading && step === "auth" ? (
             <div className="mx-auto max-w-md space-y-4 text-center" data-booth-auth="verify-at-save">
-              <h3 className="booth-neon-script" style={{ fontSize: "1.5rem" }}>
+              <h3 className="booth-panel-title">
                 {pendingAction.current === "submit" || resultId
                   ? "Verify to save"
                   : pendingAction.current === "myphotos"
@@ -780,9 +776,9 @@ export function PhotoBooth() {
 
           {!loading && step === "upload" ? (
             <div className="booth-entry-main booth-upload-step">
-              <h3 className="booth-neon-script" style={{ fontSize: "1.55rem" }}>
-                {mode === "throwback" ? "Upload a Throwback" : "Welcome to the 80's Photo Booth!"}
-              </h3>
+              {mode === "throwback" ? (
+                <h3 className="booth-panel-title">Upload a Throwback</h3>
+              ) : null}
               <p className="booth-subcopy">
                 {mode === "throwback"
                   ? "Add an original 80's photo for the party slideshow."
@@ -850,9 +846,7 @@ export function PhotoBooth() {
                 <p className="font-nav text-xs tracking-[0.14em] text-white/50">Selected photo</p>
               </div>
               <div>
-                <h3 className="booth-neon-script" style={{ fontSize: "1.6rem" }}>
-                  Your Photo
-                </h3>
+                <h3 className="booth-panel-title">Your Photo</h3>
                 <p className="mt-2 text-sm text-white/75">
                   {mode === "throwback"
                     ? "We'll keep this private until you verify email to add it to the Party Gallery."
@@ -945,7 +939,7 @@ export function PhotoBooth() {
                 <div className="booth-status-icon" aria-hidden>
                   ⎙
                 </div>
-                <h3 className="booth-neon-script">Printing your photo...</h3>
+                <h3 className="booth-panel-title">Printing your photo...</h3>
                 <div className="booth-progress" aria-hidden>
                   <span style={{ width: `${progress}%` }} />
                 </div>
@@ -993,7 +987,7 @@ export function PhotoBooth() {
                 <div className="booth-status-icon is-ok" aria-hidden>
                   ✓
                 </div>
-                <h3 className="booth-neon-script">
+                <h3 className="booth-panel-title">
                   {mode === "throwback" ? "Throwback ready!" : "Your 80's Photo is Ready!"}
                 </h3>
                 <p className="booth-subcopy">
@@ -1054,7 +1048,7 @@ export function PhotoBooth() {
                 <div className="booth-status-icon is-ok" aria-hidden>
                   ✓
                 </div>
-                <h3 className="booth-neon-script">Submitted to Party Gallery!</h3>
+                <h3 className="booth-panel-title">Submitted to Party Gallery!</h3>
                 <p className="mt-3 text-sm leading-relaxed text-white/75">
                   Your photo has been received and is awaiting approval. Once approved, it will be
                   added to the event slideshow and Party Gallery.
@@ -1106,9 +1100,7 @@ export function PhotoBooth() {
 
           {!loading && step === "myphotos" ? (
             <div className="space-y-5">
-              <h3 className="booth-neon-script text-center" style={{ fontSize: "1.5rem" }}>
-                My Photos
-              </h3>
+              <h3 className="booth-panel-title text-center">My Photos</h3>
               <div>
                 <p className="font-nav mb-2 text-xs tracking-[0.14em] text-[#c6ff00]">
                   My 80s AI photos
@@ -1231,7 +1223,7 @@ export function PhotoBooth() {
         >
           <div className="booth-rsvp-popup-card">
             <p className="booth-rsvp-popup-eyebrow">You&apos;re in the booth</p>
-            <h3 id="booth-rsvp-popup-title" className="booth-neon-script booth-rsvp-popup-title">
+            <h3 id="booth-rsvp-popup-title" className="booth-panel-title booth-rsvp-popup-title">
               RSVP now
             </h3>
             <p className="booth-rsvp-popup-copy">

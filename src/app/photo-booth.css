@@ -70,23 +70,11 @@
   z-index: 4;
   flex-shrink: 0;
 }
-.booth-neon-80s {
-  font-family: var(--font-hastron), var(--font-script-fallback), cursive;
-  font-size: clamp(1.35rem, 2.8vw, 2.1rem);
-  color: var(--booth-pink);
-  text-shadow:
-    0 0 6px rgba(255, 79, 216, 1),
-    0 0 18px rgba(255, 46, 200, 0.85),
-    0 0 42px rgba(255, 46, 200, 0.45);
-  margin: 0;
-  line-height: 1;
-  animation: booth-neon-breathe 3.2s ease-in-out infinite;
-}
 .booth-title-chrome {
   display: block;
-  width: min(980px, 96%);
+  width: min(860px, 88%);
   height: auto;
-  margin: -0.55rem auto -2.6rem;
+  margin: 0.15rem auto -2.15rem;
   position: relative;
   z-index: 2;
   filter: drop-shadow(0 0 22px rgba(255, 79, 216, 0.55));
@@ -102,20 +90,16 @@
   white-space: nowrap;
   border: 0;
 }
-.booth-neon-script {
-  font-family: var(--font-hastron), var(--font-script-fallback), cursive;
-  color: var(--booth-pink);
-  text-shadow:
-    0 0 6px rgba(255, 79, 216, 0.95),
-    0 0 18px rgba(255, 46, 200, 0.7),
-    0 0 36px rgba(255, 46, 200, 0.35);
-  margin: 0;
-  font-size: clamp(1.35rem, 3vw, 2rem);
-  line-height: 1.15;
-}
-@keyframes booth-neon-breathe {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.18); }
+.booth-panel-title {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-nav), system-ui, sans-serif;
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255, 79, 216, 0.25);
 }
 
 .booth-panel {
@@ -436,12 +420,6 @@
   align-items: stretch;
   justify-content: center;
   gap: 0.35rem;
-}
-.booth-entry-welcome {
-  font-size: clamp(1.65rem, 2.4vw + 0.6rem, 2.55rem) !important;
-  line-height: 1.12;
-  margin: 0 0 0.15rem;
-  flex-shrink: 0;
 }
 .booth-entry-subcopy {
   margin: 0 0 0.35rem !important;
@@ -845,8 +823,8 @@
     padding: clamp(1rem, 2.4vw, 1.65rem);
   }
   .booth-title-chrome {
-    width: min(1080px, 96%);
-    margin-bottom: -2.85rem;
+    width: min(940px, 88%);
+    margin-bottom: -2.35rem;
   }
   .booth-print-scene {
     width: min(100%, 420px);
@@ -866,8 +844,8 @@
     justify-content: flex-start;
   }
   .booth-title-chrome {
-    width: min(100%, 480px);
-    margin: -0.2rem auto -1.15rem;
+    width: min(100%, 420px);
+    margin: 0.1rem auto -1rem;
   }
   .booth-panel {
     width: 96%;
@@ -904,9 +882,6 @@
     gap: 0.28rem;
     justify-content: flex-start;
   }
-  .booth-entry-welcome {
-    font-size: clamp(1.3rem, 5.2vw, 1.75rem) !important;
-  }
   .booth-entry-subcopy {
     font-size: 0.84rem !important;
     margin-bottom: 0.15rem !important;
@@ -933,12 +908,9 @@
 }
 
 @media (max-width: 480px) {
-  .booth-neon-80s {
-    font-size: 1.15rem;
-  }
   .booth-title-chrome {
-    width: min(100%, 360px);
-    margin-bottom: -0.95rem;
+    width: min(100%, 320px);
+    margin-bottom: -0.8rem;
   }
   .booth-panel {
     width: 97%;
@@ -1010,11 +982,8 @@
 
 .booth-rsvp-popup-title {
   margin: 0 0 0.65rem !important;
-  font-size: clamp(2rem, 6vw, 2.55rem) !important;
-  color: #ff4fd8 !important;
-  text-shadow:
-    0 0 12px rgba(255, 79, 216, 0.7),
-    0 0 28px rgba(255, 79, 216, 0.35);
+  font-size: clamp(1.25rem, 3.5vw, 1.6rem) !important;
+  letter-spacing: 0.08em;
 }
 
 .booth-rsvp-popup-copy {

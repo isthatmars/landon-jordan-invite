@@ -163,6 +163,8 @@ async function submitImage2Image(opts: {
   model: string;
   imageUrl: string;
   label: string;
+  /** When false, OpenArt keeps our identity/scene prompt verbatim. */
+  autoEnhancePrompt?: boolean;
 }): Promise<string> {
   const res = await fetch(`${apiBase()}/api/cli/v1/generate`, {
     method: "POST",
@@ -176,6 +178,9 @@ async function submitImage2Image(opts: {
         imageCount: 1,
         aspectRatio: "1:1",
         resolution: "1K",
+        // Identity hold: nano-banana i2i has no strength/denoise — rely on
+        // visualReferences + a locked prompt (do not auto-rewrite it).
+        autoEnhancePrompt: opts.autoEnhancePrompt ?? false,
         visualReferences: [
           {
             type: "image",
@@ -290,6 +295,7 @@ export async function generatePhotoBoothViaHttp(opts: {
   mimeType?: string;
   prompt?: string;
   model?: string;
+  autoEnhancePrompt?: boolean;
 }): Promise<OpenArtGenerateResult> {
   const parsed = parseDataUrl(
     opts.mimeType && !opts.imageBase64.startsWith("data:")
@@ -314,6 +320,7 @@ export async function generatePhotoBoothViaHttp(opts: {
     model,
     imageUrl: signed.accessURL,
     label: "guest-capture",
+    autoEnhancePrompt: opts.autoEnhancePrompt ?? false,
   });
   const imageUrl = await pollCreation(historyId);
   return { historyId, imageUrl, model, mode: PHOTO_BOOTH_OPENART_MODE };
@@ -325,6 +332,7 @@ export async function generatePhotoBoothViaCli(opts: {
   mimeType?: string;
   prompt?: string;
   model?: string;
+  autoEnhancePrompt?: boolean;
 }): Promise<OpenArtGenerateResult> {
   const token = openArtToken();
   if (!token) {
@@ -442,6 +450,8 @@ export async function generatePhotoBoothImage(opts: {
   mimeType?: string;
   prompt?: string;
   model?: string;
+  /** Defaults false — preserve identity-locked booth prompt. */
+  autoEnhancePrompt?: boolean;
 }): Promise<OpenArtGenerateResult> {
   if (!openArtToken()) {
     throw new OpenArtError(

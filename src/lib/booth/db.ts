@@ -598,25 +598,44 @@ export async function getRateLimitStatus(
 
 /* ---------- temp uploads ---------- */
 
+function tempFromRow(row: Record<string, unknown>): BoothTempUpload {
+  return {
+    id: String(row.id),
+    guestEmail: (row.guest_email as string) || null,
+    sessionId: (row.session_id as string) || null,
+    path: String(row.path),
+    mime: String(row.mime),
+    bytes: Number(row.bytes || 0),
+    purpose: row.purpose as BoothTempUpload["purpose"],
+    expiresAt: String(row.expires_at),
+    deletedAt: (row.deleted_at as string) || null,
+    createdAt: String(row.created_at),
+  };
+}
+
 export async function saveTemp(temp: BoothTempUpload) {
   if (boothDbEnabled()) {
-    await rest("booth_temp_uploads?on_conflict=id", {
-      method: "POST",
-      headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
-      body: JSON.stringify({
-        id: temp.id,
-        guest_email: temp.guestEmail,
-        session_id: temp.sessionId,
-        path: temp.path,
-        mime: temp.mime,
-        bytes: temp.bytes,
-        purpose: temp.purpose,
-        expires_at: temp.expiresAt,
-        deleted_at: temp.deletedAt,
-        created_at: temp.createdAt,
-      }),
-    });
-    return;
+    try {
+      await rest("booth_temp_uploads?on_conflict=id", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+        body: JSON.stringify({
+          id: temp.id,
+          guest_email: temp.guestEmail,
+          session_id: temp.sessionId,
+          path: temp.path,
+          mime: temp.mime,
+          bytes: temp.bytes,
+          purpose: temp.purpose,
+          expires_at: temp.expiresAt,
+          deleted_at: temp.deletedAt,
+          created_at: temp.createdAt,
+        }),
+      });
+      return;
+    } catch (err) {
+      console.warn("[booth:temp:local-fallback]", err);
+    }
   }
   await writeLocal((s) => {
     const i = s.temps.findIndex((x) => x.id === temp.id);
@@ -627,23 +646,15 @@ export async function saveTemp(temp: BoothTempUpload) {
 
 export async function getTemp(id: string): Promise<BoothTempUpload | null> {
   if (boothDbEnabled()) {
-    const rows = await rest<Record<string, unknown>[]>(
-      `booth_temp_uploads?id=eq.${encodeURIComponent(id)}&limit=1`,
-    );
-    const row = rows?.[0];
-    if (!row) return null;
-    return {
-      id: String(row.id),
-      guestEmail: (row.guest_email as string) || null,
-      sessionId: (row.session_id as string) || null,
-      path: String(row.path),
-      mime: String(row.mime),
-      bytes: Number(row.bytes || 0),
-      purpose: row.purpose as BoothTempUpload["purpose"],
-      expiresAt: String(row.expires_at),
-      deletedAt: (row.deleted_at as string) || null,
-      createdAt: String(row.created_at),
-    };
+    try {
+      const rows = await rest<Record<string, unknown>[]>(
+        `booth_temp_uploads?id=eq.${encodeURIComponent(id)}&limit=1`,
+      );
+      const row = rows?.[0];
+      if (row) return tempFromRow(row);
+    } catch (err) {
+      console.warn("[booth:temp:read-fallback]", err);
+    }
   }
   const s = await readLocal();
   return s.temps.find((t) => t.id === id) || null;
@@ -651,21 +662,14 @@ export async function getTemp(id: string): Promise<BoothTempUpload | null> {
 
 export async function listExpiredTemps(nowIso = new Date().toISOString()): Promise<BoothTempUpload[]> {
   if (boothDbEnabled()) {
-    const rows = await rest<Record<string, unknown>[]>(
-      `booth_temp_uploads?deleted_at=is.null&expires_at=lte.${nowIso}&select=*`,
-    );
-    return (rows || []).map((row) => ({
-      id: String(row.id),
-      guestEmail: (row.guest_email as string) || null,
-      sessionId: (row.session_id as string) || null,
-      path: String(row.path),
-      mime: String(row.mime),
-      bytes: Number(row.bytes || 0),
-      purpose: row.purpose as BoothTempUpload["purpose"],
-      expiresAt: String(row.expires_at),
-      deletedAt: (row.deleted_at as string) || null,
-      createdAt: String(row.created_at),
-    }));
+    try {
+      const rows = await rest<Record<string, unknown>[]>(
+        `booth_temp_uploads?deleted_at=is.null&expires_at=lte.${nowIso}&select=*`,
+      );
+      return (rows || []).map(tempFromRow);
+    } catch (err) {
+      console.warn("[booth:temp:list-fallback]", err);
+    }
   }
   const s = await readLocal();
   return s.temps.filter((t) => !t.deletedAt && t.expiresAt <= nowIso);
@@ -674,12 +678,16 @@ export async function listExpiredTemps(nowIso = new Date().toISOString()): Promi
 export async function markTempDeleted(id: string) {
   const now = new Date().toISOString();
   if (boothDbEnabled()) {
-    await rest(`booth_temp_uploads?id=eq.${encodeURIComponent(id)}`, {
-      method: "PATCH",
-      headers: { Prefer: "return=minimal" },
-      body: JSON.stringify({ deleted_at: now }),
-    });
-    return;
+    try {
+      await rest(`booth_temp_uploads?id=eq.${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({ deleted_at: now }),
+      });
+      return;
+    } catch (err) {
+      console.warn("[booth:temp:delete-fallback]", err);
+    }
   }
   await writeLocal((s) => {
     const t = s.temps.find((x) => x.id === id);

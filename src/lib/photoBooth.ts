@@ -16,16 +16,17 @@ export const PHOTO_BOOTH_OPENART_MODEL =
 export const PHOTO_BOOTH_OPENART_MODE = "image2image" as const;
 
 /**
- * Prompt for the 80s Polaroid look. Keep the subject recognizable;
- * restyle wardrobe / grain / flash / era, do not replace the person.
+ * Fallback prompt (prefer `buildEightysOpenArtPrompt` from booth/types).
+ * Keep the exact photo; lightly make it a natural 1980s snapshot.
  */
 export const PHOTO_BOOTH_TRANSFORM_PROMPT = [
-  "Transform this exact person into a vintage 1980s photo booth Polaroid portrait.",
-  "Preserve their face, identity, age, and likeness precisely — same person, same features.",
-  "1980s mall photo booth aesthetic: soft flash, slight film grain, warm color cast,",
-  "mild vignette, authentic Polaroid frame crop feel, nostalgic party energy.",
-  "Optional era styling (windbreaker, big hair vibe, neon party mood) without changing who they are.",
-  "Photorealistic, not cartoon, not illustration. Single subject, centered head-and-shoulders.",
+  "Keep the exact photo but make it look like a real photograph taken in the 1980s.",
+  "Preserve face, identity, people count, pose, framing, and facial features exactly.",
+  "Keep the same background/setting essence from the upload; only period-correct that place.",
+  "Shift clothing only to the closest era-appropriate version of what they already wear.",
+  "Natural 1980s consumer photo: warm flash or available light, slight film grain, mild color cast, natural skin.",
+  "Photorealistic snapshot, not cartoon or illustration. No text, logos, watermarks, or borders.",
+  "Avoid: face swap, beauty filter, extra people, invented Miami neon club, forced costume restyle, CGI.",
 ].join(" ");
 
 export type PhotoBoothGenerateRequest = {

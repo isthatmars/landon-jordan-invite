@@ -13,7 +13,7 @@ import {
   PHOTO_BOOTH_OPENART_MODEL,
   PHOTO_BOOTH_TRANSFORM_PROMPT,
 } from "@/lib/photoBooth";
-import { EIGHTYS_STYLE_PROMPT } from "./types";
+import { buildEightysOpenArtPrompt } from "./types";
 import { mockEightiesGrade, sanitizeImage } from "./polaroid";
 
 export type AiGenerateResult =
@@ -71,7 +71,7 @@ export async function generateEightiesPhoto(
   }
 
   const dataUrl = `data:image/jpeg;base64,${cleaned.buffer.toString("base64")}`;
-  const prompt = EIGHTYS_STYLE_PROMPT || PHOTO_BOOTH_TRANSFORM_PROMPT;
+  const prompt = buildEightysOpenArtPrompt() || PHOTO_BOOTH_TRANSFORM_PROMPT;
 
   try {
     const result = await generatePhotoBoothImage({
@@ -79,6 +79,8 @@ export async function generateEightiesPhoto(
       mimeType: "image/jpeg",
       prompt,
       model: PHOTO_BOOTH_OPENART_MODEL,
+      // Keep identity: do not let OpenArt rewrite the careful lock + scene prompt.
+      autoEnhancePrompt: false,
     });
     const raw = await bufferFromResultUrl(result.imageUrl);
     const buffer = await sanitizeImage(raw);

@@ -18,7 +18,7 @@ import {
 import { hashIp } from "@/lib/booth/crypto";
 import { clientIp, readBoothSessionFromRequest } from "@/lib/booth/session";
 import { deleteObject, getObject, makeStoredRef, parseStoredRef, putObject } from "@/lib/booth/storage";
-import { EIGHTYS_STYLE_PROMPT } from "@/lib/booth/types";
+import { buildEightysOpenArtPrompt } from "@/lib/booth/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     ipHash: ip,
     status: "running",
     model: null,
-    prompt: EIGHTYS_STYLE_PROMPT.slice(0, 280),
+    prompt: buildEightysOpenArtPrompt().slice(0, 280),
     errorMessage: null,
     startedAt: now,
     finishedAt: null,
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
     ipHash: ip,
     status: "ready",
     model: ai.model,
-    prompt: EIGHTYS_STYLE_PROMPT.slice(0, 280),
+    prompt: buildEightysOpenArtPrompt().slice(0, 280),
     errorMessage: null,
     startedAt: now,
     finishedAt: finished,

@@ -101,15 +101,61 @@ export const BOOTH_ALLOWED_MIME = new Set([
   "image/heif",
 ]);
 
-/** OpenArt image2image prompt — identity lock + 80s Polaroid look. */
-export const EIGHTYS_STYLE_PROMPT = `Transform this exact person into a vintage 1980s photo booth Polaroid portrait for Landon & Jordan's birthday.
+/**
+ * OpenArt image2image — keep the exact photo, lightly restyle it as a real 1980s
+ * snapshot. Prefer identity + scene continuity over a full costume restyle.
+ */
+export const EIGHTYS_STYLE_PROMPT = `Keep the exact photo but make it look like a real photograph taken in the 1980s.
 
-Preserve identity exactly: same face(s), skin tone, age cues, hairline, facial hair, glasses shape if present, body type, and number of people. Do not add or remove people. Keep natural features — no beauty filters, no face swap, no age change.
+IDENTITY LOCK (non-negotiable):
+- Same person/people, same face(s), facial features, skin tone, age, hairline, facial hair, eye shape, nose, mouth, and expression.
+- Same people count, pose, framing, camera angle, and body proportions.
+- Do not face-swap, beautify, de-age, re-age, or invent new people.
 
-Style (one cohesive look):
-- Authentic late-80s fashion: colorful windbreakers / track jackets, bold color blocks (teal, magenta, purple, red), gold-rim aviators or clear oversized frames when glasses already exist
-- Lighting: warm flash + neon pink and electric blue rim light, soft haze
-- Photographic feel: Polaroid / party flash photo, slight film grain, natural skin texture, mild vignette
-- Keep the subject centered head-and-shoulders; photorealistic, not cartoon
+SCENE CONTINUITY:
+- Keep the same background/setting essence from the upload (driveway stays a driveway; car stays a period-plausible car; living room stays a living room).
+- Translate materials/lighting/props into period-correct 1980s versions of THAT place — do not invent an unrelated Miami Vice neon club, beach, or mall booth if it is not in the source.
 
-Output a single square portrait photograph ready for a Polaroid frame. No text, logos, watermarks, UI, or borders in the image.`;
+WARDROBE:
+- Keep the same outfit silhouette and layering; only shift fabrics/colors/details to the closest era-appropriate 1980s version of what they are already wearing.
+- Do not force windbreakers, leather jackets, or party costumes unless the source clothing already reads that way.
+
+LOOK:
+- Natural, period-correct 1980s consumer photo: warm flash or available light, slight film grain, mild color cast, natural skin texture, mild vignette.
+- Photorealistic snapshot — not illustration, not CGI, not cartoon.
+- Single square photograph ready for a Polaroid frame. No text, logos, watermarks, UI, or borders.`;
+
+/** Negative constraints appended for models without a separate negativePrompt field. */
+export const EIGHTYS_NEGATIVE_PROMPT = [
+  "face swap",
+  "different person",
+  "changed identity",
+  "beauty filter",
+  "airbrushed skin",
+  "plastic skin",
+  "de-aged",
+  "re-aged",
+  "extra people",
+  "missing people",
+  "changed pose",
+  "invented Miami neon club",
+  "unrelated nightclub",
+  "forced windbreaker costume",
+  "cartoon",
+  "anime",
+  "illustration",
+  "3d render",
+  "CGI",
+  "watermark",
+  "logo",
+  "text overlay",
+  "UI chrome",
+  "Polaroid frame drawn in image",
+].join(", ");
+
+/** Combined prompt sent to OpenArt generate. */
+export function buildEightysOpenArtPrompt(): string {
+  return `${EIGHTYS_STYLE_PROMPT}
+
+Avoid / do not generate: ${EIGHTYS_NEGATIVE_PROMPT}.`;
+}

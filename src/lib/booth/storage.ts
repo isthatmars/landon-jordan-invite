@@ -1,4 +1,5 @@
 import { promises as fs } from "fs";
+import os from "os";
 import path from "path";
 import {
   boothDbEnabled,
@@ -8,16 +9,54 @@ import {
   storageUpload,
 } from "./supabase";
 
-const LOCAL_ROOT = path.join(process.cwd(), ".data", "booth");
-
 export type BoothBucket = "booth-temp" | "booth-outputs" | "booth-throwbacks";
 
-function localPath(bucket: BoothBucket, objectPath: string) {
-  return path.join(LOCAL_ROOT, bucket, objectPath);
+/**
+ * Prefer project `.data/booth`; on read-only hosts (Vercel) use `/tmp`.
+ * Resolved lazily so the first successful mkdir wins.
+ */
+let resolvedLocalRoot: string | null = null;
+
+async function localRoot(): Promise<string> {
+  if (resolvedLocalRoot) return resolvedLocalRoot;
+  const candidates = [
+    path.join(process.cwd(), ".data", "booth"),
+    path.join(os.tmpdir(), "lj-booth-storage"),
+  ];
+  for (const candidate of candidates) {
+    try {
+      await fs.mkdir(candidate, { recursive: true });
+      const probe = path.join(candidate, ".write-probe");
+      await fs.writeFile(probe, "ok");
+      await fs.unlink(probe).catch(() => undefined);
+      resolvedLocalRoot = candidate;
+      return candidate;
+    } catch (err) {
+      console.warn("[booth:storage:local-root]", candidate, err);
+    }
+  }
+  // Last resort — still point at tmp even if probe failed.
+  resolvedLocalRoot = candidates[1];
+  return resolvedLocalRoot;
+}
+
+async function localPath(bucket: BoothBucket, objectPath: string) {
+  return path.join(await localRoot(), bucket, objectPath);
 }
 
 async function ensureParent(filePath: string) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
+}
+
+async function putLocal(
+  bucket: BoothBucket,
+  objectPath: string,
+  bytes: Buffer,
+): Promise<{ bucket: BoothBucket; path: string; backend: "local" }> {
+  const dest = await localPath(bucket, objectPath);
+  await ensureParent(dest);
+  await fs.writeFile(dest, bytes);
+  return { bucket, path: objectPath, backend: "local" };
 }
 
 export async function putObject(
@@ -27,29 +66,38 @@ export async function putObject(
   contentType: string,
 ): Promise<{ bucket: BoothBucket; path: string; backend: "supabase" | "local" }> {
   if (boothDbEnabled()) {
-    await storageUpload(bucket, objectPath, bytes, contentType);
-    return { bucket, path: objectPath, backend: "supabase" };
+    try {
+      await storageUpload(bucket, objectPath, bytes, contentType);
+      return { bucket, path: objectPath, backend: "supabase" };
+    } catch (err) {
+      // Preview/prod must still accept anon drafts when Storage is misconfigured.
+      console.warn("[booth:storage:upload-fallback]", err);
+    }
   }
-  const dest = localPath(bucket, objectPath);
-  await ensureParent(dest);
-  await fs.writeFile(dest, bytes);
-  return { bucket, path: objectPath, backend: "local" };
+  return putLocal(bucket, objectPath, bytes);
 }
 
 export async function getObject(bucket: BoothBucket, objectPath: string): Promise<Buffer> {
   if (boothDbEnabled()) {
-    return storageDownload(bucket, objectPath);
+    try {
+      return await storageDownload(bucket, objectPath);
+    } catch (err) {
+      console.warn("[booth:storage:download-fallback]", err);
+    }
   }
-  return fs.readFile(localPath(bucket, objectPath));
+  return fs.readFile(await localPath(bucket, objectPath));
 }
 
 export async function deleteObject(bucket: BoothBucket, objectPath: string): Promise<void> {
   if (boothDbEnabled()) {
-    await storageRemove(bucket, objectPath);
-    return;
+    try {
+      await storageRemove(bucket, objectPath);
+    } catch (err) {
+      console.warn("[booth:storage:remove]", err);
+    }
   }
   try {
-    await fs.unlink(localPath(bucket, objectPath));
+    await fs.unlink(await localPath(bucket, objectPath));
   } catch {
     /* missing ok */
   }
@@ -62,7 +110,11 @@ export async function objectUrl(
   expiresIn = 3600,
 ): Promise<string> {
   if (boothDbEnabled()) {
-    return storageSignedUrl(bucket, objectPath, expiresIn);
+    try {
+      return await storageSignedUrl(bucket, objectPath, expiresIn);
+    } catch (err) {
+      console.warn("[booth:storage:signed-url-fallback]", err);
+    }
   }
   return `/api/booth/file?bucket=${encodeURIComponent(bucket)}&path=${encodeURIComponent(objectPath)}`;
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { hashToken, randomToken, sha256 } from "./crypto";
+import { hashToken, normalizeEmail, randomToken, sha256 } from "./crypto";
 import { boothCookieOptions } from "./session";
 
 export const BOOTH_ANON_COOKIE = "lj_booth_anon";
@@ -46,9 +46,12 @@ export function attachAnonCookie(res: NextResponse, token: string) {
   return res;
 }
 
-/** Path prefix used for temp/output object keys. */
+/**
+ * Path prefix used for temp/output object keys.
+ * Hash-based so keys never contain `@` (breaks unencoded Supabase Storage URLs).
+ */
 export function storageKeyForEmail(email: string): string {
-  return email.replace(/[^a-z0-9@._-]/gi, "_");
+  return sha256(`booth-storage:${normalizeEmail(email)}`).slice(0, 40);
 }
 
 export function anonOwnsEmail(request: Request, guestEmail: string): boolean {

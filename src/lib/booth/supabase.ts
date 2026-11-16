@@ -36,6 +36,15 @@ export async function rest<T>(path: string, init: RequestInit = {}): Promise<T> 
   return (text ? JSON.parse(text) : undefined) as T;
 }
 
+/** Encode each path segment for Supabase Storage REST URLs. */
+function encodeObjectPath(objectPath: string): string {
+  return objectPath
+    .split("/")
+    .filter((part) => part.length > 0)
+    .map((part) => encodeURIComponent(part))
+    .join("/");
+}
+
 export async function storageUpload(
   bucket: string,
   objectPath: string,
@@ -44,8 +53,9 @@ export async function storageUpload(
 ): Promise<void> {
   const cfg = supabaseConfig();
   if (!cfg) throw new Error("Supabase is not configured.");
+  const encodedPath = encodeObjectPath(objectPath);
   const res = await fetch(
-    `${cfg.url}/storage/v1/object/${bucket}/${objectPath}`,
+    `${cfg.url}/storage/v1/object/${encodeURIComponent(bucket)}/${encodedPath}`,
     {
       method: "POST",
       headers: {
@@ -66,12 +76,16 @@ export async function storageUpload(
 export async function storageDownload(bucket: string, objectPath: string): Promise<Buffer> {
   const cfg = supabaseConfig();
   if (!cfg) throw new Error("Supabase is not configured.");
-  const res = await fetch(`${cfg.url}/storage/v1/object/${bucket}/${objectPath}`, {
-    headers: {
-      apikey: cfg.key,
-      Authorization: `Bearer ${cfg.key}`,
+  const encodedPath = encodeObjectPath(objectPath);
+  const res = await fetch(
+    `${cfg.url}/storage/v1/object/${encodeURIComponent(bucket)}/${encodedPath}`,
+    {
+      headers: {
+        apikey: cfg.key,
+        Authorization: `Bearer ${cfg.key}`,
+      },
     },
-  });
+  );
   if (!res.ok) {
     const detail = await res.text();
     throw new Error(`Storage download ${res.status}: ${detail.slice(0, 280)}`);
@@ -100,15 +114,19 @@ export async function storageSignedUrl(
 ): Promise<string> {
   const cfg = supabaseConfig();
   if (!cfg) throw new Error("Supabase is not configured.");
-  const res = await fetch(`${cfg.url}/storage/v1/object/sign/${bucket}/${objectPath}`, {
-    method: "POST",
-    headers: {
-      apikey: cfg.key,
-      Authorization: `Bearer ${cfg.key}`,
-      "Content-Type": "application/json",
+  const encodedPath = encodeObjectPath(objectPath);
+  const res = await fetch(
+    `${cfg.url}/storage/v1/object/sign/${encodeURIComponent(bucket)}/${encodedPath}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: cfg.key,
+        Authorization: `Bearer ${cfg.key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ expiresIn }),
     },
-    body: JSON.stringify({ expiresIn }),
-  });
+  );
   if (!res.ok) {
     const detail = await res.text();
     throw new Error(`Signed URL ${res.status}: ${detail.slice(0, 280)}`);

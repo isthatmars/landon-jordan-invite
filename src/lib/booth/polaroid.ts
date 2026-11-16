@@ -4,6 +4,8 @@ import {
   renderTornPaperEdge,
 } from "./watermark";
 
+export { sanitizeImage } from "./image";
+
 const FRAME = {
   /** Inner photo size (square). */
   photo: 900,
@@ -20,30 +22,6 @@ export const POLAROID_SIZE = {
   width: FRAME.photo + FRAME.padSide * 2,
   height: FRAME.photo + FRAME.padTop + FRAME.padBottom,
 } as const;
-
-/**
- * Strip EXIF/GPS and normalize to JPEG RGB.
- */
-export async function sanitizeImage(input: Buffer): Promise<{
-  buffer: Buffer;
-  width: number;
-  height: number;
-  mime: "image/jpeg";
-}> {
-  const image = sharp(input, { failOn: "none" }).rotate();
-  const meta = await image.metadata();
-  const buffer = await image
-    .removeAlpha()
-    .jpeg({ quality: 92, mozjpeg: true })
-    .toBuffer();
-  const out = await sharp(buffer).metadata();
-  return {
-    buffer,
-    width: out.width || meta.width || 0,
-    height: out.height || meta.height || 0,
-    mime: "image/jpeg",
-  };
-}
 
 /**
  * Pixel-composite a branded Polaroid:

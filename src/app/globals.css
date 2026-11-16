@@ -738,14 +738,25 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
   }
 
   /*
-   * Nuclear cover: once any later plate owns the viewport, kill arcade paint
-   * entirely — even if hysteresis still has data-live-arcade=1 for a frame,
-   * and even if play-zoom left overflow:visible + drop-shadow filters hot.
+   * Nuclear cover: once a flow plate (lineup / photobooth / RSVP) owns the
+   * viewport, hide EVERY earlier sticky photographic plate. RSVP uses
+   * scrollIntoView({block:center}), so sticky home/mixtape/watch/arcade can
+   * otherwise peek as a brown strip above the opaque RSVP plate.
+   * Key off later-plate live flags — not live-arcade=0 alone — so scrolling
+   * back up to arcade does not blank the cabinet before liveArcade flips.
    */
+  html[data-live-lineup="1"] #home,
+  html[data-live-lineup="1"] #mixtape,
+  html[data-live-lineup="1"] #watch,
   html[data-live-lineup="1"] #arcade,
+  html[data-live-photobooth="1"] #home,
+  html[data-live-photobooth="1"] #mixtape,
+  html[data-live-photobooth="1"] #watch,
   html[data-live-photobooth="1"] #arcade,
-  html[data-live-rsvp="1"] #arcade,
-  html[data-live-arcade="0"] #arcade {
+  html[data-live-rsvp="1"] #home,
+  html[data-live-rsvp="1"] #mixtape,
+  html[data-live-rsvp="1"] #watch,
+  html[data-live-rsvp="1"] #arcade {
     z-index: 1 !important;
     overflow: clip !important;
     opacity: 0 !important;
@@ -754,6 +765,10 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
     filter: none !important;
     transform: none;
     will-change: auto;
+  }
+
+  html[data-live-arcade="0"] #arcade {
+    overflow: clip !important;
   }
 
   html[data-live-lineup="1"] #arcade.is-play-zoom,
@@ -773,8 +788,7 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
   html[data-live-arcade="0"] #arcade .arcade-stage.is-zoomed .arcade-machine,
   html[data-live-lineup="1"] #arcade .arcade-machine,
   html[data-live-photobooth="1"] #arcade .arcade-machine,
-  html[data-live-rsvp="1"] #arcade .arcade-machine,
-  html[data-live-arcade="0"] #arcade .arcade-machine {
+  html[data-live-rsvp="1"] #arcade .arcade-machine {
     filter: none !important;
     transform: none !important;
     will-change: auto !important;
@@ -842,10 +856,18 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
     isolation: isolate;
   }
 
+  html[data-live-lineup="1"] #home,
+  html[data-live-lineup="1"] #mixtape,
+  html[data-live-lineup="1"] #watch,
   html[data-live-lineup="1"] #arcade,
+  html[data-live-photobooth="1"] #home,
+  html[data-live-photobooth="1"] #mixtape,
+  html[data-live-photobooth="1"] #watch,
   html[data-live-photobooth="1"] #arcade,
-  html[data-live-rsvp="1"] #arcade,
-  html[data-live-arcade="0"] #arcade {
+  html[data-live-rsvp="1"] #home,
+  html[data-live-rsvp="1"] #mixtape,
+  html[data-live-rsvp="1"] #watch,
+  html[data-live-rsvp="1"] #arcade {
     z-index: 1 !important;
     overflow: clip !important;
     opacity: 0 !important;

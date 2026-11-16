@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import {
   boothDbEnabled,
+  boothRequiresRemoteDb,
   storageDownload,
   storageRemove,
   storageSignedUrl,
@@ -70,9 +71,19 @@ export async function putObject(
       await storageUpload(bucket, objectPath, bytes, contentType);
       return { bucket, path: objectPath, backend: "supabase" };
     } catch (err) {
-      // Preview/prod must still accept anon drafts when Storage is misconfigured.
+      // On Vercel preview/prod never silently keep gallery bytes in ephemeral /tmp.
+      if (boothRequiresRemoteDb()) {
+        console.error("[booth:storage:upload-required]", err);
+        throw err instanceof Error
+          ? err
+          : new Error("Supabase Storage upload failed for Photo Booth.");
+      }
       console.warn("[booth:storage:upload-fallback]", err);
     }
+  } else if (boothRequiresRemoteDb()) {
+    throw new Error(
+      "Photo Booth storage is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+    );
   }
   return putLocal(bucket, objectPath, bytes);
 }

@@ -2,10 +2,16 @@ import { NextResponse } from "next/server";
 import { anonOwnsEmail, isAnonBoothEmail } from "@/lib/booth/anon";
 import { claimPhotoToGuest, getPhoto, upsertPhoto } from "@/lib/booth/db";
 import { readBoothSessionFromRequest } from "@/lib/booth/session";
+import {
+  boothDbEnabled,
+  boothRequiresRemoteDb,
+  supabaseProjectRef,
+} from "@/lib/booth/supabase";
 
 /**
  * Permanent gallery association requires a verified booth session.
  * Anonymous drafts created in this browser can be claimed on submit.
+ * On Vercel preview/prod this MUST persist to Supabase (same project as RSVPs).
  */
 export async function POST(
   request: Request,
@@ -21,6 +27,18 @@ export async function POST(
       { status: 401 },
     );
   }
+
+  if (boothRequiresRemoteDb() && !boothDbEnabled()) {
+    return NextResponse.json(
+      {
+        error:
+          "Photo Booth gallery save is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on this deployment (same project as RSVPs).",
+        persistBackend: "unconfigured",
+      },
+      { status: 503 },
+    );
+  }
+
   const { id } = await ctx.params;
   let photo = await getPhoto(id);
   if (!photo) {
@@ -65,9 +83,12 @@ export async function POST(
     updatedAt: now,
   });
 
+  const projectRef = supabaseProjectRef();
   return NextResponse.json({
     ok: true,
     status: "pending",
+    persistBackend: boothDbEnabled() ? "supabase" : "local",
+    supabaseProjectRef: projectRef,
     message:
       "Your photo has been received and is awaiting approval. Once approved, it will be added to the event slideshow and Party Gallery.",
   });

@@ -550,6 +550,53 @@
   .booth-stage { grid-template-columns: 1fr; }
 }
 
+/* Confirm: stacked preview-first so the selected photo can't clip off-panel */
+.booth-confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+}
+.booth-confirm-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+}
+.booth-confirm .booth-preview-frame {
+  width: min(280px, 72vw);
+  flex-shrink: 0;
+  background: #1a1224;
+  border-color: rgba(255, 79, 216, 0.45);
+  box-shadow: 0 0 18px rgba(255, 79, 216, 0.22);
+}
+.booth-preview-missing {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-nav), sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+.booth-confirm-copy {
+  width: 100%;
+  text-align: left;
+}
+.booth-confirm-copy .booth-panel-title {
+  text-align: center;
+}
+.booth-confirm-copy > p {
+  text-align: center;
+}
+
 .booth-camera-wrap {
   position: relative;
   display: flex;

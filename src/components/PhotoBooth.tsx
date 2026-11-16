@@ -77,6 +77,7 @@ export function PhotoBooth() {
 
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const localPreviewRef = useRef<string | null>(null);
   const [consent, setConsent] = useState(false);
   const [progress, setProgress] = useState(12);
   const [flash, setFlash] = useState(false);
@@ -182,8 +183,28 @@ export function PhotoBooth() {
   useEffect(() => {
     return () => {
       if (propFlashTimer.current) window.clearTimeout(propFlashTimer.current);
+      if (localPreviewRef.current) {
+        URL.revokeObjectURL(localPreviewRef.current);
+        localPreviewRef.current = null;
+      }
     };
   }, []);
+
+  const clearLocalPreview = () => {
+    if (localPreviewRef.current) {
+      URL.revokeObjectURL(localPreviewRef.current);
+      localPreviewRef.current = null;
+    }
+  };
+
+  const setPreviewFromFile = (file: File) => {
+    clearLocalPreview();
+    const localUrl = URL.createObjectURL(file);
+    localPreviewRef.current = localUrl;
+    // Local blob so confirm always shows the selected photo even if the
+    // authenticated /api/booth/file preview fails to load.
+    setPreviewUrl(localUrl);
+  };
 
   const stepIndex = useMemo(() => {
     switch (step) {
@@ -251,6 +272,8 @@ export function PhotoBooth() {
     if (purposeOverride) setMode(purposeOverride);
     setBusy(true);
     setError("");
+    // Show the selected file immediately on confirm (don't wait on storage preview).
+    setPreviewFromFile(file);
     try {
       const fd = new FormData();
       fd.set("file", file);
@@ -260,10 +283,11 @@ export function PhotoBooth() {
       if (!res.ok) throw new Error(data.error || "Upload failed.");
       if (!data.uploadId || !data.previewUrl) throw new Error("Upload failed.");
       setUploadId(data.uploadId);
-      setPreviewUrl(data.previewUrl);
       setConsent(false);
       setStep("confirm");
     } catch (err) {
+      clearLocalPreview();
+      setPreviewUrl(null);
       setError(err instanceof Error ? err.message : "Upload failed.");
     } finally {
       setBusy(false);
@@ -453,6 +477,7 @@ export function PhotoBooth() {
 
   const resetCreate = () => {
     setUploadId(null);
+    clearLocalPreview();
     setPreviewUrl(null);
     setResultUrl(null);
     setResultId(null);
@@ -832,20 +857,34 @@ export function PhotoBooth() {
           ) : null}
 
           {!loading && step === "confirm" ? (
-            <div className="booth-stage">
-              <div className="flex flex-col items-center gap-3">
+            <div className="booth-confirm">
+              <div className="booth-confirm-preview">
                 <div className="booth-preview-frame">
                   {previewUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={previewUrl} alt="Selected photo" />
-                  ) : null}
+                    <img
+                      src={previewUrl}
+                      alt="Selected photo"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (img.dataset.failed === "1") return;
+                        img.dataset.failed = "1";
+                        img.removeAttribute("src");
+                        img.alt = "Selected photo unavailable";
+                      }}
+                    />
+                  ) : (
+                    <div className="booth-preview-missing" aria-hidden>
+                      No preview
+                    </div>
+                  )}
                   <span className="booth-check" aria-hidden>
                     ✓
                   </span>
                 </div>
                 <p className="font-nav text-xs tracking-[0.14em] text-white/50">Selected photo</p>
               </div>
-              <div>
+              <div className="booth-confirm-copy">
                 <h3 className="booth-panel-title">Your Photo</h3>
                 <p className="mt-2 text-sm text-white/75">
                   {mode === "throwback"
@@ -854,8 +893,13 @@ export function PhotoBooth() {
                 </p>
                 {!aiConfigured && mode === "ai" ? (
                   <p className="booth-error">
-                    AI generation needs OPENART_TOKEN on the server (or BOOTH_MOCK_AI=1 for local
-                    smoke tests). OpenArt image2image only — no alternate image providers.
+                    AI styling is temporarily unavailable — try again shortly.
+                    {process.env.NODE_ENV !== "production" ? (
+                      <span className="mt-1 block text-[0.75rem] opacity-80">
+                        Dev: set OPENART_TOKEN on the server (or BOOTH_MOCK_AI=1 for local smoke
+                        tests).
+                      </span>
+                    ) : null}
                   </p>
                 ) : null}
                 <div className="booth-consent">
@@ -880,7 +924,11 @@ export function PhotoBooth() {
                   <button
                     type="button"
                     className="booth-btn booth-btn-pink"
-                    disabled={busy || !consent || (mode === "ai" && rate !== null && !rate.allowed)}
+                    disabled={
+                      busy ||
+                      !consent ||
+                      (mode === "ai" && (!aiConfigured || (rate !== null && !rate.allowed)))
+                    }
                     onClick={() => void runGenerate()}
                   >
                     {mode === "throwback" ? "Continue with throwback →" : "Create my 80s photo →"}
@@ -890,6 +938,7 @@ export function PhotoBooth() {
                     className="booth-btn booth-btn-outline"
                     onClick={() => {
                       setUploadId(null);
+                      clearLocalPreview();
                       setPreviewUrl(null);
                       setStep("upload");
                     }}

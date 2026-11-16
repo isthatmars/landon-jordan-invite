@@ -35,7 +35,9 @@ export async function POST(request: Request) {
       ok: false,
       code: "missing_token",
       error:
-        "Photo Booth AI is not configured. Set OPENART_TOKEN on the server.",
+        process.env.NODE_ENV === "production"
+          ? "AI styling is temporarily unavailable — try again shortly."
+          : "Photo Booth AI is not configured. Set OPENART_TOKEN on the server.",
     });
   }
 

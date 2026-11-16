@@ -61,7 +61,9 @@ export async function generateEightiesPhoto(
     return {
       ok: false,
       error:
-        "AI photo generation is not configured yet. Set OPENART_TOKEN on the server and try again.",
+        process.env.NODE_ENV === "production"
+          ? "AI styling is temporarily unavailable — try again shortly."
+          : "AI photo generation is not configured yet. Set OPENART_TOKEN on the server (or BOOTH_MOCK_AI=1 for local smoke tests).",
     };
   }
 

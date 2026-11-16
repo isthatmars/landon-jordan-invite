@@ -1,6 +1,7 @@
 /**
  * Shared Supabase REST + Storage helpers for the photo booth.
- * Uses the same service-role pattern as RSVP storage.
+ * Uses the same service-role pattern as RSVP storage (same SUPABASE_* env).
+ * Expected production project: landon-jordan-invite / ezuqjqdeqmdwumcqvksi.
  */
 
 export function supabaseConfig(): { url: string; key: string } | null {
@@ -15,6 +16,25 @@ export function supabaseConfig(): { url: string; key: string } | null {
 
 export function boothDbEnabled(): boolean {
   return supabaseConfig() !== null;
+}
+
+/** Project ref from SUPABASE_URL host (e.g. ezuqjqdeqmdwumcqvksi). Never returns secrets. */
+export function supabaseProjectRef(): string | null {
+  const cfg = supabaseConfig();
+  if (!cfg) return null;
+  try {
+    const host = new URL(cfg.url).hostname;
+    const ref = host.split(".")[0]?.trim();
+    return ref || null;
+  } catch {
+    return null;
+  }
+}
+
+/** True on Vercel preview/production — permanent booth writes must not use .data/tmp. */
+export function boothRequiresRemoteDb(): boolean {
+  const vercelEnv = (process.env.VERCEL_ENV || "").trim();
+  return Boolean(process.env.VERCEL) && (vercelEnv === "production" || vercelEnv === "preview");
 }
 
 export async function rest<T>(path: string, init: RequestInit = {}): Promise<T> {

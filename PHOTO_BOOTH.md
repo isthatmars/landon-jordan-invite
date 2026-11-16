@@ -18,6 +18,21 @@ Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
 - Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
 - Booth art (environment, camera, samples, chrome title) also generated via OpenArt and checked into `public/images/booth/`
 
+### Required: `OPENART_TOKEN` on Vercel
+
+Preview/production Photo Booth AI will not run until this **server-only** secret is set on the
+Vercel project `landon-jordan-invite` (`prj_lve7NCw0qR8fpOquEv5RUrTON6IY`) for **Preview + Production**:
+
+1. Create a token via OpenArt CLI: `openart login` (stores `~/.openart/cli-credentials.json`) or a
+   personal access token from the OpenArt account that has credits.
+2. In Vercel → Project → Settings → Environment Variables, add `OPENART_TOKEN` (Encrypted) to
+   Preview and Production (and Development if you pull env locally).
+3. Redeploy the Preview (or Production) deployment so the new env is picked up.
+4. Confirm with `GET /api/booth/session` → `ai.configured` should be `true` and `ai.openart` `true`.
+
+Guests never see the env-var name; the confirm step shows a friendly unavailable message and disables
+**Create** when no provider is configured. Dev builds may show a short setup hint.
+
 ## 4. Guest identity (verify only at save)
 
 - Guests can **enter, upload, generate AI photos, preview Polaroids, and download the current raw draft without email**.
@@ -43,9 +58,30 @@ OTP rows prefer Supabase `booth_otp_challenges`; on remote failure the server fa
 ## 5. Storage
 
 - Supabase tables + private buckets when `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are set
-- Local `.data/booth*` fallback otherwise (memory-only if the filesystem is read-only)
+- **Same Supabase project as RSVPs** — `https://ezuqjqdeqmdwumcqvksi.supabase.co` (`landon-jordan-invite`)
+- Tables: `booth_photos`, `booth_sessions`, `booth_otp_challenges`, `booth_generations`, `booth_temp_uploads`, `booth_rate_events` (RLS on; service role bypasses)
+- Private buckets: `booth-temp`, `booth-outputs`, `booth-throwbacks`
+- Local `.data/booth*` fallback **only on local/dev** (never on Vercel preview/prod gallery save)
 - AI source uploads deleted ≤30 min; outputs / throwbacks retained
 - Downloads + gallery/admin storage serve the **raw** AI/throwback image (no Polaroid frame, no logo). On-screen CSS Polaroid is display-only. `composeBrandedPolaroid` remains available but is not used for guest downloads.
+- Wiring check: `GET /api/booth/health` (no secrets; reports project ref + missing env)
+
+## Env / secrets checklist (Preview + Production)
+
+Set these in the Vercel project `landon-jordan-invite` for **Preview** and **Production** (server-only — never `NEXT_PUBLIC_` for secrets):
+
+| Variable | Required for | Notes |
+|---|---|---|
+| `SUPABASE_URL` | Gallery save + RSVP | Must be `https://ezuqjqdeqmdwumcqvksi.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Gallery save + RSVP | Service role; bypasses RLS. Same key RSVP already uses. |
+| `OPENART_TOKEN` | Real AI transforms | Sibling agent wires this. Without it, set `BOOTH_MOCK_AI=1` for QA only. |
+| `RESEND_API_KEY` | OTP email + RSVP mail | Without it, preview can still expose `devCode`. |
+| `RESEND_FROM_EMAIL` | Live email From | Verified sender in Resend. |
+| `NEXT_PUBLIC_SITE_URL` | Email / magic-link CTAs | Absolute site URL. |
+| `OWNER_EMAIL` | Owner RSVP alerts | Comma-separated OK. |
+| `ADMIN_ACCESS_CODE` | `/admin` | Default `NEON80S` if unset. |
+
+Optional / local-only: `BOOTH_MOCK_AI`, `BOOTH_DEV_OTP`, `BOOTH_EXPOSE_OTP`, `BOOTH_CLEANUP_SECRET`, `OPENART_IMAGE_MODEL`, `OPENART_API_BASE`.
 
 ## Flow
 

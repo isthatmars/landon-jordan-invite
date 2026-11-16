@@ -4,7 +4,7 @@ import { uid } from "@/lib/id";
 import { listRsvps, supabaseRsvpEnabled } from "@/lib/rsvp-db";
 import { getStore } from "@/lib/store";
 import { normalizeEmail } from "./crypto";
-import { boothDbEnabled, rest } from "./supabase";
+import { boothDbEnabled, boothRequiresRemoteDb, rest } from "./supabase";
 import type {
   BoothGenerationRecord,
   BoothGuest,
@@ -374,6 +374,12 @@ export async function upsertPhoto(photo: BoothPhotoRecord) {
       body: JSON.stringify(photoToRow(photo)),
     });
     return;
+  }
+  // Vercel preview/prod must never pretend a local/.data write is the party gallery.
+  if (boothRequiresRemoteDb()) {
+    throw new Error(
+      "Photo Booth gallery requires SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY on this deployment.",
+    );
   }
   await writeLocal((s) => {
     const i = s.photos.findIndex((x) => x.id === photo.id);

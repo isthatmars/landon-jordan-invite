@@ -1027,13 +1027,35 @@ html[data-live-arcade="1"] #arcade {
   pointer-events: auto;
 }
 
+/*
+ * Photo Booth is a tall FLOW plate (not sticky). Exclusive live=0 mid-scroll
+ * used to visibility:hidden the controls while the section still filled the
+ * viewport (probe at 72% already claimed lineup/RSVP). Keep controls painted
+ * and usable while warm/in-view; only blank them when fully cold. When RSVP
+ * owns the cover, kill hit-testing so seam peek cannot steal RSVP taps.
+ */
 html[data-live-photobooth="0"] #photobooth {
   pointer-events: none;
 }
-html[data-live-photobooth="0"] #photobooth button,
-html[data-live-photobooth="0"] #photobooth a,
-html[data-live-photobooth="0"] #photobooth input {
+html[data-warm-photobooth="1"] #photobooth {
+  pointer-events: auto;
+}
+html[data-warm-photobooth="1"] #photobooth button,
+html[data-warm-photobooth="1"] #photobooth a,
+html[data-warm-photobooth="1"] #photobooth input {
+  visibility: visible;
+  pointer-events: auto;
+}
+html[data-warm-photobooth="0"] #photobooth button,
+html[data-warm-photobooth="0"] #photobooth a,
+html[data-warm-photobooth="0"] #photobooth input {
   visibility: hidden;
+  pointer-events: none;
+}
+html[data-live-rsvp="1"] #photobooth,
+html[data-live-rsvp="1"] #photobooth button,
+html[data-live-rsvp="1"] #photobooth a,
+html[data-live-rsvp="1"] #photobooth input {
   pointer-events: none;
 }
 html[data-live-photobooth="1"] #photobooth {

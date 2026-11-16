@@ -247,6 +247,7 @@ export function PhotoBooth() {
       const res = await fetch("/api/booth/upload", { method: "POST", body: fd });
       const data = await readBoothJson<{ error?: string; uploadId?: string; previewUrl?: string }>(res);
       if (!res.ok) throw new Error(data.error || "Upload failed.");
+      if (!data.uploadId || !data.previewUrl) throw new Error("Upload failed.");
       setUploadId(data.uploadId);
       setPreviewUrl(data.previewUrl);
       setConsent(false);

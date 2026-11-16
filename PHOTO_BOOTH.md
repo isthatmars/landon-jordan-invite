@@ -20,15 +20,19 @@ Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
 
 ### Required: `OPENART_TOKEN` on Vercel
 
+OpenArt has no classic API-key product — `OPENART_TOKEN` is the **OAuth access token** from the
+OpenArt CLI (`openart login` → `~/.openart/cli-credentials.json` → `access_token`). Locally the
+server also reads that file when the env var is unset.
+
 Preview/production Photo Booth AI will not run until this **server-only** secret is set on the
 Vercel project `landon-jordan-invite` (`prj_lve7NCw0qR8fpOquEv5RUrTON6IY`) for **Preview + Production**:
 
-1. Create a token via OpenArt CLI: `openart login` (stores `~/.openart/cli-credentials.json`) or a
-   personal access token from the OpenArt account that has credits.
-2. In Vercel → Project → Settings → Environment Variables, add `OPENART_TOKEN` (Encrypted) to
-   Preview and Production (and Development if you pull env locally).
-3. Redeploy the Preview (or Production) deployment so the new env is picked up.
-4. Confirm with `GET /api/booth/session` → `ai.configured` should be `true` and `ai.openart` `true`.
+1. On a trusted machine: `openart login`, then copy `access_token` from
+   `~/.openart/cli-credentials.json` (do not commit it).
+2. Vercel → Project → Settings → Environment Variables → add `OPENART_TOKEN` (Encrypted) for
+   Preview + Production (+ Development if you `vercel env pull`).
+3. Redeploy Preview/Production so the new env is picked up.
+4. Confirm with `GET /api/booth/session` → `ai.configured: true` and `ai.openart: true`.
 
 Guests never see the env-var name; the confirm step shows a friendly unavailable message and disables
 **Create** when no provider is configured. Dev builds may show a short setup hint.

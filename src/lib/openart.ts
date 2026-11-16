@@ -7,8 +7,9 @@
  */
 
 import { spawn } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdtemp, writeFile, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   PHOTO_BOOTH_OPENART_MODE,
@@ -29,8 +30,29 @@ function apiBase() {
   return (process.env.OPENART_API_BASE || DEFAULT_API_BASE).replace(/\/$/, "");
 }
 
+/** Sync read of OpenArt CLI OAuth access token (local/agent only). */
+function tokenFromCliCredentials(): string {
+  try {
+    const path = join(homedir(), ".openart", "cli-credentials.json");
+    if (!existsSync(path)) return "";
+    const raw = JSON.parse(readFileSync(path, "utf8")) as {
+      access_token?: string;
+      accessToken?: string;
+      token?: string;
+    };
+    return (
+      raw.access_token?.trim() ||
+      raw.accessToken?.trim() ||
+      raw.token?.trim() ||
+      ""
+    );
+  } catch {
+    return "";
+  }
+}
+
 function openArtToken() {
-  return process.env.OPENART_TOKEN?.trim() || "";
+  return process.env.OPENART_TOKEN?.trim() || tokenFromCliCredentials();
 }
 
 function authHeaders(): HeadersInit {

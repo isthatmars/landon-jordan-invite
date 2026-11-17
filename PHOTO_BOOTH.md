@@ -20,19 +20,36 @@ Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
 
 ### Required: `OPENART_TOKEN` on Vercel
 
-OpenArt has no classic API-key product — `OPENART_TOKEN` is the **OAuth access token** from the
-OpenArt CLI (`openart login` → `~/.openart/cli-credentials.json` → `access_token`). Locally the
-server also reads that file when the env var is unset.
+**There is no “Create API key” page in OpenArt.** Cursor OpenArt MCP / “Connect OpenArt” is only
+for the assistant — it does **not** set Production. `OPENART_TOKEN` is the OAuth **`access_token`**
+from the OpenArt CLI (`openart login` → `~/.openart/cli-credentials.json`). Locally the Next server
+also reads that file when the env var is unset.
 
 Preview/production Photo Booth AI will not run until this **server-only** secret is set on the
 Vercel project `landon-jordan-invite` (`prj_lve7NCw0qR8fpOquEv5RUrTON6IY`) for **Preview + Production**:
 
-1. On a trusted machine: `openart login`, then copy `access_token` from
-   `~/.openart/cli-credentials.json` (do not commit it).
+1. On a trusted machine (same OpenArt account you want to bill tonight):
+   ```sh
+   curl -fsSL https://raw.githubusercontent.com/OpenArt-AI/cli/main/install.sh | sh
+   export PATH="$HOME/.local/bin:$PATH"
+   openart login
+   openart account   # confirm email / plan
+   python3 -c "import json,pathlib; print(json.load(open(pathlib.Path.home()/'.openart'/'cli-credentials.json'))['access_token'])"
+   ```
+   Do not commit the token; paste it only into Vercel (or a one-time agent paste).
 2. Vercel → Project → Settings → Environment Variables → add `OPENART_TOKEN` (Encrypted) for
    Preview + Production (+ Development if you `vercel env pull`).
 3. Redeploy Preview/Production so the new env is picked up.
-4. Confirm with `GET /api/booth/session` → `ai.configured: true` and `ai.openart: true`.
+4. Confirm: `GET https://www.landonandjordan.com/api/booth/health` → `openArt.configured: true`
+   (`missing` must not list `OPENART_TOKEN`).
+
+#### Switching OpenArt accounts (e.g. tomorrow)
+
+Using account A tonight and account B tomorrow is only an env replace — no code change:
+
+1. Sign into the **other** OpenArt account with `openart login`, copy that account’s `access_token`.
+2. Vercel → edit `OPENART_TOKEN` to the new value for Production + Preview.
+3. Redeploy. Re-check `/api/booth/health` → `openArt.configured: true`.
 
 Guests never see the env-var name; the confirm step shows a friendly unavailable message and disables
 **Create** when no provider is configured. Dev builds may show a short setup hint.
@@ -78,7 +95,7 @@ Set these in the Vercel project `landon-jordan-invite` for **Preview** and **Pro
 |---|---|---|
 | `SUPABASE_URL` | Gallery save + RSVP | Must be `https://ezuqjqdeqmdwumcqvksi.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Gallery save + RSVP | Service role; bypasses RLS. Same key RSVP already uses. |
-| `OPENART_TOKEN` | Real AI transforms | Sibling agent wires this. Without it, set `BOOTH_MOCK_AI=1` for QA only. |
+| `OPENART_TOKEN` | Real AI transforms | CLI OAuth `access_token` (see above). Switch accounts by replacing this + redeploy. Without it, set `BOOTH_MOCK_AI=1` for QA only. |
 | `RESEND_API_KEY` | OTP email + RSVP mail | Without it, preview can still expose `devCode`. |
 | `RESEND_FROM_EMAIL` | Live email From | Verified sender in Resend. |
 | `NEXT_PUBLIC_SITE_URL` | Email / magic-link CTAs | Absolute site URL. |

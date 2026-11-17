@@ -1,9 +1,11 @@
 /**
  * OpenArt client for Photo Booth generations.
  *
- * Primary path: HTTPS OpenArt CLI API with server-only `OPENART_TOKEN`.
- * Optional local fallback: spawn `openart` CLI when the binary is available
- * (dev / agent hosts). Never expose the token to the browser.
+ * Primary path: HTTPS OpenArt CLI API with server-only `OPENART_TOKEN`
+ * (OAuth access_token from `openart login` — OpenArt has no separate API-key
+ * product). Optional `OPENART_REFRESH_TOKEN` renews expired access tokens on
+ * Vercel. Local/agent hosts also read `~/.openart/cli-credentials.json` and
+ * may fall back to the `openart` CLI binary. Never expose tokens to the browser.
  */
 
 import { spawn } from "node:child_process";
@@ -18,6 +20,9 @@ import {
 } from "@/lib/photoBooth";
 
 const DEFAULT_API_BASE = "https://openart.ai";
+/** Public OpenArt CLI OAuth client (PKCE; no client secret). */
+const DEFAULT_OAUTH_CLIENT_ID = "azccmAz4FaQIlCTOhjJ2";
+const OAUTH_TOKEN_PATH = "/suite/api/auth/oauth/token";
 
 export type OpenArtGenerateResult = {
   historyId: string;
@@ -26,40 +31,138 @@ export type OpenArtGenerateResult = {
   mode: typeof PHOTO_BOOTH_OPENART_MODE;
 };
 
+type CliCredentials = {
+  access_token?: string;
+  accessToken?: string;
+  token?: string;
+  refresh_token?: string;
+  refreshToken?: string;
+  client_id?: string;
+  clientId?: string;
+  expiry?: string;
+  expires_at?: string;
+  expiresAt?: string;
+  expires_in?: number;
+};
+
+/** Process-local cache after a successful refresh (Vercel env is read-only). */
+let runtimeAccessToken = "";
+let refreshInFlight: Promise<string> | null = null;
+
 function apiBase() {
   return (process.env.OPENART_API_BASE || DEFAULT_API_BASE).replace(/\/$/, "");
 }
 
-/** Sync read of OpenArt CLI OAuth access token (local/agent only). */
-function tokenFromCliCredentials(): string {
+function readCliCredentials(): CliCredentials | null {
   try {
     const path = join(homedir(), ".openart", "cli-credentials.json");
-    if (!existsSync(path)) return "";
-    const raw = JSON.parse(readFileSync(path, "utf8")) as {
-      access_token?: string;
-      accessToken?: string;
-      token?: string;
-    };
-    return (
-      raw.access_token?.trim() ||
-      raw.accessToken?.trim() ||
-      raw.token?.trim() ||
-      ""
-    );
+    if (!existsSync(path)) return null;
+    return JSON.parse(readFileSync(path, "utf8")) as CliCredentials;
   } catch {
-    return "";
+    return null;
   }
 }
 
-function openArtToken() {
-  return process.env.OPENART_TOKEN?.trim() || tokenFromCliCredentials();
+/** Sync read of OpenArt CLI OAuth access token (local/agent only). */
+function tokenFromCliCredentials(): string {
+  const raw = readCliCredentials();
+  if (!raw) return "";
+  return (
+    raw.access_token?.trim() ||
+    raw.accessToken?.trim() ||
+    raw.token?.trim() ||
+    ""
+  );
 }
 
-function authHeaders(): HeadersInit {
-  const token = openArtToken();
+function refreshTokenFromConfig(): string {
+  const file = readCliCredentials();
+  return (
+    process.env.OPENART_REFRESH_TOKEN?.trim() ||
+    file?.refresh_token?.trim() ||
+    file?.refreshToken?.trim() ||
+    ""
+  );
+}
+
+function oauthClientId(): string {
+  const file = readCliCredentials();
+  return (
+    process.env.OPENART_CLIENT_ID?.trim() ||
+    file?.client_id?.trim() ||
+    file?.clientId?.trim() ||
+    DEFAULT_OAUTH_CLIENT_ID
+  );
+}
+
+function openArtToken() {
+  return (
+    runtimeAccessToken ||
+    process.env.OPENART_TOKEN?.trim() ||
+    tokenFromCliCredentials()
+  );
+}
+
+async function refreshAccessToken(): Promise<string> {
+  const refreshToken = refreshTokenFromConfig();
+  if (!refreshToken) {
+    throw new OpenArtError(
+      "OpenArt access token expired and OPENART_REFRESH_TOKEN is not set.",
+      "missing_token",
+    );
+  }
+  if (!refreshInFlight) {
+    refreshInFlight = (async () => {
+      const body = new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: oauthClientId(),
+      });
+      const res = await fetch(`${apiBase()}${OAUTH_TOKEN_PATH}`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body,
+      });
+      const json = (await res.json().catch(() => ({}))) as {
+        access_token?: string;
+        accessToken?: string;
+        error?: string;
+        error_description?: string;
+        message?: string;
+      };
+      if (!res.ok) {
+        throw new OpenArtError(
+          json.error_description ||
+            json.error ||
+            json.message ||
+            `OpenArt token refresh failed (${res.status})`,
+          "missing_token",
+        );
+      }
+      const next =
+        json.access_token?.trim() || json.accessToken?.trim() || "";
+      if (!next) {
+        throw new OpenArtError(
+          "OpenArt token refresh returned no access_token.",
+          "missing_token",
+        );
+      }
+      runtimeAccessToken = next;
+      return next;
+    })().finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
+
+function authHeaders(token = openArtToken()): HeadersInit {
   if (!token) {
     throw new OpenArtError(
-      "OPENART_TOKEN is not configured (server secret required).",
+      "OPENART_TOKEN is not configured (server secret required). Run `openart login` and set the access_token — Cursor OpenArt MCP login is separate.",
       "missing_token",
     );
   }
@@ -69,6 +172,23 @@ function authHeaders(): HeadersInit {
     "Content-Type": "application/json",
     "x-openart-cli-version": "photo-booth",
   };
+}
+
+/** Authenticated fetch; on 401, refresh once when a refresh token is available. */
+async function openArtFetch(
+  url: string,
+  init: RequestInit = {},
+): Promise<Response> {
+  const first = await fetch(url, {
+    ...init,
+    headers: { ...authHeaders(), ...(init.headers || {}) },
+  });
+  if (first.status !== 401 || !refreshTokenFromConfig()) return first;
+  const next = await refreshAccessToken();
+  return fetch(url, {
+    ...init,
+    headers: { ...authHeaders(next), ...(init.headers || {}) },
+  });
 }
 
 export class OpenArtError extends Error {
@@ -114,9 +234,8 @@ async function signUpload(opts: {
   size: number;
   contentType: string;
 }): Promise<{ signURL: string; accessURL: string; uploadId: string }> {
-  const res = await fetch(`${apiBase()}/api/upload/sign`, {
+  const res = await openArtFetch(`${apiBase()}/api/upload/sign`, {
     method: "POST",
-    headers: authHeaders(),
     body: JSON.stringify({
       filename: opts.filename,
       size: opts.size,
@@ -158,9 +277,8 @@ async function putSigned(signURL: string, bytes: Buffer, contentType: string) {
 async function waitUploadReady(accessURL: string, uploadId: string) {
   const deadline = Date.now() + 45_000;
   while (Date.now() < deadline) {
-    const res = await fetch(`${apiBase()}/api/upload/metadata`, {
+    const res = await openArtFetch(`${apiBase()}/api/upload/metadata`, {
       method: "POST",
-      headers: authHeaders(),
       body: JSON.stringify({
         mediaUrl: accessURL,
         mediaType: "image",
@@ -188,9 +306,8 @@ async function submitImage2Image(opts: {
   /** When false, OpenArt keeps our identity/scene prompt verbatim. */
   autoEnhancePrompt?: boolean;
 }): Promise<string> {
-  const res = await fetch(`${apiBase()}/api/cli/v1/generate`, {
+  const res = await openArtFetch(`${apiBase()}/api/cli/v1/generate`, {
     method: "POST",
-    headers: authHeaders(),
     body: JSON.stringify({
       model: opts.model,
       media: "image",
@@ -275,9 +392,8 @@ async function pollCreation(historyId: string, timeoutMs = 120_000): Promise<str
   let lastErr = "OpenArt creation still running.";
   while (Date.now() < deadline) {
     for (const path of paths) {
-      const res = await fetch(`${apiBase()}${path}`, {
+      const res = await openArtFetch(`${apiBase()}${path}`, {
         method: "GET",
-        headers: authHeaders(),
       });
       if (res.status === 404) continue;
       const json = (await res.json().catch(() => ({}))) as CreationPayload;
@@ -359,7 +475,7 @@ export async function generatePhotoBoothViaCli(opts: {
   const token = openArtToken();
   if (!token) {
     throw new OpenArtError(
-      "OPENART_TOKEN is not configured (server secret required).",
+      "OPENART_TOKEN is not configured (server secret required). Run `openart login` and set the access_token — Cursor OpenArt MCP login is separate.",
       "missing_token",
     );
   }
@@ -477,7 +593,7 @@ export async function generatePhotoBoothImage(opts: {
 }): Promise<OpenArtGenerateResult> {
   if (!openArtToken()) {
     throw new OpenArtError(
-      "OPENART_TOKEN is not configured (server secret required).",
+      "OPENART_TOKEN is not configured (server secret required). Run `openart login` and set the access_token — Cursor OpenArt MCP login is separate.",
       "missing_token",
     );
   }

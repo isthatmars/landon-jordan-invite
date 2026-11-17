@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       error:
         process.env.NODE_ENV === "production"
           ? "AI styling is temporarily unavailable — try again shortly."
-          : "Photo Booth AI is not configured. Set OPENART_TOKEN on the server.",
+          : "Photo Booth AI is not configured. Set OPENART_TOKEN from `openart login` (access_token) on the server — Cursor OpenArt MCP login is not enough.",
     });
   }
 

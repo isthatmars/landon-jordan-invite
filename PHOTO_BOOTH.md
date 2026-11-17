@@ -20,19 +20,36 @@ Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
 
 ### Required: `OPENART_TOKEN` on Vercel
 
-OpenArt has no classic API-key product — `OPENART_TOKEN` is the **OAuth access token** from the
-OpenArt CLI (`openart login` → `~/.openart/cli-credentials.json` → `access_token`). Locally the
-server also reads that file when the env var is unset.
+**You did not miss an API-key page.** OpenArt Pro MCP / Cursor OAuth is only for the assistant.
+Production Photo Booth needs a separate server secret. There is no “Create API token” screen in
+OpenArt account settings — `OPENART_TOKEN` is the OAuth **`access_token`** from the OpenArt CLI.
 
-Preview/production Photo Booth AI will not run until this **server-only** secret is set on the
-Vercel project `landon-jordan-invite` (`prj_lve7NCw0qR8fpOquEv5RUrTON6IY`) for **Preview + Production**:
+#### 3 steps (copy once → Vercel)
 
-1. On a trusted machine: `openart login`, then copy `access_token` from
-   `~/.openart/cli-credentials.json` (do not commit it).
-2. Vercel → Project → Settings → Environment Variables → add `OPENART_TOKEN` (Encrypted) for
-   Preview + Production (+ Development if you `vercel env pull`).
-3. Redeploy Preview/Production so the new env is picked up.
-4. Confirm with `GET /api/booth/session` → `ai.configured: true` and `ai.openart: true`.
+1. **Install + sign in on your laptop** (one-time browser login — same OpenArt account as MCP):
+   ```sh
+   curl -fsSL https://raw.githubusercontent.com/OpenArt-AI/cli/main/install.sh | sh
+   export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
+   openart login
+   openart account   # should show your email / Pro / credits
+   ```
+2. **Copy the access token** (do not commit it; never paste into chat):
+   ```sh
+   # macOS / Linux
+   python3 -c "import json,pathlib; c=json.load(open(pathlib.Path.home()/'.openart'/'cli-credentials.json')); print(c['access_token'])"
+   # optional (keeps booth AI working after access_token expires):
+   python3 -c "import json,pathlib; c=json.load(open(pathlib.Path.home()/'.openart'/'cli-credentials.json')); print(c.get('refresh_token',''))"
+   ```
+3. **Vercel → project `landon-jordan-invite` → Settings → Environment Variables**
+   - Add `OPENART_TOKEN` = the `access_token` value (Encrypted) for **Production + Preview**
+   - Strongly recommended: also add `OPENART_REFRESH_TOKEN` = the `refresh_token` value
+   - Redeploy Production (and Preview) so the new env is live
+   - Confirm: `GET /api/booth/health` → `openArt.configured: true` and `missing` no longer lists `OPENART_TOKEN`
+
+Cursor “Connect OpenArt” / MCP does **not** populate Vercel. Locally, the Next server also reads
+`~/.openart/cli-credentials.json` when `OPENART_TOKEN` is unset. Access tokens expire; with
+`OPENART_REFRESH_TOKEN` set, the server renews them on 401. Without a refresh token, re-run
+`openart login` and update `OPENART_TOKEN` when generations start failing auth.
 
 Guests never see the env-var name; the confirm step shows a friendly unavailable message and disables
 **Create** when no provider is configured. Dev builds may show a short setup hint.
@@ -78,7 +95,8 @@ Set these in the Vercel project `landon-jordan-invite` for **Preview** and **Pro
 |---|---|---|
 | `SUPABASE_URL` | Gallery save + RSVP | Must be `https://ezuqjqdeqmdwumcqvksi.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Gallery save + RSVP | Service role; bypasses RLS. Same key RSVP already uses. |
-| `OPENART_TOKEN` | Real AI transforms | Sibling agent wires this. Without it, set `BOOTH_MOCK_AI=1` for QA only. |
+| `OPENART_TOKEN` | Real AI transforms | OAuth `access_token` from `openart login` (not MCP). Without it, set `BOOTH_MOCK_AI=1` for QA only. |
+| `OPENART_REFRESH_TOKEN` | Keep AI working after access expiry | Same credentials file → `refresh_token`. Optional but recommended on Vercel. |
 | `RESEND_API_KEY` | OTP email + RSVP mail | Without it, preview can still expose `devCode`. |
 | `RESEND_FROM_EMAIL` | Live email From | Verified sender in Resend. |
 | `NEXT_PUBLIC_SITE_URL` | Email / magic-link CTAs | Absolute site URL. |

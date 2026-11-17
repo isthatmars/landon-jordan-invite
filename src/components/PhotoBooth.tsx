@@ -896,7 +896,7 @@ export function PhotoBooth() {
                     AI styling is temporarily unavailable — try again shortly.
                     {process.env.NODE_ENV !== "production" ? (
                       <span className="mt-1 block text-[0.75rem] opacity-80">
-                        Dev: set OPENART_TOKEN on the server (or BOOTH_MOCK_AI=1 for local smoke
+                        Dev: set OPENART_TOKEN from `openart login` (not MCP) or BOOTH_MOCK_AI=1 for local smoke
                         tests).
                       </span>
                     ) : null}

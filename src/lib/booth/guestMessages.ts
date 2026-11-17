@@ -20,6 +20,8 @@ export const BOOTH_GUEST_MESSAGES = {
   uploadFailed: UPLOAD_FALLBACK,
   verifyFailed: VERIFY_FALLBACK,
   saveFailed: SAVE_FALLBACK,
+  downloadNeedsAuth: "Verify your email to download this photo.",
+  rateLimited: "You've hit the limit of 5 AI photos per hour. Try again later.",
   generic: GENERIC_FALLBACK,
 } as const;
 

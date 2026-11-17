@@ -9,18 +9,20 @@ export async function GET(request: Request) {
   const auth = await readBoothSessionFromRequest(request);
   // Guests only need a boolean — never leak model/provider/env details.
   const ai = { configured: boothAiStatus().configured };
+  const ip = hashIp(clientIp(request));
+  // Always return IP-based (and email when verified) rate so anon guests see the 5/hr cap.
+  const rate = await getRateLimitStatus(auth?.guest.email || null, ip);
   if (!auth) {
     return NextResponse.json({
       authenticated: false,
       guest: null,
       photos: [],
-      rate: null,
+      rate,
       ai,
     });
   }
 
   const photos = await listPhotosForEmail(auth.guest.email);
-  const rate = await getRateLimitStatus(auth.guest.email, hashIp(clientIp(request)));
 
   const enriched = await Promise.all(
     photos.map(async (p) => {

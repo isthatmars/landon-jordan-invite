@@ -3,7 +3,12 @@ import path from "path";
 import { uid } from "@/lib/id";
 import { listRsvps, supabaseRsvpEnabled } from "@/lib/rsvp-db";
 import { getStore } from "@/lib/store";
+import { isAnonBoothEmail } from "./anon";
 import { normalizeEmail } from "./crypto";
+import {
+  isBoothRateLimitEmailAllowlisted,
+  rsvpMatchesAllowlistName,
+} from "./rateLimitAllowlist";
 import { boothDbEnabled, boothRequiresRemoteDb, rest } from "./supabase";
 import type {
   BoothGenerationRecord,
@@ -550,17 +555,44 @@ export async function recordRateEvent(guestEmail: string | null, ipHash: string 
   });
 }
 
+export async function isBoothRateLimitExempt(
+  guestEmail: string | null | undefined,
+): Promise<boolean> {
+  if (!guestEmail || isAnonBoothEmail(guestEmail)) return false;
+  if (isBoothRateLimitEmailAllowlisted(guestEmail)) return true;
+  const rsvp = await findRsvpByEmail(guestEmail).catch(() => null);
+  return Boolean(rsvp && rsvpMatchesAllowlistName(rsvp));
+}
+
 export async function getRateLimitStatus(
   guestEmail: string | null,
   ipHash: string | null,
 ): Promise<RateLimitStatus> {
+  // Verified allowlist (OWNER_EMAIL / BOOTH_RATE_LIMIT_ALLOWLIST / named RSVPs).
+  if (guestEmail && !isAnonBoothEmail(guestEmail)) {
+    const exempt = await isBoothRateLimitExempt(guestEmail);
+    if (exempt) {
+      return {
+        remaining: BOOTH_AI_LIMIT,
+        limit: BOOTH_AI_LIMIT,
+        resetAt: null,
+        allowed: true,
+      };
+    }
+  }
+
   const since = new Date(Date.now() - BOOTH_AI_WINDOW_MS).toISOString();
   let guestCount = 0;
   let ipCount = 0;
   let oldestGuest: string | null = null;
+  let oldestIp: string | null = null;
+
+  // Anonymous drafts use synthetic @booth.local emails — count IP only for those.
+  const trackGuest =
+    Boolean(guestEmail) && !isAnonBoothEmail(guestEmail);
 
   if (boothDbEnabled()) {
-    if (guestEmail) {
+    if (trackGuest && guestEmail) {
       const rows = await rest<{ created_at: string }[]>(
         `booth_rate_events?guest_email=eq.${encodeURIComponent(guestEmail)}&kind=eq.ai_gen&created_at=gte.${since}&order=created_at.asc&select=created_at`,
       );
@@ -569,33 +601,59 @@ export async function getRateLimitStatus(
     }
     if (ipHash) {
       const rows = await rest<{ created_at: string }[]>(
-        `booth_rate_events?ip_hash=eq.${encodeURIComponent(ipHash)}&kind=eq.ai_gen&created_at=gte.${since}&select=created_at`,
+        `booth_rate_events?ip_hash=eq.${encodeURIComponent(ipHash)}&kind=eq.ai_gen&created_at=gte.${since}&order=created_at.asc&select=created_at`,
       );
       ipCount = rows?.length || 0;
+      oldestIp = rows?.[0]?.created_at || null;
     }
   } else {
     const s = await readLocal();
     const recent = s.rateEvents.filter(
       (e) => e.kind === "ai_gen" && e.createdAt >= since,
     );
-    const guestEvents = guestEmail
-      ? recent.filter((e) => e.guestEmail === guestEmail).sort((a, b) => a.createdAt.localeCompare(b.createdAt))
-      : [];
+    const guestEvents =
+      trackGuest && guestEmail
+        ? recent
+            .filter((e) => e.guestEmail === guestEmail)
+            .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+        : [];
     guestCount = guestEvents.length;
     oldestGuest = guestEvents[0]?.createdAt || null;
-    ipCount = ipHash ? recent.filter((e) => e.ipHash === ipHash).length : 0;
+    const ipEvents = ipHash
+      ? recent
+          .filter((e) => e.ipHash === ipHash)
+          .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      : [];
+    ipCount = ipEvents.length;
+    oldestIp = ipEvents[0]?.createdAt || null;
   }
 
-  const guestRemaining = Math.max(0, BOOTH_AI_LIMIT - guestCount);
-  const ipOk = ipCount < BOOTH_ANON_IP_LIMIT;
-  const allowed = guestRemaining > 0 && ipOk;
-  const resetAt =
-    guestCount >= BOOTH_AI_LIMIT && oldestGuest
-      ? new Date(new Date(oldestGuest).getTime() + BOOTH_AI_WINDOW_MS).toISOString()
-      : null;
+  const guestRemaining = trackGuest
+    ? Math.max(0, BOOTH_AI_LIMIT - guestCount)
+    : BOOTH_AI_LIMIT;
+  const ipRemaining = Math.max(0, BOOTH_ANON_IP_LIMIT - ipCount);
+  const remaining = Math.min(guestRemaining, ipRemaining);
+  const allowed = remaining > 0;
+
+  let resetAt: string | null = null;
+  if (!allowed) {
+    const candidates: string[] = [];
+    if (trackGuest && guestCount >= BOOTH_AI_LIMIT && oldestGuest) {
+      candidates.push(
+        new Date(new Date(oldestGuest).getTime() + BOOTH_AI_WINDOW_MS).toISOString(),
+      );
+    }
+    if (ipCount >= BOOTH_ANON_IP_LIMIT && oldestIp) {
+      candidates.push(
+        new Date(new Date(oldestIp).getTime() + BOOTH_AI_WINDOW_MS).toISOString(),
+      );
+    }
+    candidates.sort();
+    resetAt = candidates[0] || null;
+  }
 
   return {
-    remaining: guestRemaining,
+    remaining,
     limit: BOOTH_AI_LIMIT,
     resetAt,
     allowed,

@@ -11,7 +11,7 @@ function neonScriptCopy(text: string) {
 
 export function Lineup({ content }: { content: SiteContent }) {
   return (
-    <section id="lineup" className="lineup-ambient relative overflow-visible bg-[#07010f]">
+    <section id="lineup" className="lineup-ambient relative bg-[#07010f]">
       <LineupAmbient />
       <div className="lineup-sweep" aria-hidden />
       <div className="lineup-wrap">

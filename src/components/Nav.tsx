@@ -15,8 +15,8 @@ const links = [
   { href: "#home", label: "HOME" },
   { href: "#mixtape", label: "THE MIXTAPE" },
   { href: "#watch", label: "WATCH" },
-  { href: "#lineup", label: "THE LINEUP" },
   { href: "#photobooth", label: "PHOTO BOOTH" },
+  { href: "#lineup", label: "THE LINEUP" },
 ];
 
 const SECTION_IDS = PLATE_IDS;

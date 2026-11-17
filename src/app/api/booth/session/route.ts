@@ -7,7 +7,8 @@ import { objectUrl, parseStoredRef } from "@/lib/booth/storage";
 
 export async function GET(request: Request) {
   const auth = await readBoothSessionFromRequest(request);
-  const ai = boothAiStatus();
+  // Guests only need a boolean — never leak model/provider/env details.
+  const ai = { configured: boothAiStatus().configured };
   if (!auth) {
     return NextResponse.json({
       authenticated: false,
@@ -40,7 +41,8 @@ export async function GET(request: Request) {
         status: p.status,
         createdAt: p.createdAt,
         submittedToGalleryAt: p.submittedToGalleryAt,
-        errorMessage: p.errorMessage,
+        // Never send provider/DB error strings to the browser.
+        errorMessage: null,
         url,
       };
     }),

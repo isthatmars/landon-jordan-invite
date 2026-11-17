@@ -9,13 +9,47 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
 export const PHOTO_BOOTH_GEMINI_MODEL =
-  process.env.GEMINI_IMAGE_MODEL?.trim() || "gemini-2.5-flash-image";
+  process.env.GEMINI_IMAGE_MODEL?.trim() || "gemini-nano-banana-2.1";
 
-export const PHOTO_BOOTH_GEMINI_ASPECT_RATIO =
-  process.env.GEMINI_IMAGE_ASPECT_RATIO?.trim() || "16:9";
+/** Polaroid frame is square — default 1:1. */
+export const PHOTO_BOOTH_GEMINI_ASPECT_RATIO = normalizeAspectRatio(
+  process.env.GEMINI_IMAGE_ASPECT_RATIO?.trim() || "1:1",
+);
 
-export const PHOTO_BOOTH_GEMINI_IMAGE_SIZE =
-  process.env.GEMINI_IMAGE_SIZE?.trim() || "2K";
+/** Gemini accepts 1K / 2K / 4K only (case-sensitive). */
+export const PHOTO_BOOTH_GEMINI_IMAGE_SIZE = normalizeImageSize(
+  process.env.GEMINI_IMAGE_SIZE?.trim() || "2K",
+);
+
+function normalizeAspectRatio(raw: string): string {
+  const v = raw.replace(/\s+/g, "");
+  const allowed = new Set([
+    "1:1",
+    "1:4",
+    "1:8",
+    "2:3",
+    "3:2",
+    "3:4",
+    "4:1",
+    "4:3",
+    "4:5",
+    "5:4",
+    "8:1",
+    "9:16",
+    "16:9",
+    "21:9",
+  ]);
+  return allowed.has(v) ? v : "1:1";
+}
+
+function normalizeImageSize(raw: string): string {
+  const v = raw.trim().toUpperCase();
+  if (v === "1K" || v === "2K" || v === "4K") return v;
+  if (v === "1" || v === "1024") return "1K";
+  if (v === "2" || v === "2048") return "2K";
+  if (v === "4" || v === "4096") return "4K";
+  return "2K";
+}
 
 function parseConcurrency(): number {
   const raw = Number.parseInt(
@@ -146,26 +180,27 @@ export async function generateGeminiEightiesPhoto(opts: {
   const onAbort = () => controller.abort();
   opts.signal?.addEventListener("abort", onAbort);
 
-  try {
-    const response = await ai.models.generateContent({
-      model,
-      contents: [
+  const contents = [
+    {
+      role: "user" as const,
+      parts: [
         {
-          role: "user",
-          parts: [
-            {
-              inlineData: {
-                mimeType,
-                data: opts.imageBytes.toString("base64"),
-              },
-            },
-            { text: opts.prompt },
-          ],
+          inlineData: {
+            mimeType,
+            data: opts.imageBytes.toString("base64"),
+          },
         },
+        { text: opts.prompt },
       ],
+    },
+  ];
+
+  async function runOnce(modalities: Modality[]) {
+    return ai.models.generateContent({
+      model,
+      contents,
       config: {
-        // Image-only keeps latency down for the Polaroid flow.
-        responseModalities: [Modality.IMAGE],
+        responseModalities: modalities,
         imageConfig: {
           aspectRatio: PHOTO_BOOTH_GEMINI_ASPECT_RATIO,
           imageSize: PHOTO_BOOTH_GEMINI_IMAGE_SIZE,
@@ -173,10 +208,21 @@ export async function generateGeminiEightiesPhoto(opts: {
         abortSignal: controller.signal,
       },
     });
+  }
 
-    const parts = (response.candidates?.[0]?.content?.parts ||
+  try {
+    let response = await runOnce([Modality.IMAGE]);
+    let parts = (response.candidates?.[0]?.content?.parts ||
       []) as InlinePart[];
-    const image = extractImage(parts);
+    let image = extractImage(parts);
+
+    // Some image models prefer TEXT+IMAGE; retry once if IMAGE-only returned nothing.
+    if (!image) {
+      response = await runOnce([Modality.TEXT, Modality.IMAGE]);
+      parts = (response.candidates?.[0]?.content?.parts || []) as InlinePart[];
+      image = extractImage(parts);
+    }
+
     if (!image) {
       const reason = response.candidates?.[0]?.finishReason;
       throw new GeminiError(

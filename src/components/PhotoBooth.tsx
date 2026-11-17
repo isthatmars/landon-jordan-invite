@@ -9,6 +9,10 @@
  */
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  BOOTH_GUEST_MESSAGES,
+  guestVisibleBoothError,
+} from "@/lib/booth/guestMessages";
 import { readBoothJson } from "@/lib/booth/http";
 import { emitBoothRsvpHandoff } from "@/lib/booth/rsvpBridge";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -280,15 +284,26 @@ export function PhotoBooth() {
       fd.set("purpose", purpose === "throwback" ? "throwback" : "ai_source");
       const res = await fetch("/api/booth/upload", { method: "POST", body: fd });
       const data = await readBoothJson<{ error?: string; uploadId?: string; previewUrl?: string }>(res);
-      if (!res.ok) throw new Error(data.error || "Upload failed.");
-      if (!data.uploadId || !data.previewUrl) throw new Error("Upload failed.");
+      if (!res.ok) {
+        throw new Error(
+          guestVisibleBoothError(data.error, BOOTH_GUEST_MESSAGES.uploadFailed),
+        );
+      }
+      if (!data.uploadId || !data.previewUrl) {
+        throw new Error(BOOTH_GUEST_MESSAGES.uploadFailed);
+      }
       setUploadId(data.uploadId);
       setConsent(false);
       setStep("confirm");
     } catch (err) {
       clearLocalPreview();
       setPreviewUrl(null);
-      setError(err instanceof Error ? err.message : "Upload failed.");
+      setError(
+        guestVisibleBoothError(
+          err instanceof Error ? err.message : "",
+          BOOTH_GUEST_MESSAGES.uploadFailed,
+        ),
+      );
     } finally {
       setBusy(false);
     }
@@ -345,12 +360,22 @@ export function PhotoBooth() {
         message?: string;
       }>(res);
       if (!res.ok || data.ok === false) {
-        throw new Error(data.error || data.message || "Could not send code.");
+        throw new Error(
+          guestVisibleBoothError(
+            data.error || data.message,
+            "Could not send a verification code. Please try again.",
+          ),
+        );
       }
       setOtpSent(true);
       setDevCode(data.devCode || null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send code.");
+      setError(
+        guestVisibleBoothError(
+          err instanceof Error ? err.message : "",
+          "Could not send a verification code. Please try again.",
+        ),
+      );
     } finally {
       setBusy(false);
     }
@@ -367,11 +392,20 @@ export function PhotoBooth() {
         body: JSON.stringify({ email, code: otp }),
       });
       const data = await readBoothJson<{ ok?: boolean; error?: string }>(res);
-      if (!res.ok || data.ok === false) throw new Error(data.error || "Code failed.");
+      if (!res.ok || data.ok === false) {
+        throw new Error(
+          guestVisibleBoothError(data.error, BOOTH_GUEST_MESSAGES.verifyFailed),
+        );
+      }
       await refreshSession();
       afterAuth();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Verification failed.");
+      setError(
+        guestVisibleBoothError(
+          err instanceof Error ? err.message : "",
+          BOOTH_GUEST_MESSAGES.verifyFailed,
+        ),
+      );
     } finally {
       setBusy(false);
     }
@@ -418,13 +452,14 @@ export function PhotoBooth() {
       window.clearInterval(tick);
       if (!res.ok) {
         setPolaroidPhase("idle");
-        const raw = (data.error || "").trim();
-        const friendly =
-          !raw ||
-          /token|api key|not configured|openart|gemini|missing/i.test(raw)
-            ? "We couldn't finish that 80s transform. Please try again in a moment."
-            : raw;
-        setError(friendly);
+        setError(
+          guestVisibleBoothError(
+            data.error,
+            mode === "throwback"
+              ? BOOTH_GUEST_MESSAGES.generic
+              : BOOTH_GUEST_MESSAGES.generateFailed,
+          ),
+        );
         if (data.rate) setRate(data.rate);
         setStep("confirm");
         return;
@@ -444,7 +479,12 @@ export function PhotoBooth() {
     } catch (err) {
       window.clearInterval(tick);
       setPolaroidPhase("idle");
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      setError(
+        guestVisibleBoothError(
+          err instanceof Error ? err.message : "",
+          BOOTH_GUEST_MESSAGES.generateFailed,
+        ),
+      );
       setStep("confirm");
     } finally {
       setBusy(false);
@@ -467,15 +507,29 @@ export function PhotoBooth() {
         setOtpSent(false);
         setDevCode(null);
         setStep("auth");
-        setError(data.error || "Verify your email to save this photo.");
+        setError(
+          guestVisibleBoothError(
+            data.error,
+            "Verify your email to save this photo.",
+          ),
+        );
         return;
       }
-      if (!res.ok) throw new Error(data.error || "Submit failed.");
+      if (!res.ok) {
+        throw new Error(
+          guestVisibleBoothError(data.error, BOOTH_GUEST_MESSAGES.saveFailed),
+        );
+      }
       const session = await refreshSession();
       setStep("submitted");
       offerRsvpHandoff((session.guest as Guest | null) || guest, { forcePopup: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Submit failed.");
+      setError(
+        guestVisibleBoothError(
+          err instanceof Error ? err.message : "",
+          BOOTH_GUEST_MESSAGES.saveFailed,
+        ),
+      );
     } finally {
       setBusy(false);
     }
@@ -898,15 +952,7 @@ export function PhotoBooth() {
                     : "This is the photo you selected. Ready to turn it into an 80's masterpiece?"}
                 </p>
                 {!aiConfigured && mode === "ai" ? (
-                  <p className="booth-error">
-                    AI styling is temporarily unavailable — try again shortly.
-                    {process.env.NODE_ENV !== "production" ? (
-                      <span className="mt-1 block text-[0.75rem] opacity-80">
-                        Dev: set GEMINI_API_KEY (preferred) or OPENART_TOKEN, or BOOTH_MOCK_AI=1 for
-                        local smoke tests.
-                      </span>
-                    ) : null}
-                  </p>
+                  <p className="booth-error">{BOOTH_GUEST_MESSAGES.aiUnavailable}</p>
                 ) : null}
                 <div className="booth-consent">
                   <label>
@@ -1227,7 +1273,7 @@ export function PhotoBooth() {
 
           {error ? (
             <p className="booth-error text-center" role="alert">
-              {error}
+              {guestVisibleBoothError(error, BOOTH_GUEST_MESSAGES.generic)}
             </p>
           ) : null}
         </div>

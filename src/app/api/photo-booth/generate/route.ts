@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { boothAiStatus, generateEightiesPhoto } from "@/lib/booth/ai";
 import {
+  BOOTH_GUEST_MESSAGES,
+  guestSafeBoothError,
+} from "@/lib/booth/guestMessages";
+import {
   PHOTO_BOOTH_OPENART_MODE,
   type PhotoBoothGenerateError,
   type PhotoBoothGenerateResponse,
@@ -38,16 +42,17 @@ export async function POST(request: Request) {
     return err(503, {
       ok: false,
       code: "missing_token",
-      error:
-        process.env.NODE_ENV === "production"
-          ? "AI styling is temporarily unavailable — try again shortly."
-          : "Photo Booth AI is not configured. Set GEMINI_API_KEY (preferred) or OPENART_TOKEN on the server.",
+      error: BOOTH_GUEST_MESSAGES.aiUnavailable,
     });
   }
 
   const body = (await request.json().catch(() => null)) as Body | null;
   if (!body || typeof body !== "object") {
-    return err(400, { ok: false, code: "bad_request", error: "Invalid body." });
+    return err(400, {
+      ok: false,
+      code: "bad_request",
+      error: BOOTH_GUEST_MESSAGES.generic,
+    });
   }
 
   const imageBase64 = (body.imageBase64 || body.image || "").trim();
@@ -55,7 +60,7 @@ export async function POST(request: Request) {
     return err(400, {
       ok: false,
       code: "bad_request",
-      error: "imageBase64 (guest capture) is required.",
+      error: "Please upload a photo first.",
     });
   }
   // Soft size guard (~8MB base64).
@@ -73,8 +78,8 @@ export async function POST(request: Request) {
     if (!ai.ok) {
       return err(502, {
         ok: false,
-        code: status.provider === "gemini" ? "gemini" : "openart",
-        error: ai.error,
+        code: "gemini",
+        error: guestSafeBoothError(ai.error, BOOTH_GUEST_MESSAGES.generateFailed),
       });
     }
     const mime = ai.mime || "image/jpeg";
@@ -88,26 +93,20 @@ export async function POST(request: Request) {
     };
     return NextResponse.json(payload);
   } catch (e) {
+    console.error("[photo-booth:generate]", e);
     return err(502, {
       ok: false,
-      code: "openart",
-      error:
-        e instanceof Error
-          ? e.message
-          : "Photo Booth generation failed.",
+      code: "gemini",
+      error: BOOTH_GUEST_MESSAGES.generateFailed,
     });
   }
 }
 
+/** Public status is booleans only — no model/provider names. */
 export async function GET() {
   const status = boothAiStatus();
   return NextResponse.json({
     ok: true,
-    provider: status.provider,
-    model: status.model,
-    mode: PHOTO_BOOTH_OPENART_MODE,
     configured: status.configured,
-    gemini: status.gemini,
-    openart: status.openart,
   });
 }

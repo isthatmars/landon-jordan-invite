@@ -4,8 +4,8 @@ export const PLATE_IDS = [
   "mixtape",
   "watch",
   "arcade",
-  "lineup",
   "photobooth",
+  "lineup",
   "rsvp",
 ] as const;
 export type PlateId = (typeof PLATE_IDS)[number];

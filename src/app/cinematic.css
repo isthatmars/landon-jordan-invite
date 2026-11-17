@@ -1052,6 +1052,11 @@ html[data-warm-photobooth="0"] #photobooth input {
   visibility: hidden;
   pointer-events: none;
 }
+/* Later flow plates (lineup / RSVP) must not let booth controls steal taps. */
+html[data-live-lineup="1"] #photobooth,
+html[data-live-lineup="1"] #photobooth button,
+html[data-live-lineup="1"] #photobooth a,
+html[data-live-lineup="1"] #photobooth input,
 html[data-live-rsvp="1"] #photobooth,
 html[data-live-rsvp="1"] #photobooth button,
 html[data-live-rsvp="1"] #photobooth a,

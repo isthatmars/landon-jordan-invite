@@ -58,8 +58,23 @@ const STEPS_AI = ["Choose", "Upload", "Confirm", "Generate", "Preview", "Complet
 const CONSENT =
   "I understand my photo may be reviewed before appearing in the party gallery/slideshow. Original uploads used for AI styling are deleted within 30 minutes. I confirm I have the right to upload this photo.";
 
+/** Soft ceiling while waiting on OpenAI (~15–45s). Never hits finalize % until the request returns. */
+const PROGRESS_START = 10;
+const PROGRESS_SOFT_CAP = 90;
+/** Characteristic time (ms) for 1−e^(−t/τ). ~63% of the climb at 16s; mid-range for typical edits. */
+const PROGRESS_TAU_MS = 16000;
+const PROGRESS_TICK_MS = 200;
+const PROGRESS_WAIT_MAX = 89.5;
+
 function firstNameOf(guest: Guest | null) {
   return guest?.firstName?.trim() || "";
+}
+
+/** Asymptotic wait progress: slow climb, most time mid-range, never reaches soft cap. */
+function waitProgressAt(elapsedMs: number) {
+  const climb = PROGRESS_SOFT_CAP - PROGRESS_START;
+  const raw = PROGRESS_START + climb * (1 - Math.exp(-elapsedMs / PROGRESS_TAU_MS));
+  return Math.min(raw, PROGRESS_WAIT_MAX);
 }
 
 export function PhotoBooth() {
@@ -97,7 +112,46 @@ export function PhotoBooth() {
   const pendingAction = useRef<"ai" | "throwback" | "myphotos" | "submit" | null>(null);
   const pendingFile = useRef<File | null>(null);
   const propFlashTimer = useRef<number | null>(null);
+  const progressTimerRef = useRef<number | null>(null);
+  const progressStartedAtRef = useRef(0);
+  const progressValueRef = useRef(12);
   const rsvpPromptedFor = useRef<string | null>(null);
+
+  const clearProgressTicker = useCallback(() => {
+    if (progressTimerRef.current != null) {
+      window.clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+  }, []);
+
+  const setProgressBoth = useCallback((value: number) => {
+    progressValueRef.current = value;
+    setProgress(value);
+  }, []);
+
+  const startProgressTicker = useCallback(() => {
+    clearProgressTicker();
+    progressStartedAtRef.current = performance.now();
+    setProgressBoth(PROGRESS_START);
+    progressTimerRef.current = window.setInterval(() => {
+      const elapsed = performance.now() - progressStartedAtRef.current;
+      setProgressBoth(waitProgressAt(elapsed));
+    }, PROGRESS_TICK_MS);
+  }, [clearProgressTicker, setProgressBoth]);
+
+  /** Request finished — ease through finalize (~95%) then 100% without a hard jump from mid-range. */
+  const completeProgress = useCallback(async () => {
+    clearProgressTicker();
+    const from = progressValueRef.current;
+    const targets =
+      from < 70 ? [Math.max(from + 8, 72), 88, 95, 100] : from < 90 ? [92, 95, 100] : [95, 100];
+    for (const target of targets) {
+      setProgressBoth(target);
+      await new Promise((r) => setTimeout(r, target === 100 ? 220 : 320));
+    }
+  }, [clearProgressTicker, setProgressBoth]);
+
+  useEffect(() => () => clearProgressTicker(), [clearProgressTicker]);
 
   const refreshSession = useCallback(async () => {
     const res = await fetch("/api/booth/session");
@@ -418,9 +472,9 @@ export function PhotoBooth() {
     setStep("generate");
     setPolaroidPhase("idle");
     setFlash(false);
-    setProgress(18);
     setResultUrl(null);
     setResultId(null);
+    startProgressTicker();
 
     // Flash → eject blank polaroid while request runs
     requestAnimationFrame(() => {
@@ -430,10 +484,6 @@ export function PhotoBooth() {
         setPolaroidPhase("eject");
       }, 420);
     });
-
-    const tick = window.setInterval(() => {
-      setProgress((p) => Math.min(p + 4 + Math.random() * 6, 88));
-    }, 450);
 
     try {
       const endpoint = mode === "throwback" ? "/api/booth/throwback" : "/api/booth/generate";
@@ -449,8 +499,8 @@ export function PhotoBooth() {
         rawUrl?: string;
         brandedUrl?: string;
       }>(res);
-      window.clearInterval(tick);
       if (!res.ok) {
+        clearProgressTicker();
         setPolaroidPhase("idle");
         setError(
           guestVisibleBoothError(
@@ -465,7 +515,7 @@ export function PhotoBooth() {
         return;
       }
 
-      setProgress(100);
+      await completeProgress();
       setResultId(data.photoId || null);
       // Hold blank eject, then develop once AI image is ready (never reveal early)
       setPolaroidPhase("eject");
@@ -477,7 +527,7 @@ export function PhotoBooth() {
       await refreshSession();
       setStep("ready");
     } catch (err) {
-      window.clearInterval(tick);
+      clearProgressTicker();
       setPolaroidPhase("idle");
       setError(
         guestVisibleBoothError(
@@ -543,7 +593,8 @@ export function PhotoBooth() {
     setResultId(null);
     setConsent(false);
     setPolaroidPhase("idle");
-    setProgress(12);
+    clearProgressTicker();
+    setProgressBoth(12);
     setError("");
     setMode("ai");
     setStep("upload");
@@ -576,7 +627,7 @@ export function PhotoBooth() {
         setConsent(true);
         if (stepName === "generate") {
           setPolaroidPhase("eject");
-          setProgress(72);
+          setProgressBoth(55);
           setFlash(true);
         }
         if (stepName === "ready" || stepName === "submitted") setPolaroidPhase("ready");
@@ -1054,8 +1105,12 @@ export function PhotoBooth() {
                     80s Style
                   </li>
                   <li>
-                    <span className={`dot${progress >= 95 ? " is-done" : ""}`} /> Finalizing Your
-                    Photo
+                    <span
+                      className={`dot${
+                        progress >= 100 ? " is-done" : progress >= 90 ? " is-active" : ""
+                      }`}
+                    />{" "}
+                    Finalizing Your Photo
                   </li>
                 </ul>
               </div>

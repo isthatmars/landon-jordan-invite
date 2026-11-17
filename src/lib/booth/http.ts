@@ -23,9 +23,7 @@ export async function readBoothJson<T extends Record<string, unknown> = Record<s
   if (!text.trim()) {
     return {
       ok: false,
-      error: res.ok
-        ? "Empty response from Photo Booth server."
-        : `Photo Booth request failed (${res.status}).`,
+      error: "Something went wrong. Please try again.",
     } as unknown as T;
   }
   try {
@@ -33,9 +31,7 @@ export async function readBoothJson<T extends Record<string, unknown> = Record<s
   } catch {
     return {
       ok: false,
-      error: res.ok
-        ? "Photo Booth returned an unexpected response."
-        : `Photo Booth request failed (${res.status}).`,
+      error: "Something went wrong. Please try again.",
     } as unknown as T;
   }
 }

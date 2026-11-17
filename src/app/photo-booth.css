@@ -237,8 +237,13 @@
 .booth-btn-stack {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 0.65rem;
   width: min(340px, 100%);
+  margin-inline: auto;
+}
+.booth-btn-stack .booth-btn {
+  width: 100%;
 }
 
 .booth-drop {
@@ -351,6 +356,29 @@
   pointer-events: none;
   transform: rotate(-12deg);
   filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55));
+}
+/* Cover PNG cutout hole on lower-right of the camera body */
+.booth-print-scene::before,
+.booth-camera::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  bottom: 6%;
+  width: 42%;
+  height: 22%;
+  background: #0a090c;
+  border-radius: 10px;
+  z-index: 4;
+  pointer-events: none;
+  transform: rotate(-12deg);
+}
+.booth-camera::before {
+  left: 28%;
+  bottom: 10%;
+  width: 48%;
+  height: 18%;
+  z-index: 1;
+  transform: none;
 }
 .booth-entry-polaroid.booth-polaroid {
   position: relative;
@@ -588,12 +616,25 @@
 }
 .booth-confirm-copy {
   width: 100%;
-  text-align: left;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .booth-confirm-copy .booth-panel-title {
   text-align: center;
+  width: 100%;
 }
 .booth-confirm-copy > p {
+  text-align: center;
+  width: 100%;
+}
+.booth-confirm-copy .booth-consent {
+  width: 100%;
+  text-align: left;
+}
+.booth-confirm-copy .booth-rate {
+  width: 100%;
   text-align: center;
 }
 

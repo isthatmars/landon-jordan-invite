@@ -15,8 +15,8 @@ Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set
 - Runtime: `src/lib/booth/ai.ts` → `src/lib/booth/gemini.ts` (preferred) or `src/lib/openart.ts`
 - Routes: `POST /api/booth/generate` (full session + storage) and `POST /api/photo-booth/generate` (lightweight)
 - Gemini runtime: `@google/genai` via `src/lib/booth/gemini.ts`
-- Gemini model: `gemini-2.5-flash-image` (override `GEMINI_IMAGE_MODEL`) — typically a few seconds
-- Gemini image defaults: `GEMINI_IMAGE_ASPECT_RATIO=16:9`, `GEMINI_IMAGE_SIZE=2K`, `IMAGE_GENERATION_CONCURRENCY=3`
+- Gemini model: `gemini-nano-banana-2.1` (override `GEMINI_IMAGE_MODEL`) — typically a few seconds
+- Gemini image defaults: `GEMINI_IMAGE_ASPECT_RATIO=1:1`, `GEMINI_IMAGE_SIZE=2K`, `IMAGE_GENERATION_CONCURRENCY=3`
 - OpenArt model: `nano-banana-2` (override `OPENART_IMAGE_MODEL`)
 - Preference: if `GEMINI_API_KEY` or `GOOGLE_GENERATIVE_AI_API_KEY` is set, Gemini runs first; OpenArt is used when Gemini is unset, or as fallback if Gemini fails and `OPENART_TOKEN` is present
 - Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
@@ -27,12 +27,12 @@ Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set
 1. Create an API key in [Google AI Studio](https://aistudio.google.com/apikey).
 2. Vercel → project `landon-jordan-invite` → Settings → Environment Variables → add for **Production** (and Preview if desired):
    - `GEMINI_API_KEY` (Encrypted / Sensitive)
-   - `GEMINI_IMAGE_MODEL=gemini-2.5-flash-image`
-   - `GEMINI_IMAGE_ASPECT_RATIO=16:9`
+   - `GEMINI_IMAGE_MODEL=gemini-nano-banana-2.1`
+   - `GEMINI_IMAGE_ASPECT_RATIO=1:1`
    - `GEMINI_IMAGE_SIZE=2K`
    - `IMAGE_GENERATION_CONCURRENCY=3`
 3. Redeploy so the env is live.
-4. Confirm: `GET /api/booth/health` → `gemini.configured: true` and `ai.preferred: "gemini"`.
+4. Confirm: `GET /api/booth/health` → public `{ ready, ai }` booleans; diagnostics need admin or `x-booth-health-secret`.
 
 ### Optional fallback: `OPENART_TOKEN`
 
@@ -80,7 +80,7 @@ OTP rows prefer Supabase `booth_otp_challenges`; on remote failure the server fa
 - Local `.data/booth*` fallback **only on local/dev** (never on Vercel preview/prod gallery save)
 - AI source uploads deleted ≤30 min; outputs / throwbacks retained
 - Downloads + gallery/admin storage serve the **raw** AI/throwback image (no Polaroid frame, no logo). On-screen CSS Polaroid is display-only. `composeBrandedPolaroid` remains available but is not used for guest downloads.
-- Wiring check: `GET /api/booth/health` (no secrets; reports project ref + missing env)
+- Wiring check: `GET /api/booth/health` (public booleans only; full diagnostics with admin / `BOOTH_HEALTH_SECRET`)
 
 ## Env / secrets checklist (Preview + Production)
 

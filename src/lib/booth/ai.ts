@@ -23,6 +23,10 @@ import {
   PHOTO_BOOTH_GEMINI_MODEL,
 } from "./gemini";
 import { buildEightysOpenArtPrompt } from "./types";
+import {
+  BOOTH_GUEST_MESSAGES,
+  guestSafeBoothError,
+} from "./guestMessages";
 import { mockEightiesGrade, sanitizeImage } from "./polaroid";
 
 export type AiProvider = "gemini" | "openart" | "mock" | "none";
@@ -84,11 +88,7 @@ async function bufferFromResultUrl(url: string): Promise<Buffer> {
 
 function guestFacingError(message: string, isProd: boolean): string {
   if (isProd) {
-    // Never leak provider/token setup details to guests.
-    if (/not configured|missing|api key|token/i.test(message)) {
-      return "AI styling is temporarily unavailable — try again shortly.";
-    }
-    return "We couldn't finish that 80s transform. Please try again in a moment.";
+    return guestSafeBoothError(message, BOOTH_GUEST_MESSAGES.generateFailed);
   }
   return message.slice(0, 280);
 }
@@ -130,7 +130,7 @@ export async function generateEightiesPhoto(
     return {
       ok: false,
       error: isProd
-        ? "AI styling is temporarily unavailable — try again shortly."
+        ? BOOTH_GUEST_MESSAGES.aiUnavailable
         : "AI photo generation is not configured yet. Set GEMINI_API_KEY (preferred) or OPENART_TOKEN on the server, or BOOTH_MOCK_AI=1 for local smoke tests.",
     };
   }

@@ -102,28 +102,35 @@ export const BOOTH_ALLOWED_MIME = new Set([
 ]);
 
 /**
- * OpenArt image2image — keep the exact photo, lightly restyle it as a real 1980s
- * snapshot. Prefer identity + scene continuity over a full costume restyle.
+ * Gemini / OpenArt image2image — restyle the upload as an authentic late-1980s
+ * throwback photo ("what would this look like if taken in the 80s"), while
+ * locking faces, people count, pose, and composition identity.
  */
-export const EIGHTYS_STYLE_PROMPT = `Keep the exact photo but make it look like a real photograph taken in the 1980s.
+export const EIGHTYS_STYLE_PROMPT = `Transform this exact photograph into an authentic late-1980s throwback snapshot — as if it were really taken around 1987–1989 with a consumer film camera. Restyle the ERA (fashion, hair, cars, film look); do not invent new people or a new scene.
 
 IDENTITY LOCK (non-negotiable):
 - Same person/people, same face(s), facial features, skin tone, age, hairline, facial hair, eye shape, nose, mouth, and expression.
-- Same people count, pose, framing, camera angle, and body proportions.
-- Do not face-swap, beautify, de-age, re-age, or invent new people.
+- Same people count, pose, body language, framing, camera angle, crop, and composition identity.
+- Do not face-swap, beautify, smooth skin, de-age, re-age, or invent / remove people.
 
-SCENE CONTINUITY:
-- Keep the same background/setting essence from the upload (driveway stays a driveway; car stays a period-plausible car; living room stays a living room).
-- Translate materials/lighting/props into period-correct 1980s versions of THAT place — do not invent an unrelated Miami Vice neon club, beach, or mall booth if it is not in the source.
+ERA RESTYLE (be bold — modern uploads should clearly read as 1980s):
+- Wardrobe: restyle clothing into period-accurate late-80s fashion that fits THIS scene (e.g. geometric nylon windbreakers, acid-wash / stonewash denim, puff shoulders, bold patterned knits, chunky sneakers, gold chains, oversized frames / aviators, digital watches). Keep similar color family and formality when possible, but do NOT leave modern athleisure, slim contemporary cuts, or current logos looking modern.
+- Hair: period-plausible 80s volume / styling when it fits the subject (teased / permed curls, high volume, clean fades) without changing identity.
+- Setting: keep the same place type (street, canyon overlook, driveway, living room, etc.) but period-correct props — late-70s/80s cars instead of modern vehicles, era-plausible signage and details. Do not invent an unrelated Miami Vice neon club, mall booth, or beach if it is not in the source.
 
-WARDROBE:
-- Keep the same outfit silhouette and layering; only shift fabrics/colors/details to the closest era-appropriate 1980s version of what they are already wearing.
-- Do not force windbreakers, leather jackets, or party costumes unless the source clothing already reads that way.
+ANALOG FILM LOOK (required — this must not look like a clean modern digital photo):
+- Warm aged film color grade (slight yellow/orange cast, soft saturation).
+- Visible film grain across the image; soft focus / slight softness (not clinical digital sharpness).
+- Mild vignette; natural skin texture (no beauty filter).
+- Subtle aged photo wear: light scuffs, dust specks, and edge wear as on a handled print.
 
-LOOK:
-- Natural, period-correct 1980s consumer photo: warm flash or available light, slight film grain, mild color cast, natural skin texture, mild vignette.
-- Photorealistic snapshot — not illustration, not CGI, not cartoon.
-- Single photograph ready for a Polaroid frame (keep framing; do not invent borders). No text, logos, watermarks, UI, or drawn frames.`;
+OPTIONAL DATE STAMP:
+- You may add one small classic orange/red segmented LCD date stamp in a corner (e.g. JUN 27 1988). No other text.
+
+OUTPUT:
+- Photorealistic single photograph — not illustration, cartoon, CGI, or collage.
+- Keep the same framing; do not draw Polaroid borders, UI chrome, stickers, or watermarks.
+- No logos, brand names, event titles, or "Landon & Jordan" branding anywhere in the image.`;
 
 /** Negative constraints appended for models without a separate negativePrompt field. */
 export const EIGHTYS_NEGATIVE_PROMPT = [
@@ -138,9 +145,13 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "extra people",
   "missing people",
   "changed pose",
+  "modern digital look",
+  "HDR smartphone photo",
+  "clinically sharp",
+  "unchanged modern clothing",
+  "modern car left modern",
   "invented Miami neon club",
   "unrelated nightclub",
-  "forced windbreaker costume",
   "cartoon",
   "anime",
   "illustration",
@@ -148,12 +159,14 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "CGI",
   "watermark",
   "logo",
-  "text overlay",
+  "brand name",
+  "Landon & Jordan text",
+  "event title overlay",
   "UI chrome",
   "Polaroid frame drawn in image",
 ].join(", ");
 
-/** Combined prompt sent to OpenArt generate. */
+/** Combined prompt sent to Gemini / OpenArt generate. */
 export function buildEightysOpenArtPrompt(): string {
   return `${EIGHTYS_STYLE_PROMPT}
 

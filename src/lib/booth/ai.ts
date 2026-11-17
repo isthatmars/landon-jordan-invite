@@ -140,7 +140,14 @@ export async function generateEightiesPhoto(
     return { ok: true, buffer, mime: "image/jpeg", model: "booth-mock-sharp", mock: true };
   }
 
-  const prompt = buildEightysOpenArtPrompt() || PHOTO_BOOTH_TRANSFORM_PROMPT;
+  // Master prompt + light controlled variation (outfit/env/film accents).
+  const variationSeed =
+    (cleaned.width || 1) * 1009 +
+    (cleaned.height || 1) * 9176 +
+    cleaned.buffer.length +
+    Date.now();
+  const prompt =
+    buildEightysOpenArtPrompt({ variationSeed }) || PHOTO_BOOTH_TRANSFORM_PROMPT;
 
   if (status.gemini) {
     try {
@@ -149,6 +156,8 @@ export async function generateEightiesPhoto(
         mimeType: "image/jpeg",
         prompt,
         model: PHOTO_BOOTH_GEMINI_MODEL,
+        width: cleaned.width,
+        height: cleaned.height,
       });
       const buffer = await sanitizeImage(result.buffer);
       return {

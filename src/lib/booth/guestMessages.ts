@@ -4,7 +4,7 @@
  */
 
 const TECH_LEAK =
-  /GEMINI|OPENART|GOOGLE|GENAI|API[_\s-]?KEY|TOKEN|SUPABASE|BOOTH_MOCK|configured|Invalid body|ECONN|ENOTFOUND|stack|at\s+\S+\(|node_modules|timeout from provider|missing_key|UNAUTHORIZED|PERMISSION_DENIED|INVALID_ARGUMENT|quota|billing/i;
+  /GEMINI|OPENART|OPENAI|CHATGPT|GOOGLE|GENAI|GPT-?IMAGE|API[_\s-]?KEY|TOKEN|SUPABASE|BOOTH_MOCK|configured|Invalid body|ECONN|ENOTFOUND|stack|at\s+\S+\(|node_modules|timeout from provider|missing_key|UNAUTHORIZED|PERMISSION_DENIED|INVALID_ARGUMENT|quota|billing/i;
 
 const FALLBACK =
   "We couldn't finish that 80s transform. Please try again in a moment.";

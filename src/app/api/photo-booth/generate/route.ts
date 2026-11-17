@@ -11,7 +11,7 @@ import {
 } from "@/lib/photoBooth";
 
 export const runtime = "nodejs";
-/** Gemini / OpenArt image edit can take a bit — allow a long server window. */
+/** OpenAI / OpenArt / Gemini image edit can take a bit — long server window. */
 export const maxDuration = 300;
 
 type Body = {
@@ -33,7 +33,7 @@ function parseImageInput(input: string): Buffer {
 }
 
 /**
- * Guest capture → Gemini (preferred) or OpenArt image2image.
+ * Guest capture → OpenAI Images (preferred) → OpenArt → Gemini.
  * Identity-preserving late-80s / early-90s film snapshot restyle.
  */
 export async function POST(request: Request) {
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     if (!ai.ok) {
       return err(502, {
         ok: false,
-        code: "gemini",
+        code: "openai",
         error: guestSafeBoothError(ai.error, BOOTH_GUEST_MESSAGES.generateFailed),
       });
     }
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
     console.error("[photo-booth:generate]", e);
     return err(502, {
       ok: false,
-      code: "gemini",
+      code: "openai",
       error: BOOTH_GUEST_MESSAGES.generateFailed,
     });
   }

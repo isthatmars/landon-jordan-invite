@@ -26,6 +26,12 @@ export const PLATE_ASSETS: Record<PlateId, readonly string[]> = {
     "/images/prop-skate-pair.png",
   ],
   lineup: [],
+  photobooth: [
+    "/images/booth/environment.jpg",
+    "/images/booth/polaroid-camera-cut.png",
+    "/images/booth/title-photo-booth-sm.png",
+    "/images/booth/sample-after-face.jpg",
+  ],
   rsvp: ["/images/prop-rsvp-phone.png"],
 };
 

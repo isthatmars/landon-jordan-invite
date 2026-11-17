@@ -22,9 +22,20 @@ import type {
   VideoItem,
 } from "@/lib/types";
 
-type Tab = "rsvps" | "content" | "tracks" | "videos" | "email" | "reminders";
+type Tab = "rsvps" | "photos" | "content" | "tracks" | "videos" | "email" | "reminders";
 type View = Tab | "home";
 type CardAccent = "pink" | "teal" | "gold" | "purple" | "green";
+
+type AdminPhoto = {
+  id: string;
+  kind: string;
+  guestEmail: string;
+  guestFirstName: string;
+  status: string;
+  url: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+};
 
 const TABS: {
   id: Tab;
@@ -38,6 +49,13 @@ const TABS: {
     accent: "pink",
     explainer:
       "See who's coming, update guest responses, and resend confirmation emails.",
+  },
+  {
+    id: "photos",
+    label: "Photos",
+    accent: "purple",
+    explainer:
+      "Moderate AI Polaroids and throwbacks — approve for the party gallery, reject, download, or ZIP.",
   },
   {
     id: "content",
@@ -106,12 +124,26 @@ export function AdminApp() {
     Record<string, "sending" | "sent" | "failed">
   >({});
   const resendInFlight = useRef<Set<string>>(new Set());
+  const [photos, setPhotos] = useState<AdminPhoto[]>([]);
+  const [photoFilter, setPhotoFilter] = useState({ status: "all", kind: "all", q: "" });
+  const [photoSelected, setPhotoSelected] = useState<string[]>([]);
 
   const flash = (msg: string, tone: "ok" | "warn" = "ok") => {
     setToastTone(tone);
     setToast(msg);
     setTimeout(() => setToast(""), 5200);
   };
+
+  const loadPhotos = useCallback(async () => {
+    const params = new URLSearchParams({
+      status: photoFilter.status,
+      kind: photoFilter.kind,
+      q: photoFilter.q,
+    });
+    const res = await fetch(`/api/admin/photos?${params}`);
+    const data = await res.json();
+    setPhotos(data.photos || []);
+  }, [photoFilter]);
 
   const load = useCallback(async () => {
     const [r, c, t, v, m, rem, tpl] = await Promise.all([
@@ -133,7 +165,8 @@ export function AdminApp() {
     setReminders(rem.reminders || []);
     setAbandoned(rem.abandoned || []);
     setEmailTemplates(mergeEmailTemplates(tpl.templates || rem.templates || null));
-  }, []);
+    void loadPhotos();
+  }, [loadPhotos]);
 
   useEffect(() => {
     // Mount fetch for control-room data; defer past paint to avoid cascading render lint.
@@ -418,6 +451,178 @@ export function AdminApp() {
             </button>
           </div>
         </>
+      )}
+
+      {tab === "photos" && (
+        <section className="admin-panel space-y-4 p-5">
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="text-xs text-violet-200">
+              Status
+              <select
+                className="input-dark mt-1 block"
+                value={photoFilter.status}
+                onChange={(e) => setPhotoFilter((f) => ({ ...f, status: e.target.value }))}
+              >
+                {["all", "pending", "approved", "rejected", "private", "failed"].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs text-violet-200">
+              Kind
+              <select
+                className="input-dark mt-1 block"
+                value={photoFilter.kind}
+                onChange={(e) => setPhotoFilter((f) => ({ ...f, kind: e.target.value }))}
+              >
+                {["all", "ai", "throwback"].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs text-violet-200">
+              Search
+              <input
+                className="input-dark mt-1 block"
+                value={photoFilter.q}
+                onChange={(e) => setPhotoFilter((f) => ({ ...f, q: e.target.value }))}
+                placeholder="name or email"
+              />
+            </label>
+            <button type="button" className="btn-pink-outline text-xs" onClick={() => void loadPhotos()}>
+              Refresh
+            </button>
+            <button
+              type="button"
+              className="btn-green-solid text-xs"
+              onClick={async () => {
+                const res = await fetch("/api/admin/photos", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ ids: photoSelected, status: "approved" }),
+                });
+                if (!res.ok) flash("Approve failed", "warn");
+                else flash(`Approved ${photoSelected.length}`);
+                void loadPhotos();
+              }}
+              disabled={!photoSelected.length}
+            >
+              Approve selected
+            </button>
+            <button
+              type="button"
+              className="btn-pink-outline text-xs"
+              onClick={async () => {
+                const res = await fetch("/api/admin/photos", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ ids: photoSelected, status: "rejected" }),
+                });
+                if (!res.ok) flash("Reject failed", "warn");
+                else flash(`Rejected ${photoSelected.length}`, "warn");
+                void loadPhotos();
+              }}
+              disabled={!photoSelected.length}
+            >
+              Reject selected
+            </button>
+            <button
+              type="button"
+              className="btn-pink-outline text-xs"
+              onClick={async () => {
+                const res = await fetch("/api/admin/photos/zip", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    ids: photoSelected.length ? photoSelected : undefined,
+                  }),
+                });
+                if (!res.ok) {
+                  flash("ZIP failed", "warn");
+                  return;
+                }
+                const blob = await res.blob();
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "party-gallery-photos.zip";
+                a.click();
+              }}
+            >
+              Download ZIP
+            </button>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {photos.length === 0 ? (
+              <p className="text-sm text-violet-300">No photos match these filters.</p>
+            ) : (
+              photos.map((p) => (
+                <article key={p.id} className="rounded-xl border border-white/15 bg-black/30 p-3">
+                  <label className="mb-2 flex items-center gap-2 text-xs text-violet-200">
+                    <input
+                      type="checkbox"
+                      checked={photoSelected.includes(p.id)}
+                      onChange={(e) =>
+                        setPhotoSelected((s) =>
+                          e.target.checked ? [...s, p.id] : s.filter((x) => x !== p.id),
+                        )
+                      }
+                    />
+                    {p.kind} · {p.status}
+                  </label>
+                  {p.url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.url} alt="" className="mb-2 aspect-square w-full rounded-lg object-cover" />
+                  ) : (
+                    <div className="mb-2 aspect-square rounded-lg bg-white/10" />
+                  )}
+                  <p className="text-sm text-white">
+                    {p.guestFirstName || "Guest"} · {p.guestEmail}
+                  </p>
+                  {p.errorMessage ? (
+                    <p className="text-xs text-rose-300">{p.errorMessage}</p>
+                  ) : null}
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <a className="btn-pink-outline text-[10px]" href={`/api/booth/photos/${p.id}/download`}>
+                      Download
+                    </a>
+                    <button
+                      type="button"
+                      className="btn-green-solid text-[10px]"
+                      onClick={async () => {
+                        await fetch("/api/admin/photos", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: p.id, status: "approved" }),
+                        });
+                        void loadPhotos();
+                      }}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-pink-outline text-[10px]"
+                      onClick={async () => {
+                        await fetch("/api/admin/photos", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: p.id, status: "rejected" }),
+                        });
+                        void loadPhotos();
+                      }}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        </section>
       )}
 
       {tab === "rsvps" && (
@@ -1058,6 +1263,14 @@ function ToolIcon({ id }: { id: Tab }) {
           <rect x="9" y="6" width="22" height="28" rx="3" stroke="currentColor" strokeWidth="2" />
           <path d="M14 14h12M14 20h12M14 26h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           <path d="M26 25.5l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case "photos":
+      return (
+        <svg {...common}>
+          <rect x="7" y="10" width="26" height="20" rx="3" stroke="currentColor" strokeWidth="2" />
+          <circle cx="15" cy="17" r="2.5" stroke="currentColor" strokeWidth="2" />
+          <path d="M10 27l7-7 4 4 5-6 4 9H10Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
         </svg>
       );
     case "content":

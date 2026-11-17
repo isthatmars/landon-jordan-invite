@@ -1,0 +1,354 @@
+/* Fixed Photo Booth stage — one scene for every step. Panel content swaps only. */
+
+.photo-booth {
+  --booth-wood-hi: #6b3a22;
+  --booth-wood-mid: #4a2414;
+  --booth-wood-lo: #2a140c;
+  --booth-curtain: #7a1028;
+  --booth-curtain-deep: #3d0814;
+  --booth-neon: #ff39c8;
+  --booth-neon-alt: #38d9ff;
+  --booth-chrome-hi: #f4f0f7;
+  --booth-chrome-mid: #9aa8c0;
+  --booth-chrome-lo: #3a4558;
+  --booth-panel-bg: #0c0612;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100svh;
+  min-height: 100dvh;
+  isolation: isolate;
+  overflow: clip;
+}
+
+.photo-booth-atmosphere {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(255, 57, 200, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 50% 90%, rgba(56, 217, 255, 0.1), transparent 50%),
+    linear-gradient(180deg, #12061c 0%, #1a0a18 45%, #0b0615 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.booth-shell {
+  position: relative;
+  z-index: 1;
+  width: min(920px, 100%);
+  margin: 0 auto;
+  padding: clamp(1rem, 3vh, 2rem) clamp(0.75rem, 3vw, 1.5rem)
+    clamp(1.5rem, 4vh, 2.75rem);
+  display: grid;
+  gap: 0.85rem;
+  justify-items: center;
+}
+
+.booth-sign {
+  font-family: var(--font-chrome), var(--font-condensed), sans-serif;
+  font-size: clamp(1.6rem, 1rem + 2.4vw, 2.6rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--booth-neon);
+  text-shadow:
+    0 0 8px #fff,
+    0 0 16px var(--booth-neon),
+    0 0 32px color-mix(in srgb, var(--booth-neon) 70%, transparent);
+  animation: booth-neon-pulse 3.6s ease-in-out infinite;
+}
+
+@keyframes booth-neon-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.12);
+  }
+}
+
+.booth-frame {
+  position: relative;
+  width: min(100%, 560px);
+  aspect-ratio: 3 / 4.15;
+  border-radius: 18px 18px 22px 22px;
+  background:
+    linear-gradient(160deg, var(--booth-wood-hi), var(--booth-wood-mid) 42%, var(--booth-wood-lo));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 180, 0.25),
+    inset 0 -8px 18px rgba(0, 0, 0, 0.35),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+  padding: 4.8% 5.5% 7%;
+  overflow: hidden;
+}
+
+.booth-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 11px,
+      rgba(0, 0, 0, 0.06) 11px 12px
+    );
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.booth-curtains {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 18%;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.booth-curtain {
+  width: 28%;
+  height: 100%;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--booth-curtain-deep) 0 10px,
+      var(--booth-curtain) 10px 20px
+    );
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
+  transform-origin: top center;
+}
+
+.booth-curtain.is-left {
+  border-radius: 0 0 40% 8%;
+  animation: booth-curtain-sway 5.5s ease-in-out infinite;
+}
+
+.booth-curtain.is-right {
+  border-radius: 0 0 8% 40%;
+  animation: booth-curtain-sway 5.5s ease-in-out infinite reverse;
+}
+
+@keyframes booth-curtain-sway {
+  0%,
+  100% {
+    transform: skewX(0deg);
+  }
+  50% {
+    transform: skewX(1.4deg);
+  }
+}
+
+.booth-props {
+  position: absolute;
+  inset: auto 6% 4% 6%;
+  height: 10%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.85;
+}
+
+.booth-prop {
+  font-family: var(--font-label), cursive;
+  font-size: clamp(0.7rem, 0.55rem + 0.5vw, 0.95rem);
+  color: color-mix(in srgb, var(--booth-chrome-hi) 70%, transparent);
+  letter-spacing: 0.04em;
+}
+
+.booth-panel-chrome {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  border-radius: 10px;
+  background:
+    linear-gradient(145deg, var(--booth-chrome-hi), var(--booth-chrome-mid) 38%, var(--booth-chrome-lo));
+  padding: 3.2%;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.35),
+    0 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+.booth-panel {
+  position: relative;
+  height: 100%;
+  border-radius: 6px;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 30%, rgba(135, 56, 255, 0.2), transparent 60%),
+    linear-gradient(180deg, #1a0d28 0%, var(--booth-panel-bg) 100%);
+  border: 1px solid rgba(255, 57, 200, 0.28);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.booth-panel-inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: clamp(0.85rem, 2.5vw, 1.35rem);
+  text-align: center;
+}
+
+.booth-panel-inner h3 {
+  margin: 0;
+  font-family: var(--font-chrome), sans-serif;
+  font-size: clamp(1.15rem, 0.9rem + 1.2vw, 1.65rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--booth-chrome-hi);
+  text-shadow: 0 0 12px rgba(255, 57, 200, 0.45);
+}
+
+.booth-panel-inner p {
+  margin: 0;
+  max-width: 28ch;
+  color: color-mix(in srgb, var(--booth-chrome-hi) 78%, transparent);
+  font-size: clamp(0.9rem, 0.82rem + 0.35vw, 1.05rem);
+  line-height: 1.4;
+}
+
+.booth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: center;
+  margin-top: 0.35rem;
+}
+
+.booth-btn {
+  appearance: none;
+  border: 1px solid color-mix(in srgb, var(--booth-neon) 65%, #fff);
+  background: linear-gradient(180deg, #ff5ad4, #c2188e);
+  color: #fff;
+  font-family: var(--font-condensed), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  box-shadow:
+    0 0 12px rgba(255, 57, 200, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+}
+
+.booth-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.booth-btn.is-ghost {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--booth-neon-alt) 70%, #fff);
+  color: var(--booth-neon-alt);
+  box-shadow: 0 0 10px rgba(56, 217, 255, 0.25);
+}
+
+.booth-preview,
+.booth-result {
+  width: min(100%, 220px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.booth-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.booth-status {
+  font-family: var(--font-condensed), sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: var(--booth-neon-alt);
+  text-shadow: 0 0 10px rgba(56, 217, 255, 0.4);
+}
+
+.booth-error {
+  color: #ff8fab;
+  font-size: 0.85rem;
+  max-width: 28ch;
+}
+
+/* Polaroid eject — the only full-frame motion that leaves the panel. */
+.booth-polaroid-slot {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  transform: translateX(-50%);
+  width: min(42%, 180px);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.booth-polaroid {
+  background: #f6f1e8;
+  padding: 6% 6% 16%;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+  transform: translateY(120%) rotate(-2deg);
+  opacity: 0;
+}
+
+.booth-polaroid.is-ejecting {
+  animation: booth-polaroid-eject 1.1s cubic-bezier(0.2, 0.85, 0.25, 1) forwards;
+  pointer-events: auto;
+}
+
+@keyframes booth-polaroid-eject {
+  0% {
+    opacity: 0;
+    transform: translateY(120%) rotate(-2deg);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(1.5deg);
+  }
+}
+
+.booth-polaroid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: #111;
+}
+
+.booth-polaroid figcaption {
+  margin-top: 0.45rem;
+  font-family: var(--font-label), cursive;
+  font-size: 0.85rem;
+  color: #3a2a22;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booth-sign,
+  .booth-curtain.is-left,
+  .booth-curtain.is-right {
+    animation: none;
+  }
+  .booth-polaroid.is-ejecting {
+    animation: none;
+    opacity: 1;
+    transform: translateY(0) rotate(1deg);
+  }
+}

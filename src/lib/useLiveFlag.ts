@@ -7,6 +7,7 @@ type LiveKey =
   | "liveMixtape"
   | "liveWatch"
   | "liveArcade"
+  | "livePhotobooth"
   | "liveLineup"
   | "liveRsvp";
 
@@ -15,6 +16,7 @@ type WarmKey =
   | "warmMixtape"
   | "warmWatch"
   | "warmArcade"
+  | "warmPhotobooth"
   | "warmLineup"
   | "warmRsvp";
 

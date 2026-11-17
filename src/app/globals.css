@@ -431,7 +431,7 @@ html[data-seen-rsvp="1"] #rsvp .neon-script-lg.rsvp-title {
  */
 .site-footer {
   position: relative;
-  /* Above flow plates (#lineup/#rsvp at 20) when the credit band scrolls in. */
+  /* Above flow plates (#lineup/#photobooth/#rsvp at 20) when the credit band scrolls in. */
   z-index: 24;
   overflow: hidden;
   padding: 2rem 1.25rem max(4.75rem, calc(3.75rem + env(safe-area-inset-bottom)));

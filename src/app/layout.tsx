@@ -10,6 +10,7 @@ import "./globals.css";
 import "./motion.css";
 import "./cinematic.css";
 import "./envelope.css";
+import "./photo-booth.css";
 
 const script = localFont({
   src: "../fonts/hastron.otf",

@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { generatePhotoBoothImage, OpenArtError, openArtConfigured } from "@/lib/openart";
+import { boothAiStatus, generateEightiesPhoto } from "@/lib/booth/ai";
 import {
   PHOTO_BOOTH_OPENART_MODE,
-  PHOTO_BOOTH_OPENART_MODEL,
   type PhotoBoothGenerateError,
   type PhotoBoothGenerateResponse,
 } from "@/lib/photoBooth";
 
 export const runtime = "nodejs";
-/** OpenArt image2image can take a while — allow a long server window. */
+/** Gemini / OpenArt image edit can take a bit — allow a long server window. */
 export const maxDuration = 300;
 
 type Body = {
@@ -18,26 +17,31 @@ type Body = {
   prompt?: string;
 };
 
-function err(
-  status: number,
-  payload: PhotoBoothGenerateError,
-) {
+function err(status: number, payload: PhotoBoothGenerateError) {
   return NextResponse.json(payload, { status });
 }
 
+function parseImageInput(input: string): Buffer {
+  const trimmed = input.trim();
+  const match = /^data:[^;,]+;base64,(.+)$/i.exec(trimmed);
+  if (match) return Buffer.from(match[1], "base64");
+  return Buffer.from(trimmed, "base64");
+}
+
 /**
- * Guest capture → OpenArt image2image (identity-preserving 80s Polaroid).
- * Uses server-only OPENART_TOKEN. No alternate image providers.
+ * Guest capture → Gemini (preferred) or OpenArt image2image.
+ * Identity-preserving 80s Polaroid restyle.
  */
 export async function POST(request: Request) {
-  if (!openArtConfigured()) {
+  const status = boothAiStatus();
+  if (!status.configured) {
     return err(503, {
       ok: false,
       code: "missing_token",
       error:
         process.env.NODE_ENV === "production"
           ? "AI styling is temporarily unavailable — try again shortly."
-          : "Photo Booth AI is not configured. Set OPENART_TOKEN on the server.",
+          : "Photo Booth AI is not configured. Set GEMINI_API_KEY (preferred) or OPENART_TOKEN on the server.",
     });
   }
 
@@ -64,40 +68,46 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await generatePhotoBoothImage({
-      imageBase64,
-      mimeType: body.mimeType,
-      prompt: typeof body.prompt === "string" ? body.prompt : undefined,
-      model: PHOTO_BOOTH_OPENART_MODEL,
-    });
+    const source = parseImageInput(imageBase64);
+    const ai = await generateEightiesPhoto(source);
+    if (!ai.ok) {
+      return err(502, {
+        ok: false,
+        code: status.provider === "gemini" ? "gemini" : "openart",
+        error: ai.error,
+      });
+    }
+    const mime = ai.mime || "image/jpeg";
+    const imageUrl = `data:${mime};base64,${ai.buffer.toString("base64")}`;
     const payload: PhotoBoothGenerateResponse = {
       ok: true,
-      historyId: result.historyId,
-      imageUrl: result.imageUrl,
-      model: result.model,
+      historyId: `booth-${Date.now()}`,
+      imageUrl,
+      model: ai.model,
       mode: PHOTO_BOOTH_OPENART_MODE,
     };
     return NextResponse.json(payload);
   } catch (e) {
-    if (e instanceof OpenArtError) {
-      const status =
-        e.code === "missing_token" ? 503 : e.code === "timeout" ? 504 : 502;
-      return err(status, { ok: false, code: e.code, error: e.message });
-    }
     return err(502, {
       ok: false,
       code: "openart",
-      error: e instanceof Error ? e.message : "OpenArt generation failed.",
+      error:
+        e instanceof Error
+          ? e.message
+          : "Photo Booth generation failed.",
     });
   }
 }
 
 export async function GET() {
+  const status = boothAiStatus();
   return NextResponse.json({
     ok: true,
-    provider: "openart",
-    model: PHOTO_BOOTH_OPENART_MODEL,
+    provider: status.provider,
+    model: status.model,
     mode: PHOTO_BOOTH_OPENART_MODE,
-    configured: openArtConfigured(),
+    configured: status.configured,
+    gemini: status.gemini,
+    openart: status.openart,
   });
 }

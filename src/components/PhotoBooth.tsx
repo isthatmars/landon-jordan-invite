@@ -5,7 +5,7 @@
  * 1. Fixed OpenArt environment plate (`/images/booth/environment.jpg`) for every step.
  * 2. Entry = large two-column panel: left Polaroid + camera prop (~45%), right welcome + drag/drop + upload (~55%).
  *    On-screen Polaroid frame has no logo; downloads are raw AI photos only.
- * 3. AI via OpenArt only (`/api/booth/generate` → `src/lib/booth/ai.ts` → OpenArt).
+ * 3. AI via Gemini (preferred) or OpenArt (`/api/booth/generate` → `src/lib/booth/ai.ts`).
  */
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -418,7 +418,13 @@ export function PhotoBooth() {
       window.clearInterval(tick);
       if (!res.ok) {
         setPolaroidPhase("idle");
-        setError(data.error || "Generation failed.");
+        const raw = (data.error || "").trim();
+        const friendly =
+          !raw ||
+          /token|api key|not configured|openart|gemini|missing/i.test(raw)
+            ? "We couldn't finish that 80s transform. Please try again in a moment."
+            : raw;
+        setError(friendly);
         if (data.rate) setRate(data.rate);
         setStep("confirm");
         return;
@@ -896,8 +902,8 @@ export function PhotoBooth() {
                     AI styling is temporarily unavailable — try again shortly.
                     {process.env.NODE_ENV !== "production" ? (
                       <span className="mt-1 block text-[0.75rem] opacity-80">
-                        Dev: set OPENART_TOKEN on the server (or BOOTH_MOCK_AI=1 for local smoke
-                        tests).
+                        Dev: set GEMINI_API_KEY (preferred) or OPENART_TOKEN, or BOOTH_MOCK_AI=1 for
+                        local smoke tests.
                       </span>
                     ) : null}
                   </p>

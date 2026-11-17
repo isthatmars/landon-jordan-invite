@@ -46,5 +46,5 @@ export type PhotoBoothGenerateResponse = {
 export type PhotoBoothGenerateError = {
   ok: false;
   error: string;
-  code?: "missing_token" | "bad_request" | "openart" | "timeout";
+  code?: "missing_token" | "bad_request" | "openart" | "gemini" | "timeout";
 };

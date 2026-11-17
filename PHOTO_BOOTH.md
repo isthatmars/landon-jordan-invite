@@ -8,33 +8,39 @@ The booth stage never swaps backgrounds between steps. One OpenArt environment p
 
 Entry matches the reference: a large pink neon panel (~80–90% × ~70–75% of the stage) with a **left Polaroid + camera prop** (~45%) and **right controls** (~55%: welcome script, huge drag-drop, chunky upload). On-screen Polaroid frames are blank (no logo). The Polaroid may flash once on click — no strobe, no modern “before” photo. Generate / ready still use the Polaroid camera eject animation in the same fixed room.
 
-## 3. OpenArt for AI generation + booth art
+## 3. AI generation (Gemini preferred) + booth art
 
-Identity-preserving 80s transforms use **OpenArt** (`OPENART_TOKEN`).
+Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set, otherwise **OpenArt**.
 
-- Runtime: `src/lib/booth/ai.ts` → `src/lib/openart.ts` → image2image
+- Runtime: `src/lib/booth/ai.ts` → `src/lib/booth/gemini.ts` (preferred) or `src/lib/openart.ts`
 - Routes: `POST /api/booth/generate` (full session + storage) and `POST /api/photo-booth/generate` (lightweight)
-- Model: `nano-banana-2` (override `OPENART_IMAGE_MODEL`)
+- Gemini model: `gemini-2.5-flash-image` (override `GEMINI_IMAGE_MODEL`) — typically a few seconds
+- OpenArt model: `nano-banana-2` (override `OPENART_IMAGE_MODEL`)
+- Preference: if `GEMINI_API_KEY` or `GOOGLE_GENERATIVE_AI_API_KEY` is set, Gemini runs first; OpenArt is used when Gemini is unset, or as fallback if Gemini fails and `OPENART_TOKEN` is present
 - Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
-- Booth art (environment, camera, samples, chrome title) also generated via OpenArt and checked into `public/images/booth/`
+- Booth art (environment, camera, samples, chrome title) was generated via OpenArt and checked into `public/images/booth/`
 
-### Required: `OPENART_TOKEN` on Vercel
+### Preferred: `GEMINI_API_KEY` on Vercel
 
-OpenArt has no classic API-key product — `OPENART_TOKEN` is the **OAuth access token** from the
-OpenArt CLI (`openart login` → `~/.openart/cli-credentials.json` → `access_token`). Locally the
-server also reads that file when the env var is unset.
+1. Create an API key in [Google AI Studio](https://aistudio.google.com/apikey).
+2. Vercel → project `landon-jordan-invite` → Settings → Environment Variables → add
+   `GEMINI_API_KEY` (Encrypted) for **Production + Preview** (also accepts `GOOGLE_GENERATIVE_AI_API_KEY`).
+3. Redeploy so the env is live.
+4. Confirm: `GET /api/booth/health` → `gemini.configured: true` and `ai.preferred: "gemini"`.
 
-Preview/production Photo Booth AI will not run until this **server-only** secret is set on the
-Vercel project `landon-jordan-invite` (`prj_lve7NCw0qR8fpOquEv5RUrTON6IY`) for **Preview + Production**:
+### Optional fallback: `OPENART_TOKEN`
 
-1. On a trusted machine: `openart login`, then copy `access_token` from
-   `~/.openart/cli-credentials.json` (do not commit it).
-2. Vercel → Project → Settings → Environment Variables → add `OPENART_TOKEN` (Encrypted) for
-   Preview + Production (+ Development if you `vercel env pull`).
-3. Redeploy Preview/Production so the new env is picked up.
-4. Confirm with `GET /api/booth/session` → `ai.configured: true` and `ai.openart: true`.
+OpenArt has no classic API-key product — `OPENART_TOKEN` is the OAuth **`access_token`** from the
+OpenArt CLI (`openart login` → `~/.openart/cli-credentials.json`). Locally the Next server also reads
+that file when the env var is unset. Credentials may use `access_token`, `accessToken`, or `token`
+(a `KeyError: access_token` usually means the file uses a different key name).
 
-Guests never see the env-var name; the confirm step shows a friendly unavailable message and disables
+```sh
+# Safe extract (handles access_token / accessToken / token):
+python3 -c "import json,pathlib; c=json.load(open(pathlib.Path.home()/'.openart'/'cli-credentials.json')); print(c.get('access_token') or c.get('accessToken') or c.get('token') or '')"
+```
+
+Guests never see env-var names; the confirm step shows a friendly unavailable message and disables
 **Create** when no provider is configured. Dev builds may show a short setup hint.
 
 ## 4. Guest identity (verify only at save)
@@ -78,14 +84,15 @@ Set these in the Vercel project `landon-jordan-invite` for **Preview** and **Pro
 |---|---|---|
 | `SUPABASE_URL` | Gallery save + RSVP | Must be `https://ezuqjqdeqmdwumcqvksi.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Gallery save + RSVP | Service role; bypasses RLS. Same key RSVP already uses. |
-| `OPENART_TOKEN` | Real AI transforms | Sibling agent wires this. Without it, set `BOOTH_MOCK_AI=1` for QA only. |
+| `GEMINI_API_KEY` | Real AI transforms (preferred) | From Google AI Studio. Alias: `GOOGLE_GENERATIVE_AI_API_KEY`. |
+| `OPENART_TOKEN` | AI fallback | OAuth `access_token` from `openart login` (optional if Gemini is set). |
 | `RESEND_API_KEY` | OTP email + RSVP mail | Without it, preview can still expose `devCode`. |
 | `RESEND_FROM_EMAIL` | Live email From | Verified sender in Resend. |
 | `NEXT_PUBLIC_SITE_URL` | Email / magic-link CTAs | Absolute site URL. |
 | `OWNER_EMAIL` | Owner RSVP alerts | Comma-separated OK. |
 | `ADMIN_ACCESS_CODE` | `/admin` | Default `NEON80S` if unset. |
 
-Optional / local-only: `BOOTH_MOCK_AI`, `BOOTH_DEV_OTP`, `BOOTH_EXPOSE_OTP`, `BOOTH_CLEANUP_SECRET`, `OPENART_IMAGE_MODEL`, `OPENART_API_BASE`.
+Optional / local-only: `BOOTH_MOCK_AI`, `BOOTH_DEV_OTP`, `BOOTH_EXPOSE_OTP`, `BOOTH_CLEANUP_SECRET`, `GEMINI_IMAGE_MODEL`, `OPENART_IMAGE_MODEL`, `OPENART_API_BASE`.
 
 ## Flow
 

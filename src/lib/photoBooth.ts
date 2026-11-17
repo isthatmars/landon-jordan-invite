@@ -16,18 +16,18 @@ export const PHOTO_BOOTH_OPENART_MODEL =
 export const PHOTO_BOOTH_OPENART_MODE = "image2image" as const;
 
 /**
- * Fallback prompt (prefer `buildEightysOpenArtPrompt` from booth/types).
- * Authentic late-80s throwback restyle while locking identity + composition.
+ * Fallback prompt only — prefer `buildEightysOpenArtPrompt` /
+ * `PHOTO_BOOTH_MASTER_PROMPT` from `src/lib/booth/types.ts` (source of truth).
  */
 export const PHOTO_BOOTH_TRANSFORM_PROMPT = [
-  "Transform this exact photo into an authentic late-1980s throwback snapshot — as if taken ~1987–1989 on consumer film.",
-  "Preserve face, identity, people count, pose, framing, and facial features exactly; do not invent or remove people.",
-  "Restyle era boldly: period-accurate late-80s fashion/hair/accessories that fit the scene; period-correct cars and setting details.",
-  "Keep the same place type from the upload; do not invent an unrelated neon club or mall booth.",
-  "Required film look: warm aged color grade, visible grain, soft focus, mild vignette, subtle edge wear/scuffs/dust.",
-  "Optional: one small classic orange/red LCD date stamp in a corner (e.g. JUN 27 1988). No other text.",
-  "Photorealistic snapshot, not cartoon/CGI. No logos, watermarks, Polaroid borders, UI, or Landon & Jordan branding.",
-  "Avoid: face swap, beauty filter, modern digital look, unchanged modern clothes/cars, extra people, invented Miami neon club.",
+  "EDIT THIS PHOTOGRAPH (image-to-image). The attached image is the only visual source of truth — edit it in place; do not invent people from a text description.",
+  "Turn it into a believable 1985–1989 consumer film family-album photo — not 80s-themed AI art, not a neon collage, not a modern digital photo with a retro filter.",
+  "IDENTITY LOCK: preserve exact faces, proportions, skin tone, hair, facial hair, expressions, people count, poses, and camera perspective.",
+  "EYEWEAR LOCK: if anyone wears glasses, keep the SAME glasses (shape, color, placement). Do not remove or replace glasses (no clear frames → gold aviators).",
+  "Restyle clothing into authentic flattering late-80s fashion that varies per person and respects original silhouette/formality; replace smartwatches with period watches.",
+  "Transform the background into a believable 1980s environment using original perspective, framing, lighting direction, and outdoor/indoor context — no generic neon backdrop.",
+  "Required film look: C-41 warm yellow-orange cast, visible grain, slight softness, natural light/flash, mild vignette, subtle print wear. Optional one orange/red LCD date stamp only.",
+  "Photorealistic single cohesive photograph. No beauty filter, plastic skin, cartoon, CGI, logos, watermarks, Polaroid borders, or Landon & Jordan branding.",
 ].join(" ");
 
 export type PhotoBoothGenerateRequest = {

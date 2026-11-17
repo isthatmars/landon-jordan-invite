@@ -16,7 +16,7 @@ Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set
 - Routes: `POST /api/booth/generate` (full session + storage) and `POST /api/photo-booth/generate` (lightweight)
 - Gemini runtime: `@google/genai` via `src/lib/booth/gemini.ts`
 - Gemini model: `gemini-nano-banana-2.1` (override `GEMINI_IMAGE_MODEL`) — typically a few seconds
-- Gemini image defaults: `GEMINI_IMAGE_ASPECT_RATIO=1:1`, `GEMINI_IMAGE_SIZE=2K`, `IMAGE_GENERATION_CONCURRENCY=3`
+- Gemini image defaults: `GEMINI_IMAGE_ASPECT_RATIO=auto` (match source), `GEMINI_IMAGE_SIZE=2K`, `IMAGE_GENERATION_CONCURRENCY=3`, temperature `0.4`
 - OpenArt model: `nano-banana-2` (override `OPENART_IMAGE_MODEL`)
 - Preference: if `GEMINI_API_KEY` or `GOOGLE_GENERATIVE_AI_API_KEY` is set, Gemini runs first; OpenArt is used when Gemini is unset, or as fallback if Gemini fails and `OPENART_TOKEN` is present
 - Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
@@ -24,16 +24,23 @@ Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set
 
 ### Transform prompt defaults
 
-Canonical prompt: `EIGHTYS_STYLE_PROMPT` / `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts` (fallback `PHOTO_BOOTH_TRANSFORM_PROMPT` in `src/lib/photoBooth.ts`).
+Canonical **master prompt**: `EIGHTYS_STYLE_PROMPT` / `PHOTO_BOOTH_MASTER_PROMPT` + `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts` (fallback `PHOTO_BOOTH_TRANSFORM_PROMPT` in `src/lib/photoBooth.ts`).
 
-Goal: **authentic late-80s throwback** (“what would this look like if taken in the 80s”), not a light filter on a modern photo.
+Goal: **believable 1985–1989 consumer film album photo** via image-to-image edit of the upload — not random 80s AI art, not a neon collage, not a modern digital photo with a retro filter.
 
-- **Lock:** same faces, people count, pose, framing / composition identity
-- **Restyle:** period fashion / hair / accessories; period-correct cars & setting details for the same place type
-- **Film look:** warm aged grade, visible grain, soft focus, mild vignette, subtle edge wear / scuffs / dust
+- **Lock:** same faces, skin tone, hair, facial hair, **same glasses when present**, people count, pose, framing / camera perspective
+- **Restyle:** period fashion that varies per person (respect silhouette/formality); believable 80s environment using original perspective / lighting direction / indoor-outdoor context
+- **Film look:** C-41 warm yellow-orange cast, visible grain, slight softness, natural light/flash, mild vignette, subtle print wear
+- **Variation:** `buildEightysOpenArtPrompt({ variationSeed })` rotates outfit / environment / film-detail accents without changing identity lock or quality bar
 - **Optional:** one classic orange/red LCD date stamp (e.g. `JUN 27 1988`) — no other text
 - **Never:** logos, watermarks, UI chrome, drawn Polaroid borders, or Landon & Jordan branding in the image
 - Downloads stay **raw** (no Polaroid frame); on-screen Polaroid is CSS-only
+
+Gemini call notes (`src/lib/booth/gemini.ts`):
+
+- Upload is sent as **inline image bytes** (primary visual reference) + master prompt text
+- `responseModalities`: TEXT+IMAGE first (retry IMAGE-only); reject text-only replies
+- `imageConfig.personGeneration=ALLOW_ALL`, lower temperature (~0.4), aspect ratio defaults to **match source** (`GEMINI_IMAGE_ASPECT_RATIO=auto`)
 
 ### Preferred: `GEMINI_API_KEY` on Vercel
 
@@ -41,7 +48,7 @@ Goal: **authentic late-80s throwback** (“what would this look like if taken in
 2. Vercel → project `landon-jordan-invite` → Settings → Environment Variables → add for **Production** (and Preview if desired):
    - `GEMINI_API_KEY` (Encrypted / Sensitive)
    - `GEMINI_IMAGE_MODEL=gemini-nano-banana-2.1`
-   - `GEMINI_IMAGE_ASPECT_RATIO=1:1`
+   - `GEMINI_IMAGE_ASPECT_RATIO=auto` (match source; or force e.g. `1:1`)
    - `GEMINI_IMAGE_SIZE=2K`
    - `IMAGE_GENERATION_CONCURRENCY=3`
 3. Redeploy so the env is live.

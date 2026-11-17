@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAdminFromRequest } from "@/lib/auth";
+import { boothAiStatus } from "@/lib/booth/ai";
 import { geminiRuntimeConfig } from "@/lib/booth/gemini";
+import { openaiRuntimeConfig } from "@/lib/booth/openai";
 import {
   boothDbEnabled,
   boothRequiresRemoteDb,
@@ -8,6 +10,10 @@ import {
   supabaseConfig,
   supabaseProjectRef,
 } from "@/lib/booth/supabase";
+import {
+  PHOTO_BOOTH_OPENART_MODE,
+  PHOTO_BOOTH_OPENART_MODEL,
+} from "@/lib/photoBooth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,24 +61,22 @@ export async function GET(request: Request) {
     }
   }
 
+  const ai = boothAiStatus();
   const geminiCfg = geminiRuntimeConfig();
-  const gemini = geminiCfg.configured;
-  const openArtConfigured = Boolean(process.env.OPENART_TOKEN?.trim());
+  const openaiCfg = openaiRuntimeConfig();
   const resendConfigured = Boolean(process.env.RESEND_API_KEY?.trim());
   const resendFromConfigured = Boolean(process.env.RESEND_FROM_EMAIL?.trim());
-  const mockAi = process.env.BOOTH_MOCK_AI === "1";
   const requiresRemote = boothRequiresRemoteDb();
   const persistBackend = boothDbEnabled() ? "supabase" : "local";
-  const aiConfigured = gemini || openArtConfigured || mockAi;
   const ready = boothDbEnabled()
-    ? boothPhotosReachable && aiConfigured
-    : !requiresRemote && aiConfigured;
+    ? boothPhotosReachable && ai.configured
+    : !requiresRemote && ai.configured;
 
   if (!canSeeDiagnostics(request)) {
     return NextResponse.json({
       ok: ready,
       ready,
-      ai: aiConfigured,
+      ai: ai.configured,
     });
   }
 
@@ -85,7 +89,11 @@ export async function GET(request: Request) {
       "SUPABASE_SERVICE_ROLE_KEY (optional locally)",
     );
   }
-  if (!aiConfigured) missing.push("GEMINI_API_KEY (or OPENART_TOKEN)");
+  if (!ai.configured) {
+    missing.push(
+      "OPENAI_API_KEY (preferred) or OPENART_TOKEN or GEMINI_API_KEY",
+    );
+  }
   if (!resendConfigured) missing.push("RESEND_API_KEY");
   if (!resendFromConfigured) missing.push("RESEND_FROM_EMAIL");
 
@@ -105,23 +113,30 @@ export async function GET(request: Request) {
       boothPhotosError,
       buckets: ["booth-temp", "booth-outputs", "booth-throwbacks"],
     },
+    openai: {
+      configured: ai.openai,
+      model: openaiCfg.model,
+      size: openaiCfg.size,
+      quality: openaiCfg.quality,
+    },
+    openArt: {
+      configured: ai.openart,
+      model: PHOTO_BOOTH_OPENART_MODEL,
+      mode: PHOTO_BOOTH_OPENART_MODE,
+      mockAi: ai.mock,
+    },
     gemini: {
-      configured: gemini,
+      configured: ai.gemini,
       model: geminiCfg.model,
       aspectRatio: geminiCfg.aspectRatio,
       imageSize: geminiCfg.imageSize,
       concurrency: geminiCfg.concurrency,
     },
-    openArt: { configured: openArtConfigured, mockAi },
     ai: {
-      configured: aiConfigured,
-      preferred: gemini
-        ? "gemini"
-        : openArtConfigured
-          ? "openart"
-          : mockAi
-            ? "mock"
-            : "none",
+      configured: ai.configured,
+      preferred: ai.provider,
+      cascade: ai.cascade,
+      preferenceOrder: ["openai", "openart", "gemini", "mock"],
     },
     resend: {
       configured: resendConfigured,

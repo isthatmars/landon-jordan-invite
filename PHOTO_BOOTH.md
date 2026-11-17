@@ -8,53 +8,58 @@ The booth stage never swaps backgrounds between steps. One OpenArt environment p
 
 Entry matches the reference: a large pink neon panel (~80–90% × ~70–75% of the stage) with a **left Polaroid + camera prop** (~45%) and **right controls** (~55%: welcome script, huge drag-drop, chunky upload). On-screen Polaroid frames are blank (no logo). The Polaroid may flash once on click — no strobe, no modern “before” photo. Generate / ready still use the Polaroid camera eject animation in the same fixed room.
 
-## 3. AI generation (Gemini preferred) + booth art
+## 3. AI generation (OpenAI Images preferred) + booth art
 
-Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set, otherwise **OpenArt**.
+Identity-preserving 80s transforms cascade through configured providers:
 
-- Runtime: `src/lib/booth/ai.ts` → `src/lib/booth/gemini.ts` (preferred) or `src/lib/openart.ts`
+1. **OpenAI Images Edit** when `OPENAI_API_KEY` is set (preferred)
+2. **OpenArt** when `OPENART_TOKEN` is set
+3. **Gemini** when `GEMINI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` is set
+4. **Mock** sharp grade only when `BOOTH_MOCK_AI=1`
+
+If a preferred provider fails, the next configured provider is tried automatically.
+
+- Runtime: `src/lib/booth/ai.ts` → `openai.ts` / `openart.ts` / `gemini.ts`
 - Routes: `POST /api/booth/generate` (full session + storage) and `POST /api/photo-booth/generate` (lightweight)
-- Gemini runtime: `@google/genai` via `src/lib/booth/gemini.ts`
-- Gemini model: `gemini-nano-banana-2.1` (override `GEMINI_IMAGE_MODEL`) — typically a few seconds
-- Gemini image defaults: `GEMINI_IMAGE_ASPECT_RATIO=auto` (match source), `GEMINI_IMAGE_SIZE=2K`, `IMAGE_GENERATION_CONCURRENCY=3`, temperature `0.4`
+- OpenAI: `POST /v1/images/edits` via `src/lib/booth/openai.ts` (multipart image + prompt — **not** chat completions)
+- OpenAI model: **`gpt-image-2.5-flare`** (fast Flare tier). Override with `OPENAI_IMAGE_MODEL`.
+- If `OPENAI_MODEL` is a chat model (e.g. `gpt-5.2`), it is **ignored** for Images — use `OPENAI_IMAGE_MODEL`.
+- OpenAI size: portrait-first **`1024x1536`** (2:3). Landscape sources stay `1536x1024` — never force landscape onto a portrait upload. Quality default `medium`.
+- OpenAI prompt: `What would this picture look like if it were taken in the 80's? retain facial features.`
 - OpenArt model: `nano-banana-2` (override `OPENART_IMAGE_MODEL`)
-- Preference: if `GEMINI_API_KEY` or `GOOGLE_GENERATIVE_AI_API_KEY` is set, Gemini runs first; OpenArt is used when Gemini is unset, or as fallback if Gemini fails and `OPENART_TOKEN` is present
+- Gemini runtime: `@google/genai` via `src/lib/booth/gemini.ts`
+- Gemini model: `gemini-nano-banana-2.1` (override `GEMINI_IMAGE_MODEL`)
+- Gemini image defaults: `GEMINI_IMAGE_ASPECT_RATIO=auto`, `GEMINI_IMAGE_SIZE=2K`, `IMAGE_GENERATION_CONCURRENCY=3`, temperature `0.4`
 - Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
+- Local-only port sketch: `PORT=4174` → `npm run dev -- -p 4174` (not used on Vercel)
 - Booth art (environment, camera, samples, chrome title) was generated via OpenArt and checked into `public/images/booth/`
 
 ### Transform prompt defaults
 
-Canonical **master prompt**: `EIGHTYS_STYLE_PROMPT` / `PHOTO_BOOTH_MASTER_PROMPT` + `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts` (fallback `PHOTO_BOOTH_TRANSFORM_PROMPT` in `src/lib/photoBooth.ts`).
+**OpenAI** uses the short Images prompt (`PHOTO_BOOTH_OPENAI_PROMPT` in `src/lib/booth/openai.ts`).
 
-Goal: **true-to-life late-1980s / early-1990s consumer film snapshot** via image-to-image reinterpretation of the upload — documentary / photoreal, not costume-party 80s AI art, not matching tracksuits, not a Miami neon collage, not a modern digital photo with a retro filter.
+**OpenArt / Gemini** use the canonical **master prompt**: `EIGHTYS_STYLE_PROMPT` / `PHOTO_BOOTH_MASTER_PROMPT` + `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts` (fallback `PHOTO_BOOTH_TRANSFORM_PROMPT` in `src/lib/photoBooth.ts`).
 
-- **Lock:** same faces, body types, skin tone, hair, facial hair, **same glasses when present**, people count, pose, scene vibe, framing / camera perspective
-- **Wardrobe:** distinct outfits per person; light era-appropriate color/wardrobe shifts OK — never matching tracksuits, cloned windbreakers, forced matching hairstyles, or a wheelchair not in the source
-- **Place:** same place / scene vibe in that era (or period-true equivalent) — not a costume-party backdrop swap
-- **Film look:** C-41 warm yellow-orange cast, visible grain, slight softness, natural light or on-camera flash, mild vignette, subtle print wear; **no text overlays**
-- **Variation:** `buildEightysOpenArtPrompt({ variationSeed })` rotates light outfit / environment / film-detail accents without changing identity lock or quality bar
-- **Never:** logos, watermarks, UI chrome, drawn Polaroid borders, date stamps / captions, or Landon & Jordan branding in the image
+Goal: **true-to-life late-1980s / early-1990s consumer film snapshot** via image-to-image reinterpretation of the upload — documentary / photoreal, not costume-party 80s AI art.
+
+- **Lock:** same faces, skin tone, expression, body type, pose, people count, **same glasses when present**, scene vibe / framing
+- **Film look:** warm C-41 consumer film, visible grain, slight softness — not costume-party neon AI art
+- **Variation:** `buildEightysOpenArtPrompt({ variationSeed })` rotates light outfit / environment / film-detail accents (OpenArt / Gemini)
+- **Never:** logos, watermarks, drawn Polaroid borders, or text overlays in the image
 - Downloads stay **raw** (no Polaroid frame); on-screen Polaroid is CSS-only
+- Guest-facing errors stay soft; real provider errors are logged server-side (`[booth:ai:…]`) and a short detail is stored on failed `booth_generations` rows
 
-Gemini call notes (`src/lib/booth/gemini.ts`):
+### Preferred: `OPENAI_API_KEY` on Vercel
 
-- Upload is sent as **inline image bytes** (primary visual reference) + master prompt text
-- `responseModalities`: TEXT+IMAGE first (retry IMAGE-only); reject text-only replies
-- `imageConfig.personGeneration=ALLOW_ALL`, lower temperature (~0.4), aspect ratio defaults to **match source** (`GEMINI_IMAGE_ASPECT_RATIO=auto`)
-
-### Preferred: `GEMINI_API_KEY` on Vercel
-
-1. Create an API key in [Google AI Studio](https://aistudio.google.com/apikey).
+1. Create an API key in [OpenAI Platform](https://platform.openai.com/api-keys).
 2. Vercel → project `landon-jordan-invite` → Settings → Environment Variables → add for **Production** (and Preview if desired):
-   - `GEMINI_API_KEY` (Encrypted / Sensitive)
-   - `GEMINI_IMAGE_MODEL=gemini-nano-banana-2.1`
-   - `GEMINI_IMAGE_ASPECT_RATIO=auto` (match source; or force e.g. `1:1`)
-   - `GEMINI_IMAGE_SIZE=2K`
-   - `IMAGE_GENERATION_CONCURRENCY=3`
+   - `OPENAI_API_KEY` (Encrypted / Sensitive)
+   - `OPENAI_IMAGE_MODEL=gpt-image-2.5-flare`
+   - Optional: `OPENAI_IMAGE_SIZE=1024x1536`, `OPENAI_IMAGE_QUALITY=medium`
 3. Redeploy so the env is live.
-4. Confirm: `GET /api/booth/health` → public `{ ready, ai }` booleans; diagnostics need admin or `x-booth-health-secret`.
+4. Confirm: `GET /api/booth/health` → public `{ ready, ai }` booleans; diagnostics (admin / `x-booth-health-secret`) show `ai.preferred`, `ai.cascade`, and per-provider config.
 
-### Optional fallback: `OPENART_TOKEN`
+### Fallback: `OPENART_TOKEN`
 
 OpenArt has no classic API-key product — `OPENART_TOKEN` is the OAuth **`access_token`** from the
 OpenArt CLI (`openart login` → `~/.openart/cli-credentials.json`). Locally the Next server also reads
@@ -65,6 +70,10 @@ that file when the env var is unset. Credentials may use `access_token`, `access
 # Safe extract (handles access_token / accessToken / token):
 python3 -c "import json,pathlib; c=json.load(open(pathlib.Path.home()/'.openart'/'cli-credentials.json')); print(c.get('access_token') or c.get('accessToken') or c.get('token') or '')"
 ```
+
+### Optional: `GEMINI_API_KEY`
+
+Create a key in [Google AI Studio](https://aistudio.google.com/apikey). Used when OpenAI/OpenArt are unset, or as a later cascade step after they fail.
 
 Guests never see env-var names; the confirm step shows a friendly unavailable message and disables
 **Create** when no provider is configured. Dev builds may show a short setup hint.
@@ -110,17 +119,19 @@ Set these in the Vercel project `landon-jordan-invite` for **Preview** and **Pro
 |---|---|---|
 | `SUPABASE_URL` | Gallery save + RSVP | Must be `https://ezuqjqdeqmdwumcqvksi.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Gallery save + RSVP | Service role; bypasses RLS. Same key RSVP already uses. |
-| `GEMINI_API_KEY` | Real AI transforms (preferred) | From Google AI Studio. Alias: `GOOGLE_GENERATIVE_AI_API_KEY`. |
-| `OPENART_TOKEN` | AI fallback | OAuth `access_token` from `openart login` (optional if Gemini is set). |
+| `OPENAI_API_KEY` | Real AI transforms (preferred) | OpenAI Images `/v1/images/edits` (not chat). |
+| `OPENAI_IMAGE_MODEL` | OpenAI model id | Default `gpt-image-2.5-flare`. Ignore chat `OPENAI_MODEL`. |
+| `OPENART_TOKEN` | AI fallback | OAuth `access_token` from `openart login`. |
+| `GEMINI_API_KEY` | AI fallback | From Google AI Studio. Alias: `GOOGLE_GENERATIVE_AI_API_KEY`. |
 | `RESEND_API_KEY` | OTP email + RSVP mail | Without it, preview can still expose `devCode`. |
 | `RESEND_FROM_EMAIL` | Live email From | Verified sender in Resend. |
 | `NEXT_PUBLIC_SITE_URL` | Email / magic-link CTAs | Absolute site URL. |
 | `OWNER_EMAIL` | Owner RSVP alerts | Comma-separated OK. |
 | `ADMIN_ACCESS_CODE` | `/admin` | Default `NEON80S` if unset. |
 
-Optional: `GEMINI_IMAGE_MODEL`, `GEMINI_IMAGE_ASPECT_RATIO`, `GEMINI_IMAGE_SIZE`, `IMAGE_GENERATION_CONCURRENCY`, `OPENART_IMAGE_MODEL`, `OPENART_API_BASE`.
+Optional: `OPENAI_IMAGE_QUALITY` (`medium`), `OPENAI_IMAGE_SIZE` (`1024x1536` portrait), `OPENART_IMAGE_MODEL`, `OPENART_API_BASE`, `GEMINI_IMAGE_MODEL`, `GEMINI_IMAGE_ASPECT_RATIO`, `GEMINI_IMAGE_SIZE`, `IMAGE_GENERATION_CONCURRENCY`.
 
-Local-only: `BOOTH_MOCK_AI`, `BOOTH_DEV_OTP`, `BOOTH_EXPOSE_OTP`, `BOOTH_CLEANUP_SECRET`.
+Local-only: `PORT=4174` (dev server), `BOOTH_MOCK_AI`, `BOOTH_DEV_OTP`, `BOOTH_EXPOSE_OTP`, `BOOTH_CLEANUP_SECRET`.
 
 ## Flow
 

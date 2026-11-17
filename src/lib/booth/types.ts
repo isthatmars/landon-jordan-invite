@@ -103,39 +103,14 @@ export const BOOTH_ALLOWED_MIME = new Set([
 
 /**
  * Master Photo Booth transform prompt (source of truth).
- * Gemini / OpenArt image2image: reinterpret the uploaded photo as a
- * late-80s / early-90s true-to-life film snapshot while locking identity.
+ * OpenAI / OpenArt / Gemini image edit: simple 80s restyle with identity lock.
+ * Core guest wording kept first; minimal locks appended.
  */
-export const EIGHTYS_STYLE_PROMPT = `EDIT THIS PHOTOGRAPH (image-to-image). The attached image is the only visual source of truth — edit it in place. Do not invent people from a text description. Do not regenerate a new scene from imagination. Output one photorealistic edited photograph.
+export const EIGHTYS_STYLE_PROMPT = `What would this picture look like if it were taken in the 80's? Retain facial features.
 
-Goal: reinterpret this photo as a true-to-life late-1980s / early-1990s consumer film snapshot (documentary family-album look) — NOT costume-party 80s AI art, NOT matching tracksuits, NOT a Miami neon collage, NOT a modern digital photo with a retro filter.
+Edit the attached photograph in place (image-to-image). Keep every person's exact face, skin tone, expression, body type, pose, people count, and eyewear (same glasses if present). Do not face-swap, de-age, or invent people.
 
-IDENTITY LOCK (highest priority — non-negotiable):
-- Preserve every person's exact face, facial structure, proportions, skin tone, age appearance, hairline, hairstyle silhouette, facial hair shape/density, eye shape, nose, mouth, expression, body type, and pose.
-- Eyewear lock: if anyone wears glasses, keep the SAME glasses — same frame shape, thickness, color/material, lens size, and placement on the face. Do not remove glasses. Do not replace clear/translucent/plastic frames with gold aviators or invent different eyewear. If they do not wear glasses, do not add glasses.
-- Keep the same people count, approximate positions, body proportions, poses, expressions, scene vibe, and camera perspective / framing / crop identity.
-- Do not force matching or synchronized hairstyles across people.
-- Do not add or invent a wheelchair (or other assistive devices that are not in the source).
-- No face-swap, beauty filter, plastic/airbrushed skin, smooth-skin AI finish, de-aging, re-aging, cartoon features, or altered recognizable features.
-
-ERA REINTERPRETATION (period-true, not a costume swap):
-- Clothing: keep each person's distinct outfit identity and silhouette family. Light era-appropriate color or wardrobe shifts are OK (fabric, cut, or palette nudges that quietly read late-80s / early-90s). Do NOT costume-swap into matching tracksuits, identical windbreakers, or one cloned look for everyone. Distinct outfits per person.
-- Environment: keep the same place / scene vibe — this location in that era, or a period-true equivalent of the same place type. Respect original camera perspective, framing, lighting direction, and outdoor/indoor context. Do NOT invent a costume-party backdrop, generic neon club, mall photo-booth, or Miami Vice collage unrelated to the photo's context.
-- Hair: only period-plausible volume or styling that does not change identity; never force the same hairstyle on everyone.
-
-CONSUMER FILM LOOK (required — real analog photo, not a filter):
-- C-41 consumer color film (Kodak Gold / Kodacolor era): warm slightly faded yellow-orange cast, soft saturation, lifted warm shadows.
-- Visible fine-to-medium film grain across the whole image; slight optical softness (not clinical digital sharpness, not HDR smartphone look).
-- Natural available light or on-camera flash quality (hard flash and hard shadows are OK when they fit the scene) — not cinematic graded lighting, not beauty-retouched skin.
-- Mild vignette; subtle handled-print wear (light dust, faint scuffs, soft edge wear).
-- No text overlays of any kind (no date stamps, captions, logos, watermarks, stickers, or titles).
-
-COHESION:
-- One cohesive photograph: people, clothing, lighting, background, grain, and color processing must belong together as a single documentary snapshot.
-
-OUTPUT:
-- Return a photorealistic IMAGE — not a text description, illustration, cartoon, CGI, collage, or sticker sheet.
-- No logos, brand names, watermarks, UI chrome, stickers, drawn Polaroid borders, text overlays, or "Landon & Jordan" branding.`;
+Make it feel like a real late-1980s / early-1990s consumer film snapshot: warm C-41 color, visible grain, slight softness — not costume-party neon AI art, not a modern phone filter. Keep the same scene vibe and framing. No text, logos, watermarks, or Polaroid borders in the image. Return one photorealistic edited photograph.`;
 
 /** Alias — same master prompt constant. */
 export const PHOTO_BOOTH_MASTER_PROMPT = EIGHTYS_STYLE_PROMPT;
@@ -146,75 +121,33 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "different person",
   "changed identity",
   "removed glasses",
-  "different glasses",
-  "replaced eyewear",
-  "gold aviators when source has clear frames",
   "beauty filter",
-  "airbrushed skin",
-  "plastic skin",
-  "smooth AI skin",
   "de-aged",
-  "re-aged",
   "extra people",
-  "missing people",
-  "changed pose",
-  "changed body type",
-  "matching tracksuits",
-  "identical outfits",
-  "cloned windbreakers",
-  "forced matching hairstyles",
-  "wheelchair not in source",
-  "costume party swap",
   "costume-party 80s art",
-  "modern digital look",
-  "HDR smartphone photo",
-  "clinically sharp",
-  "generic neon backdrop",
   "Miami neon collage",
-  "invented Miami neon club",
-  "unrelated nightclub",
-  "mall photo booth backdrop",
   "cartoon",
-  "anime",
-  "illustration",
-  "3d render",
-  "CGI",
-  "overly cinematic lighting",
-  "exaggerated costume",
   "text overlay",
-  "date stamp",
-  "caption text",
   "watermark",
-  "logo",
-  "brand name",
-  "Landon & Jordan text",
-  "event title overlay",
-  "UI chrome",
   "Polaroid frame drawn in image",
 ].join(", ");
 
 /** Controlled outfit accents — light period nudges only; never clone looks. */
 export const EIGHTYS_OUTFIT_VARIATIONS = [
-  "Allow only light, person-specific color or fabric nudges; keep each outfit distinct.",
-  "Keep each person's silhouette family; favor subtle late-80s / early-90s palette shifts over costume pieces.",
-  "Quiet period wardrobe cues only (cut, fabric, palette) — never matching tracksuits or identical jackets.",
-  "Preserve real-moment outfit identity per person; avoid costume-party restyles.",
+  "Quiet late-80s wardrobe color/fabric nudges; keep each outfit distinct.",
+  "Subtle period palette shifts only — no matching tracksuits.",
 ] as const;
 
 /** Controlled environment accents — same place vibe, period-true materials. */
 export const EIGHTYS_ENVIRONMENT_VARIATIONS = [
-  "Keep the same place type and camera angle; period-correct materials, signage, or props only as quiet era cues.",
-  "Lean into warm golden-hour / late-afternoon consumer snapshot light that matches the source lighting direction.",
-  "Lean into available-light or on-camera flash consistent with the source context (hard flash OK when it fits).",
-  "Keep environmental storytelling quiet and album-like — lived-in period details of this place, not a stylized movie set.",
+  "Keep the same place vibe and camera angle; quiet period cues only.",
+  "Warm available light or on-camera flash that matches the source.",
 ] as const;
 
 /** Small photo-detail accents for album authenticity (no text overlays). */
 export const EIGHTYS_FILM_DETAIL_VARIATIONS = [
-  "Emphasize fine Kodak Gold-style grain and a soft yellow-orange print cast.",
-  "Emphasize mild print edge wear, tiny dust flecks, and a slightly soft consumer lens.",
-  "Lean into on-camera flash snap energy with hard shadows when the scene supports it; no text overlays.",
-  "Rely on grain, warm C-41 color, and soft focus for the era read — no date stamp or other text.",
+  "Emphasize fine film grain and a soft warm print cast.",
+  "Slight optical softness and mild vignette — no text overlays.",
 ] as const;
 
 function pickVariation<T extends readonly string[]>(
@@ -232,7 +165,7 @@ export type EightysPromptOptions = {
 };
 
 /**
- * Combined master prompt sent to Gemini / OpenArt generate.
+ * Combined master prompt sent to OpenAI / OpenArt / Gemini generate.
  * Optional variationSeed rotates outfit/environment/film accents without
  * changing the identity lock or overall aesthetic.
  */

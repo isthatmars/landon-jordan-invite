@@ -160,7 +160,11 @@ export async function POST(request: Request) {
 
     const ai = await generateEightiesPhoto(sourceBytes);
     if (!ai.ok) {
-      await fail(generationId, photoId, ai.error);
+      // Real provider detail stays server-side; guests only see soft copy.
+      if (ai.detail) {
+        console.error("[booth:generate:ai-detail]", ai.detail);
+      }
+      await fail(generationId, photoId, ai.error, ai.detail);
       return NextResponse.json(
         {
           error: guestSafeBoothError(ai.error, BOOTH_GUEST_MESSAGES.generateFailed),
@@ -249,9 +253,19 @@ export async function POST(request: Request) {
   }
 }
 
-async function fail(generationId: string, photoId: string, error: string) {
+async function fail(
+  generationId: string,
+  photoId: string,
+  error: string,
+  detail?: string,
+) {
   const finished = new Date().toISOString();
   const safe = guestSafeBoothError(error, BOOTH_GUEST_MESSAGES.generateFailed);
+  // Persist a short internal hint for ops (no secrets); guest API still soft.
+  const stored =
+    detail && detail.length > 0
+      ? `${safe} [${detail.slice(0, 220)}]`
+      : safe;
   try {
     const { getPhoto, getGeneration } = await import("@/lib/booth/db");
     const existing = await getPhoto(photoId);
@@ -268,7 +282,7 @@ async function fail(generationId: string, photoId: string, error: string) {
       await upsertGeneration({
         ...gen,
         status: "failed",
-        errorMessage: safe,
+        errorMessage: stored,
         finishedAt: finished,
       });
     }

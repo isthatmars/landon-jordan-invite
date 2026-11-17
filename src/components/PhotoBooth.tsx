@@ -5,7 +5,7 @@
  * 1. Fixed OpenArt environment plate (`/images/booth/environment.jpg`) for every step.
  * 2. Entry = large two-column panel: left Polaroid + camera prop (~45%), right welcome + drag/drop + upload (~55%).
  *    On-screen Polaroid frame has no logo; downloads are raw AI photos only.
- * 3. AI via Gemini (preferred) or OpenArt (`/api/booth/generate` → `src/lib/booth/ai.ts`).
+ * 3. AI via OpenAI → OpenArt → Gemini (`/api/booth/generate` → `src/lib/booth/ai.ts`).
  */
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";

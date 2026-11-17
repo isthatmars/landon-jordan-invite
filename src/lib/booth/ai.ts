@@ -1,7 +1,10 @@
 /**
- * Photo Booth AI — Gemini preferred when GEMINI_API_KEY (or
- * GOOGLE_GENERATIVE_AI_API_KEY) is set; OpenArt fallback when OPENART_TOKEN
- * is present. Identity-preserving late-80s / early-90s film prompt stays the same for both.
+ * Photo Booth AI — multi-provider cascade.
+ *
+ * Preference when multiple keys exist:
+ *   OpenAI Images (OPENAI_API_KEY) → OpenArt (OPENART_TOKEN) → Gemini → mock
+ *
+ * OpenAI uses POST /v1/images/edits with a fast image model (not chat).
  * See PHOTO_BOOTH.md.
  */
 
@@ -22,6 +25,14 @@ import {
   generateGeminiEightiesPhoto,
   PHOTO_BOOTH_GEMINI_MODEL,
 } from "./gemini";
+import {
+  OpenAIBoothError,
+  openaiConfigured,
+  openaiRuntimeConfig,
+  generateOpenAIEightiesPhoto,
+  PHOTO_BOOTH_OPENAI_PROMPT,
+  resolveOpenAiImageModel,
+} from "./openai";
 import { buildEightysOpenArtPrompt } from "./types";
 import {
   BOOTH_GUEST_MESSAGES,
@@ -29,40 +40,54 @@ import {
 } from "./guestMessages";
 import { mockEightiesGrade, sanitizeImage } from "./polaroid";
 
-export type AiProvider = "gemini" | "openart" | "mock" | "none";
+export type AiProvider = "openai" | "openart" | "gemini" | "mock" | "none";
 
 export type AiGenerateResult =
   | { ok: true; buffer: Buffer; mime: string; model: string; mock: boolean }
-  | { ok: false; error: string };
+  | { ok: false; error: string; detail?: string };
 
 export function boothAiStatus() {
   const mock = process.env.BOOTH_MOCK_AI === "1";
-  const gemini = geminiConfigured();
+  const openai = openaiConfigured();
   const openart = openArtConfigured();
-  // Prefer Gemini when its key is set (fastest path to ship on Vercel).
-  const provider: AiProvider = gemini
-    ? "gemini"
+  const gemini = geminiConfigured();
+  // Prefer OpenAI → OpenArt → Gemini → mock when multiple are configured.
+  const provider: AiProvider = openai
+    ? "openai"
     : openart
       ? "openart"
-      : mock
-        ? "mock"
-        : "none";
+      : gemini
+        ? "gemini"
+        : mock
+          ? "mock"
+          : "none";
   const geminiCfg = geminiRuntimeConfig();
+  const openaiCfg = openaiRuntimeConfig();
   return {
-    configured: gemini || openart || mock,
+    configured: openai || openart || gemini || mock,
     provider,
-    gemini,
+    openai,
     openart,
+    gemini,
     gateway: false,
     mock,
-    model: gemini
-      ? PHOTO_BOOTH_GEMINI_MODEL
+    model: openai
+      ? resolveOpenAiImageModel()
       : openart
         ? PHOTO_BOOTH_OPENART_MODEL
-        : mock
-          ? "booth-mock-sharp"
-          : null,
+        : gemini
+          ? PHOTO_BOOTH_GEMINI_MODEL
+          : mock
+            ? "booth-mock-sharp"
+            : null,
     mode: PHOTO_BOOTH_OPENART_MODE,
+    openaiConfig: openai
+      ? {
+          model: openaiCfg.model,
+          size: openaiCfg.size,
+          quality: openaiCfg.quality,
+        }
+      : null,
     geminiConfig: gemini
       ? {
           aspectRatio: geminiCfg.aspectRatio,
@@ -70,6 +95,12 @@ export function boothAiStatus() {
           concurrency: geminiCfg.concurrency,
         }
       : null,
+    cascade: [
+      openai ? "openai" : null,
+      openart ? "openart" : null,
+      gemini ? "gemini" : null,
+      mock ? "mock" : null,
+    ].filter(Boolean) as AiProvider[],
   };
 }
 
@@ -91,6 +122,11 @@ function guestFacingError(message: string, isProd: boolean): string {
     return guestSafeBoothError(message, BOOTH_GUEST_MESSAGES.generateFailed);
   }
   return message.slice(0, 280);
+}
+
+function errMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error && err.message) return err.message;
+  return fallback;
 }
 
 async function runOpenArt(
@@ -115,9 +151,60 @@ async function runOpenArt(
   };
 }
 
+async function runOpenAI(
+  cleaned: Buffer,
+  width?: number,
+  height?: number,
+): Promise<{ buffer: Buffer; mime: string; model: string }> {
+  const result = await generateOpenAIEightiesPhoto({
+    imageBytes: cleaned,
+    mimeType: "image/jpeg",
+    // Short Images-API prompt (not the long Gemini/OpenArt master prompt).
+    prompt: PHOTO_BOOTH_OPENAI_PROMPT,
+    model: resolveOpenAiImageModel(),
+    width,
+    height,
+  });
+  const buffer = await sanitizeImage(result.buffer);
+  return {
+    buffer: buffer.buffer,
+    mime: buffer.mime,
+    model: `openai:${result.model}:${result.size}`,
+  };
+}
+
+async function runGemini(
+  cleaned: Buffer,
+  prompt: string,
+  width?: number,
+  height?: number,
+): Promise<{ buffer: Buffer; mime: string; model: string }> {
+  const result = await generateGeminiEightiesPhoto({
+    imageBytes: cleaned,
+    mimeType: "image/jpeg",
+    prompt,
+    model: PHOTO_BOOTH_GEMINI_MODEL,
+    width,
+    height,
+  });
+  const buffer = await sanitizeImage(result.buffer);
+  return {
+    buffer: buffer.buffer,
+    mime: buffer.mime,
+    model: `gemini:${result.model}`,
+  };
+}
+
+type ProviderAttempt = {
+  name: "openai" | "openart" | "gemini";
+  enabled: boolean;
+  run: () => Promise<{ buffer: Buffer; mime: string; model: string }>;
+};
+
 /**
  * Identity-preserving 80s restyle.
- * Order: Gemini (if key) → OpenArt (if token) → mock sharp (BOOTH_MOCK_AI=1).
+ * Cascade: OpenAI → OpenArt → Gemini → mock (BOOTH_MOCK_AI=1).
+ * Each enabled provider is tried in order; failures fall through.
  */
 export async function generateEightiesPhoto(
   sourceBytes: Buffer,
@@ -131,122 +218,90 @@ export async function generateEightiesPhoto(
       ok: false,
       error: isProd
         ? BOOTH_GUEST_MESSAGES.aiUnavailable
-        : "AI photo generation is not configured yet. Set GEMINI_API_KEY (preferred) or OPENART_TOKEN on the server, or BOOTH_MOCK_AI=1 for local smoke tests.",
+        : "AI photo generation is not configured yet. Set OPENAI_API_KEY (preferred), OPENART_TOKEN, or GEMINI_API_KEY on the server, or BOOTH_MOCK_AI=1 for local smoke tests.",
+      detail: "no_provider_configured",
     };
   }
 
-  if (status.mock && !status.gemini && !status.openart) {
+  if (
+    status.mock &&
+    !status.openai &&
+    !status.openart &&
+    !status.gemini
+  ) {
     const buffer = await mockEightiesGrade(cleaned.buffer);
-    return { ok: true, buffer, mime: "image/jpeg", model: "booth-mock-sharp", mock: true };
+    return {
+      ok: true,
+      buffer,
+      mime: "image/jpeg",
+      model: "booth-mock-sharp",
+      mock: true,
+    };
   }
 
-  // Master prompt + light controlled variation (outfit/env/film accents).
+  // OpenArt / Gemini use the master film prompt; OpenAI uses the short prompt.
   const variationSeed =
     (cleaned.width || 1) * 1009 +
     (cleaned.height || 1) * 9176 +
     cleaned.buffer.length +
     Date.now();
-  const prompt =
+  const masterPrompt =
     buildEightysOpenArtPrompt({ variationSeed }) || PHOTO_BOOTH_TRANSFORM_PROMPT;
 
-  if (status.gemini) {
+  const attempts: ProviderAttempt[] = [
+    {
+      name: "openai",
+      enabled: status.openai,
+      run: () => runOpenAI(cleaned.buffer, cleaned.width, cleaned.height),
+    },
+    {
+      name: "openart",
+      enabled: status.openart,
+      run: () => runOpenArt(cleaned.buffer, masterPrompt),
+    },
+    {
+      name: "gemini",
+      enabled: status.gemini,
+      run: () =>
+        runGemini(cleaned.buffer, masterPrompt, cleaned.width, cleaned.height),
+    },
+  ];
+
+  const errors: string[] = [];
+
+  for (const attempt of attempts) {
+    if (!attempt.enabled) continue;
     try {
-      const result = await generateGeminiEightiesPhoto({
-        imageBytes: cleaned.buffer,
-        mimeType: "image/jpeg",
-        prompt,
-        model: PHOTO_BOOTH_GEMINI_MODEL,
-        width: cleaned.width,
-        height: cleaned.height,
-      });
-      const buffer = await sanitizeImage(result.buffer);
-      return {
-        ok: true,
-        buffer: buffer.buffer,
-        mime: buffer.mime,
-        model: `gemini:${result.model}`,
-        mock: false,
-      };
+      const result = await attempt.run();
+      return { ok: true, ...result, mock: false };
     } catch (err) {
       const message =
+        err instanceof OpenAIBoothError ||
+        err instanceof OpenArtError ||
         err instanceof GeminiError
           ? err.message
-          : err instanceof Error
-            ? err.message
-            : "Gemini generation failed.";
-      console.warn("[booth:ai:gemini]", message);
-
-      // Fall through to OpenArt when available.
-      if (status.openart) {
-        try {
-          const oa = await runOpenArt(cleaned.buffer, prompt);
-          return { ok: true, ...oa, mock: false };
-        } catch (oaErr) {
-          const oaMessage =
-            oaErr instanceof OpenArtError
-              ? oaErr.message
-              : oaErr instanceof Error
-                ? oaErr.message
-                : "OpenArt generation failed.";
-          console.warn("[booth:ai:openart-fallback]", oaMessage);
-          if (status.mock) {
-            const buffer = await mockEightiesGrade(cleaned.buffer);
-            return {
-              ok: true,
-              buffer,
-              mime: "image/jpeg",
-              model: "booth-mock-sharp-fallback",
-              mock: true,
-            };
-          }
-          return {
-            ok: false,
-            error: guestFacingError(oaMessage, isProd),
-          };
-        }
-      }
-
-      if (status.mock) {
-        const buffer = await mockEightiesGrade(cleaned.buffer);
-        return {
-          ok: true,
-          buffer,
-          mime: "image/jpeg",
-          model: "booth-mock-sharp-fallback",
-          mock: true,
-        };
-      }
-      return {
-        ok: false,
-        error: guestFacingError(message, isProd),
-      };
+          : errMessage(err, `${attempt.name} generation failed.`);
+      console.warn(`[booth:ai:${attempt.name}]`, message);
+      errors.push(`${attempt.name}: ${message}`);
     }
   }
 
-  try {
-    const oa = await runOpenArt(cleaned.buffer, prompt);
-    return { ok: true, ...oa, mock: false };
-  } catch (err) {
-    const message =
-      err instanceof OpenArtError
-        ? err.message
-        : err instanceof Error
-          ? err.message
-          : "OpenArt generation failed.";
-    console.warn("[booth:ai:openart]", message);
-    if (status.mock) {
-      const buffer = await mockEightiesGrade(cleaned.buffer);
-      return {
-        ok: true,
-        buffer,
-        mime: "image/jpeg",
-        model: "booth-mock-sharp-fallback",
-        mock: true,
-      };
-    }
+  if (status.mock) {
+    const buffer = await mockEightiesGrade(cleaned.buffer);
     return {
-      ok: false,
-      error: guestFacingError(message, isProd),
+      ok: true,
+      buffer,
+      mime: "image/jpeg",
+      model: "booth-mock-sharp-fallback",
+      mock: true,
     };
   }
+
+  const detail = errors.join(" | ").slice(0, 500) || "all_providers_failed";
+  console.error("[booth:ai:all-failed]", detail);
+  return {
+    ok: false,
+    error: guestFacingError(errors[errors.length - 1] || detail, isProd),
+    detail,
+  };
 }

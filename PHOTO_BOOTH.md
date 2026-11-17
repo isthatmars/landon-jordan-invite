@@ -14,7 +14,9 @@ Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set
 
 - Runtime: `src/lib/booth/ai.ts` → `src/lib/booth/gemini.ts` (preferred) or `src/lib/openart.ts`
 - Routes: `POST /api/booth/generate` (full session + storage) and `POST /api/photo-booth/generate` (lightweight)
+- Gemini runtime: `@google/genai` via `src/lib/booth/gemini.ts`
 - Gemini model: `gemini-2.5-flash-image` (override `GEMINI_IMAGE_MODEL`) — typically a few seconds
+- Gemini image defaults: `GEMINI_IMAGE_ASPECT_RATIO=16:9`, `GEMINI_IMAGE_SIZE=2K`, `IMAGE_GENERATION_CONCURRENCY=3`
 - OpenArt model: `nano-banana-2` (override `OPENART_IMAGE_MODEL`)
 - Preference: if `GEMINI_API_KEY` or `GOOGLE_GENERATIVE_AI_API_KEY` is set, Gemini runs first; OpenArt is used when Gemini is unset, or as fallback if Gemini fails and `OPENART_TOKEN` is present
 - Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
@@ -23,8 +25,12 @@ Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set
 ### Preferred: `GEMINI_API_KEY` on Vercel
 
 1. Create an API key in [Google AI Studio](https://aistudio.google.com/apikey).
-2. Vercel → project `landon-jordan-invite` → Settings → Environment Variables → add
-   `GEMINI_API_KEY` (Encrypted) for **Production + Preview** (also accepts `GOOGLE_GENERATIVE_AI_API_KEY`).
+2. Vercel → project `landon-jordan-invite` → Settings → Environment Variables → add for **Production** (and Preview if desired):
+   - `GEMINI_API_KEY` (Encrypted / Sensitive)
+   - `GEMINI_IMAGE_MODEL=gemini-2.5-flash-image`
+   - `GEMINI_IMAGE_ASPECT_RATIO=16:9`
+   - `GEMINI_IMAGE_SIZE=2K`
+   - `IMAGE_GENERATION_CONCURRENCY=3`
 3. Redeploy so the env is live.
 4. Confirm: `GET /api/booth/health` → `gemini.configured: true` and `ai.preferred: "gemini"`.
 
@@ -92,7 +98,9 @@ Set these in the Vercel project `landon-jordan-invite` for **Preview** and **Pro
 | `OWNER_EMAIL` | Owner RSVP alerts | Comma-separated OK. |
 | `ADMIN_ACCESS_CODE` | `/admin` | Default `NEON80S` if unset. |
 
-Optional / local-only: `BOOTH_MOCK_AI`, `BOOTH_DEV_OTP`, `BOOTH_EXPOSE_OTP`, `BOOTH_CLEANUP_SECRET`, `GEMINI_IMAGE_MODEL`, `OPENART_IMAGE_MODEL`, `OPENART_API_BASE`.
+Optional: `GEMINI_IMAGE_MODEL`, `GEMINI_IMAGE_ASPECT_RATIO`, `GEMINI_IMAGE_SIZE`, `IMAGE_GENERATION_CONCURRENCY`, `OPENART_IMAGE_MODEL`, `OPENART_API_BASE`.
+
+Local-only: `BOOTH_MOCK_AI`, `BOOTH_DEV_OTP`, `BOOTH_EXPOSE_OTP`, `BOOTH_CLEANUP_SECRET`.
 
 ## Flow
 

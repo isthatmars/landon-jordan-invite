@@ -123,7 +123,7 @@ WARDROBE:
 LOOK:
 - Natural, period-correct 1980s consumer photo: warm flash or available light, slight film grain, mild color cast, natural skin texture, mild vignette.
 - Photorealistic snapshot — not illustration, not CGI, not cartoon.
-- Single square photograph ready for a Polaroid frame. No text, logos, watermarks, UI, or borders.`;
+- Single photograph ready for a Polaroid frame (keep framing; do not invent borders). No text, logos, watermarks, UI, or drawn frames.`;
 
 /** Negative constraints appended for models without a separate negativePrompt field. */
 export const EIGHTYS_NEGATIVE_PROMPT = [

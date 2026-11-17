@@ -18,6 +18,7 @@ import {
 import {
   GeminiError,
   geminiConfigured,
+  geminiRuntimeConfig,
   generateGeminiEightiesPhoto,
   PHOTO_BOOTH_GEMINI_MODEL,
 } from "./gemini";
@@ -42,6 +43,7 @@ export function boothAiStatus() {
       : mock
         ? "mock"
         : "none";
+  const geminiCfg = geminiRuntimeConfig();
   return {
     configured: gemini || openart || mock,
     provider,
@@ -57,6 +59,13 @@ export function boothAiStatus() {
           ? "booth-mock-sharp"
           : null,
     mode: PHOTO_BOOTH_OPENART_MODE,
+    geminiConfig: gemini
+      ? {
+          aspectRatio: geminiCfg.aspectRatio,
+          imageSize: geminiCfg.imageSize,
+          concurrency: geminiCfg.concurrency,
+        }
+      : null,
   };
 }
 

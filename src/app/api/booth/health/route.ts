@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { geminiConfigured } from "@/lib/booth/gemini";
+import { geminiRuntimeConfig } from "@/lib/booth/gemini";
 import {
   boothDbEnabled,
   boothRequiresRemoteDb,
@@ -38,7 +38,8 @@ export async function GET() {
     }
   }
 
-  const gemini = geminiConfigured();
+  const geminiCfg = geminiRuntimeConfig();
+  const gemini = geminiCfg.configured;
   const openArtConfigured = Boolean(process.env.OPENART_TOKEN?.trim());
   const resendConfigured = Boolean(process.env.RESEND_API_KEY?.trim());
   const resendFromConfigured = Boolean(process.env.RESEND_FROM_EMAIL?.trim());
@@ -73,7 +74,13 @@ export async function GET() {
       boothPhotosError,
       buckets: ["booth-temp", "booth-outputs", "booth-throwbacks"],
     },
-    gemini: { configured: gemini },
+    gemini: {
+      configured: gemini,
+      model: geminiCfg.model,
+      aspectRatio: geminiCfg.aspectRatio,
+      imageSize: geminiCfg.imageSize,
+      concurrency: geminiCfg.concurrency,
+    },
     openArt: { configured: openArtConfigured, mockAi },
     ai: {
       configured: aiConfigured,

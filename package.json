@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/gateway": "^4.0.146",
+    "@google/genai": "^3.4.0",
     "ai": "^7.0.173",
     "framer-motion": "^14.11.1",
     "jszip": "^3.10.2",

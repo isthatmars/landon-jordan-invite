@@ -116,6 +116,8 @@ export async function GET(request: Request) {
     openai: {
       configured: ai.openai,
       model: openaiCfg.model,
+      size: openaiCfg.size,
+      quality: openaiCfg.quality,
     },
     openArt: {
       configured: ai.openart,

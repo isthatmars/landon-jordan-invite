@@ -8,11 +8,11 @@ The booth stage never swaps backgrounds between steps. One OpenArt environment p
 
 Entry matches the reference: a large pink neon panel (~80–90% × ~70–75% of the stage) with a **left Polaroid + camera prop** (~45%) and **right controls** (~55%: welcome script, huge drag-drop, chunky upload). On-screen Polaroid frames are blank (no logo). The Polaroid may flash once on click — no strobe, no modern “before” photo. Generate / ready still use the Polaroid camera eject animation in the same fixed room.
 
-## 3. AI generation (OpenAI → OpenArt → Gemini) + booth art
+## 3. AI generation (OpenAI Images preferred) + booth art
 
 Identity-preserving 80s transforms cascade through configured providers:
 
-1. **OpenAI Images Edit** when `OPENAI_API_KEY` is set (preferred “ChatGPT” path)
+1. **OpenAI Images Edit** when `OPENAI_API_KEY` is set (preferred)
 2. **OpenArt** when `OPENART_TOKEN` is set
 3. **Gemini** when `GEMINI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` is set
 4. **Mock** sharp grade only when `BOOTH_MOCK_AI=1`
@@ -21,24 +21,30 @@ If a preferred provider fails, the next configured provider is tried automatical
 
 - Runtime: `src/lib/booth/ai.ts` → `openai.ts` / `openart.ts` / `gemini.ts`
 - Routes: `POST /api/booth/generate` (full session + storage) and `POST /api/photo-booth/generate` (lightweight)
-- OpenAI: `POST /v1/images/edits` via `src/lib/booth/openai.ts` (multipart image + prompt)
-- OpenAI model: `gpt-image-1` (override `OPENAI_IMAGE_MODEL`; e.g. `gpt-image-2.5-sunburst` if needed)
+- OpenAI: `POST /v1/images/edits` via `src/lib/booth/openai.ts` (multipart image + prompt — **not** chat completions)
+- OpenAI model: **`gpt-image-2.5-flare`** (fast Flare tier). Override with `OPENAI_IMAGE_MODEL`.
+- If `OPENAI_MODEL` is a chat model (e.g. `gpt-5.2`), it is **ignored** for Images — use `OPENAI_IMAGE_MODEL`.
+- OpenAI size: portrait-first **`1024x1536`** (2:3). Landscape sources stay `1536x1024` — never force landscape onto a portrait upload. Quality default `medium`.
+- OpenAI prompt: `What would this picture look like if it were taken in the 80's? retain facial features.`
 - OpenArt model: `nano-banana-2` (override `OPENART_IMAGE_MODEL`)
 - Gemini runtime: `@google/genai` via `src/lib/booth/gemini.ts`
 - Gemini model: `gemini-nano-banana-2.1` (override `GEMINI_IMAGE_MODEL`)
 - Gemini image defaults: `GEMINI_IMAGE_ASPECT_RATIO=auto`, `GEMINI_IMAGE_SIZE=2K`, `IMAGE_GENERATION_CONCURRENCY=3`, temperature `0.4`
 - Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
+- Local-only port sketch: `PORT=4174` → `npm run dev -- -p 4174` (not used on Vercel)
 - Booth art (environment, camera, samples, chrome title) was generated via OpenArt and checked into `public/images/booth/`
 
 ### Transform prompt defaults
 
-Canonical **master prompt**: `EIGHTYS_STYLE_PROMPT` / `PHOTO_BOOTH_MASTER_PROMPT` + `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts` (fallback `PHOTO_BOOTH_TRANSFORM_PROMPT` in `src/lib/photoBooth.ts`).
+**OpenAI** uses the short Images prompt (`PHOTO_BOOTH_OPENAI_PROMPT` in `src/lib/booth/openai.ts`).
 
-Core guest wording: *“What would this picture look like if it were taken in the 80's? Retain facial features.”* plus minimal identity / film locks.
+**OpenArt / Gemini** use the canonical **master prompt**: `EIGHTYS_STYLE_PROMPT` / `PHOTO_BOOTH_MASTER_PROMPT` + `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts` (fallback `PHOTO_BOOTH_TRANSFORM_PROMPT` in `src/lib/photoBooth.ts`).
+
+Goal: **true-to-life late-1980s / early-1990s consumer film snapshot** via image-to-image reinterpretation of the upload — documentary / photoreal, not costume-party 80s AI art.
 
 - **Lock:** same faces, skin tone, expression, body type, pose, people count, **same glasses when present**, scene vibe / framing
 - **Film look:** warm C-41 consumer film, visible grain, slight softness — not costume-party neon AI art
-- **Variation:** `buildEightysOpenArtPrompt({ variationSeed })` rotates light outfit / environment / film-detail accents
+- **Variation:** `buildEightysOpenArtPrompt({ variationSeed })` rotates light outfit / environment / film-detail accents (OpenArt / Gemini)
 - **Never:** logos, watermarks, drawn Polaroid borders, or text overlays in the image
 - Downloads stay **raw** (no Polaroid frame); on-screen Polaroid is CSS-only
 - Guest-facing errors stay soft; real provider errors are logged server-side (`[booth:ai:…]`) and a short detail is stored on failed `booth_generations` rows
@@ -48,7 +54,8 @@ Core guest wording: *“What would this picture look like if it were taken in th
 1. Create an API key in [OpenAI Platform](https://platform.openai.com/api-keys).
 2. Vercel → project `landon-jordan-invite` → Settings → Environment Variables → add for **Production** (and Preview if desired):
    - `OPENAI_API_KEY` (Encrypted / Sensitive)
-   - Optional: `OPENAI_IMAGE_MODEL=gpt-image-1` (or a current GPT Image model your account supports)
+   - `OPENAI_IMAGE_MODEL=gpt-image-2.5-flare`
+   - Optional: `OPENAI_IMAGE_SIZE=1024x1536`, `OPENAI_IMAGE_QUALITY=medium`
 3. Redeploy so the env is live.
 4. Confirm: `GET /api/booth/health` → public `{ ready, ai }` booleans; diagnostics (admin / `x-booth-health-secret`) show `ai.preferred`, `ai.cascade`, and per-provider config.
 

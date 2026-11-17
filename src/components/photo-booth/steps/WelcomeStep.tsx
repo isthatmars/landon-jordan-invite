@@ -8,7 +8,7 @@ export function WelcomeStep({ onStart }: WelcomeStepProps) {
   return (
     <div className="booth-panel-inner">
       <h3>Strike a pose</h3>
-      <p>One booth. One vibe. Snap a shot and we&apos;ll drop you into an 80s Polaroid.</p>
+      <p>One booth. One vibe. Snap a shot and we&apos;ll print it like a late-80s / early-90s film snapshot.</p>
       <div className="booth-actions">
         <button type="button" className="booth-btn" onClick={onStart}>
           Enter booth

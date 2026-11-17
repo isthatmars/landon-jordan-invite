@@ -103,37 +103,39 @@ export const BOOTH_ALLOWED_MIME = new Set([
 
 /**
  * Master Photo Booth transform prompt (source of truth).
- * Gemini / OpenArt image2image: edit the uploaded photo into a believable
- * 1985–1989 consumer film snapshot while locking identity (esp. glasses).
+ * Gemini / OpenArt image2image: reinterpret the uploaded photo as a
+ * late-80s / early-90s true-to-life film snapshot while locking identity.
  */
 export const EIGHTYS_STYLE_PROMPT = `EDIT THIS PHOTOGRAPH (image-to-image). The attached image is the only visual source of truth — edit it in place. Do not invent people from a text description. Do not regenerate a new scene from imagination. Output one photorealistic edited photograph.
 
-Goal: a believable late-1980s family-photo-album snapshot (1985–1989 consumer film) — NOT random 80s-themed AI art, NOT a neon Miami Vice collage, NOT a modern digital photo with a retro filter.
+Goal: reinterpret this photo as a true-to-life late-1980s / early-1990s consumer film snapshot (documentary family-album look) — NOT costume-party 80s AI art, NOT matching tracksuits, NOT a Miami neon collage, NOT a modern digital photo with a retro filter.
 
 IDENTITY LOCK (highest priority — non-negotiable):
-- Preserve every person's exact face, facial structure, proportions, skin tone, age appearance, hairline, hairstyle silhouette, facial hair shape/density, eye shape, nose, mouth, and expression.
+- Preserve every person's exact face, facial structure, proportions, skin tone, age appearance, hairline, hairstyle silhouette, facial hair shape/density, eye shape, nose, mouth, expression, body type, and pose.
 - Eyewear lock: if anyone wears glasses, keep the SAME glasses — same frame shape, thickness, color/material, lens size, and placement on the face. Do not remove glasses. Do not replace clear/translucent/plastic frames with gold aviators or invent different eyewear. If they do not wear glasses, do not add glasses.
-- Keep the same people count, approximate positions, body proportions, poses, expressions, and camera perspective / framing / crop identity.
+- Keep the same people count, approximate positions, body proportions, poses, expressions, scene vibe, and camera perspective / framing / crop identity.
+- Do not force matching or synchronized hairstyles across people.
+- Do not add or invent a wheelchair (or other assistive devices that are not in the source).
 - No face-swap, beauty filter, plastic/airbrushed skin, smooth-skin AI finish, de-aging, re-aging, cartoon features, or altered recognizable features.
 
-ERA RESTYLE (must immediately read as 1985–1989 while people stay recognizable):
-- Clothing: transform modern clothing into authentic, flattering period-appropriate late-80s fashion. Vary looks per person — respect each person's original presentation, formality, and silhouette family (casual stays casual; dressy stays dressy). Period-correct pieces include geometric nylon windbreakers, acid-wash / stonewash denim, patterned knits, puff shoulders, polos, gold curb chains, and period watches (not smartwatches). Do NOT leave modern athleisure, slim contemporary cuts, current logos, or smartwatches looking modern. Do NOT costume everyone identically.
-- Environment: transform the background into a believable late-1980s environment that respects the original camera perspective, framing, lighting direction, and outdoor/indoor context. Period-correct props (cars, signage, interiors, street details). Substantial era restyle is desired, but do NOT invent a generic neon club / mall photo-booth / Miami Vice backdrop unrelated to the photo's context.
-- Hair: only period-plausible volume or styling that does not change identity.
+ERA REINTERPRETATION (period-true, not a costume swap):
+- Clothing: keep each person's distinct outfit identity and silhouette family. Light era-appropriate color or wardrobe shifts are OK (fabric, cut, or palette nudges that quietly read late-80s / early-90s). Do NOT costume-swap into matching tracksuits, identical windbreakers, or one cloned look for everyone. Distinct outfits per person.
+- Environment: keep the same place / scene vibe — this location in that era, or a period-true equivalent of the same place type. Respect original camera perspective, framing, lighting direction, and outdoor/indoor context. Do NOT invent a costume-party backdrop, generic neon club, mall photo-booth, or Miami Vice collage unrelated to the photo's context.
+- Hair: only period-plausible volume or styling that does not change identity; never force the same hairstyle on everyone.
 
 CONSUMER FILM LOOK (required — real analog photo, not a filter):
 - C-41 consumer color film (Kodak Gold / Kodacolor era): warm slightly faded yellow-orange cast, soft saturation, lifted warm shadows.
 - Visible fine-to-medium film grain across the whole image; slight optical softness (not clinical digital sharpness, not HDR smartphone look).
-- Natural available light or on-camera flash quality — not cinematic graded lighting, not beauty-retouched skin.
+- Natural available light or on-camera flash quality (hard flash and hard shadows are OK when they fit the scene) — not cinematic graded lighting, not beauty-retouched skin.
 - Mild vignette; subtle handled-print wear (light dust, faint scuffs, soft edge wear).
-- Optional: one small classic orange/red 7-segment LCD date stamp in a corner (e.g. JUN 27 1988). No other text.
+- No text overlays of any kind (no date stamps, captions, logos, watermarks, stickers, or titles).
 
 COHESION:
-- One cohesive photograph: people, clothing, lighting, background, grain, and color processing must belong together as a single snapshot.
+- One cohesive photograph: people, clothing, lighting, background, grain, and color processing must belong together as a single documentary snapshot.
 
 OUTPUT:
 - Return a photorealistic IMAGE — not a text description, illustration, cartoon, CGI, collage, or sticker sheet.
-- No logos, brand names, watermarks, UI chrome, stickers, drawn Polaroid borders, or "Landon & Jordan" branding.`;
+- No logos, brand names, watermarks, UI chrome, stickers, drawn Polaroid borders, text overlays, or "Landon & Jordan" branding.`;
 
 /** Alias — same master prompt constant. */
 export const PHOTO_BOOTH_MASTER_PROMPT = EIGHTYS_STYLE_PROMPT;
@@ -156,13 +158,19 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "extra people",
   "missing people",
   "changed pose",
+  "changed body type",
+  "matching tracksuits",
+  "identical outfits",
+  "cloned windbreakers",
+  "forced matching hairstyles",
+  "wheelchair not in source",
+  "costume party swap",
+  "costume-party 80s art",
   "modern digital look",
   "HDR smartphone photo",
   "clinically sharp",
-  "unchanged modern clothing",
-  "smartwatch left modern",
-  "modern car left modern",
   "generic neon backdrop",
+  "Miami neon collage",
   "invented Miami neon club",
   "unrelated nightclub",
   "mall photo booth backdrop",
@@ -173,6 +181,9 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "CGI",
   "overly cinematic lighting",
   "exaggerated costume",
+  "text overlay",
+  "date stamp",
+  "caption text",
   "watermark",
   "logo",
   "brand name",
@@ -182,28 +193,28 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "Polaroid frame drawn in image",
 ].join(", ");
 
-/** Controlled outfit accents — pick one per generation for variety without quality drift. */
+/** Controlled outfit accents — light period nudges only; never clone looks. */
 export const EIGHTYS_OUTFIT_VARIATIONS = [
-  "Favor geometric nylon windbreaker / color-block track jacket accents where they fit each person's silhouette.",
-  "Favor acid-wash or stonewash denim and soft knit layers where they fit each person's silhouette.",
-  "Favor patterned late-80s knits / polo + gold chain accents where they fit each person's silhouette.",
-  "Favor period-correct casual layers (oversized tee under light jacket, high-waist denim) without cloning one outfit onto everyone.",
+  "Allow only light, person-specific color or fabric nudges; keep each outfit distinct.",
+  "Keep each person's silhouette family; favor subtle late-80s / early-90s palette shifts over costume pieces.",
+  "Quiet period wardrobe cues only (cut, fabric, palette) — never matching tracksuits or identical jackets.",
+  "Preserve real-moment outfit identity per person; avoid costume-party restyles.",
 ] as const;
 
-/** Controlled environment accents — still must respect original perspective/context. */
+/** Controlled environment accents — same place vibe, period-true materials. */
 export const EIGHTYS_ENVIRONMENT_VARIATIONS = [
-  "Period-correct the setting with late-80s cars, signage, and materials while keeping the same camera angle and place type.",
+  "Keep the same place type and camera angle; period-correct materials, signage, or props only as quiet era cues.",
   "Lean into warm golden-hour / late-afternoon consumer snapshot light that matches the source lighting direction.",
-  "Lean into available-light outdoor (or room-interior) consumer flash/ambient look consistent with the source context.",
-  "Keep environmental storytelling quiet and album-like — lived-in period details, not a stylized movie set.",
+  "Lean into available-light or on-camera flash consistent with the source context (hard flash OK when it fits).",
+  "Keep environmental storytelling quiet and album-like — lived-in period details of this place, not a stylized movie set.",
 ] as const;
 
-/** Small photo-detail accents for album authenticity. */
+/** Small photo-detail accents for album authenticity (no text overlays). */
 export const EIGHTYS_FILM_DETAIL_VARIATIONS = [
   "Emphasize fine Kodak Gold-style grain and a soft yellow-orange print cast.",
   "Emphasize mild print edge wear, tiny dust flecks, and a slightly soft consumer lens.",
-  "Include one small classic orange/red LCD date stamp in a corner (e.g. JUN 27 1988); no other text.",
-  "Skip the date stamp; rely on grain, warm C-41 color, and soft focus for the era read.",
+  "Lean into on-camera flash snap energy with hard shadows when the scene supports it; no text overlays.",
+  "Rely on grain, warm C-41 color, and soft focus for the era read — no date stamp or other text.",
 ] as const;
 
 function pickVariation<T extends readonly string[]>(

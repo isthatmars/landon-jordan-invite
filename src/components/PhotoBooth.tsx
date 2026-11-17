@@ -697,8 +697,8 @@ export function PhotoBooth() {
               <div className="booth-entry-main">
                 <p className="booth-subcopy booth-entry-subcopy">
                   {welcomeName
-                    ? `Welcome back, ${welcomeName}. Upload a photo to get your 80's transformation and add it to the Party Gallery.`
-                    : "Upload a photo to get your 80's transformation and add it to the Party Gallery."}
+                    ? `Welcome back, ${welcomeName}. Upload a photo for a late-80s / early-90s film snapshot and add it to the Party Gallery.`
+                    : "Upload a photo for a late-80s / early-90s film snapshot and add it to the Party Gallery."}
                 </p>
                 <div
                   className={`booth-drop booth-entry-drop${dragOver ? " is-drag" : ""}`}
@@ -867,7 +867,7 @@ export function PhotoBooth() {
               <p className="booth-subcopy">
                 {mode === "throwback"
                   ? "Add an original 80's photo for the party slideshow."
-                  : "Upload a photo to get your 80's transformation and add it to the Party Gallery."}
+                  : "Upload a photo for a late-80s / early-90s film snapshot and add it to the Party Gallery."}
               </p>
               <div
                 className={`booth-drop${dragOver ? " is-drag" : ""}`}
@@ -949,7 +949,7 @@ export function PhotoBooth() {
                 <p className="mt-2 text-sm text-white/75">
                   {mode === "throwback"
                     ? "We'll keep this private until you verify email to add it to the Party Gallery."
-                    : "This is the photo you selected. Ready to turn it into an 80's masterpiece?"}
+                    : "This is the photo you selected. Ready to print it as a late-80s / early-90s film snapshot?"}
                 </p>
                 {!aiConfigured && mode === "ai" ? (
                   <p className="booth-error">{BOOTH_GUEST_MESSAGES.aiUnavailable}</p>

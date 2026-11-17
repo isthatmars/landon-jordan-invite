@@ -1,7 +1,7 @@
 /**
  * Photo Booth AI — Gemini preferred when GEMINI_API_KEY (or
  * GOOGLE_GENERATIVE_AI_API_KEY) is set; OpenArt fallback when OPENART_TOKEN
- * is present. Identity-preserving 80s prompt stays the same for both.
+ * is present. Identity-preserving late-80s / early-90s film prompt stays the same for both.
  * See PHOTO_BOOTH.md.
  */
 

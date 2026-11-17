@@ -26,14 +26,14 @@ Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set
 
 Canonical **master prompt**: `EIGHTYS_STYLE_PROMPT` / `PHOTO_BOOTH_MASTER_PROMPT` + `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts` (fallback `PHOTO_BOOTH_TRANSFORM_PROMPT` in `src/lib/photoBooth.ts`).
 
-Goal: **believable 1985–1989 consumer film album photo** via image-to-image edit of the upload — not random 80s AI art, not a neon collage, not a modern digital photo with a retro filter.
+Goal: **true-to-life late-1980s / early-1990s consumer film snapshot** via image-to-image reinterpretation of the upload — documentary / photoreal, not costume-party 80s AI art, not matching tracksuits, not a Miami neon collage, not a modern digital photo with a retro filter.
 
-- **Lock:** same faces, skin tone, hair, facial hair, **same glasses when present**, people count, pose, framing / camera perspective
-- **Restyle:** period fashion that varies per person (respect silhouette/formality); believable 80s environment using original perspective / lighting direction / indoor-outdoor context
-- **Film look:** C-41 warm yellow-orange cast, visible grain, slight softness, natural light/flash, mild vignette, subtle print wear
-- **Variation:** `buildEightysOpenArtPrompt({ variationSeed })` rotates outfit / environment / film-detail accents without changing identity lock or quality bar
-- **Optional:** one classic orange/red LCD date stamp (e.g. `JUN 27 1988`) — no other text
-- **Never:** logos, watermarks, UI chrome, drawn Polaroid borders, or Landon & Jordan branding in the image
+- **Lock:** same faces, body types, skin tone, hair, facial hair, **same glasses when present**, people count, pose, scene vibe, framing / camera perspective
+- **Wardrobe:** distinct outfits per person; light era-appropriate color/wardrobe shifts OK — never matching tracksuits, cloned windbreakers, forced matching hairstyles, or a wheelchair not in the source
+- **Place:** same place / scene vibe in that era (or period-true equivalent) — not a costume-party backdrop swap
+- **Film look:** C-41 warm yellow-orange cast, visible grain, slight softness, natural light or on-camera flash, mild vignette, subtle print wear; **no text overlays**
+- **Variation:** `buildEightysOpenArtPrompt({ variationSeed })` rotates light outfit / environment / film-detail accents without changing identity lock or quality bar
+- **Never:** logos, watermarks, UI chrome, drawn Polaroid borders, date stamps / captions, or Landon & Jordan branding in the image
 - Downloads stay **raw** (no Polaroid frame); on-screen Polaroid is CSS-only
 
 Gemini call notes (`src/lib/booth/gemini.ts`):

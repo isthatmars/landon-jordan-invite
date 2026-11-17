@@ -22,7 +22,7 @@ export function CaptureStep({
   return (
     <div className="booth-panel-inner">
       <h3>Capture</h3>
-      <p>Upload a clear face photo — we keep you, restyle the era.</p>
+      <p>Upload a clear photo — we keep you, the place vibe, and print it as period film.</p>
       {previewUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img className="booth-preview" src={previewUrl} alt="Your capture preview" />

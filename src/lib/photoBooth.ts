@@ -21,13 +21,13 @@ export const PHOTO_BOOTH_OPENART_MODE = "image2image" as const;
  */
 export const PHOTO_BOOTH_TRANSFORM_PROMPT = [
   "EDIT THIS PHOTOGRAPH (image-to-image). The attached image is the only visual source of truth — edit it in place; do not invent people from a text description.",
-  "Turn it into a believable 1985–1989 consumer film family-album photo — not 80s-themed AI art, not a neon collage, not a modern digital photo with a retro filter.",
-  "IDENTITY LOCK: preserve exact faces, proportions, skin tone, hair, facial hair, expressions, people count, poses, and camera perspective.",
+  "Reinterpret it as a true-to-life late-1980s / early-1990s consumer film snapshot — not costume-party 80s AI art, not matching tracksuits, not a Miami neon collage, not a modern digital photo with a retro filter.",
+  "IDENTITY LOCK: preserve exact faces, body types, proportions, skin tone, hair, facial hair, expressions, people count, poses, scene vibe, and camera perspective.",
   "EYEWEAR LOCK: if anyone wears glasses, keep the SAME glasses (shape, color, placement). Do not remove or replace glasses (no clear frames → gold aviators).",
-  "Restyle clothing into authentic flattering late-80s fashion that varies per person and respects original silhouette/formality; replace smartwatches with period watches.",
-  "Transform the background into a believable 1980s environment using original perspective, framing, lighting direction, and outdoor/indoor context — no generic neon backdrop.",
-  "Required film look: C-41 warm yellow-orange cast, visible grain, slight softness, natural light/flash, mild vignette, subtle print wear. Optional one orange/red LCD date stamp only.",
-  "Photorealistic single cohesive photograph. No beauty filter, plastic skin, cartoon, CGI, logos, watermarks, Polaroid borders, or Landon & Jordan branding.",
+  "Keep distinct outfits per person; light era-appropriate color/wardrobe shifts OK. Do not force matching tracksuits, identical windbreakers, matching hairstyles, or a wheelchair not in the source.",
+  "Background should feel like the same place in that era (or a period-true equivalent) — not a costume-party swap or generic neon backdrop.",
+  "Required film look: C-41 warm yellow-orange cast, visible grain, slight softness, natural light or on-camera flash, mild vignette, subtle print wear. No text overlays.",
+  "Photorealistic single cohesive documentary photograph. No beauty filter, plastic skin, cartoon, CGI, logos, watermarks, Polaroid borders, text overlays, or Landon & Jordan branding.",
 ].join(" ");
 
 export type PhotoBoothGenerateRequest = {

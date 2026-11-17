@@ -34,7 +34,7 @@ function parseImageInput(input: string): Buffer {
 
 /**
  * Guest capture → Gemini (preferred) or OpenArt image2image.
- * Identity-preserving 80s Polaroid restyle.
+ * Identity-preserving late-80s / early-90s film snapshot restyle.
  */
 export async function POST(request: Request) {
   const status = boothAiStatus();

@@ -22,7 +22,7 @@ import {
 } from "@/lib/booth/guestMessages";
 import { clientIp, readBoothSessionFromRequest } from "@/lib/booth/session";
 import { deleteObject, getObject, makeStoredRef, parseStoredRef, putObject } from "@/lib/booth/storage";
-import { buildEightysOpenArtPrompt } from "@/lib/booth/types";
+import { EIGHTYS_STYLE_PROMPT } from "@/lib/booth/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -92,7 +92,8 @@ export async function POST(request: Request) {
     const generationId = uid("bgen");
     const photoId = uid("bphoto");
     const now = new Date().toISOString();
-    const promptSnippet = buildEightysOpenArtPrompt().slice(0, 280);
+    // Log master prompt head only — full prompt (+ variation) is built in booth/ai.ts.
+    const promptSnippet = EIGHTYS_STYLE_PROMPT.slice(0, 280);
 
     // Photo row first — booth_generations.photo_id FK references booth_photos(id).
     await upsertPhoto({

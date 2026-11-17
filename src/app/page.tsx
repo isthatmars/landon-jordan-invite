@@ -26,8 +26,9 @@ export default async function HomePage() {
         videos={videos}
       />
       <Arcade headline={content.arcadeHeadline} />
-      <Lineup content={content} />
+      {/* Scroll order: Pac-Man arcade → Photo Booth → Lineup → RSVP */}
       <PhotoBooth />
+      <Lineup content={content} />
       <RsvpForm content={content} />
       <Footer tagline={content.footerTagline} />
     </main>

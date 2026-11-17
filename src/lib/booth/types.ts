@@ -102,44 +102,55 @@ export const BOOTH_ALLOWED_MIME = new Set([
 ]);
 
 /**
- * Gemini / OpenArt image2image — restyle the upload as an authentic late-1980s
- * throwback photo ("what would this look like if taken in the 80s"), while
- * locking faces, people count, pose, and composition identity.
+ * Master Photo Booth transform prompt (source of truth).
+ * Gemini / OpenArt image2image: edit the uploaded photo into a believable
+ * 1985–1989 consumer film snapshot while locking identity (esp. glasses).
  */
-export const EIGHTYS_STYLE_PROMPT = `Transform this exact photograph into an authentic late-1980s throwback snapshot — as if it were really taken around 1987–1989 with a consumer film camera. Restyle the ERA (fashion, hair, cars, film look); do not invent new people or a new scene.
+export const EIGHTYS_STYLE_PROMPT = `EDIT THIS PHOTOGRAPH (image-to-image). The attached image is the only visual source of truth — edit it in place. Do not invent people from a text description. Do not regenerate a new scene from imagination. Output one photorealistic edited photograph.
 
-IDENTITY LOCK (non-negotiable):
-- Same person/people, same face(s), facial features, skin tone, age, hairline, facial hair, eye shape, nose, mouth, and expression.
-- Same people count, pose, body language, framing, camera angle, crop, and composition identity.
-- Do not face-swap, beautify, smooth skin, de-age, re-age, or invent / remove people.
+Goal: a believable late-1980s family-photo-album snapshot (1985–1989 consumer film) — NOT random 80s-themed AI art, NOT a neon Miami Vice collage, NOT a modern digital photo with a retro filter.
 
-ERA RESTYLE (be bold — modern uploads should clearly read as 1980s):
-- Wardrobe: restyle clothing into period-accurate late-80s fashion that fits THIS scene (e.g. geometric nylon windbreakers, acid-wash / stonewash denim, puff shoulders, bold patterned knits, chunky sneakers, gold chains, oversized frames / aviators, digital watches). Keep similar color family and formality when possible, but do NOT leave modern athleisure, slim contemporary cuts, or current logos looking modern.
-- Hair: period-plausible 80s volume / styling when it fits the subject (teased / permed curls, high volume, clean fades) without changing identity.
-- Setting: keep the same place type (street, canyon overlook, driveway, living room, etc.) but period-correct props — late-70s/80s cars instead of modern vehicles, era-plausible signage and details. Do not invent an unrelated Miami Vice neon club, mall booth, or beach if it is not in the source.
+IDENTITY LOCK (highest priority — non-negotiable):
+- Preserve every person's exact face, facial structure, proportions, skin tone, age appearance, hairline, hairstyle silhouette, facial hair shape/density, eye shape, nose, mouth, and expression.
+- Eyewear lock: if anyone wears glasses, keep the SAME glasses — same frame shape, thickness, color/material, lens size, and placement on the face. Do not remove glasses. Do not replace clear/translucent/plastic frames with gold aviators or invent different eyewear. If they do not wear glasses, do not add glasses.
+- Keep the same people count, approximate positions, body proportions, poses, expressions, and camera perspective / framing / crop identity.
+- No face-swap, beauty filter, plastic/airbrushed skin, smooth-skin AI finish, de-aging, re-aging, cartoon features, or altered recognizable features.
 
-ANALOG FILM LOOK (required — this must not look like a clean modern digital photo):
-- Warm aged film color grade (slight yellow/orange cast, soft saturation).
-- Visible film grain across the image; soft focus / slight softness (not clinical digital sharpness).
-- Mild vignette; natural skin texture (no beauty filter).
-- Subtle aged photo wear: light scuffs, dust specks, and edge wear as on a handled print.
+ERA RESTYLE (must immediately read as 1985–1989 while people stay recognizable):
+- Clothing: transform modern clothing into authentic, flattering period-appropriate late-80s fashion. Vary looks per person — respect each person's original presentation, formality, and silhouette family (casual stays casual; dressy stays dressy). Period-correct pieces include geometric nylon windbreakers, acid-wash / stonewash denim, patterned knits, puff shoulders, polos, gold curb chains, and period watches (not smartwatches). Do NOT leave modern athleisure, slim contemporary cuts, current logos, or smartwatches looking modern. Do NOT costume everyone identically.
+- Environment: transform the background into a believable late-1980s environment that respects the original camera perspective, framing, lighting direction, and outdoor/indoor context. Period-correct props (cars, signage, interiors, street details). Substantial era restyle is desired, but do NOT invent a generic neon club / mall photo-booth / Miami Vice backdrop unrelated to the photo's context.
+- Hair: only period-plausible volume or styling that does not change identity.
 
-OPTIONAL DATE STAMP:
-- You may add one small classic orange/red segmented LCD date stamp in a corner (e.g. JUN 27 1988). No other text.
+CONSUMER FILM LOOK (required — real analog photo, not a filter):
+- C-41 consumer color film (Kodak Gold / Kodacolor era): warm slightly faded yellow-orange cast, soft saturation, lifted warm shadows.
+- Visible fine-to-medium film grain across the whole image; slight optical softness (not clinical digital sharpness, not HDR smartphone look).
+- Natural available light or on-camera flash quality — not cinematic graded lighting, not beauty-retouched skin.
+- Mild vignette; subtle handled-print wear (light dust, faint scuffs, soft edge wear).
+- Optional: one small classic orange/red 7-segment LCD date stamp in a corner (e.g. JUN 27 1988). No other text.
+
+COHESION:
+- One cohesive photograph: people, clothing, lighting, background, grain, and color processing must belong together as a single snapshot.
 
 OUTPUT:
-- Photorealistic single photograph — not illustration, cartoon, CGI, or collage.
-- Keep the same framing; do not draw Polaroid borders, UI chrome, stickers, or watermarks.
-- No logos, brand names, event titles, or "Landon & Jordan" branding anywhere in the image.`;
+- Return a photorealistic IMAGE — not a text description, illustration, cartoon, CGI, collage, or sticker sheet.
+- No logos, brand names, watermarks, UI chrome, stickers, drawn Polaroid borders, or "Landon & Jordan" branding.`;
+
+/** Alias — same master prompt constant. */
+export const PHOTO_BOOTH_MASTER_PROMPT = EIGHTYS_STYLE_PROMPT;
 
 /** Negative constraints appended for models without a separate negativePrompt field. */
 export const EIGHTYS_NEGATIVE_PROMPT = [
   "face swap",
   "different person",
   "changed identity",
+  "removed glasses",
+  "different glasses",
+  "replaced eyewear",
+  "gold aviators when source has clear frames",
   "beauty filter",
   "airbrushed skin",
   "plastic skin",
+  "smooth AI skin",
   "de-aged",
   "re-aged",
   "extra people",
@@ -149,14 +160,19 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "HDR smartphone photo",
   "clinically sharp",
   "unchanged modern clothing",
+  "smartwatch left modern",
   "modern car left modern",
+  "generic neon backdrop",
   "invented Miami neon club",
   "unrelated nightclub",
+  "mall photo booth backdrop",
   "cartoon",
   "anime",
   "illustration",
   "3d render",
   "CGI",
+  "overly cinematic lighting",
+  "exaggerated costume",
   "watermark",
   "logo",
   "brand name",
@@ -166,9 +182,72 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "Polaroid frame drawn in image",
 ].join(", ");
 
-/** Combined prompt sent to Gemini / OpenArt generate. */
-export function buildEightysOpenArtPrompt(): string {
+/** Controlled outfit accents — pick one per generation for variety without quality drift. */
+export const EIGHTYS_OUTFIT_VARIATIONS = [
+  "Favor geometric nylon windbreaker / color-block track jacket accents where they fit each person's silhouette.",
+  "Favor acid-wash or stonewash denim and soft knit layers where they fit each person's silhouette.",
+  "Favor patterned late-80s knits / polo + gold chain accents where they fit each person's silhouette.",
+  "Favor period-correct casual layers (oversized tee under light jacket, high-waist denim) without cloning one outfit onto everyone.",
+] as const;
+
+/** Controlled environment accents — still must respect original perspective/context. */
+export const EIGHTYS_ENVIRONMENT_VARIATIONS = [
+  "Period-correct the setting with late-80s cars, signage, and materials while keeping the same camera angle and place type.",
+  "Lean into warm golden-hour / late-afternoon consumer snapshot light that matches the source lighting direction.",
+  "Lean into available-light outdoor (or room-interior) consumer flash/ambient look consistent with the source context.",
+  "Keep environmental storytelling quiet and album-like — lived-in period details, not a stylized movie set.",
+] as const;
+
+/** Small photo-detail accents for album authenticity. */
+export const EIGHTYS_FILM_DETAIL_VARIATIONS = [
+  "Emphasize fine Kodak Gold-style grain and a soft yellow-orange print cast.",
+  "Emphasize mild print edge wear, tiny dust flecks, and a slightly soft consumer lens.",
+  "Include one small classic orange/red LCD date stamp in a corner (e.g. JUN 27 1988); no other text.",
+  "Skip the date stamp; rely on grain, warm C-41 color, and soft focus for the era read.",
+] as const;
+
+function pickVariation<T extends readonly string[]>(
+  options: T,
+  seed: number,
+  salt: number,
+): T[number] {
+  const idx = Math.abs((seed * 31 + salt) | 0) % options.length;
+  return options[idx]!;
+}
+
+export type EightysPromptOptions = {
+  /** Stable-ish seed for controlled outfit/environment/film variation. */
+  variationSeed?: number;
+};
+
+/**
+ * Combined master prompt sent to Gemini / OpenArt generate.
+ * Optional variationSeed rotates outfit/environment/film accents without
+ * changing the identity lock or overall aesthetic.
+ */
+export function buildEightysOpenArtPrompt(opts?: EightysPromptOptions): string {
+  const seed =
+    typeof opts?.variationSeed === "number" && Number.isFinite(opts.variationSeed)
+      ? Math.floor(opts.variationSeed)
+      : Date.now();
+
+  const outfit = pickVariation(EIGHTYS_OUTFIT_VARIATIONS, seed, 7);
+  const environment = pickVariation(EIGHTYS_ENVIRONMENT_VARIATIONS, seed, 13);
+  const film = pickVariation(EIGHTYS_FILM_DETAIL_VARIATIONS, seed, 19);
+
   return `${EIGHTYS_STYLE_PROMPT}
 
+CONTROLLED VARIATION (keep identity + film quality constant):
+- Outfit accent: ${outfit}
+- Environment accent: ${environment}
+- Film detail accent: ${film}
+
 Avoid / do not generate: ${EIGHTYS_NEGATIVE_PROMPT}.`;
+}
+
+/** Alias for callers that prefer the “master prompt” name. */
+export function buildPhotoBoothMasterPrompt(
+  opts?: EightysPromptOptions,
+): string {
+  return buildEightysOpenArtPrompt(opts);
 }

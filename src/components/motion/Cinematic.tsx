@@ -22,8 +22,8 @@ const SECTIONS = [
   ["mixtape", "seenMixtape", "liveMixtape", "warmMixtape"],
   ["watch", "seenWatch", "liveWatch", "warmWatch"],
   ["arcade", "seenArcade", "liveArcade", "warmArcade"],
-  ["lineup", "seenLineup", "liveLineup", "warmLineup"],
   ["photobooth", "seenPhotobooth", "livePhotobooth", "warmPhotobooth"],
+  ["lineup", "seenLineup", "liveLineup", "warmLineup"],
   ["rsvp", "seenRsvp", "liveRsvp", "warmRsvp"],
 ] as const;
 

@@ -94,7 +94,10 @@ export function PhotoBooth() {
   const [rsvpPrompt, setRsvpPrompt] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const entryFileRef = useRef<HTMLInputElement>(null);
-  const pendingAction = useRef<"ai" | "throwback" | "myphotos" | "submit" | null>(null);
+  const pendingAction = useRef<
+    "ai" | "throwback" | "myphotos" | "submit" | "download" | null
+  >(null);
+  const pendingDownloadId = useRef<string | null>(null);
   const pendingFile = useRef<File | null>(null);
   const propFlashTimer = useRef<number | null>(null);
   const rsvpPromptedFor = useRef<string | null>(null);
@@ -119,7 +122,7 @@ export function PhotoBooth() {
     } else {
       setGuest(null);
       setPhotos([]);
-      setRate(null);
+      setRate(data.rate || null);
     }
     setLoading(false);
     return data;
@@ -232,12 +235,14 @@ export function PhotoBooth() {
     }
   }, [step]);
 
-  const requireAuthThen = async (action: "ai" | "throwback" | "myphotos" | "submit") => {
+  const requireAuthThen = async (
+    action: "ai" | "throwback" | "myphotos" | "submit" | "download",
+  ) => {
     setError("");
     const data = await refreshSession();
     if (data.authenticated) {
       if (action === "myphotos") setStep("myphotos");
-      else if (action === "submit") {
+      else if (action === "submit" || action === "download") {
         return true;
       } else if (action === "throwback") {
         setMode("throwback");
@@ -253,6 +258,78 @@ export function PhotoBooth() {
     setDevCode(null);
     setStep("auth");
     return false;
+  };
+
+  const triggerPhotoDownload = async (photoId: string) => {
+    setBusy(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/booth/photos/${photoId}/download`, {
+        method: "GET",
+        credentials: "same-origin",
+      });
+      if (res.status === 401) {
+        pendingDownloadId.current = photoId;
+        pendingAction.current = "download";
+        setOtpSent(false);
+        setDevCode(null);
+        setStep("auth");
+        setError(BOOTH_GUEST_MESSAGES.downloadNeedsAuth);
+        return false;
+      }
+      if (!res.ok) {
+        const data = await readBoothJson<{ error?: string; needsAuth?: boolean }>(res);
+        if (data.needsAuth) {
+          pendingDownloadId.current = photoId;
+          pendingAction.current = "download";
+          setOtpSent(false);
+          setDevCode(null);
+          setStep("auth");
+          setError(
+            guestVisibleBoothError(
+              data.error,
+              BOOTH_GUEST_MESSAGES.downloadNeedsAuth,
+            ),
+          );
+          return false;
+        }
+        throw new Error(
+          guestVisibleBoothError(data.error, BOOTH_GUEST_MESSAGES.generic),
+        );
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `landon-jordan-80s-photo-${photoId}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      return true;
+    } catch (err) {
+      setError(
+        guestVisibleBoothError(
+          err instanceof Error ? err.message : "",
+          BOOTH_GUEST_MESSAGES.generic,
+        ),
+      );
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const downloadCurrentResult = async (photoId?: string | null) => {
+    const id = photoId || resultId;
+    if (!id) return;
+    const ok = await requireAuthThen("download");
+    if (!ok) {
+      pendingDownloadId.current = id;
+      return;
+    }
+    pendingDownloadId.current = null;
+    await triggerPhotoDownload(id);
   };
 
   const startCreate = (action: "ai" | "throwback") => {
@@ -309,13 +386,24 @@ export function PhotoBooth() {
     }
   };
 
-  const afterAuth = () => {
+  const afterAuth = async () => {
     const next = pendingAction.current || "ai";
     pendingAction.current = null;
     const queued = pendingFile.current;
     pendingFile.current = null;
     if (next === "submit") {
-      void submitToGallery({ skipAuthCheck: true });
+      await submitToGallery({ skipAuthCheck: true });
+      return;
+    }
+    if (next === "download") {
+      const id = pendingDownloadId.current || resultId;
+      pendingDownloadId.current = null;
+      if (id) {
+        setStep(resultId ? "ready" : "myphotos");
+        await triggerPhotoDownload(id);
+      } else {
+        setStep("entry");
+      }
       return;
     }
     if (next === "myphotos") {
@@ -324,12 +412,12 @@ export function PhotoBooth() {
     }
     if (next === "throwback") {
       setMode("throwback");
-      if (queued) void onFile(queued, "throwback");
+      if (queued) await onFile(queued, "throwback");
       else setStep("upload");
       return;
     }
     setMode("ai");
-    if (queued) void onFile(queued, "ai");
+    if (queued) await onFile(queued, "ai");
     else setStep("upload");
   };
 
@@ -398,7 +486,7 @@ export function PhotoBooth() {
         );
       }
       await refreshSession();
-      afterAuth();
+      await afterAuth();
     } catch (err) {
       setError(
         guestVisibleBoothError(
@@ -777,16 +865,20 @@ export function PhotoBooth() {
           {!loading && step === "auth" ? (
             <div className="mx-auto max-w-md space-y-4 text-center" data-booth-auth="verify-at-save">
               <h3 className="booth-panel-title">
-                {pendingAction.current === "submit" || resultId
-                  ? "Verify to save"
-                  : pendingAction.current === "myphotos"
-                    ? "See my photos"
-                    : "Verify your email"}
+                {pendingAction.current === "download"
+                  ? "Verify your email to download"
+                  : pendingAction.current === "submit" || resultId
+                    ? "Verify to save"
+                    : pendingAction.current === "myphotos"
+                      ? "See my photos"
+                      : "Verify your email"}
               </h3>
               <p className="text-sm text-white/70">
-                {pendingAction.current === "submit" || resultId
-                  ? "Verify once to add this photo to the Party Gallery and your library. Creating and downloading drafts does not need email."
-                  : "We email a one-time code. Same flow whether you've RSVP'd or not — Photo Booth never marks you as attending."}
+                {pendingAction.current === "download"
+                  ? "Verify once with a one-time code, then you can download this photo and any others in this session."
+                  : pendingAction.current === "submit" || resultId
+                    ? "Verify once to add this photo to the Party Gallery and your library. Creating AI drafts does not need email — download and gallery save do."
+                    : "We email a one-time code. Same flow whether you've RSVP'd or not — Photo Booth never marks you as attending."}
               </p>
               {!otpSent ? (
                 <form onSubmit={startAuth} className="space-y-3 text-left">
@@ -836,9 +928,11 @@ export function PhotoBooth() {
                   <button type="submit" className="booth-btn booth-btn-pink w-full" disabled={busy}>
                     {busy
                       ? "Checking…"
-                      : pendingAction.current === "submit" || resultId
-                        ? "Verify & save to gallery"
-                        : "Verify & continue"}
+                      : pendingAction.current === "download"
+                        ? "Verify & download"
+                        : pendingAction.current === "submit" || resultId
+                          ? "Verify & save to gallery"
+                          : "Verify & continue"}
                   </button>
                   <button
                     type="button"
@@ -1092,7 +1186,8 @@ export function PhotoBooth() {
                   {mode === "throwback" ? "Throwback ready!" : "Your 80's Photo is Ready!"}
                 </h3>
                 <p className="booth-subcopy">
-                  Download anytime. Verify your email only when you add it to the Party Gallery.
+                  Verify your email to download or add this photo to the Party Gallery. Creating
+                  another draft stays available (5 AI photos per hour).
                 </p>
                 <p className="booth-download-note" data-download-type="raw">
                   Download is the raw 80s photo only — no Polaroid frame or logo.
@@ -1107,14 +1202,16 @@ export function PhotoBooth() {
                   >
                     Add to Party Gallery
                   </button>
-                  <a
+                  <button
+                    type="button"
                     className="booth-btn booth-btn-outline"
-                    href={resultId ? `/api/booth/photos/${resultId}/download` : resultUrl || "#"}
-                    download={resultId ? undefined : "landon-jordan-80s-photo.jpg"}
+                    disabled={busy || !resultId}
+                    onClick={() => void downloadCurrentResult(resultId)}
                     data-download-type="raw"
+                    data-booth-download="gated"
                   >
-                    Download photo
-                  </a>
+                    {busy ? "Working…" : "Download photo"}
+                  </button>
                   <button type="button" className="booth-btn booth-btn-outline" onClick={resetCreate}>
                     Create another
                   </button>
@@ -1158,13 +1255,16 @@ export function PhotoBooth() {
                   Download is the raw 80s photo only — no Polaroid frame or logo.
                 </p>
                 <div className="booth-btn-stack mx-auto mt-4 md:mx-0">
-                  <a
+                  <button
+                    type="button"
                     className="booth-btn booth-btn-pink"
-                    href={resultId ? `/api/booth/photos/${resultId}/download` : "#"}
+                    disabled={busy || !resultId}
+                    onClick={() => void downloadCurrentResult(resultId)}
                     data-download-type="raw"
+                    data-booth-download="gated"
                   >
-                    Download photo
-                  </a>
+                    {busy ? "Working…" : "Download photo"}
+                  </button>
                   {guest?.hasRsvp ? (
                     <button
                       type="button"
@@ -1290,9 +1390,19 @@ export function PhotoBooth() {
               {lightbox.kind} · {lightbox.status}
             </p>
             <div className="booth-actions-row">
-              <a className="booth-btn booth-btn-pink" href={`/api/booth/photos/${lightbox.id}/download`}>
+              <button
+                type="button"
+                className="booth-btn booth-btn-pink"
+                disabled={busy}
+                onClick={() => {
+                  const id = lightbox.id;
+                  setLightbox(null);
+                  void downloadCurrentResult(id);
+                }}
+                data-booth-download="gated"
+              >
                 Download
-              </a>
+              </button>
               {lightbox.status === "private" ? (
                 <button
                   type="button"

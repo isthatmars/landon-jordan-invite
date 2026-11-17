@@ -78,16 +78,29 @@ Create a key in [Google AI Studio](https://aistudio.google.com/apikey). Used whe
 Guests never see env-var names; the confirm step shows a friendly unavailable message and disables
 **Create** when no provider is configured. Dev builds may show a short setup hint.
 
-## 4. Guest identity (verify only at save)
+## 4. Guest identity (verify for download + gallery)
 
-- Guests can **enter, upload, generate AI photos, preview Polaroids, and download the current raw draft without email**.
-- Email OTP / magic link → httpOnly `lj_booth_session` cookie is required only to:
+- Guests can **enter, upload, generate AI photos, and preview Polaroids without email**.
+- Generation is rate-limited to **5 AI photos per rolling hour** by hashed client IP (and by verified guest email when known). Enforced in `POST /api/booth/generate` via `getRateLimitStatus` + `booth_rate_events` (same path for OpenAI / OpenArt / Gemini).
+- Email OTP / magic link → httpOnly `lj_booth_session` cookie is required to:
+  - **Download** the current result (or any private library photo)
   - **Add to Party Gallery** / permanent library association
   - **See my photos**
-- Anonymous drafts use httpOnly `lj_booth_anon` and a synthetic `anon.*.@booth.local` owner until claimed on verify + submit
+- After verify, the session cookie stays for subsequent downloads in-session. Anon drafts are claimed to the verified email on first download or gallery save.
+- Anonymous drafts use httpOnly `lj_booth_anon` and a synthetic `anon.*.@booth.local` owner until claimed
 - Match existing RSVPs by normalized email; Photo Booth never auto-marks attending
 - localStorage email alone is never identity
 - Post-booth RSVP handoff still works once they have a verified email
+
+### Rate-limit allowlist (uncapped)
+
+Verified emails skip the 5/hour AI cap when they match any of:
+
+1. `OWNER_EMAIL` (always included)
+2. `BOOTH_RATE_LIMIT_ALLOWLIST` (comma/semicolon-separated emails)
+3. An RSVP whose name is Kathy Jenkins, Jenice Stallings, or Jordan Jenkins (name → email after verify)
+
+Anonymous / unverified guests are never exempt — the IP cap always applies until they verify as an allowlisted person.
 
 ### Dev / preview OTP (testing)
 
@@ -126,7 +139,8 @@ Set these in the Vercel project `landon-jordan-invite` for **Preview** and **Pro
 | `RESEND_API_KEY` | OTP email + RSVP mail | Without it, preview can still expose `devCode`. |
 | `RESEND_FROM_EMAIL` | Live email From | Verified sender in Resend. |
 | `NEXT_PUBLIC_SITE_URL` | Email / magic-link CTAs | Absolute site URL. |
-| `OWNER_EMAIL` | Owner RSVP alerts | Comma-separated OK. |
+| `OWNER_EMAIL` | Owner RSVP alerts + booth rate-limit allowlist | Comma-separated OK. Auto-included in booth AI uncapped list. |
+| `BOOTH_RATE_LIMIT_ALLOWLIST` | Booth AI uncapped emails | Optional comma/semicolon list. Plus hardcoded names via RSVP (Kathy Jenkins, Jenice Stallings, Jordan Jenkins). |
 | `ADMIN_ACCESS_CODE` | `/admin` | Default `NEON80S` if unset. |
 
 Optional: `OPENAI_IMAGE_QUALITY` (`medium`), `OPENAI_IMAGE_SIZE` (`1024x1536` portrait), `OPENART_IMAGE_MODEL`, `OPENART_API_BASE`, `GEMINI_IMAGE_MODEL`, `GEMINI_IMAGE_ASPECT_RATIO`, `GEMINI_IMAGE_SIZE`, `IMAGE_GENERATION_CONCURRENCY`.
@@ -135,6 +149,6 @@ Local-only: `PORT=4174` (dev server), `BOOTH_MOCK_AI`, `BOOTH_DEV_OTP`, `BOOTH_E
 
 ## Flow
 
-entry (two-column panel + sample Polaroid) → upload → confirm → generate (printing camera) → ready (download OK) → **verify at save** → submitted / my photos
+entry (two-column panel + sample Polaroid) → upload → confirm → generate (printing camera, IP-capped) → ready → **verify to download or save** → submitted / my photos
 
-Throwbacks follow the same private-until-save rule (no auto-pending gallery submit without verified email).
+Throwbacks follow the same private-until-save rule (no auto-pending gallery submit without verified email). Download also requires verify.

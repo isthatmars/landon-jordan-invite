@@ -86,9 +86,11 @@ export interface RateLimitStatus {
   allowed: boolean;
 }
 
+/** Max AI generations per guest email per rolling hour (verified sessions). */
 export const BOOTH_AI_LIMIT = 5;
 export const BOOTH_AI_WINDOW_MS = 60 * 60 * 1000;
-export const BOOTH_ANON_IP_LIMIT = 8;
+/** Max AI generations per hashed client IP per rolling hour (anonymous + verified). */
+export const BOOTH_ANON_IP_LIMIT = 5;
 export const BOOTH_TEMP_TTL_MS = 30 * 60 * 1000;
 export const BOOTH_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 export const BOOTH_OTP_TTL_MS = 15 * 60 * 1000;

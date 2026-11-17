@@ -78,11 +78,13 @@ export async function POST(request: Request) {
     }
 
     const ip = hashIp(clientIp(request));
+    // Cap is 5 AI gens/hour by hashed IP (and by verified email when present).
+    // Allowlisted verified emails (OWNER_EMAIL / BOOTH_RATE_LIMIT_ALLOWLIST / named RSVPs) skip the cap.
     const rate = await getRateLimitStatus(guestEmail, ip);
     if (!rate.allowed) {
       return NextResponse.json(
         {
-          error: "You’ve hit the limit of 5 AI photos per hour.",
+          error: BOOTH_GUEST_MESSAGES.rateLimited,
           rate,
         },
         { status: 429 },

@@ -22,6 +22,19 @@ Identity-preserving 80s transforms use **Gemini first** when a Gemini key is set
 - Local only: `BOOTH_MOCK_AI=1` sharp grade (never report as real AI success in prod without the flag)
 - Booth art (environment, camera, samples, chrome title) was generated via OpenArt and checked into `public/images/booth/`
 
+### Transform prompt defaults
+
+Canonical prompt: `EIGHTYS_STYLE_PROMPT` / `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts` (fallback `PHOTO_BOOTH_TRANSFORM_PROMPT` in `src/lib/photoBooth.ts`).
+
+Goal: **authentic late-80s throwback** (“what would this look like if taken in the 80s”), not a light filter on a modern photo.
+
+- **Lock:** same faces, people count, pose, framing / composition identity
+- **Restyle:** period fashion / hair / accessories; period-correct cars & setting details for the same place type
+- **Film look:** warm aged grade, visible grain, soft focus, mild vignette, subtle edge wear / scuffs / dust
+- **Optional:** one classic orange/red LCD date stamp (e.g. `JUN 27 1988`) — no other text
+- **Never:** logos, watermarks, UI chrome, drawn Polaroid borders, or Landon & Jordan branding in the image
+- Downloads stay **raw** (no Polaroid frame); on-screen Polaroid is CSS-only
+
 ### Preferred: `GEMINI_API_KEY` on Vercel
 
 1. Create an API key in [Google AI Studio](https://aistudio.google.com/apikey).

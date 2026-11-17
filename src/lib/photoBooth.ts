@@ -17,16 +17,17 @@ export const PHOTO_BOOTH_OPENART_MODE = "image2image" as const;
 
 /**
  * Fallback prompt (prefer `buildEightysOpenArtPrompt` from booth/types).
- * Keep the exact photo; lightly make it a natural 1980s snapshot.
+ * Authentic late-80s throwback restyle while locking identity + composition.
  */
 export const PHOTO_BOOTH_TRANSFORM_PROMPT = [
-  "Keep the exact photo but make it look like a real photograph taken in the 1980s.",
-  "Preserve face, identity, people count, pose, framing, and facial features exactly.",
-  "Keep the same background/setting essence from the upload; only period-correct that place.",
-  "Shift clothing only to the closest era-appropriate version of what they already wear.",
-  "Natural 1980s consumer photo: warm flash or available light, slight film grain, mild color cast, natural skin.",
-  "Photorealistic snapshot, not cartoon or illustration. No text, logos, watermarks, or borders.",
-  "Avoid: face swap, beauty filter, extra people, invented Miami neon club, forced costume restyle, CGI.",
+  "Transform this exact photo into an authentic late-1980s throwback snapshot — as if taken ~1987–1989 on consumer film.",
+  "Preserve face, identity, people count, pose, framing, and facial features exactly; do not invent or remove people.",
+  "Restyle era boldly: period-accurate late-80s fashion/hair/accessories that fit the scene; period-correct cars and setting details.",
+  "Keep the same place type from the upload; do not invent an unrelated neon club or mall booth.",
+  "Required film look: warm aged color grade, visible grain, soft focus, mild vignette, subtle edge wear/scuffs/dust.",
+  "Optional: one small classic orange/red LCD date stamp in a corner (e.g. JUN 27 1988). No other text.",
+  "Photorealistic snapshot, not cartoon/CGI. No logos, watermarks, Polaroid borders, UI, or Landon & Jordan branding.",
+  "Avoid: face swap, beauty filter, modern digital look, unchanged modern clothes/cars, extra people, invented Miami neon club.",
 ].join(" ");
 
 export type PhotoBoothGenerateRequest = {

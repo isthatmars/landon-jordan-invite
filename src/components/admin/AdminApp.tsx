@@ -11,7 +11,7 @@ import {
   type EmailTemplateCopy,
   type StoredEmailTemplates,
 } from "@/lib/email-templates";
-import { partyHeadcount } from "@/lib/rsvp";
+import { hasUsableAdminContact, partyHeadcount } from "@/lib/rsvp";
 import { extractYoutubeId, watchUrl, youtubePosterUrl } from "@/lib/youtube";
 import type {
   MessageLog,
@@ -155,7 +155,7 @@ export function AdminApp() {
       fetch("/api/admin/reminders").then((x) => x.json()),
       fetch("/api/admin/email-templates").then((x) => x.json()),
     ]);
-    setRsvps(r.rsvps || []);
+    setRsvps((r.rsvps || []).filter(hasUsableAdminContact));
     setContent(c.content || null);
     setTracks(t.tracks || []);
     setVideos(v.videos || []);
@@ -163,7 +163,7 @@ export function AdminApp() {
     setEmailLive(Boolean(m.emailLive));
     setEmailNote(typeof m.emailNote === "string" ? m.emailNote : "");
     setReminders(rem.reminders || []);
-    setAbandoned(rem.abandoned || []);
+    setAbandoned((rem.abandoned || []).filter(hasUsableAdminContact));
     setEmailTemplates(mergeEmailTemplates(tpl.templates || rem.templates || null));
     void loadPhotos();
   }, [loadPhotos]);
@@ -229,7 +229,7 @@ export function AdminApp() {
       body: JSON.stringify({ id, status }),
     });
     const data = await res.json();
-    setRsvps(data.rsvps || []);
+    setRsvps((data.rsvps || []).filter(hasUsableAdminContact));
     flash(`Updated ${id}`);
   };
 
@@ -706,35 +706,37 @@ export function AdminApp() {
                   <td className="py-2 pr-2">{r.email || "—"}</td>
                   <td className="py-2 pr-2">{r.phone || "—"}</td>
                   <td className="py-2">
-                    {(() => {
-                      const state = resendState[r.id];
-                      const busy = state === "sending";
-                      const done = state === "sent";
-                      const failed = state === "failed";
-                      const label = !r.email
-                        ? "Resend email"
-                        : busy
+                    {!r.email?.trim() ? (
+                      <span className="text-violet-500">—</span>
+                    ) : (
+                      (() => {
+                        const state = resendState[r.id];
+                        const busy = state === "sending";
+                        const done = state === "sent";
+                        const failed = state === "failed";
+                        const label = busy
                           ? "Sending…"
                           : done
                             ? "Sent"
                             : failed
                               ? "Failed"
                               : "Resend email";
-                      return (
-                        <button
-                          type="button"
-                          className={`admin-resend-btn${done ? " admin-resend-btn--sent" : ""}${
-                            failed ? " admin-resend-btn--failed" : ""
-                          }${busy ? " admin-resend-btn--busy" : ""}`}
-                          onClick={() => resend(r.id)}
-                          disabled={!r.email || busy || done}
-                          aria-busy={busy || undefined}
-                          aria-live={busy || done || failed ? "polite" : undefined}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })()}
+                        return (
+                          <button
+                            type="button"
+                            className={`admin-resend-btn${done ? " admin-resend-btn--sent" : ""}${
+                              failed ? " admin-resend-btn--failed" : ""
+                            }${busy ? " admin-resend-btn--busy" : ""}`}
+                            onClick={() => resend(r.id)}
+                            disabled={busy || done}
+                            aria-busy={busy || undefined}
+                            aria-live={busy || done || failed ? "polite" : undefined}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })()
+                    )}
                   </td>
                 </tr>
               ))}

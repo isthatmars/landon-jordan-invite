@@ -4,9 +4,9 @@
 
 The booth stage never swaps backgrounds between steps. One OpenArt environment plate (`/images/booth/environment.jpg`: shag carpet, disco ball, vanity lights, flight case with Polaroid packs, CRT stack, neon bars) stays locked; only inner panel content + Polaroid animation change.
 
-## 2. Entry = large two-column reference panel
+## 2. Entry = large two-column path-choice panel
 
-Entry matches the reference: a large pink neon panel (~80–90% × ~70–75% of the stage) with a **left Polaroid + camera prop** (~45%) and **right controls** (~55%: welcome script, huge drag-drop, chunky upload). On-screen Polaroid frames are blank (no logo). The Polaroid may flash once on click — no strobe, no modern “before” photo. Generate / ready still use the Polaroid camera eject animation in the same fixed room.
+Entry uses a large pink neon panel (~80–90% × ~70–75% of the stage) with a **left Polaroid + camera prop** (~45%) and **right path choice** (~55%): short instructions, then two clear buttons — **Upload current photo** (`mode: ai`) and **Upload 80’s photo** (`mode: throwback`). Do **not** lead with the drag-drop zone; the file picker / dropzone appears on the Upload step after a path is chosen. On-screen Polaroid frames are blank (no logo). The Polaroid may flash once on click — no strobe, no modern “before” photo. Generate / ready still use the Polaroid camera eject animation in the same fixed room.
 
 ## 3. AI generation (OpenAI Images preferred) + booth art
 

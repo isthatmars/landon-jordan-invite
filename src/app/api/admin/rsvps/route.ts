@@ -10,6 +10,7 @@ import {
 import { partySiteUrl, sendGuestEmail } from "@/lib/notifications";
 import {
   headcountFor,
+  hasUsableAdminContact,
   isAttendStatus,
   parseDraftRsvp,
   partyHeadcount,
@@ -37,7 +38,8 @@ export async function GET(request: Request) {
   const all = await readRsvps(store.rsvps);
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get("filter");
-  let rsvps = all;
+  // Drop nameless/email-less draft stubs — nothing to identify or Resend to.
+  let rsvps = all.filter(hasUsableAdminContact);
   if (filter === "incomplete" || filter === "abandoned") {
     rsvps = rsvps.filter((r) => r.abandoned || r.status === "incomplete");
   } else if (filter === "attending") {
@@ -60,6 +62,9 @@ export async function PATCH(request: Request) {
   if (action === "resend") {
     const rsvp = (await readRsvps(store.rsvps)).find((r) => r.id === body.id);
     if (!rsvp) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!rsvp.email?.trim()) {
+      return NextResponse.json({ error: "No email on this RSVP" }, { status: 400 });
+    }
     const templates = mergeEmailTemplates(store.emailTemplates);
     const coming = rsvp.status !== "declined" && rsvp.attend !== "no";
     const templateId = coming ? "signup_confirm" : "signup_declined";
@@ -141,7 +146,11 @@ export async function PATCH(request: Request) {
   }
   await persistRsvp(r);
   const next = await readRsvps((await getStore()).rsvps);
-  return NextResponse.json({ ok: true, rsvps: next, headcount: partyHeadcount(next) });
+  return NextResponse.json({
+    ok: true,
+    rsvps: next.filter(hasUsableAdminContact),
+    headcount: partyHeadcount(next),
+  });
 }
 
 export async function POST(request: Request) {
@@ -180,5 +189,10 @@ export async function POST(request: Request) {
     abandoned: false,
   });
   const listed = await readRsvps((await getStore()).rsvps);
-  return NextResponse.json({ ok: true, id, rsvps: listed, headcount: partyHeadcount(listed) });
+  return NextResponse.json({
+    ok: true,
+    id,
+    rsvps: listed.filter(hasUsableAdminContact),
+    headcount: partyHeadcount(listed),
+  });
 }

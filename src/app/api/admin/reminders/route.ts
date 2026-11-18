@@ -16,7 +16,7 @@ import {
   sendOwnerEmail,
   type NotifyResult,
 } from "@/lib/notifications";
-import { partyPeople } from "@/lib/rsvp";
+import { hasUsableAdminContact, partyPeople } from "@/lib/rsvp";
 import { readRsvps } from "@/lib/rsvp-db";
 import { getStore, updateStore } from "@/lib/store";
 import type { ReminderLog } from "@/lib/types";
@@ -42,7 +42,9 @@ export async function GET(request: Request) {
   }
   const store = await getStore();
   const rsvps = await readRsvps(store.rsvps);
-  const abandoned = rsvps.filter((r) => r.abandoned || r.status === "incomplete");
+  const abandoned = rsvps.filter(
+    (r) => (r.abandoned || r.status === "incomplete") && hasUsableAdminContact(r),
+  );
   return NextResponse.json({
     reminders: store.reminders,
     abandoned,
@@ -71,7 +73,9 @@ export async function POST(request: Request) {
   const inviteUrl = partySiteUrl();
 
   if (kind === "abandoned_digest") {
-    const abandoned = rsvps.filter((r) => r.abandoned || r.status === "incomplete");
+    const abandoned = rsvps.filter(
+      (r) => (r.abandoned || r.status === "incomplete") && hasUsableAdminContact(r),
+    );
     const abandonedListHtml =
       abandoned.length === 0
         ? "<p>No abandoned forms right now.</p>"

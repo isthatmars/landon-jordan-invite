@@ -231,6 +231,24 @@ export function isSampleRsvp(id: string): boolean {
   return id.startsWith("sample-");
 }
 
+/** Display name for admin lists — fullName, else first+last. */
+export function adminDisplayName(
+  rsvp: Pick<RsvpRecord, "fullName" | "firstName" | "lastName">,
+): string {
+  return (rsvp.fullName || `${rsvp.firstName || ""} ${rsvp.lastName || ""}`).trim();
+}
+
+/**
+ * Admin guest list / abandoned digests: hide empty draft stubs with no name
+ * and no email (nothing to identify or Resend to). Phone-only stubs still hide.
+ */
+export function hasUsableAdminContact(
+  rsvp: Pick<RsvpRecord, "fullName" | "firstName" | "lastName" | "email">,
+): boolean {
+  if (rsvp.email?.trim()) return true;
+  return Boolean(adminDisplayName(rsvp));
+}
+
 /** Completed, not declined, and not a bundled sample row. */
 export function countsTowardHeadcount(rsvp: RsvpRecord): boolean {
   if (isSampleRsvp(rsvp.id)) return false;

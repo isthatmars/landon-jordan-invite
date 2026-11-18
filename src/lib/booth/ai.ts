@@ -240,7 +240,7 @@ export async function generateEightiesPhoto(
     };
   }
 
-  // All providers share the authentic-80s master prompt (period eyewear + wardrobe).
+  // All providers share the authentic-80s master prompt (full era restyle + face lock).
   const variationSeed =
     (cleaned.width || 1) * 1009 +
     (cleaned.height || 1) * 9176 +

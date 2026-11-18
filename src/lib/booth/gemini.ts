@@ -221,7 +221,8 @@ function extractText(parts: InlinePart[] | undefined): string {
 }
 
 const IDENTITY_SYSTEM_INSTRUCTION = `You are an expert photographic image editor performing image-to-image edits.
-Always edit the attached photograph in place. Preserve every person's exact face, skin tone, facial hair, and expression.
+Always edit the attached photograph in place. Preserve every person's exact face, skin tone, facial hair, and expression (identity lock).
+Restyle everything else into authentic mid/late-1980s realism: clothing, hair (era-appropriate without changing who they are), accessories/eyewear, background, props/cars, lighting, and consumer film look — grounded in the original photo's context, not neon costume clichés.
 If someone wears glasses, keep that they wear glasses but restyle modern clear skinny frames into authentic late-80s eyewear; do not remove glasses.
 Return an IMAGE. Never respond with only text. Never invent people from a description.`;
 

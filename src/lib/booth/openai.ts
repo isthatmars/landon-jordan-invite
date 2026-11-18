@@ -10,14 +10,15 @@ export const PHOTO_BOOTH_OPENAI_DEFAULT_MODEL = "gpt-image-2.5-flare";
 /**
  * OpenAI Images edit prompt — aligned with PHOTO_BOOTH_MASTER_PROMPT /
  * EIGHTYS_STYLE_PROMPT (source of truth in booth/types.ts). Kept concise for
- * the Images API while covering identity, period eyewear, and anti-cliché wardrobe.
+ * the Images API while covering full-era restyle (not glasses-only) + identity lock.
  */
 export const PHOTO_BOOTH_OPENAI_PROMPT = [
   "What would this picture look like if it were taken in the 80's? Retain facial features.",
-  "Edit in place. Keep exact face shape, features, skin tone, facial hair, expression, people count, pose, and framing.",
+  "Edit in place. Keep exact face shape, features, skin tone, facial hair, expression, people count, pose, and framing — only the recognizable face stays identity-locked.",
+  "Restyle EVERYTHING else into authentic mid/late-1980s realism grounded in the original photo's context: clothing, hair (era-appropriate volume/styling without changing who they are), accessories/eyewear, background, props/cars, lighting, and consumer film look.",
   "If the subject wears glasses, keep that they wear glasses but restyle modern clear skinny rectangular frames into authentic late-80s eyewear (larger acetate frames, classic aviators, or period plastic frames). Do not leave modern clear skinny frames unchanged. Do not remove glasses.",
   "Clothing: flattering period-appropriate 1985–89 fashion that fits this person's vibe, with a varied natural real-world 80s palette — do NOT default to a neon teal/magenta/blue windbreaker costume stereotype.",
-  "Background: period-plausible environment from the original context, natural light. Consumer film look: grain, mild warm or cool film stock — not Instagram teal-magenta, not plastic AI skin, not costume-party neon overload.",
+  "Background/props: period-correct the environment from the original place type (era cars, signage, materials); natural available light or on-camera flash. Consumer film look: grain, mild warm or cool film stock — not Instagram teal-magenta, not plastic AI skin, not costume-party neon overload.",
   "No text, logos, watermarks, or Polaroid borders. Return one photorealistic edited photograph.",
 ].join(" ");
 

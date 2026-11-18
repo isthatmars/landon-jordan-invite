@@ -38,9 +38,10 @@ If a preferred provider fails, the next configured provider is tried automatical
 
 **All providers** (OpenAI → OpenArt → Gemini) use the canonical **master prompt**: `EIGHTYS_STYLE_PROMPT` / `PHOTO_BOOTH_MASTER_PROMPT` + `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts`. Fallbacks: `PHOTO_BOOTH_TRANSFORM_PROMPT` (`src/lib/photoBooth.ts`) and `PHOTO_BOOTH_OPENAI_PROMPT` (`src/lib/booth/openai.ts`).
 
-Goal: a **believable real late-1980s photo-album snapshot** (≈1985–89 consumer film) via image-to-image — documentary / photoreal, not costume-party neon AI art.
+Goal: a **believable real mid/late-1980s photo-album snapshot** (≈1985–89 consumer film) via image-to-image — documentary / photoreal, not costume-party neon AI art. For **any** upload, restyle **everything** except the locked face.
 
-- **Identity lock:** same faces, skin tone, facial hair, expression, body type, pose, people count, framing
+- **Identity lock:** same faces, skin tone, facial hair, expression, body type, pose, people count, framing — only the recognizable face stays
+- **Full era restyle:** clothing, hair (era-appropriate without changing who they are), accessories/eyewear, background, props/cars, lighting, and film look — grounded in the original photo’s context
 - **Eyewear:** if they wear glasses, keep that they wear glasses, but restyle modern clear skinny frames into period-correct late-80s eyewear (larger acetate, classic aviators, period plastic) — do not leave modern clear rectangles unchanged
 - **Wardrobe:** flattering varied real-world 1985–89 fashion that fits the person’s vibe — **not** a default neon teal/magenta/blue windbreaker costume
 - **Film look:** C-41 consumer film grain, mild warm/cool stock cast, natural light — not Instagram teal-magenta grading or plastic AI skin

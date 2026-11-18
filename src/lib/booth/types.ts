@@ -103,30 +103,26 @@ export const BOOTH_ALLOWED_MIME = new Set([
 
 /**
  * Master Photo Booth transform prompt (source of truth).
- * OpenAI / OpenArt / Gemini image edit: authentic late-80s album photo with
- * facial identity lock. Period-correct eyewear when glasses are present;
- * varied real-world 80s wardrobe — not neon costume clichés.
+ * OpenAI / OpenArt / Gemini image edit: full authentic mid/late-80s restyle
+ * with facial identity lock only — clothing, hair, accessories, background,
+ * props, lighting, and film look all become period-real (not neon costume).
  */
 export const EIGHTYS_STYLE_PROMPT = `What would this picture look like if it were taken in the 80's? Retain facial features.
 
-Edit the attached photograph in place (image-to-image). Goal: a believable real late-1980s photo-album snapshot (about 1985–1989 consumer film) — NOT a costume-party neon stereotype, NOT Instagram teal-magenta grading, NOT plastic AI skin.
+Edit the attached photograph in place (image-to-image). For ANY upload, restyle EVERYTHING into a believable real mid/late-1980s photo-album snapshot (about 1985–1989 consumer film) — documentary / photoreal, NOT a costume-party neon stereotype, NOT Instagram teal-magenta grading, NOT plastic AI skin.
+
+Only the recognizable face stays modern-identity-locked. Everything else — clothing, hair styling, accessories/eyewear, background, props/cars, lighting, and film processing — must read as period-real 1980s.
 
 IDENTITY (highest priority — non-negotiable):
 - Keep every person's exact face shape, features, skin tone, facial hair, expression, body type, pose, people count, and framing.
 - Do not face-swap, beautify, de-age, re-age, invent people, or change who is in the photo.
 
-EYEWEAR (period-correct when present):
-- If someone wears glasses, they must still wear glasses — keep that they wear eyewear.
-- Restyle obviously modern frames (clear skinny rectangles, thin translucent plastic, current fashion specs) into authentic late-80s eyewear: larger acetate frames, classic aviators, or other period plastic/metal frames that fit the face.
-- Do not leave modern clear skinny rectangular frames unchanged. Do not remove glasses. Do not add glasses if the person is not wearing any.
-
-CLOTHING (varied authentic 1985–89 fashion — flattering, not costume):
-- Restyle modern clothes into period-appropriate late-80s fashion that fits each person's vibe, formality, and silhouette (casual stays casual; dressy stays dressy).
-- Use varied real-world 80s wardrobes: denim jackets, acid/stonewash jeans, soft knits, polos, oxfords, simple tees, muted color-block jackets, flannel, high-waist trousers, modest gold chain — natural, lived-in color palettes.
-- Do NOT default every subject to a neon teal / magenta / electric-blue windbreaker. Avoid cliché “80s costume” neon overload and identical tracksuits on everyone.
-
-BACKGROUND & LIGHT:
-- Keep a period-plausible environment from the original context (same place type, camera angle, outdoor/indoor feel). Natural available light or on-camera flash — not a generic neon club / mall booth invented from nowhere.
+FULL ERA RESTYLE (bold — modern uploads must clearly look mid/late-80s):
+- Clothing: restyle modern clothes into flattering period-appropriate 1985–89 fashion that fits each person's vibe, formality, and silhouette (casual stays casual; dressy stays dressy). Use varied real-world 80s wardrobes grounded in the original photo's context: denim jackets, acid/stonewash jeans, soft knits, polos, oxfords, simple tees, muted color-block jackets, flannel, high-waist trousers, modest gold chain — natural, lived-in color palettes. Do NOT leave modern athleisure, slim contemporary cuts, current logos, or smartwatches looking modern. Do NOT default every subject to a neon teal / magenta / electric-blue windbreaker. Avoid cliché “80s costume” neon overload and identical tracksuits on everyone.
+- Hair: era-appropriate late-80s volume or styling (period-plausible shape only) without changing who they are — keep hairline/identity; do not invent a different person.
+- Accessories / eyewear: restyle modern accessories into period-real ones. If someone wears glasses, they must still wear glasses — restyle obviously modern frames (clear skinny rectangles, thin translucent plastic, current fashion specs) into authentic late-80s eyewear (larger acetate frames, classic aviators, or other period plastic/metal frames). Do not leave modern clear skinny rectangular frames unchanged. Do not remove glasses. Do not add glasses if the person is not wearing any. Replace smartwatches with period watches; period jewelry/chains when they fit.
+- Background / props / cars: keep the same place type, camera angle, and outdoor/indoor feel from the original context, but period-correct the environment — late-70s/80s cars instead of modern vehicles, era-plausible signage, interiors, street details, and materials. Do not invent a generic neon club / mall booth / Miami Vice backdrop unrelated to the photo.
+- Lighting: natural available light or on-camera flash quality that matches a real album snapshot — not cinematic graded lighting.
 
 FILM LOOK:
 - Consumer C-41 film: visible grain, mild warm or cool film-stock cast, slight optical softness — like a real handled print, not a phone filter and not an Instagram teal-magenta grade.
@@ -145,6 +141,11 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "removed glasses",
   "modern clear skinny rectangle frames left unchanged",
   "unchanged contemporary translucent eyewear",
+  "unchanged modern clothing",
+  "modern athleisure left modern",
+  "smartwatch left modern",
+  "modern car left modern",
+  "unchanged contemporary hair only",
   "default neon teal magenta blue windbreaker costume",
   "cliché 80s costume party neon overload",
   "matching neon tracksuits on everyone",
@@ -171,9 +172,10 @@ export const EIGHTYS_OUTFIT_VARIATIONS = [
   "Favor period-correct layers with varied real-world colors (navy, cream, olive, washed black) — avoid teal/magenta stereotype.",
 ] as const;
 
-/** Controlled environment accents — same place vibe, period-true materials. */
+/** Controlled environment accents — same place vibe, period-true materials/props. */
 export const EIGHTYS_ENVIRONMENT_VARIATIONS = [
-  "Keep the same place vibe and camera angle; quiet period-plausible materials only.",
+  "Period-correct the setting with late-80s cars, signage, and materials while keeping the same camera angle and place type.",
+  "Keep the same place vibe and camera angle; quiet period-plausible materials and props only — album-like, not a movie set.",
   "Warm available light or on-camera flash that matches the source — album-like, not cinematic neon.",
 ] as const;
 

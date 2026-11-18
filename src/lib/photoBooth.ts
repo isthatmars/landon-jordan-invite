@@ -21,7 +21,8 @@ export const PHOTO_BOOTH_OPENART_MODE = "image2image" as const;
  */
 export const PHOTO_BOOTH_TRANSFORM_PROMPT = [
   "What would this picture look like if it were taken in the 80's? Retain facial features.",
-  "Edit the attached photograph in place. Keep exact faces, skin tone, expression, people count, pose, and scene vibe.",
+  "Edit the attached photograph in place. Keep exact faces, skin tone, expression, people count, pose, and framing — only facial identity stays locked.",
+  "Restyle EVERYTHING else into authentic mid/late-1980s: clothing, hair (era-appropriate without changing who they are), accessories/eyewear, background, props/cars, lighting, and consumer film look — grounded in the original photo's context.",
   "If anyone wears glasses, keep that they wear glasses but restyle modern clear skinny frames into authentic late-80s eyewear (larger acetate, classic aviators, or period plastic frames).",
   "Clothing: flattering varied 1985–89 fashion that fits each person's vibe — not a default neon teal/magenta windbreaker costume.",
   "Believable late-1980s consumer film album photo: grain, mild warm/cool film stock, natural light — not Instagram teal-magenta or costume-party neon AI art.",

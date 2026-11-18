@@ -103,14 +103,36 @@ export const BOOTH_ALLOWED_MIME = new Set([
 
 /**
  * Master Photo Booth transform prompt (source of truth).
- * OpenAI / OpenArt / Gemini image edit: simple 80s restyle with identity lock.
- * Core guest wording kept first; minimal locks appended.
+ * OpenAI / OpenArt / Gemini image edit: authentic late-80s album photo with
+ * facial identity lock. Period-correct eyewear when glasses are present;
+ * varied real-world 80s wardrobe — not neon costume clichés.
  */
 export const EIGHTYS_STYLE_PROMPT = `What would this picture look like if it were taken in the 80's? Retain facial features.
 
-Edit the attached photograph in place (image-to-image). Keep every person's exact face, skin tone, expression, body type, pose, people count, and eyewear (same glasses if present). Do not face-swap, de-age, or invent people.
+Edit the attached photograph in place (image-to-image). Goal: a believable real late-1980s photo-album snapshot (about 1985–1989 consumer film) — NOT a costume-party neon stereotype, NOT Instagram teal-magenta grading, NOT plastic AI skin.
 
-Make it feel like a real late-1980s / early-1990s consumer film snapshot: warm C-41 color, visible grain, slight softness — not costume-party neon AI art, not a modern phone filter. Keep the same scene vibe and framing. No text, logos, watermarks, or Polaroid borders in the image. Return one photorealistic edited photograph.`;
+IDENTITY (highest priority — non-negotiable):
+- Keep every person's exact face shape, features, skin tone, facial hair, expression, body type, pose, people count, and framing.
+- Do not face-swap, beautify, de-age, re-age, invent people, or change who is in the photo.
+
+EYEWEAR (period-correct when present):
+- If someone wears glasses, they must still wear glasses — keep that they wear eyewear.
+- Restyle obviously modern frames (clear skinny rectangles, thin translucent plastic, current fashion specs) into authentic late-80s eyewear: larger acetate frames, classic aviators, or other period plastic/metal frames that fit the face.
+- Do not leave modern clear skinny rectangular frames unchanged. Do not remove glasses. Do not add glasses if the person is not wearing any.
+
+CLOTHING (varied authentic 1985–89 fashion — flattering, not costume):
+- Restyle modern clothes into period-appropriate late-80s fashion that fits each person's vibe, formality, and silhouette (casual stays casual; dressy stays dressy).
+- Use varied real-world 80s wardrobes: denim jackets, acid/stonewash jeans, soft knits, polos, oxfords, simple tees, muted color-block jackets, flannel, high-waist trousers, modest gold chain — natural, lived-in color palettes.
+- Do NOT default every subject to a neon teal / magenta / electric-blue windbreaker. Avoid cliché “80s costume” neon overload and identical tracksuits on everyone.
+
+BACKGROUND & LIGHT:
+- Keep a period-plausible environment from the original context (same place type, camera angle, outdoor/indoor feel). Natural available light or on-camera flash — not a generic neon club / mall booth invented from nowhere.
+
+FILM LOOK:
+- Consumer C-41 film: visible grain, mild warm or cool film-stock cast, slight optical softness — like a real handled print, not a phone filter and not an Instagram teal-magenta grade.
+
+OUTPUT:
+- One photorealistic edited photograph. No text, logos, watermarks, UI chrome, or Polaroid borders drawn in the image.`;
 
 /** Alias — same master prompt constant. */
 export const PHOTO_BOOTH_MASTER_PROMPT = EIGHTYS_STYLE_PROMPT;
@@ -121,33 +143,44 @@ export const EIGHTYS_NEGATIVE_PROMPT = [
   "different person",
   "changed identity",
   "removed glasses",
+  "modern clear skinny rectangle frames left unchanged",
+  "unchanged contemporary translucent eyewear",
+  "default neon teal magenta blue windbreaker costume",
+  "cliché 80s costume party neon overload",
+  "matching neon tracksuits on everyone",
+  "Instagram teal-magenta grade",
   "beauty filter",
+  "plastic AI skin",
+  "airbrushed skin",
   "de-aged",
   "extra people",
   "costume-party 80s art",
   "Miami neon collage",
+  "generic neon club backdrop",
   "cartoon",
   "text overlay",
   "watermark",
   "Polaroid frame drawn in image",
 ].join(", ");
 
-/** Controlled outfit accents — light period nudges only; never clone looks. */
+/** Controlled outfit accents — varied real 80s wardrobes; never neon-costume default. */
 export const EIGHTYS_OUTFIT_VARIATIONS = [
-  "Quiet late-80s wardrobe color/fabric nudges; keep each outfit distinct.",
-  "Subtle period palette shifts only — no matching tracksuits.",
+  "Favor soft knits, denim jacket, or muted earth-tone layers that fit each person's vibe — no neon windbreaker default.",
+  "Favor acid/stonewash denim and simple period tees or polos with natural color palettes.",
+  "Favor quiet late-80s casual (oxford/polo, high-waist denim, modest chain) — flattering, not costume-party.",
+  "Favor period-correct layers with varied real-world colors (navy, cream, olive, washed black) — avoid teal/magenta stereotype.",
 ] as const;
 
 /** Controlled environment accents — same place vibe, period-true materials. */
 export const EIGHTYS_ENVIRONMENT_VARIATIONS = [
-  "Keep the same place vibe and camera angle; quiet period cues only.",
-  "Warm available light or on-camera flash that matches the source.",
+  "Keep the same place vibe and camera angle; quiet period-plausible materials only.",
+  "Warm available light or on-camera flash that matches the source — album-like, not cinematic neon.",
 ] as const;
 
 /** Small photo-detail accents for album authenticity (no text overlays). */
 export const EIGHTYS_FILM_DETAIL_VARIATIONS = [
-  "Emphasize fine film grain and a soft warm print cast.",
-  "Slight optical softness and mild vignette — no text overlays.",
+  "Emphasize fine film grain and a mild warm C-41 print cast — not teal-magenta grading.",
+  "Slight optical softness and mild vignette — consumer film, no text overlays.",
 ] as const;
 
 function pickVariation<T extends readonly string[]>(

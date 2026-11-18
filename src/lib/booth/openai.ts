@@ -7,9 +7,19 @@
 
 export const PHOTO_BOOTH_OPENAI_DEFAULT_MODEL = "gpt-image-2.5-flare";
 
-/** Simple guest prompt — keep facial identity, restyle as an 80s photo. */
-export const PHOTO_BOOTH_OPENAI_PROMPT =
-  "What would this picture look like if it were taken in the 80's? retain facial features.";
+/**
+ * OpenAI Images edit prompt — aligned with PHOTO_BOOTH_MASTER_PROMPT /
+ * EIGHTYS_STYLE_PROMPT (source of truth in booth/types.ts). Kept concise for
+ * the Images API while covering identity, period eyewear, and anti-cliché wardrobe.
+ */
+export const PHOTO_BOOTH_OPENAI_PROMPT = [
+  "What would this picture look like if it were taken in the 80's? Retain facial features.",
+  "Edit in place. Keep exact face shape, features, skin tone, facial hair, expression, people count, pose, and framing.",
+  "If the subject wears glasses, keep that they wear glasses but restyle modern clear skinny rectangular frames into authentic late-80s eyewear (larger acetate frames, classic aviators, or period plastic frames). Do not leave modern clear skinny frames unchanged. Do not remove glasses.",
+  "Clothing: flattering period-appropriate 1985–89 fashion that fits this person's vibe, with a varied natural real-world 80s palette — do NOT default to a neon teal/magenta/blue windbreaker costume stereotype.",
+  "Background: period-plausible environment from the original context, natural light. Consumer film look: grain, mild warm or cool film stock — not Instagram teal-magenta, not plastic AI skin, not costume-party neon overload.",
+  "No text, logos, watermarks, or Polaroid borders. Return one photorealistic edited photograph.",
+].join(" ");
 
 const CHAT_MODEL_RE =
   /^(gpt-5|gpt-4|gpt-3\.5|o[1-9]|chatgpt|o3|o4)/i;

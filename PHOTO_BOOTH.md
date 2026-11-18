@@ -25,7 +25,7 @@ If a preferred provider fails, the next configured provider is tried automatical
 - OpenAI model: **`gpt-image-2.5-flare`** (fast Flare tier). Override with `OPENAI_IMAGE_MODEL`.
 - If `OPENAI_MODEL` is a chat model (e.g. `gpt-5.2`), it is **ignored** for Images — use `OPENAI_IMAGE_MODEL`.
 - OpenAI size: portrait-first **`1024x1536`** (2:3). Landscape sources stay `1536x1024` — never force landscape onto a portrait upload. Quality default `medium`.
-- OpenAI prompt: `What would this picture look like if it were taken in the 80's? retain facial features.`
+- OpenAI / OpenArt / Gemini share the authentic-80s **master prompt** from `src/lib/booth/types.ts` (`buildEightysOpenArtPrompt`)
 - OpenArt model: `nano-banana-2` (override `OPENART_IMAGE_MODEL`)
 - Gemini runtime: `@google/genai` via `src/lib/booth/gemini.ts`
 - Gemini model: `gemini-nano-banana-2.1` (override `GEMINI_IMAGE_MODEL`)
@@ -36,15 +36,15 @@ If a preferred provider fails, the next configured provider is tried automatical
 
 ### Transform prompt defaults
 
-**OpenAI** uses the short Images prompt (`PHOTO_BOOTH_OPENAI_PROMPT` in `src/lib/booth/openai.ts`).
+**All providers** (OpenAI → OpenArt → Gemini) use the canonical **master prompt**: `EIGHTYS_STYLE_PROMPT` / `PHOTO_BOOTH_MASTER_PROMPT` + `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts`. Fallbacks: `PHOTO_BOOTH_TRANSFORM_PROMPT` (`src/lib/photoBooth.ts`) and `PHOTO_BOOTH_OPENAI_PROMPT` (`src/lib/booth/openai.ts`).
 
-**OpenArt / Gemini** use the canonical **master prompt**: `EIGHTYS_STYLE_PROMPT` / `PHOTO_BOOTH_MASTER_PROMPT` + `buildEightysOpenArtPrompt()` in `src/lib/booth/types.ts` (fallback `PHOTO_BOOTH_TRANSFORM_PROMPT` in `src/lib/photoBooth.ts`).
+Goal: a **believable real late-1980s photo-album snapshot** (≈1985–89 consumer film) via image-to-image — documentary / photoreal, not costume-party neon AI art.
 
-Goal: **true-to-life late-1980s / early-1990s consumer film snapshot** via image-to-image reinterpretation of the upload — documentary / photoreal, not costume-party 80s AI art.
-
-- **Lock:** same faces, skin tone, expression, body type, pose, people count, **same glasses when present**, scene vibe / framing
-- **Film look:** warm C-41 consumer film, visible grain, slight softness — not costume-party neon AI art
-- **Variation:** `buildEightysOpenArtPrompt({ variationSeed })` rotates light outfit / environment / film-detail accents (OpenArt / Gemini)
+- **Identity lock:** same faces, skin tone, facial hair, expression, body type, pose, people count, framing
+- **Eyewear:** if they wear glasses, keep that they wear glasses, but restyle modern clear skinny frames into period-correct late-80s eyewear (larger acetate, classic aviators, period plastic) — do not leave modern clear rectangles unchanged
+- **Wardrobe:** flattering varied real-world 1985–89 fashion that fits the person’s vibe — **not** a default neon teal/magenta/blue windbreaker costume
+- **Film look:** C-41 consumer film grain, mild warm/cool stock cast, natural light — not Instagram teal-magenta grading or plastic AI skin
+- **Variation:** `buildEightysOpenArtPrompt({ variationSeed })` rotates outfit / environment / film-detail accents (avoids neon-costume defaults)
 - **Never:** logos, watermarks, drawn Polaroid borders, or text overlays in the image
 - Downloads stay **raw** (no Polaroid frame); on-screen Polaroid is CSS-only
 - Guest-facing errors stay soft; real provider errors are logged server-side (`[booth:ai:…]`) and a short detail is stored on failed `booth_generations` rows

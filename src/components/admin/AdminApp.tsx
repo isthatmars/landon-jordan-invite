@@ -134,6 +134,12 @@ export function AdminApp() {
     setTimeout(() => setToast(""), 5200);
   };
 
+  const removePhotosFromGrid = useCallback((ids: string[]) => {
+    if (!ids.length) return;
+    setPhotos((prev) => prev.filter((p) => !ids.includes(p.id)));
+    setPhotoSelected((s) => s.filter((id) => !ids.includes(id)));
+  }, []);
+
   const loadPhotos = useCallback(async () => {
     const params = new URLSearchParams({
       status: photoFilter.status,
@@ -523,7 +529,11 @@ export function AdminApp() {
                   body: JSON.stringify({ ids: photoSelected, status: "rejected" }),
                 });
                 if (!res.ok) flash("Reject failed", "warn");
-                else flash(`Rejected ${photoSelected.length}`, "warn");
+                else {
+                  const rejected = [...photoSelected];
+                  removePhotosFromGrid(rejected);
+                  flash(`Rejected ${rejected.length}`, "warn");
+                }
                 void loadPhotos();
               }}
               disabled={!photoSelected.length}
@@ -607,11 +617,12 @@ export function AdminApp() {
                       type="button"
                       className="btn-pink-outline text-[10px]"
                       onClick={async () => {
-                        await fetch("/api/admin/photos", {
+                        const res = await fetch("/api/admin/photos", {
                           method: "PATCH",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ id: p.id, status: "rejected" }),
                         });
+                        if (res.ok) removePhotosFromGrid([p.id]);
                         void loadPhotos();
                       }}
                     >

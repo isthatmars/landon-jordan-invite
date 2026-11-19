@@ -438,8 +438,11 @@ export async function listPhotosAdmin(filters?: {
 }): Promise<BoothPhotoRecord[]> {
   if (boothDbEnabled()) {
     const parts = ["booth_photos?select=*&order=created_at.desc"];
-    if (filters?.status && filters.status !== "all") {
-      parts[0] += `&status=eq.${encodeURIComponent(filters.status)}`;
+    const statusFilter = filters?.status || "all";
+    if (statusFilter === "all") {
+      parts[0] += "&status=neq.rejected";
+    } else {
+      parts[0] += `&status=eq.${encodeURIComponent(statusFilter)}`;
     }
     if (filters?.kind && filters.kind !== "all") {
       parts[0] += `&kind=eq.${encodeURIComponent(filters.kind)}`;
@@ -453,8 +456,11 @@ export async function listPhotosAdmin(filters?: {
   }
   const s = await readLocal();
   let list = [...s.photos];
-  if (filters?.status && filters.status !== "all") {
-    list = list.filter((p) => p.status === filters.status);
+  const statusFilter = filters?.status || "all";
+  if (statusFilter === "all") {
+    list = list.filter((p) => p.status !== "rejected");
+  } else {
+    list = list.filter((p) => p.status === statusFilter);
   }
   if (filters?.kind && filters.kind !== "all") {
     list = list.filter((p) => p.kind === filters.kind);

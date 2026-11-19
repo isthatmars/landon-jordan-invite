@@ -25,7 +25,8 @@ export function AdminLogin() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Invalid code");
       }
-      router.replace("/admin");
+      const dest = `${window.location.pathname}${window.location.search}`;
+      router.replace(dest || "/admin");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
       setLoading(false);

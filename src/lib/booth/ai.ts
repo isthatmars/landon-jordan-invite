@@ -153,14 +153,15 @@ async function runOpenArt(
 
 async function runOpenAI(
   cleaned: Buffer,
+  prompt: string,
   width?: number,
   height?: number,
 ): Promise<{ buffer: Buffer; mime: string; model: string }> {
   const result = await generateOpenAIEightiesPhoto({
     imageBytes: cleaned,
     mimeType: "image/jpeg",
-    // Short Images-API prompt (not the long Gemini/OpenArt master prompt).
-    prompt: PHOTO_BOOTH_OPENAI_PROMPT,
+    // Shared master prompt (OpenAI / OpenArt / Gemini) with Images-API fallback.
+    prompt: prompt || PHOTO_BOOTH_OPENAI_PROMPT,
     model: resolveOpenAiImageModel(),
     width,
     height,
@@ -239,20 +240,23 @@ export async function generateEightiesPhoto(
     };
   }
 
-  // OpenArt / Gemini use the master film prompt; OpenAI uses the short prompt.
+  // All providers share the authentic-80s master prompt (full era restyle + face lock).
   const variationSeed =
     (cleaned.width || 1) * 1009 +
     (cleaned.height || 1) * 9176 +
     cleaned.buffer.length +
     Date.now();
   const masterPrompt =
-    buildEightysOpenArtPrompt({ variationSeed }) || PHOTO_BOOTH_TRANSFORM_PROMPT;
+    buildEightysOpenArtPrompt({ variationSeed }) ||
+    PHOTO_BOOTH_TRANSFORM_PROMPT ||
+    PHOTO_BOOTH_OPENAI_PROMPT;
 
   const attempts: ProviderAttempt[] = [
     {
       name: "openai",
       enabled: status.openai,
-      run: () => runOpenAI(cleaned.buffer, cleaned.width, cleaned.height),
+      run: () =>
+        runOpenAI(cleaned.buffer, masterPrompt, cleaned.width, cleaned.height),
     },
     {
       name: "openart",

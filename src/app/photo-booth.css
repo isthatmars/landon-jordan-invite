@@ -610,7 +610,8 @@
     #ff9aef 10px 20px
   );
   box-shadow: 0 0 12px rgba(255, 79, 216, 0.7);
-  transition: width 0.4s ease;
+  /* Longer ease so asymptotic ticks read as a steady climb, not stutter */
+  transition: width 0.55s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* Fill remaining pink-panel height and vertically center stage content

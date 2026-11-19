@@ -3,7 +3,8 @@
 /**
  * 80s Photo Booth — LOCKS (see PHOTO_BOOTH.md):
  * 1. Fixed OpenArt environment plate (`/images/booth/environment.jpg`) for every step.
- * 2. Entry = large two-column panel: left Polaroid + camera prop (~45%), right welcome + drag/drop + upload (~55%).
+ * 2. Entry = large two-column panel: left Polaroid + camera prop (~45%), right path choice
+ *    (current → AI transform, or already-80s → throwback slideshow). Dropzone lives on Upload.
  *    On-screen Polaroid frame has no logo; downloads are raw AI photos only.
  * 3. AI via OpenAI → OpenArt → Gemini (`/api/booth/generate` → `src/lib/booth/ai.ts`).
  */
@@ -93,7 +94,6 @@ export function PhotoBooth() {
   const [dragOver, setDragOver] = useState(false);
   const [rsvpPrompt, setRsvpPrompt] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const entryFileRef = useRef<HTMLInputElement>(null);
   const pendingAction = useRef<"ai" | "throwback" | "myphotos" | "submit" | null>(null);
   const pendingFile = useRef<File | null>(null);
   const propFlashTimer = useRef<number | null>(null);
@@ -331,16 +331,6 @@ export function PhotoBooth() {
     setMode("ai");
     if (queued) void onFile(queued, "ai");
     else setStep("upload");
-  };
-
-  const startAiFromEntry = async (file?: File | null) => {
-    setError("");
-    setMode("ai");
-    if (file) {
-      await onFile(file, "ai");
-      return;
-    }
-    startCreate("ai");
   };
 
   const startAuth = async (e: FormEvent) => {
@@ -695,65 +685,35 @@ export function PhotoBooth() {
               </div>
 
               <div className="booth-entry-main">
+                {welcomeName ? (
+                  <p className="booth-entry-welcome">Welcome back, {welcomeName}.</p>
+                ) : null}
                 <p className="booth-subcopy booth-entry-subcopy">
-                  {welcomeName
-                    ? `Welcome back, ${welcomeName}. Upload a photo for a late-80s / early-90s film snapshot and add it to the Party Gallery.`
-                    : "Upload a photo for a late-80s / early-90s film snapshot and add it to the Party Gallery."}
+                  Two ways into the booth: upload a <strong>current</strong> photo and
+                  we&apos;ll turn it into an 80s throwback, or upload a photo that&apos;s{" "}
+                  <strong>already 80s</strong> to add to the party slideshow.
                 </p>
-                <div
-                  className={`booth-drop booth-entry-drop${dragOver ? " is-drag" : ""}`}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDragOver(true);
-                  }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setDragOver(false);
-                    void startAiFromEntry(e.dataTransfer.files?.[0] || null);
-                  }}
-                >
-                  <span className="booth-drop-icon" aria-hidden>
-                    ☁
-                  </span>
-                  <p className="booth-drop-label">DRAG &amp; DROP YOUR PHOTO HERE</p>
-                </div>
-                <div className="booth-or" aria-hidden>
-                  <span />
-                  OR
-                  <span />
-                </div>
-                <button
-                  type="button"
-                  className="booth-btn booth-btn-pink booth-btn-upload"
-                  disabled={busy}
-                  onClick={() => entryFileRef.current?.click()}
-                >
-                  <span className="booth-btn-upload-icon" aria-hidden>
-                    ▣
-                  </span>
-                  {busy ? "Uploading…" : "Upload photo"}
-                </button>
-                <p className="booth-file-specs">JPG, PNG, or HEIC • Up to 10MB</p>
-                <input
-                  ref={entryFileRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0] || null;
-                    e.target.value = "";
-                    void startAiFromEntry(f);
-                  }}
-                />
-                <div className="booth-entry-links">
+                <div className="booth-entry-choices" role="group" aria-label="Photo Booth paths">
                   <button
                     type="button"
-                    className="booth-linkish"
+                    className="booth-btn booth-btn-pink booth-entry-choice"
+                    disabled={busy}
+                    onClick={() => startCreate("ai")}
+                  >
+                    Upload current photo
+                  </button>
+                  <p className="booth-entry-choice-hint">AI transforms it into a late-80s film snapshot.</p>
+                  <button
+                    type="button"
+                    className="booth-btn booth-btn-outline booth-entry-choice"
+                    disabled={busy}
                     onClick={() => startCreate("throwback")}
                   >
-                    Upload a throwback
+                    Upload 80&apos;s photo
                   </button>
+                  <p className="booth-entry-choice-hint">Skip the AI — send an already-80s shot to the gallery.</p>
+                </div>
+                <div className="booth-entry-links">
                   <button
                     type="button"
                     className="booth-linkish"
@@ -861,13 +821,13 @@ export function PhotoBooth() {
 
           {!loading && step === "upload" ? (
             <div className="booth-entry-main booth-upload-step">
-              {mode === "throwback" ? (
-                <h3 className="booth-panel-title">Upload a Throwback</h3>
-              ) : null}
+              <h3 className="booth-panel-title">
+                {mode === "throwback" ? "Upload 80's photo" : "Upload current photo"}
+              </h3>
               <p className="booth-subcopy">
                 {mode === "throwback"
-                  ? "Add an original 80's photo for the party slideshow."
-                  : "Upload a photo for a late-80s / early-90s film snapshot and add it to the Party Gallery."}
+                  ? "Drop in a photo that's already 80s — we'll add it to the party slideshow."
+                  : "Drop in a current photo — we'll transform it into a late-80s / early-90s film snapshot."}
               </p>
               <div
                 className={`booth-drop${dragOver ? " is-drag" : ""}`}

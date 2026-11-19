@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TAPE_SPINE_PALETTE } from "@/lib/defaults";
 import {
@@ -94,8 +95,31 @@ const TABS: {
   },
 ];
 
+const TAB_SET = new Set<Tab>(TABS.map((t) => t.id));
+
+function viewFromSearchParam(raw: string | null): View {
+  if (raw && TAB_SET.has(raw as Tab)) return raw as Tab;
+  return "home";
+}
+
 export function AdminApp() {
-  const [view, setView] = useState<View>("home");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const view = viewFromSearchParam(searchParams.get("view"));
+  const navigateView = useCallback(
+    (next: View) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (next === "home") {
+        params.delete("view");
+      } else {
+        params.set("view", next);
+      }
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
   const tab = view === "home" ? null : view;
   const [rsvps, setRsvps] = useState<RsvpRecord[]>([]);
   const [content, setContent] = useState<SiteContent | null>(null);
@@ -376,7 +400,7 @@ export function AdminApp() {
               className="admin-back-link"
               onClick={() => {
                 closeTemplatePanel();
-                setView("home");
+                navigateView("home");
               }}
             >
               ← back
@@ -423,7 +447,7 @@ export function AdminApp() {
                 className={`admin-tool-card admin-tool-card--${t.accent}`}
                 onClick={() => {
                   if (t.id !== "reminders") closeTemplatePanel();
-                  setView(t.id);
+                  navigateView(t.id);
                 }}
               >
                 <span className="admin-tool-card__icon" aria-hidden>
@@ -961,7 +985,7 @@ export function AdminApp() {
             <button
               type="button"
               className="btn-pink-outline mt-3 text-xs"
-              onClick={() => setView("reminders")}
+              onClick={() => navigateView("reminders")}
             >
               Edit party email templates → Templates
             </button>
